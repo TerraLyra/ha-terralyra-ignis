@@ -1,14 +1,13 @@
-# Migration snapshot readiness
+# Release readiness
 
-This is a local staging snapshot, not a new release. The original manifest
-version 0.26.3 is preserved for comparison and must not be treated as a new
-published release tag. See SNAPSHOT_PROVENANCE.md.
+0.26.4 is the first release prepared for the new public repository. The source
+provenance is recorded in SNAPSHOT_PROVENANCE.md. Main is protected by required
+checks and pull-request review flow.
 
-Required before distribution: clean initial history; verified public target;
-working security reporting; CI/HACS/Hassfest on the target; validated HACS
-repository-switch instructions and rollback with unchanged HA IDs/history.
+Release gates: tests and config-flow coverage, Python/JSON validation, HACS,
+Hassfest, security checks and GOES ARM64/x86-64 compatibility.
 
-The original repository remains available. No live HA migration is performed by
-preparing this snapshot. Test results for the source commit do not substitute
-for running checks on this tree. Local check results are recorded outside the
-public snapshot until verified.
+HACS 2.0.5 accepts both repositories in its custom list. Registration has been
+verified; a completed live package migration has not yet been verified. Follow
+REPOSITORY_MIGRATION.md and preserve the existing configuration entry. The old
+repository remains available for rollback.

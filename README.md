@@ -1,6 +1,6 @@
 # TerraLyra IGNIS for Home Assistant
 
-> Prepared migration snapshot: the target repository and release are not yet published. Existing installations should continue using the current repository until migration instructions are validated.
+> Moving from `TerraLyra/ha-ignis`? Read the [repository migration guide](docs/REPOSITORY_MIGRATION.md) before changing HACS sources. Keep your existing IGNIS integration configured.
 
 A HACS-compatible wildfire intelligence and early-warning integration for
 Home Assistant. TerraLyra IGNIS automatically assigns every geographically
