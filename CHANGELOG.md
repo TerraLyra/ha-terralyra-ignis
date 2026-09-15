@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.26.4
+
+- First stable release from `TerraLyra/ha-terralyra-ignis`, with source provenance preserved.
+- Extract basic geographic/location helpers and HA attribute serialization behind compatibility-preserving interfaces.
+- Preserve the integration domain, existing identifiers, storage keys and history format.
+- Document the ordered HACS repository switch and rollback.
+
 ## 0.26.3
 
 - Prevent replayed older observations from creating duplicate retained track IDs
