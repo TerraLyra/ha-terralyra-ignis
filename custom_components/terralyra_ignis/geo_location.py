@@ -1,0 +1,312 @@
+"""Provider-attributed TerraLyra IGNIS map entities for active fire clusters."""
+from __future__ import annotations
+
+from collections import Counter
+from typing import Any, override
+
+from homeassistant.components.geo_location import GeolocationEvent
+from homeassistant.const import ATTR_GPS_ACCURACY, UnitOfLength
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+
+from . import IgnisConfigEntry
+from .clustering import haversine_km
+from .const import (
+    ATTR_LOCATION_MATCHES,
+    ATTR_PRODUCT_TIME,
+    ATTR_PROVIDER_ATTRIBUTION,
+    ATTR_SOURCE_URL,
+    DOMAIN,
+    MONITORING_AREA_SOURCE,
+)
+from .coordinator import FireCluster
+from .entity import IgnisEntity
+from .models import FireLifecycle
+from .monitoring import MonitoredLocation
+
+
+@callback
+def _async_remove_expired_entity(
+    hass: HomeAssistant,
+    registry: er.EntityRegistry,
+    entity: IgnisFireLocation,
+) -> None:
+    """Remove an expired marker from both the platform and registry."""
+    entity_id = entity.entity_id
+    if entity_id is not None and registry.async_get(entity_id) is not None:
+        # Removing the registry entry also removes the loaded entity. This
+        # prevents expired fire markers from lingering as unavailable entities.
+        registry.async_remove(entity_id)
+        return
+
+    hass.async_create_task(entity.async_remove(force_remove=True))
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: IgnisConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Set up and maintain one map entity per active fire cluster."""
+    coordinator = entry.runtime_data.coordinator
+    entities: dict[str, IgnisFireLocation] = {}
+    monitored_locations = {
+        location.id: location
+        for location in coordinator.monitored_locations
+        if location.enabled
+    }
+
+    def active_clusters() -> dict[str, FireCluster]:
+        data = coordinator.data
+        return {
+            cluster.track_id: cluster
+            for cluster in (data.tracked_fires if data else [])
+            if cluster.track_id is not None
+            and cluster.lifecycle in (FireLifecycle.NEW, FireLifecycle.CONTINUING)
+        }
+
+    registry = er.async_get(hass)
+    active_unique_ids = {
+        f"{entry.entry_id}_fire_{track_id}" for track_id in active_clusters()
+    }
+    active_area_unique_ids = {
+        f"{entry.entry_id}_monitoring_area_{location_id}"
+        for location_id in monitored_locations
+    }
+    prefix = f"{entry.entry_id}_fire_"
+    area_prefix = f"{entry.entry_id}_monitoring_area_"
+    for registry_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            registry_entry.domain != "geo_location"
+            or registry_entry.platform != DOMAIN
+        ):
+            continue
+        if registry_entry.unique_id.startswith(prefix):
+            current_unique_ids = active_unique_ids
+        elif registry_entry.unique_id.startswith(area_prefix):
+            current_unique_ids = active_area_unique_ids
+        else:
+            continue
+        if registry_entry.unique_id not in current_unique_ids:
+            registry.async_remove(registry_entry.entity_id)
+        elif registry_entry.device_id is not None:
+            registry.async_update_entity(registry_entry.entity_id, device_id=None)
+
+    area_entities = [
+        IgnisMonitoringArea(
+            entry,
+            location,
+            home_latitude=float(hass.config.latitude),
+            home_longitude=float(hass.config.longitude),
+        )
+        for location in monitored_locations.values()
+    ]
+    if area_entities:
+        async_add_entities(area_entities)
+
+    @callback
+    def async_sync_entities() -> None:
+        active = active_clusters()
+        display_name_counts = Counter(
+            _base_display_name(cluster) for cluster in active.values()
+        )
+
+        for track_id in entities.keys() - active.keys():
+            entity = entities.pop(track_id)
+            _async_remove_expired_entity(hass, registry, entity)
+
+        new_entities: list[IgnisFireLocation] = []
+        for track_id, cluster in active.items():
+            disambiguate = display_name_counts[_base_display_name(cluster)] > 1
+            if track_id in entities:
+                entities[track_id].set_cluster(cluster, disambiguate=disambiguate)
+                continue
+            entity = IgnisFireLocation(
+                entry, cluster, disambiguate=disambiguate
+            )
+            entities[track_id] = entity
+            new_entities.append(entity)
+
+        if new_entities:
+            async_add_entities(new_entities)
+
+    entry.async_on_unload(coordinator.async_add_listener(async_sync_entities))
+    async_sync_entities()
+
+
+class IgnisMonitoringArea(IgnisEntity, GeolocationEvent):
+    """A monitored location whose GPS-accuracy decoration shows its radius."""
+
+    _attr_should_poll = False
+    _attr_source = MONITORING_AREA_SOURCE
+    _attr_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_icon = "mdi:map-marker-radius-outline"
+    _attr_translation_key = "monitoring_area"
+
+    def __init__(
+        self,
+        entry: IgnisConfigEntry,
+        location: MonitoredLocation,
+        *,
+        home_latitude: float,
+        home_longitude: float,
+    ) -> None:
+        super().__init__(entry)
+        self._attr_device_info = None
+        self._location = location
+        self._distance_km = haversine_km(
+            home_latitude,
+            home_longitude,
+            location.latitude,
+            location.longitude,
+        )
+        self._attr_unique_id = (
+            f"{entry.entry_id}_monitoring_area_{location.id}"
+        )
+        self._attr_suggested_object_id = (
+            f"{DOMAIN}_monitoring_area_{location.id}"
+        )
+        self._attr_translation_placeholders = {"location_name": location.name}
+
+    @property
+    @override
+    def distance(self) -> float:
+        return self._distance_km
+
+    @property
+    @override
+    def latitude(self) -> float:
+        return self._location.latitude
+
+    @property
+    @override
+    def longitude(self) -> float:
+        return self._location.longitude
+
+    @property
+    @override
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            ATTR_GPS_ACCURACY: self._location.radius_km * 1000.0,
+            "monitoring_location_id": self._location.id,
+            "monitoring_radius_km": self._location.radius_km,
+            "map_circle_meaning": "active_fire_monitoring_area",
+        }
+
+
+class IgnisFireLocation(IgnisEntity, GeolocationEvent):
+    """An active fire cluster shown on Home Assistant maps."""
+
+    _attr_should_poll = False
+    _attr_source = DOMAIN
+    _attr_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_icon = "mdi:fire-alert"
+
+    def __init__(
+        self,
+        entry: IgnisConfigEntry,
+        cluster: FireCluster,
+        *,
+        disambiguate: bool = False,
+    ) -> None:
+        super().__init__(entry)
+        self._attr_device_info = None
+        if cluster.track_id is None:
+            raise ValueError("A map entity requires a tracked fire cluster")
+        self._cluster = cluster
+        self._attr_unique_id = f"{entry.entry_id}_fire_{cluster.track_id}"
+        # Home Assistant records history by entity_id. Deriving the object ID
+        # from the changing display name allowed a later fire near the same
+        # settlement to reuse an expired entity's history. The incident ID is
+        # stable and unique for the lifetime of one tracked fire.
+        self._attr_suggested_object_id = _suggested_object_id(cluster.track_id)
+        self._attr_name = _display_name(cluster, disambiguate=disambiguate)
+
+    @callback
+    def set_cluster(
+        self, cluster: FireCluster, *, disambiguate: bool = False
+    ) -> None:
+        """Replace this entity's current cluster data."""
+        self._cluster = cluster
+        self._attr_name = _display_name(cluster, disambiguate=disambiguate)
+
+    @property
+    @override
+    def distance(self) -> float:
+        return self._cluster.distance_km
+
+    @property
+    @override
+    def latitude(self) -> float:
+        return self._cluster.latitude
+
+    @property
+    @override
+    def longitude(self) -> float:
+        return self._cluster.longitude
+
+    @property
+    @override
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        attrs = self._cluster.attrs()
+        if self._cluster.location_matches:
+            # Keep full comparisons available without labelling outsiders matches.
+            # Do not change cluster serialization used by events and history.
+            attrs["location_comparisons"] = attrs[ATTR_LOCATION_MATCHES]
+            attrs[ATTR_LOCATION_MATCHES] = [
+                match.attrs()
+                for match in self._cluster.location_matches
+                if match.inside_radius
+            ]
+        attrs["source_selection"] = "automatic_equal_peers"
+        attrs[ATTR_PROVIDER_ATTRIBUTION] = _provider_attribution(
+            self._cluster.providers
+        )
+        if data:
+            attrs[ATTR_PRODUCT_TIME] = data.product_time.isoformat()
+            attrs.setdefault(ATTR_SOURCE_URL, data.source_url)
+        return attrs
+
+
+def _base_display_name(cluster: FireCluster) -> str:
+    """Return a map label that makes the actual observation source explicit."""
+    track_id = cluster.track_id or "unknown"
+    name = cluster.location_description or f"Fire detection {_short_id(track_id)}"
+    return f"{_provider_attribution(cluster.providers)} · {name}"
+
+
+def _display_name(cluster: FireCluster, *, disambiguate: bool = False) -> str:
+    """Return a distinct label when nearby incidents share the same place name."""
+    name = _base_display_name(cluster)
+    if not disambiguate:
+        return name
+    return f"{name} · #{_short_id(cluster.track_id or 'unknown')}"
+
+
+def _short_id(track_id: str) -> str:
+    """Return a useful short incident ID without an internal source prefix."""
+    source_id = track_id.removeprefix("firms-")
+    return (source_id or "unknown")[:6]
+
+
+def _suggested_object_id(track_id: str) -> str:
+    """Bind Home Assistant history to one incident instead of its place name."""
+    return f"{DOMAIN}_fire_{track_id}"
+
+
+def _provider_attribution(providers: tuple[str, ...]) -> str:
+    """Return a stable, human-readable attribution for one incident."""
+    labels = {
+        "eumetsat_lsa_saf": "LSA SAF",
+        "eumetsat_lsa_saf_iodc": "LSA SAF IODC",
+        "noaa_goes": "NOAA GOES",
+        "nasa_firms": "NASA FIRMS",
+    }
+    unique = tuple(dict.fromkeys(providers))
+    if len(unique) > 1:
+        return "Multiple sources"
+    if unique:
+        return labels.get(unique[0], unique[0])
+    return "Unknown source"

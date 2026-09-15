@@ -1,0 +1,242 @@
+"""Tests for automatic equal-peer active-fire source pooling."""
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
+
+import pytest
+
+from custom_components.terralyra_ignis.models import (
+    FireDetection,
+    ProviderSnapshot,
+    ProviderStatus,
+)
+from custom_components.terralyra_ignis.providers.base import (
+    ProviderAuthenticationError,
+    ProviderRateLimitError,
+    ProviderUnavailableError,
+)
+from custom_components.terralyra_ignis.providers.pool import (
+    MultiProviderPool,
+    ProviderBinding,
+)
+
+NOW = datetime(2026, 8, 31, 12, tzinfo=UTC)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error_type,code", [
+    (ModuleNotFoundError, "provider_unexpected_import_error"),
+    (RuntimeError, "provider_unexpected_runtime_error"),
+    (TypeError, "provider_unexpected_type_error"),
+    (ValueError, "provider_unexpected_value_error"),
+    (PermissionError, "provider_unexpected_os_error"),
+    (Exception, "provider_unexpected_error"),
+])
+async def test_unexpected_failure_has_safe_diagnostic_and_recovers(error_type, code):
+    current = [NOW]
+    failed = _binding("noaa_goes", "G18", error_type("/private/token=secret"))
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(2):
+        result = await pool.async_fetch_latest()
+        assert len(result.detections) == 1
+        assert pool.health[0].diagnostic_code == code
+        assert pool.health[0].failure_type == "invalid_response"
+        assert "secret" not in str(pool.health[0].attrs())
+    assert failed.provider.async_fetch_latest.await_count == 1
+    current[0] += timedelta(hours=1)
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("NOAA", "G18")
+    await pool.async_fetch_latest()
+    assert pool.health[0].diagnostic_code is None
+    assert pool.health[0].consecutive_failures == 0
+
+
+@pytest.mark.asyncio
+async def test_provider_cancellation_is_not_converted_to_failure():
+    import asyncio
+    binding = _binding("noaa_goes", "G18", _snapshot("NOAA", "G18"))
+    binding.provider.async_fetch_latest.side_effect = asyncio.CancelledError()
+    pool = MultiProviderPool((binding,), now=lambda: NOW)
+    with pytest.raises(asyncio.CancelledError):
+        await pool._async_fetch_binding(binding)
+    assert not pool._failure_counts
+
+
+@pytest.mark.asyncio
+async def test_diagnostic_survives_retry_and_clears_after_recovery():
+    current = [NOW]
+    failed = _binding("goes", "G18", ProviderUnavailableError(
+        "private", diagnostic_code="goes_decode_failed"))
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(2):
+        await pool.async_fetch_latest()
+        assert pool.health[0].attrs()["diagnostic_code"] == "goes_decode_failed"
+        assert "private" not in str(pool.health[0].attrs())
+    assert failed.provider.async_fetch_latest.await_count == 1
+    current[0] += timedelta(hours=1)
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("NOAA", "G18")
+    await pool.async_fetch_latest()
+    assert pool.health[0].diagnostic_code is None
+
+
+def test_diagnostic_rejects_arbitrary_text():
+    from custom_components.terralyra_ignis.providers.pool import ProviderHealth
+    error = ProviderUnavailableError(diagnostic_code="/private/token=secret")
+    assert error.diagnostic_code is None
+    health = ProviderHealth("goes", "GOES", "G18", (), ProviderStatus.OUTAGE,
+        diagnostic_code="https://private.invalid/token")
+    assert health.attrs()["diagnostic_code"] is None
+
+
+@pytest.mark.parametrize("failures", [5, 40, 1000, 10**100])
+def test_retry_delay_saturates_for_long_outages(failures):
+    assert MultiProviderPool._retry_delay(failures) == timedelta(hours=1)
+
+
+@pytest.mark.asyncio
+async def test_long_outage_preserves_healthy_peer_and_recovers():
+    current = [NOW]
+    failed = _binding("mtg", "MTG", ProviderUnavailableError())
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(45):
+        result = await pool.async_fetch_latest()
+        assert len(result.detections) == 1
+        assert pool.health[0].retry_at <= current[0] + timedelta(hours=1)
+        current[0] += timedelta(hours=1)
+    assert pool.health[0].consecutive_failures == 45
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("LSA SAF", "MTG")
+    assert len((await pool.async_fetch_latest()).detections) == 2
+    assert pool.health[0].consecutive_failures == 0
+    assert pool.health[0].retry_at is None
+
+
+def _snapshot(provider: str, satellite: str) -> ProviderSnapshot:
+    detection = FireDetection(
+        provider=provider,
+        satellite=satellite,
+        product="test",
+        timestamp=NOW,
+        latitude=46.0,
+        longitude=20.0,
+        frp_mw=10.0,
+        confidence=0.8,
+        source_detection_id=provider,
+    )
+    return ProviderSnapshot(
+        provider=provider,
+        satellite=satellite,
+        product="test",
+        product_timestamp=NOW,
+        received_timestamp=NOW,
+        status=ProviderStatus.AVAILABLE,
+        source_url="https://example.invalid",
+        filename="test",
+        detections=(detection,),
+    )
+
+
+def _binding(provider_id: str, satellite: str, result: object) -> ProviderBinding:
+    provider = AsyncMock()
+    if isinstance(result, Exception):
+        provider.async_fetch_latest.side_effect = result
+    else:
+        provider.async_fetch_latest.return_value = result
+    return ProviderBinding(provider_id, provider_id, satellite, ("home",), provider)
+
+
+@pytest.mark.asyncio
+async def test_pool_merges_equal_sources() -> None:
+    pool = MultiProviderPool(
+        (
+            _binding("mtg", "MTG", _snapshot("LSA SAF", "MTG")),
+            _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS")),
+        )
+    )
+
+    result = await pool.async_fetch_latest()
+
+    assert len(result.detections) == 2
+    assert {item.provider for item in result.detections} == {"LSA SAF", "NASA FIRMS"}
+    assert all(item.status is ProviderStatus.AVAILABLE for item in pool.health)
+    assert all(item.product_timestamp == NOW for item in pool.health)
+    assert all(item.received_timestamp == NOW for item in pool.health)
+
+
+@pytest.mark.asyncio
+async def test_one_failed_source_does_not_block_healthy_peer() -> None:
+    pool = MultiProviderPool(
+        (
+            _binding("mtg", "MTG", ProviderUnavailableError()),
+            _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS")),
+        )
+    )
+
+    result = await pool.async_fetch_latest()
+
+    assert len(result.detections) == 1
+    assert [item.status for item in pool.health] == [
+        ProviderStatus.OUTAGE,
+        ProviderStatus.AVAILABLE,
+    ]
+
+
+@pytest.mark.asyncio
+async def test_pool_reports_when_every_source_rejects_authentication() -> None:
+    pool = MultiProviderPool(
+        (
+            _binding("mtg", "MTG", ProviderAuthenticationError()),
+            _binding("firms", "VIIRS", ProviderAuthenticationError()),
+        )
+    )
+
+    with pytest.raises(ProviderAuthenticationError):
+        await pool.async_fetch_latest()
+
+
+@pytest.mark.asyncio
+async def test_failed_peer_is_deferred_while_healthy_peer_continues() -> None:
+    current = [NOW]
+    failed = _binding("mtg", "MTG", ProviderUnavailableError())
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+
+    await pool.async_fetch_latest()
+    await pool.async_fetch_latest()
+
+    assert failed.provider.async_fetch_latest.await_count == 1
+    assert healthy.provider.async_fetch_latest.await_count == 2
+    assert pool.health[0].consecutive_failures == 1
+    assert pool.health[0].failure_type == "service_outage"
+    assert pool.health[0].retry_at == NOW + timedelta(minutes=5)
+    assert pool.health[0].received_timestamp is None
+
+
+@pytest.mark.asyncio
+async def test_provider_retry_after_is_honored_and_clears_after_recovery() -> None:
+    current = [NOW]
+    binding = _binding(
+        "firms",
+        "VIIRS",
+        ProviderRateLimitError(retry_after=timedelta(minutes=17)),
+    )
+    pool = MultiProviderPool((binding,), now=lambda: current[0])
+
+    with pytest.raises(ProviderUnavailableError) as first_error:
+        await pool.async_fetch_latest()
+    assert first_error.value.retry_after == timedelta(minutes=17)
+    assert pool.health[0].failure_type == "rate_limit"
+
+    binding.provider.async_fetch_latest.side_effect = None
+    binding.provider.async_fetch_latest.return_value = _snapshot("NASA FIRMS", "VIIRS")
+    current[0] += timedelta(minutes=18)
+    await pool.async_fetch_latest()
+
+    assert pool.health[0].consecutive_failures == 0
+    assert pool.health[0].failure_type is None
+    assert pool.health[0].retry_at is None

@@ -1,0 +1,1196 @@
+"""Sensors for TerraLyra IGNIS."""
+from __future__ import annotations
+
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
+from homeassistant.const import UnitOfLength, UnitOfPower, UnitOfTemperature
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.event import async_track_point_in_utc_time
+
+from . import IgnisConfigEntry
+from .const import (
+    CONF_ENABLE_FIRMS,
+    CONF_ENABLE_LAND_SURFACE_TEMPERATURE,
+    CONF_FIRMS_MAP_KEY,
+    DEFAULT_ENABLE_FIRMS,
+    DEFAULT_ENABLE_LAND_SURFACE_TEMPERATURE,
+)
+from .coverage import (
+    LocationSourcePlan,
+    plan_location_sources,
+    summarize_source_plans,
+)
+from .entity import (
+    IgnisEntity,
+    IgnisFireRiskEntity,
+    IgnisLandSurfaceTemperatureEntity,
+)
+from .evidence import FireEvidenceAssessment, assess_fire_evidence
+from .models import FireLifecycle, ProviderStatus
+from .observation_schedule import location_update_estimates, next_usable_update
+from .observation_counts import summarize_counts
+from .products.fire_risk import WMS_URL
+from .products.lst import WMS_URL as LST_WMS_URL
+from .situation import MAX_PRODUCT_AGE
+
+
+async def async_setup_entry(
+    hass: HomeAssistant, entry: IgnisConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+) -> None:
+    location_plans = _location_source_plans(
+        entry, entry.runtime_data.coordinator.monitored_locations
+    )
+    _remove_orphaned_location_entities(hass, entry, location_plans)
+    entities = [
+        NearestFireSensor(entry),
+        ActiveFireCountSensor(entry),
+        SupplementalFireCountSensor(entry),
+        CombinedFireCountSensor(entry),
+        RawPixelCountSensor(entry),
+        ProductTimeSensor(entry),
+        ProductAgeSensor(entry),
+        ProviderStatusSensor(entry),
+        ActiveFireProviderSensor(entry),
+        ProviderCoverageSensor(entry),
+        RecentDetectionsSensor(entry),
+        FireActivityFrpChangeSensor(entry),
+        NewIncidents24hSensor(entry),
+        ActiveFireSituationSensor(entry),
+        FireSourceConfirmationSensor(entry),
+        NearestFireEvidenceSensor(entry),
+        FireRiskTodaySensor(entry),
+        FireRiskAreaMaximumSensor(entry),
+        FireRiskUpdateSensor(entry),
+    ]
+    entities.extend(MonitoredLocationSourcesSensor(entry, plan) for plan in location_plans)
+    entities.extend(MonitoredLocationStatusSensor(entry, plan) for plan in location_plans)
+    entities.extend(
+        MonitoredLocationObservationSensor(entry, plan) for plan in location_plans
+    )
+    locations_by_id = {
+        location.id: location
+        for location in entry.runtime_data.coordinator.monitored_locations
+    }
+    entities.extend(
+        MonitoredLocationNextUpdateSensor(entry, plan, locations_by_id[plan.location_id])
+        for plan in location_plans
+    )
+    if entry.options.get(
+        CONF_ENABLE_LAND_SURFACE_TEMPERATURE,
+        DEFAULT_ENABLE_LAND_SURFACE_TEMPERATURE,
+    ):
+        entities.append(LandSurfaceTemperatureSensor(entry))
+    async_add_entities(entities)
+
+
+def _remove_orphaned_location_entities(
+    hass: HomeAssistant,
+    entry: IgnisConfigEntry,
+    plans: tuple[LocationSourcePlan, ...],
+) -> None:
+    """Remove source sensors whose monitored location no longer exists."""
+    registry = er.async_get(hass)
+    prefixes = (
+        f"{entry.entry_id}_location_sources_",
+        f"{entry.entry_id}_location_status_",
+        f"{entry.entry_id}_location_observation_",
+        f"{entry.entry_id}_location_next_update_",
+    )
+    expected_unique_ids = {
+        f"{prefix}{plan.location_id}" for prefix in prefixes for plan in plans
+    }
+    for registry_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            registry_entry.entity_id.startswith("sensor.")
+            and registry_entry.unique_id.startswith(prefixes)
+            and registry_entry.unique_id not in expected_unique_ids
+        ):
+            registry.async_remove(registry_entry.entity_id)
+
+
+# Compatibility for tests and callers from v0.7.3/v0.7.4.
+_remove_orphaned_location_source_entities = _remove_orphaned_location_entities
+
+
+class LandSurfaceTemperatureSensor(
+    IgnisLandSurfaceTemperatureEntity, SensorEntity
+):
+    """Latest satellite-observed radiative land-surface temperature at Home."""
+
+    _attr_translation_key = "land_surface_temperature"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+    _attr_icon = "mdi:thermometer-lines"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_land_surface_temperature"
+
+    @property
+    def native_value(self) -> float | None:
+        data = self.coordinator.data
+        if data is None or data.temperature_celsius is None:
+            return None
+        return round(data.temperature_celsius, 2)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {
+                "product": "MTLST",
+                "attribution": "EUMETSAT / LSA SAF, CC BY 4.0",
+            }
+        return {
+            "observed_at": data.observed_at.isoformat(),
+            "sample_latitude": round(data.latitude, 6),
+            "sample_longitude": round(data.longitude, 6),
+            "uncertainty_k": data.uncertainty_kelvin,
+            "quality": data.quality,
+            "product": "MTLST",
+            "source_url": LST_WMS_URL,
+            "attribution": "EUMETSAT / LSA SAF, CC BY 4.0",
+            "measurement_note": "radiative_land_skin_temperature",
+        }
+
+
+class NearestFireSensor(IgnisEntity, SensorEntity):
+    _attr_translation_key = "nearest_fire"
+    _attr_native_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_device_class = SensorDeviceClass.DISTANCE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+    _attr_icon = "mdi:fire-alert"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_nearest_fire"
+
+    @property
+    def native_value(self) -> float | None:
+        data = self.coordinator.data
+        if not data or not data.active_clusters:
+            return None
+        return round(data.active_clusters[0].distance_km, 2)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        data = self.coordinator.data
+        if not data or not data.active_clusters:
+            return None
+        return data.active_clusters[0].attrs() | {"source_url": data.source_url}
+
+
+class ActiveFireCountSensor(IgnisEntity, SensorEntity):
+    _attr_translation_key = "active_fire_count"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:fire"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_active_fire_count"
+
+    @property
+    def native_value(self) -> int:
+        return len(self.coordinator.data.active_clusters) if self.coordinator.data else 0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {
+                "tracked_incidents": 0,
+                "inactive_incidents": 0,
+                "map_markers": 0,
+                "map_source": "terralyra_ignis",
+            }
+        inactive = sum(
+            cluster.lifecycle is not None and cluster.lifecycle.value == "inactive"
+            for cluster in data.tracked_fires
+        )
+        return {
+            "count_scope": "all_assigned_sources_deduplicated",
+            "tracked_incidents": len(data.tracked_fires),
+            "inactive_incidents": inactive,
+            "map_markers": len(data.tracked_fires),
+            "map_source": "terralyra_ignis",
+        }
+
+
+class SupplementalFireCountSensor(IgnisEntity, SensorEntity):
+    """Count current deduplicated clusters observed by NASA FIRMS."""
+
+    _attr_translation_key = "supplemental_fire_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:satellite-uplink"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_supplemental_fire_count"
+
+    @property
+    def native_value(self) -> int:
+        data = self.coordinator.data
+        return (
+            sum("nasa_firms" in cluster.providers for cluster in data.active_clusters)
+            if data
+            else 0
+        )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "provider": "nasa_firms",
+            "count_scope": "deduplicated_clusters_observed_by_provider",
+            "provider_role": "equal_peer",
+        }
+
+
+class CombinedFireCountSensor(IgnisEntity, SensorEntity):
+    """Count distinct current clusters across primary and supplemental sources."""
+
+    _attr_translation_key = "combined_fire_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:fire-circle"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_combined_fire_count"
+
+    @property
+    def native_value(self) -> int:
+        data = self.coordinator.data
+        if data is None:
+            return 0
+        return len(data.active_clusters)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        distinct = len(data.active_clusters) if data else 0
+        return {
+            "distinct_clusters": distinct,
+            "count_scope": "deduplicated_current_clusters_all_sources",
+        }
+
+
+class RawPixelCountSensor(IgnisEntity, SensorEntity):
+    _attr_translation_key = "raw_pixel_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:dots-hexagon"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_raw_pixel_count"
+
+    @property
+    def native_value(self) -> int:
+        return self.coordinator.data.raw_pixels_in_radius if self.coordinator.data else 0
+
+
+class ProductTimeSensor(IgnisEntity, SensorEntity):
+    _attr_translation_key = "product_time"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_icon = "mdi:satellite-variant"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_product_time"
+
+    @property
+    def native_value(self) -> datetime | None:
+        return self.coordinator.data.product_time if self.coordinator.data else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        if not self.coordinator.data:
+            return None
+        return {"filename": self.coordinator.data.filename, "source_url": self.coordinator.data.source_url}
+
+
+class ProductAgeSensor(IgnisEntity, SensorEntity):
+    _attr_translation_key = "product_age"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_native_unit_of_measurement = "min"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+    _attr_icon = "mdi:timer-sand"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_product_age"
+
+    @property
+    def native_value(self) -> float | None:
+        if not self.coordinator.data:
+            return None
+        return max(0, (datetime.now(UTC) - self.coordinator.data.product_time).total_seconds() / 60)
+
+
+class ProviderStatusSensor(IgnisEntity, SensorEntity):
+    """Expose provider health even when the latest refresh failed."""
+
+    _attr_translation_key = "provider_status"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [status.value for status in ProviderStatus]
+    _attr_icon = "mdi:satellite-uplink"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_provider_status"
+
+    @property
+    def available(self) -> bool:
+        """The health entity remains useful during provider failures."""
+        return True
+
+    @property
+    def native_value(self) -> str:
+        data = getattr(self.coordinator, "data", None)
+        if (
+            self.coordinator.provider_status is ProviderStatus.AVAILABLE
+            and data is not None
+            and datetime.now(UTC) - data.product_time > MAX_PRODUCT_AGE
+        ):
+            return ProviderStatus.DELAYED.value
+        return self.coordinator.provider_status.value
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "provider": self.coordinator.provider_name,
+            "satellite": self.coordinator.satellite,
+            "product": self.coordinator.provider_product,
+            "product_timestamp": (
+                self.coordinator.product_timestamp.isoformat()
+                if self.coordinator.product_timestamp
+                else None
+            ),
+            "received_timestamp": (
+                self.coordinator.received_timestamp.isoformat()
+                if self.coordinator.received_timestamp
+                else None
+            ),
+        }
+
+
+class ActiveFireProviderSensor(IgnisEntity, SensorEntity):
+    """Expose the automatically assigned equal active-fire sources."""
+
+    _attr_translation_key = "active_fire_provider"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["automatic", "unavailable"]
+    _attr_icon = "mdi:satellite-variant"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_active_fire_provider"
+
+    @property
+    def native_value(self) -> str:
+        return "automatic" if getattr(self.coordinator.provider, "bindings", ()) else "unavailable"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        bindings = getattr(self.coordinator.provider, "bindings", ())
+        health = getattr(self.coordinator.provider, "health", ())
+        return {
+            "selection_mode": "automatic_by_location_coverage",
+            "providers": [binding.provider_id for binding in bindings],
+            "satellites": [binding.satellite for binding in bindings],
+            "provider_health": [item.attrs() for item in health],
+        }
+
+
+class ProviderCoverageSensor(IgnisEntity, SensorEntity):
+    """Expose provider health separately from geographic coverage."""
+
+    _attr_translation_key = "provider_coverage"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["covered", "partial", "not_covered", "unknown"]
+    _attr_icon = "mdi:map-marker-check-outline"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_provider_coverage"
+
+    def _coverage(self):
+        return "automatic", _location_source_plans(
+            self.entry, self.coordinator.monitored_locations
+        )
+
+    @property
+    def native_value(self) -> str:
+        _, results = self._coverage()
+        return summarize_source_plans(results)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        provider, results = self._coverage()
+        return {
+            "selection_mode": provider,
+            "provider_status": self.coordinator.provider_status.value,
+            "covered_locations": sum(result.covered for result in results),
+            "uncovered_locations": sum(not result.covered for result in results),
+            "locations": [result.attrs() for result in results],
+            "assessment": "automatic_equal_peer_geographic_assignment",
+        }
+
+
+class MonitoredLocationSourcesSensor(IgnisEntity, SensorEntity):
+    """Expose the equal active-fire sources assigned to one location."""
+
+    _attr_translation_key = "monitored_location_sources"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:satellite-uplink"
+
+    def __init__(
+        self,
+        entry: IgnisConfigEntry,
+        plan: LocationSourcePlan,
+    ) -> None:
+        super().__init__(entry)
+        self._plan = plan
+        self._attr_unique_id = f"{entry.entry_id}_location_sources_{plan.location_id}"
+        self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    @property
+    def native_value(self) -> int:
+        return len(self._plan.providers)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        status, assignments = _location_operational_status(
+            self._plan,
+            getattr(getattr(self.coordinator, "provider", None), "health", ()),
+        )
+        return self._plan.attrs() | {
+            "selection_mode": "automatic_by_location_coverage",
+            "assignment_note": "all_sources_are_equal_peers",
+            "operational_status": status,
+            "source_health": assignments,
+            **_location_health_summary(assignments),
+        }
+
+
+class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
+    """Summarize source availability for one monitored location."""
+
+    _attr_translation_key = "monitored_location_status"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [
+        "available",
+        "degraded",
+        "partial",
+        "initializing",
+        "unavailable",
+    ]
+    _attr_icon = "mdi:map-marker-radius-outline"
+
+    def __init__(self, entry: IgnisConfigEntry, plan: LocationSourcePlan) -> None:
+        super().__init__(entry)
+        self._plan = plan
+        self._attr_unique_id = f"{entry.entry_id}_location_status_{plan.location_id}"
+        self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    @property
+    def native_value(self) -> str:
+        status, _ = _location_operational_status(
+            self._plan,
+            getattr(getattr(self.coordinator, "provider", None), "health", ()),
+        )
+        return status
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        status, assignments = _location_operational_status(
+            self._plan,
+            getattr(getattr(self.coordinator, "provider", None), "health", ()),
+        )
+        incidents = _location_incident_summary(
+            self._plan.location_id, self.coordinator.data
+        )
+        return self._plan.attrs() | {
+            "operational_status": status,
+            "source_health": assignments,
+            **_location_health_summary(assignments),
+            **_location_source_timestamps(assignments),
+            **incidents,
+        }
+
+
+class MonitoredLocationObservationSensor(IgnisEntity, SensorEntity):
+    """Explain what an empty active-fire map means for one location."""
+
+    _attr_translation_key = "monitored_location_observation"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [
+        "detections_present",
+        "no_detections",
+        "no_detections_limited_coverage",
+        "awaiting_data",
+        "data_unavailable",
+    ]
+    _attr_icon = "mdi:map-search-outline"
+
+    def __init__(self, entry: IgnisConfigEntry, plan: LocationSourcePlan) -> None:
+        super().__init__(entry)
+        self._plan = plan
+        self._attr_unique_id = (
+            f"{entry.entry_id}_location_observation_{plan.location_id}"
+        )
+        self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    def _assessment(self) -> tuple[str, str, list[dict[str, Any]], dict[str, Any]]:
+        status, assignments = _location_operational_status(
+            self._plan,
+            getattr(getattr(self.coordinator, "provider", None), "health", ()),
+        )
+        incidents = _location_incident_summary(
+            self._plan.location_id, self.coordinator.data
+        )
+        state = _location_observation_state(status, incidents["active_incidents"])
+        return state, status, assignments, incidents
+
+    @property
+    def native_value(self) -> str:
+        state, _, _, _ = self._assessment()
+        return state
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        state, status, assignments, incidents = self._assessment()
+        health = _location_health_summary(assignments)
+        reasons = _location_observation_reasons(state, health)
+        return {
+            "location_id": self._plan.location_id,
+            "location_name": self._plan.location_name,
+            "map_source": "terralyra_ignis",
+            "observation_state": state,
+            "coverage_status": status,
+            "source_health": assignments,
+            **_location_source_timestamps(assignments),
+            **incidents,
+            **health,
+            "reasons": reasons,
+            "absence_is_not_all_clear": incidents["active_incidents"] == 0,
+            "assessment": "satellite_observation_summary_not_fire_safety_status",
+        }
+
+
+class MonitoredLocationNextUpdateSensor(IgnisEntity, SensorEntity):
+    """Expose a qualified next-update estimate for one monitored location."""
+
+    _attr_translation_key = "monitored_location_next_update"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_icon = "mdi:satellite-variant"
+
+    def __init__(
+        self,
+        entry: IgnisConfigEntry,
+        plan: LocationSourcePlan,
+        location: Any,
+    ) -> None:
+        super().__init__(entry)
+        self._plan = plan
+        self._location = location
+        self._cancel_estimate_timer: Callable[[], None] | None = None
+        self._attr_unique_id = (
+            f"{entry.entry_id}_location_next_update_{plan.location_id}"
+        )
+        self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(self._cancel_scheduled_estimate)
+        self._schedule_estimate_refresh()
+
+    @callback
+    def _cancel_scheduled_estimate(self) -> None:
+        if self._cancel_estimate_timer is not None:
+            self._cancel_estimate_timer()
+            self._cancel_estimate_timer = None
+
+    @callback
+    def _schedule_estimate_refresh(self) -> None:
+        self._cancel_scheduled_estimate()
+        expected = self.native_value
+        if expected is not None:
+            self._cancel_estimate_timer = async_track_point_in_utc_time(
+                self.hass, self._refresh_expired_estimate, expected
+            )
+
+    @callback
+    def _refresh_expired_estimate(self, _now: datetime) -> None:
+        # Refresh the published timestamp even if no provider update arrives.
+        self._cancel_estimate_timer = None
+        self._schedule_estimate_refresh()
+        self.async_write_ha_state()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._schedule_estimate_refresh()
+        super()._handle_coordinator_update()
+
+    @property
+    def available(self) -> bool:
+        return self.native_value is not None
+
+    def _estimates(self):
+        return location_update_estimates(
+            self._plan,
+            self._location,
+            tuple(
+                getattr(getattr(self.coordinator, "provider", None), "health", ())
+            ),
+        )
+
+    @property
+    def native_value(self) -> datetime | None:
+        estimate = next_usable_update(self._estimates())
+        return estimate.expected_at if estimate else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        estimates = self._estimates()
+        next_update = next_usable_update(estimates)
+        return {
+            "location_id": self._plan.location_id,
+            "location_name": self._plan.location_name,
+            "next_source": next_update.provider if next_update else None,
+            "next_source_name": next_update.name if next_update else None,
+            "next_satellite": next_update.satellite if next_update else None,
+            "estimate_type": next_update.estimate_type if next_update else None,
+            "sources": [item.attrs() for item in estimates],
+            "estimate_note": "estimated_not_guaranteed",
+        }
+
+
+def _location_operational_status(
+    plan: LocationSourcePlan, health: tuple[Any, ...]
+) -> tuple[str, list[dict[str, Any]]]:
+    """Return a bounded per-location summary and equal-source details."""
+    matching = [item for item in health if plan.location_id in item.location_ids]
+    assignments: list[dict[str, Any]] = []
+    states: list[str] = []
+    for provider, satellite in zip(plan.providers, plan.satellites, strict=True):
+        item = next(
+            (
+                candidate
+                for candidate in matching
+                if (
+                    candidate.provider_id == provider
+                    or candidate.provider_id.startswith(f"{provider}:")
+                )
+                and candidate.satellite == satellite
+            ),
+            None,
+        )
+        state = item.status.value if item is not None else "initializing"
+        states.append(state)
+        assignments.append(
+            {
+                "provider": provider,
+                "name": getattr(item, "label", None),
+                "satellite": satellite,
+                "status": state,
+                "reason": {
+                    "available": "source_data_available",
+                    "delayed": "source_data_delayed",
+                    "no_product": "source_product_not_available",
+                    "outage": "source_fetch_failed",
+                    "auth_error": "source_authentication_failed",
+                    "initializing": "awaiting_first_source_result",
+                }.get(state, "source_status_unknown"),
+                "failure_type": getattr(item, "failure_type", None),
+                "diagnostic_code": getattr(item, "diagnostic_code", None),
+                "consecutive_failures": getattr(item, "consecutive_failures", 0),
+                "retry_at": _isoformat_or_none(getattr(item, "retry_at", None)),
+                "product_timestamp": _isoformat_or_none(
+                    getattr(item, "product_timestamp", None)
+                ),
+                "received_timestamp": _isoformat_or_none(
+                    getattr(item, "received_timestamp", None)
+                ),
+                "last_success_at": _isoformat_or_none(
+                    getattr(item, "received_timestamp", None)
+                ),
+            }
+        )
+    if not states:
+        return "unavailable", assignments
+    if all(state == "available" for state in states):
+        return "available", assignments
+    usable = sum(state in {"available", "delayed"} for state in states)
+    if usable == len(states):
+        return "degraded", assignments
+    if usable:
+        return "partial", assignments
+    if all(state == "initializing" for state in states):
+        return "initializing", assignments
+    return "unavailable", assignments
+
+
+def _location_source_timestamps(
+    assignments: list[dict[str, Any]],
+) -> dict[str, str | None]:
+    """Use only assigned sources; a fresh peer elsewhere cannot refresh a place.
+
+    These are latest successful source timestamps, not proof that every source
+    is fresh or that the source observed every pixel in this location.
+    """
+    def latest(key: str) -> str | None:
+        values = [item[key] for item in assignments if item.get(key)]
+        return max(values, key=datetime.fromisoformat) if values else None
+
+    return {
+        "last_received_at": latest("received_timestamp"),
+        "last_product_at": latest("product_timestamp"),
+    }
+
+
+def _location_health_summary(
+    assignments: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Return stable, automation-friendly per-location health attributes."""
+    statuses = tuple(status.value for status in ProviderStatus)
+    sources_by_status = {
+        status: [
+            item["provider"] for item in assignments if item["status"] == status
+        ]
+        for status in statuses
+    }
+    unavailable_states = {
+        ProviderStatus.NO_PRODUCT.value,
+        ProviderStatus.OUTAGE.value,
+        ProviderStatus.AUTH_ERROR.value,
+    }
+    retries = [
+        item["retry_at"] for item in assignments if item.get("retry_at") is not None
+    ]
+    return {
+        "fresh_source_count": len(sources_by_status[ProviderStatus.AVAILABLE.value]),
+        "delayed_source_count": len(sources_by_status[ProviderStatus.DELAYED.value]),
+        "unavailable_source_count": sum(
+            len(sources_by_status[state]) for state in unavailable_states
+        ),
+        "initializing_source_count": len(
+            sources_by_status[ProviderStatus.INITIALIZING.value]
+        ),
+        "available_sources": sources_by_status[ProviderStatus.AVAILABLE.value],
+        "delayed_sources": sources_by_status[ProviderStatus.DELAYED.value],
+        "no_product_sources": sources_by_status[ProviderStatus.NO_PRODUCT.value],
+        "outage_sources": sources_by_status[ProviderStatus.OUTAGE.value],
+        "auth_error_sources": sources_by_status[ProviderStatus.AUTH_ERROR.value],
+        "unavailable_sources": [
+            item["provider"]
+            for item in assignments
+            if item["status"] in unavailable_states
+        ],
+        "initializing_sources": sources_by_status[
+            ProviderStatus.INITIALIZING.value
+        ],
+        "sources_by_status": sources_by_status,
+        "next_retry_at": min(retries) if retries else None,
+    }
+
+
+def _isoformat_or_none(value: Any) -> str | None:
+    """Serialize an optional timestamp without assuming its concrete type."""
+    return value.isoformat() if value is not None else None
+
+
+def _location_incident_summary(location_id: str, data: Any) -> dict[str, int]:
+    """Summarize map-visible incidents and corroboration for a location."""
+    if data is None:
+        return {"active_incidents": 0, "multi_source_incidents": 0}
+    incidents = [
+        cluster
+        for cluster in data.tracked_fires
+        if cluster.lifecycle in (FireLifecycle.NEW, FireLifecycle.CONTINUING)
+        and any(
+            match.location_id == location_id and match.inside_radius
+            for match in cluster.location_matches
+        )
+    ]
+    return {
+        "active_incidents": len(incidents),
+        "multi_source_incidents": sum(
+            cluster.confirmation_level.value == "multi_source" for cluster in incidents
+        ),
+    }
+
+
+def _location_observation_state(status: str, active_incidents: int) -> str:
+    """Return a cautious, map-oriented observation state."""
+    if active_incidents:
+        return "detections_present"
+    if status == "available":
+        return "no_detections"
+    if status in {"degraded", "partial"}:
+        return "no_detections_limited_coverage"
+    if status == "initializing":
+        return "awaiting_data"
+    return "data_unavailable"
+
+
+def _location_observation_reasons(
+    state: str, health: dict[str, Any]
+) -> list[str]:
+    """Return stable reason codes for dashboards and automations."""
+    if state == "detections_present":
+        return ["active_satellite_detections_present"]
+
+    reasons = ["no_active_satellite_detections"]
+    if health["fresh_source_count"] == 0:
+        reasons.append("no_fresh_sources")
+    if health["delayed_source_count"]:
+        reasons.append("delayed_sources")
+    if health["unavailable_source_count"]:
+        reasons.append("unavailable_sources")
+    if health["initializing_source_count"]:
+        reasons.append("sources_initializing")
+    return reasons
+
+
+def _location_source_plans(
+    entry: IgnisConfigEntry, locations: tuple[Any, ...]
+) -> tuple[LocationSourcePlan, ...]:
+    """Return bounded automatic source plans for every enabled location."""
+    return tuple(
+        plan_location_sources(
+            location,
+            lsa_saf_available=bool(
+                entry.data.get("username") and entry.data.get("password")
+            ),
+            firms_available=bool(
+                entry.options.get(CONF_ENABLE_FIRMS, DEFAULT_ENABLE_FIRMS)
+                and entry.data.get(CONF_FIRMS_MAP_KEY)
+            ),
+        )
+        for location in locations
+        if location.enabled
+    )
+
+
+class RecentDetectionsSensor(IgnisEntity, SensorEntity):
+    """Count provider detections in fixed recent windows."""
+
+    _attr_translation_key = "recent_detections"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:chart-timeline-variant"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_recent_detections"
+
+    @property
+    def native_value(self) -> int:
+        data = self.coordinator.data
+        return data.activity.detections_1h if data else 0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {"detections_last_3h": 0, "detections_last_6h": 0}
+        details = summarize_counts(
+            getattr(self.coordinator, "_observation_counts", {}), now=datetime.now(UTC)
+        )
+        details.pop("counts")
+        return {
+            **details,
+            "detections_last_3h": data.activity.detections_3h,
+            "detections_last_6h": data.activity.detections_6h,
+            "history_samples_24h": data.activity.samples_24h,
+        }
+
+
+class FireActivityFrpChangeSensor(IgnisEntity, SensorEntity):
+    """Change in total clustered FRP across recent product observations."""
+
+    _attr_translation_key = "fire_activity_frp_change"
+    _attr_native_unit_of_measurement = UnitOfPower.MEGA_WATT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+    _attr_icon = "mdi:trending-up"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_fire_activity_frp_change"
+
+    @property
+    def native_value(self) -> float | None:
+        data = self.coordinator.data
+        return data.activity.frp_change_1h if data else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, float | None]:
+        data = self.coordinator.data
+        return {
+            "frp_change_last_3h": data.activity.frp_change_3h if data else None
+        }
+
+
+class NewIncidents24hSensor(IgnisEntity, SensorEntity):
+    """Count newly created incidents during the last 24 hours."""
+
+    _attr_translation_key = "new_incidents_24h"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:fire-plus"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_new_incidents_24h"
+
+    @property
+    def native_value(self) -> int:
+        data = self.coordinator.data
+        return data.activity.new_incidents_24h if data else 0
+
+
+class ActiveFireSituationSensor(IgnisEntity, SensorEntity):
+    """Explainable integration-calculated current active-fire situation."""
+
+    _attr_translation_key = "active_fire_situation"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["normal", "elevated", "high", "critical", "unknown"]
+    _attr_icon = "mdi:fire-circle"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_active_fire_situation"
+
+    @property
+    def native_value(self) -> str:
+        data = self.coordinator.data
+        return data.situation.level.value if data else "unknown"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {"score": 0, "reasons": ["data_not_loaded"]}
+        situation = data.situation
+        return {
+            "score": situation.score,
+            "reasons": list(situation.reasons),
+            "active_incidents": situation.active_incidents,
+            "nearest_distance_km": situation.nearest_distance_km,
+            "highest_frp_mw": situation.highest_frp_mw,
+            "approaching_incidents": situation.approaching_incidents,
+            "increasing_intensity_incidents": (
+                situation.increasing_intensity_incidents
+            ),
+            "increasing_activity_incidents": (
+                situation.increasing_activity_incidents
+            ),
+            "assessed_at": situation.assessed_at.isoformat(),
+            "classification": "integration_calculated_situation_indicator",
+        }
+
+
+class FireSourceConfirmationSensor(IgnisEntity, SensorEntity):
+    """Expose whether equal independent sources corroborate active fire."""
+
+    _attr_translation_key = "fire_source_confirmation"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [
+        "disabled",
+        "not_available",
+        "no_active_fire",
+        "single_source",
+        "multi_source",
+    ]
+    _attr_icon = "mdi:satellite-uplink"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_fire_source_confirmation"
+
+    @property
+    def native_value(self) -> str:
+        data = self.coordinator.data
+        return data.confirmation_level.value if data else "not_available"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        health = tuple(getattr(self.coordinator.provider, "health", ()))
+        return {
+            "selection_mode": "automatic_equal_peers",
+            "assigned_sources": [item.attrs() for item in health],
+            "available_source_count": sum(
+                item.status is ProviderStatus.AVAILABLE for item in health
+            ),
+            "corroborating_detections": (
+                data.corroborating_detections if data else 0
+            ),
+            "correlation_distance_km": 5.0,
+            "correlation_window_hours": 6,
+            "classification": "independent_satellite_source_corroboration",
+        }
+
+
+class NearestFireEvidenceSensor(IgnisEntity, SensorEntity):
+    """Explain the strength and limitations of the nearest fire evidence."""
+
+    _attr_translation_key = "nearest_fire_evidence"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["no_active_fire", "limited", "moderate", "strong"]
+    _attr_icon = "mdi:shield-search"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_nearest_fire_evidence"
+
+    def _assessment(self) -> FireEvidenceAssessment:
+        data = self.coordinator.data
+        nearest = data.active_clusters[0] if data and data.active_clusters else None
+        health = tuple(getattr(self.coordinator.provider, "health", ()))
+        return assess_fire_evidence(
+            nearest,
+            product_time=data.product_time if data else None,
+            secondary_available=(
+                sum(item.status is ProviderStatus.AVAILABLE for item in health) > 1
+            ),
+        )
+
+    @property
+    def native_value(self) -> str:
+        return self._assessment().level
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        assessment = self._assessment()
+        data = self.coordinator.data
+        nearest = data.active_clusters[0] if data and data.active_clusters else None
+        return {
+            "score": assessment.score,
+            "factors": list(assessment.factors),
+            "cautions": list(assessment.cautions),
+            "incident_id": nearest.track_id if nearest else None,
+            "classification": "integration_calculated_evidence_strength",
+            "not_an_emergency_confirmation": True,
+        }
+
+
+class FireRiskTodaySensor(IgnisFireRiskEntity, SensorEntity):
+    """Near-Home FRMv3 risk with the ten-day outlook."""
+
+    _attr_translation_key = "fire_risk_today"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["low", "moderate", "high", "very_high", "extreme", "unknown"]
+    _attr_icon = "mdi:pine-tree-fire"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_fire_risk_today"
+
+    @property
+    def native_value(self) -> str:
+        data = self.coordinator.data
+        return data.days[0].risk if data and data.days else "unknown"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {"forecast": [], "attribution": "EUMETSAT / LSA SAF, CC BY 4.0"}
+        return {
+            "risk_level": data.days[0].level,
+            "scope": "near_home",
+            "sample_latitude": data.latitude,
+            "sample_longitude": data.longitude,
+            "generated_at": data.generated_at.isoformat(),
+            "forecast": [
+                {"date": day.valid_date.isoformat(), "risk": day.risk, "level": day.level}
+                for day in data.days
+            ],
+            "source_url": WMS_URL,
+            "attribution": "EUMETSAT / LSA SAF, CC BY 4.0",
+        }
+
+
+class FireRiskAreaMaximumSensor(IgnisFireRiskEntity, SensorEntity):
+    """Highest sampled risk in the configured monitoring area."""
+
+    _attr_translation_key = "fire_risk_area_maximum"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["low", "moderate", "high", "very_high", "extreme", "unknown"]
+    _attr_icon = "mdi:map-marker-alert"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_fire_risk_area_maximum"
+
+    @property
+    def native_value(self) -> str:
+        data = self.coordinator.data
+        return data.area_risk if data else "unknown"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {"attribution": "EUMETSAT / LSA SAF, CC BY 4.0"}
+        return {
+            "risk_level": data.area_level,
+            "scope": "monitoring_area",
+            "monitoring_radius_km": data.radius_km,
+            "sample_latitude": data.area_latitude,
+            "sample_longitude": data.area_longitude,
+            "sampling_method": "bounded_raster_scan",
+            "valid_date": data.days[0].valid_date.isoformat(),
+            "source_url": WMS_URL,
+            "attribution": "EUMETSAT / LSA SAF, CC BY 4.0",
+        }
+
+
+class FireRiskUpdateSensor(IgnisFireRiskEntity, SensorEntity):
+    """Expose successful FRMv3 refresh and validity metadata."""
+
+    _attr_translation_key = "fire_risk_update"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_icon = "mdi:cloud-sync"
+
+    def __init__(self, entry: IgnisConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_fire_risk_update"
+
+    @property
+    def native_value(self) -> datetime | None:
+        return self.coordinator.data.generated_at if self.coordinator.data else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        if data is None:
+            return {"forecast_available": False}
+        return {
+            "forecast_available": True,
+            "forecast_days": len(data.days),
+            "valid_from": data.days[0].valid_date.isoformat(),
+            "valid_until": data.days[-1].valid_date.isoformat(),
+            "next_planned_update": (data.generated_at + timedelta(hours=12)).isoformat(),
+            "source_url": WMS_URL,
+        }

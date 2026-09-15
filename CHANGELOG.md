@@ -1,0 +1,804 @@
+# Changelog
+
+## 0.26.3
+
+- Prevent replayed older observations from creating duplicate retained track IDs
+  and repeated new-incident events outside the matching window.
+- Count unique source track IDs and avoid multiplying corroboration counts from
+  duplicate records. Preserve stored history.
+
+## 0.26.2
+
+- Track minimum distance per monitored location and use the selected location
+  for both current and historical minimum distances, including merged incidents.
+- Preserve legacy Home-based history without reinterpreting it. Scoped minima
+  begin with observed samples and reset when reference coordinates change.
+
+## 0.26.1 (prerelease)
+
+- Show NSW RFS reports at their update time when the UTC publication field agrees
+  with the Sydney-local UPDATED field. Use a one-minute display slot, not fire
+  duration, and retain all-day fallback for uncertain timestamps.
+- Preserve report identities and history; verify standard/daylight-saving offsets
+  and calendar query boundaries.
+
+## 0.26.0 (prerelease)
+
+- Add a disabled-by-default Queensland QFD report calendar with a shared,
+  bounded conditional-cache client and worker-based geometry/rendering. Keep
+  incidents, warnings, planned burns and source-time uncertainty explicit; no
+  satellite matching, warning events or persistent QFD archive is introduced.
+- Add immutable official-report models, a compatibility-preserving NSW conversion
+  and a mixed QFD parser. Preserve source identities, separate event/publication/
+  expiry times and disclose filtered, invalid and conflicting records.
+- Validate warning polygon topology with Shapely 2.1.2 and use bounded spherical
+  circle intersection. Unsupported geometry and ambiguous boundaries stay unknown.
+  Geometry tests pass on Linux ARM64 and x86-64; live HA checks remain pending.
+- Refresh next-update sensor states at their estimated deadline using local timers,
+  without extra provider requests. Preserve source selection and estimate labels.
+- Show only in-radius locations in map entities' `location_matches`; expose all
+  comparisons separately as `location_comparisons`. Event/history serialization,
+  internal matching and alerts are unchanged.
+- Document the Australia-first roadmap, source evidence and outstanding checks.
+
+## 0.25.0
+
+- Add an opt-in NSW RFS fire-report calendar using the official GeoJSON feed.
+  Filter publisher points against enabled monitored-location radii; overlapping
+  locations share one incident entry. Keep publisher report dates and labels,
+  exclude explicitly planned/non-fire reports and unmapped LGA placeholders.
+- Share a bounded 30-minute feed cache, parse outside the event loop, and mark
+  retained snapshots stale during failures. No satellite matching, public-alert
+  automation, or persistent NSW archive is introduced.
+
+## 0.24.12
+
+- Shortlist persistent tracking matches with Earth-centred spatial cells,
+  preserving nearest-match tie order and one-match-per-snapshot semantics.
+- Add multi-cycle randomized equivalence tests (poles, date line and delayed
+  observations), a 2400-track comparison-count regression and a zero-radius tie
+  test. This reduces candidate-search work; tracking still runs on the HA loop.
+
+## 0.24.11
+
+- Shortlist incident-family candidates using Earth-centred spatial cells while
+  retaining existing temporal, diameter, ordering, and stable-ID rules.
+- Run both family consolidation passes in the HA executor on private copies,
+  preventing workers from mutating live coordinator state.
+- Add randomized equivalence tests including poles and the date line, a bounded
+  comparison-count regression, and an event-loop responsiveness test.
+- All 745 tests pass locally. A synthetic 2400-track benchmark returned identical
+  results in 0.078 s versus 4.922 s; deployed performance still needs verification.
+
+## 0.24.10
+
+- Add bounded, per-stage processing timings to downloaded diagnostics, including
+  elapsed time and coordinator-thread CPU time for eleven stages.
+- Retain the last completed processing run across unchanged-product skips.
+- Document asynchronous-wait and CPU-attribution limits; these measurements do
+  not by themselves prove continuous event-loop blocking.
+- Diagnostic release only: no changes to detection, alerts, or polling behavior.
+- All 740 tests pass locally.
+
+## 0.24.9
+
+- Distinguish unavailable forecast dates from service failures using the Risk
+  layer's bounded, safely parsed WMS date catalogue after a non-future 404.
+- Show localized missing-date notices and safe error summaries instead of raw
+  upstream XML; retain automatic retry and self-clearing recovery notices.
+- Never substitute an old forecast for today's data; satellite fire monitoring
+  remains independent. This fix does not restore missing upstream forecasts.
+- Bound forecast retry calculation before exponentiation for prolonged outages.
+- Add date-catalogue and coordinator regressions; 740 tests pass locally.
+
+## 0.24.8
+
+- Fix GOES temporary-file cleanup accepting Home Assistant executor Futures,
+  preventing a cleanup TypeError from masking a successful product or its error.
+- Exercise both coroutine and Future executors for success, invalid downloads,
+  decoder failures and cancellation; verify cleanup completes on cancellation.
+
+## 0.24.7
+
+- Classify unexpected provider exceptions with allowlisted diagnostic codes,
+  without exposing exception messages, class names, paths or credentials.
+- Test fallback diagnostics, healthy peers, retry retention and recovery.
+- Diagnostic extension only; the deployed GOES root cause is not yet confirmed.
+
+## 0.24.6
+
+- Expose allowlisted GOES failure-stage codes in source health and integration
+  diagnostics without raw exception text, native paths or credentials.
+- Preserve diagnostic codes during deferred retries and clear them on recovery.
+- Include diagnostic changes in product identity checks so source details refresh.
+- This is a diagnostic release, not a confirmed fix for the deployed GOES failure.
+
+## 0.24.5
+
+- Publish location-specific approaching events with bounded, persisted trend
+  samples and per-location cooldowns; align map distance and distance trend.
+- Separate historical family membership and peak power from current power,
+  position and independent-source confirmation.
+- Reprocess corrected observations even when product timestamps and counts
+  are unchanged; regroup retained pixels after obsolete scan filtering.
+- Add regressions including coordinator-level opposite-motion event replays.
+
+## 0.24.4
+
+- Count distinct source observations by acquisition time with a bounded,
+  persisted six-hour ledger, instead of summing repeated snapshot sizes.
+- Exclude future records from activity windows and age observation counts on
+  unchanged-product refreshes. Keep FRP and incident history separate.
+- Expose collection-window and retention-limit metadata. Legacy aggregate
+  counts are not converted; existing Recorder history remains untouched.
+
+## 0.24.3
+
+- Derive per-location latest product/receipt timestamps only from sources
+  assigned to that location, rather than the global coordinator timestamp.
+- Expose bounded source health, failure reasons and successful timestamps on
+  each location's observation sensor for investigating empty maps.
+
+## 0.24.2
+
+- Preserve distance from the nearest matching monitored location when merging
+  fire incidents for the map, instead of resetting it to Home distance. Overlap
+  selection agrees with the location name and distance in entity attributes.
+
+## 0.24.1
+
+- Bound current fire clustering to a 30-minute acquisition window. Older
+  overlapping passes no longer create duplicate current markers or independent
+  confirmation. The tracking layer retains history already observed over time.
+- Calculate FRP from the newest scan (with a one-minute scan-line tolerance)
+  per provider/satellite/product, taking the largest view total. Preserve sums
+  of adjacent pixels while avoiding repeated-pass and MTG/IODC view sums.
+- Saturate provider retry delays before timedelta multiplication, preventing
+  overflow during prolonged outages.
+
+## 0.24.0
+
+- Add a location-scoped active-fire observation sensor that distinguishes
+  current detections, an observation with no active detections, reduced source
+  coverage, startup and complete data unavailability. Its stable reason codes
+  expose delayed, unavailable and initializing sources without treating an
+  empty map as an all-clear.
+- Align per-location active incident counts with the markers actually shown on
+  the map by excluding inactive and ended tracks from the active summary.
+
+## 0.23.0
+
+- Add one map entity for every enabled monitored location. Its native Home
+  Assistant map decoration shows the configured active-fire radius as a circle,
+  in metres internally and kilometres in the readable attributes.
+- Publish monitoring areas under the separate
+  `terralyra_ignis_monitoring_areas` geolocation source, so existing fire maps
+  remain unchanged and users can independently show or hide the circles.
+- Remove stale area entities when a location is deleted or disabled. These
+  circles describe configured monitoring boundaries only; they are not fire
+  extents, satellite footprints, positioning uncertainty, or safety zones.
+
+## 0.22.0
+
+- Add an isolated, tested GDACS wildfire-context parser with bounded page sizes,
+  stable event identifiers and explicit raw-time/centroid uncertainty. This is
+  context code only: no changes to satellite evidence.
+- Prepare a shared on-demand GDACS client and separate bounded archive: hourly
+  cache, serialized requests, bounded pagination/payloads, failure backoff and
+  preservation of previous records when a fetch is incomplete.
+- Add a disabled-by-default GDACS context calendar with all-day provider dates,
+  source attribution, stale-feed labels and conservative affected-area bounding
+  box filtering. Missing/unsupported geometry is explicitly uncertain. Geometry
+  requests are capped; this is not complete coverage or exact polygon matching.
+  Existing installations do not poll GDACS until the calendar is enabled.
+
+- Make reviewed calendar links easier to read: show the archived report title and
+  BM OKF source first, explain the possible association, and format observation
+  and review times in the Home Assistant time zone with explicit UTC offsets.
+  Keep technical link/incident identifiers in the review/list actions rather than
+  calendar descriptions. Existing saved links require no migration; matching,
+  incident times and satellite evidence remain unchanged.
+
+## 0.21.0
+
+- Enrich official-report review candidates with coordinates, actual first/last
+  detection times, providers, satellites and a per-candidate review token.
+- Add explicit, reversible manual report links in a separate bounded local
+  store. Saving rechecks one candidate and its token; changed reviews are rejected.
+  Links are entry-scoped, survive restarts, and expire within 30 days of publication.
+- Show active manually reviewed links in both calendars with source attribution
+  and a clear non-confirmation label. Missing or revised reports and reused incident
+  identities are not displayed as active links. Satellite evidence, counts, event
+  identities and notifications remain unchanged.
+
+## 0.20.1
+
+- Filter the BM OKF publication calendar using bounded, local Hungarian fire-
+  incident language rules. Hide weather alerts, non-fire accidents and uncertain
+  notices without deleting archived records. Preserve explicitly described fires,
+  including the saved Egyek report; no incident evidence or matching changes.
+
+## 0.20.0
+
+- Retain fetched BM OKF publications locally across restarts for 30 days, capped
+  at 1000 URLs. Calendar and manual matching can use archived notices even after
+  they leave RSS; live feed health and manual-import provenance remain explicit.
+- Add a validated manual publication import action and an attributed, opt-in
+  Egyek example. Regression tests replay the saved report against two reviewed
+  satellite history samples without mutating incidents or auto-applying date hints.
+
+## 0.19.0
+
+- Add a response-only official-report review action that compares a selected
+  current RSS notice with local incident history using explicitly reviewed fire
+  coordinates, uncertainty and optional event times. It reports candidates and
+  reasons without modifying incidents or applying extracted date hints.
+
+- Preserve bounded RSS descriptions with attribution and expose review-only
+  Hungarian previous-day ignition date hints. Dates use the publication's
+  Europe/Budapest calendar day, retain source wording and do not become automatic
+  incident start/end times or satellite associations.
+
+- Add a disabled-by-default BM OKF publication calendar, separate from satellite
+  incident history. When enabled, it refreshes every 15 minutes using the manual
+  action's shared cache and includes attributed links and explicit publication-
+  time and coverage limitations. No automatic incident matching is performed.
+
+## 0.18.0
+
+- Add an on-demand `get_official_reports` action returning current BM OKF
+  emergency-notice titles, attributed links and publication times. Five-minute
+  caching and failure cooldown bound requests. No automatic incident matching,
+  background polling or new map markers are enabled.
+
+- Add a local report-association foundation with explicit spatial and temporal
+  uncertainty and shared-origin grouping. Automatic incident association and
+  map/calendar presentation are not enabled yet.
+
+## 0.17.1
+
+- Remove inactive and ended incidents from the active-fire map while retaining
+  their incident history; show reactivated incidents again after new observations.
+
+## 0.17.0
+
+- Consolidate nearby, temporally related provider tracks into stable physical
+  incident families before publishing map entities, counts, history or events.
+- Keep provider-level source tracks for attribution while exposing one incident
+  identity with bounded source-track and spatial-extent diagnostics.
+- Prevent duplicate new-fire and trend events for one incident, avoid summing
+  overlapping-source intensity, and preserve the original entity identity when
+  an incident gains a source or later splits.
+- Document a separate, opt-in official-report and news-context roadmap that
+  never treats automatically matched reporting as satellite or official proof.
+
+## 0.16.0
+
+- Add a local, searchable Home Assistant fire-incident history calendar. It
+  retains up to 30 days or 500 incidents independently of the shorter map
+  marker window and records first/last detection, monitored locations,
+  coordinates, sources, satellites, peak FRP and detection counts.
+- Build the archive entirely from the existing bounded provider refreshes, so
+  the feature adds no upstream API calls and no additional live map markers.
+- Keep credential-free NOAA GOES outages visible in source-health sensors and
+  diagnostics without repeatedly recreating a non-actionable Repair issue.
+
+## 0.15.4
+
+- Reduce Home Assistant load by reusing unchanged active-fire products, avoiding
+  unnecessary incident-store writes, and exposing bounded refresh performance
+  counters in integration diagnostics.
+- Record the worldwide fire-risk provider decision: JRC GWIS is the preferred
+  global FWI candidate, subject to bounded live-WMS validation, while
+  Open-Meteo remains a possible input for a separately validated calculated
+  FWI provider.
+- Add a provider-neutral per-location fire-risk coverage planner that assigns
+  FRMv3 by geography instead of location identity and represents unvalidated
+  GWIS coverage only as an inactive opportunity.
+- Add privacy-safe diagnostics and regression coverage for covered, partially
+  covered and uncovered monitored-location sets.
+
+## 0.15.3
+
+- Organize entity display names into localized `Location`, `Overview` and
+  `Sources` groups so their scope is visible before the metric in alphabetical
+  Home Assistant lists.
+- Identify all FRMv3 fire-risk, forecast-map, calendar, selector, radius,
+  risk-event and optional land-surface-temperature entities as Home-bound.
+- Identify active-fire situation, incident, trend and history entities as a
+  combined overview of all enabled monitored locations.
+- Keep provider-specific NASA FIRMS counts, raw fire pixels and the redundant
+  legacy all-source cluster alias as diagnostics disabled by default for new
+  installations. Existing entities remain available and retain their IDs.
+- Give the primary active-fire radius a dynamic location-name prefix and add
+  translation regression coverage for the complete naming taxonomy.
+
+## 0.15.2
+
+- Group all per-location entities alphabetically with a localized
+  `Location: <name> — <sensor>` display-name convention.
+- Preserve existing entity identities, history, dashboards and automations;
+  only the integration-provided display names change.
+
+## 0.15.1
+
+- Distinguish fully fresh per-location monitoring from usable but delayed
+  equal-peer sources with a translated `degraded` state, instead of reporting
+  misleadingly that every source is available.
+- Expose per-source product, receipt and retry timestamps plus failure details
+  in each monitored location's source-health attributes.
+- Add automation-friendly fresh, delayed, unavailable and initializing source
+  counts, provider lists and exact status groups.
+- Cover the complete equal-peer availability matrix and the new summary
+  contract with regression tests.
+
+## 0.15.0
+
+- Add public EUMETSAT Sentinel-3A and Sentinel-3B SLSTR Level 2 near-real-time
+  FRP observations as separate, credential-free equal peers for locations
+  between 82°S and 82°N.
+- Query only bounded monitored-location areas through the official EUMETView
+  WFS, with a one-day time window, 15-minute cache, fixed host and layer names,
+  no redirects, strict size/count limits and fail-closed GeoJSON validation.
+- Preserve FRP, uncertainty, confidence, MWIR channel, pixel dimensions,
+  satellite identity and acquisition time for normalized incident processing.
+- Keep each Sentinel-3 satellite's health and backoff independent while
+  suppressing duplicate, non-actionable Repairs for a shared public-service
+  outage; provider health and diagnostics still report the failure.
+- Add schedule, coverage, parsing, normalization, truncation, identity and
+  failure-isolation regression tests plus implementation/privacy documentation.
+- Identify whether each assigned active-fire feed is geostationary or
+  polar-orbiting in the per-location source details.
+- Expose safe Himawari-9 geographic coverage as an inactive opportunity for
+  relevant Asia-Pacific locations, without adding it to the active source
+  count or treating it as fire evidence.
+- Explain that Himawari activation remains blocked on a documented, licensed
+  machine-access endpoint; no unsupported map endpoint or full-disk imagery is
+  queried.
+- Add regression tests proving that Tokyo reports one active NASA FIRMS source
+  plus a separate inactive Himawari opportunity, while locations outside the
+  conservative Himawari gate do not report it.
+- Accept current NOAA GOES floating-point science fields when optional NetCDF
+  packing attributes are absent, while preserving strict units, range, shape,
+  projection and source validation.
+
+## 0.14.0
+
+- Rename the wildfire product to **TerraLyra IGNIS** and move its repository to
+  `TerraLyra/ha-ignis`, establishing the product boundary needed for future
+  TerraLyra integrations such as TREMOR, FLUMEN and AERIS.
+- Adopt the collision-resistant `terralyra_ignis` Home Assistant domain now,
+  before public distribution. This intentionally creates new config entries,
+  entity IDs, map-source IDs, service names and event names.
+- Rename the Python package and internal integration classes to IGNIS-specific
+  identities while keeping provider-normalization and incident logic intact.
+- Update HACS metadata, documentation links, user agents, workflows,
+  translations, examples and regression tests for the new identity.
+- Document the one-time clean migration from the pre-release `terralyra`
+  integration. Automatic cross-domain migration is deliberately not attempted.
+
+## 0.13.0
+
+- Activate Meteosat-9 MSG-IODC FRP-PIXEL as an equal active-fire source for
+  monitored locations inside its conservative 45.5°E coverage gate.
+- Add bounded HDF5 science-array decoding with product-identity, quality,
+  shape, type, missing-value, scale, coordinate and acquisition-time checks.
+- Reuse the configured LSA SAF account, download one shared IODC product for
+  all covered locations and isolate its retry/health state from healthy peers.
+- Preserve the 15-minute IODC cadence in next-update estimates and expose the
+  source in coverage, diagnostics and incident attribution.
+- Treat MTG and MSG-IODC as equal observing feeds from the same LSA SAF FRP
+  evidence family, avoiding a false independent-confirmation claim when their
+  observations overlap.
+- Replace the removed `aiohttp.encode_basic_auth` helper with the compatible
+  `BasicAuth.encode()` API.
+
+## 0.12.0
+
+- Add an explicit, response-only Home Assistant action for inspecting one
+  current MSG-IODC FRP-PIXEL List Product with the LSA SAF credentials already
+  stored in the selected TerraLyra configuration.
+- Keep the compatibility check runtime-disabled and privacy-safe: no redirects,
+  a 2 MiB download limit, a 60-second overall timeout, no retained upstream file
+  and no reads of fire-observation array values.
+- Return only bounded HDF5 structure and attribute metadata for review before a
+  synthetic fixture, decoder and live Meteosat-9 provider are implemented.
+- Add action names and descriptions in English, Hungarian, German, French,
+  Spanish and Italian, plus regression tests and user documentation.
+
+## 0.11.0
+
+- Add NASA FIRMS Terra and Aqua MODIS near-real-time active-fire observations
+  alongside the existing NOAA-20 and NOAA-21 VIIRS feeds, using the same
+  user-supplied MAP_KEY and bounded 15-minute cache.
+- Treat observations from different satellites as independent evidence even
+  when they arrive through the same provider, while preventing duplicate FRP
+  values from being added together.
+- Preserve contributing satellite names on live and persisted incidents and
+  expose them in Home Assistant attributes.
+- Extend the expected-observation estimate with broad Terra/Aqua nominal local
+  overpass windows without presenting them as precise orbital predictions.
+- Clarify the NOAA GOES Repair message: the public GOES source needs no account,
+  API key or credentials, so users should check service availability instead.
+
+## 0.10.0
+
+- Add a translated timestamp sensor for every enabled monitored location that
+  shows the next expected update from its earliest currently usable equal
+  active-fire source.
+- Estimate MTG and GOES updates from their 10-minute product cadence and NASA
+  FIRMS refreshes from its bounded 15-minute client cache.
+- Include a deliberately broad, longitude-adjusted NOAA-20/21 VIIRS nominal
+  overpass window without presenting it as an exact orbital prediction.
+- Preserve each provider's last successful product and receipt timestamps in
+  health details across temporary per-provider backoff periods.
+- Remove next-update entities automatically when their monitored location is
+  disabled or deleted, and add regression tests for scheduling and cleanup.
+
+## 0.9.0
+
+- Add a common reliability layer for the equal-peer MTG, GOES and NASA FIRMS
+  active-fire providers, distinguishing authentication, rate-limit, timeout,
+  service-outage, no-product and invalid-response states.
+- Honor bounded upstream `Retry-After` hints and exponentially delay only a
+  failing peer while healthy providers continue at the normal polling rate.
+- Expose privacy-safe failure category, consecutive-failure count and next
+  retry time in provider health attributes and diagnostics.
+- Create one translated, self-clearing Home Assistant Repair per failing
+  upstream provider; authentication is reported immediately and transient
+  failures only after three consecutive attempts.
+- Persist the size-bounded last valid FRMv3 PNG for up to 24 hours so the
+  same-date, same-bounds outage fallback survives a Home Assistant restart.
+- Add regression coverage for retry deferral, recovery, Repair lifecycle,
+  normalized provider errors and safe FRMv3 cache restoration.
+
+## 0.8.7
+
+- Keep the last valid FRMv3 map available for up to 24 hours when a refresh is
+  temporarily rate-limited, the service returns a transient server error, or
+  the connection fails.
+- Reuse a stale map only for the exact same bounds and forecast date, and never
+  conceal authentication errors or serve an expired image.
+- Remove the stale development version from the FRMv3 HTTP User-Agent.
+
+## 0.8.6
+
+- Improve FRMv3 reliability by classifying temporary HTTP failures (auth/rate-limit/
+  temporary service), capturing `Retry-After` hints when present, and using that
+  signal for smarter backoff.
+- Add clearer FRMv3 outage diagnostics including the last failure reason in the
+  warning repair notification.
+- Keep the specialized FRMv3 HTTP failures compatible with existing HTTP error
+  handling, and sanitize server-provided details before showing them.
+
+## 0.8.5
+
+- Make the NASA FIRMS multi-area active-fire provider resilient to partial area
+  failures, so one bad monitoring box no longer invalidates all FIRMS detections.
+- Add regression coverage for partial and complete FIRMS multi-area failures.
+
+## 0.8.4
+
+- Add more actionable FRMv3 diagnostics when the WMS endpoint returns a non-200
+  status, capturing a bounded response snippet for easier root-cause detection.
+- Add regression coverage for non-200 FRMv3 HTTP error diagnostics.
+
+## 0.8.3
+
+- Keep FRMv3 daily forecast entities available even when the rendered map image
+  cannot be fetched or analyzed during transient outages; only the map-derived
+  area-maximum value falls back to its forecast sample.
+
+
+## 0.8.2
+
+- Keep FRMv3 fire-risk forecast updates resilient when future dates are not
+  yet available: a 404 for future forecast days is treated as missing data
+  for that specific day instead of failing the whole forecast.
+- Preserve 1xx/4xx/5xx failures for current forecast day to surface a clear
+  integration outage signal when the immediate-risk map is truly unavailable.
+- Add regression coverage for partial future-date 404 tolerance.
+
+## 0.8.1
+
+- Remove persisted fire incidents that no longer belong to any enabled
+  monitored location, preventing deleted locations from leaving stale map
+  markers.
+- Reset the bounded 24-hour activity aggregate when obsolete location tracks
+  are removed, preventing misleading incident totals after location changes.
+- Apply the same current-location relevance check while building map entities
+  as an additional fail-safe.
+
+## 0.8.0
+
+- Add a translated monitoring-status sensor for every enabled location, clearly
+  distinguishing all sources available, partial availability, initialization
+  and complete unavailability.
+- Show the health of each automatically assigned equal-peer provider and
+  satellite in the location sensor attributes, without exposing coordinates.
+- Include the latest received/product timestamps plus per-location active and
+  independently corroborated incident counts.
+- Remove orphaned location-status entities automatically when a monitored
+  location is deleted, disabled or recreated.
+
+## 0.7.4
+
+- Align the German, Spanish, French, Hungarian and Italian option and repair
+  text with automatic, location-based assignment of equal active-fire sources.
+- Explain that NASA FIRMS is queried separately around every enabled monitored
+  location rather than around a single selected monitoring center.
+- Update authentication and outage wording for multi-source operation, and
+  remove obsolete primary/supplemental terminology from user documentation.
+
+## 0.7.3
+
+- Remove orphaned per-location source sensors from Home Assistant's entity
+  registry when a monitored location is deleted, disabled or recreated.
+- Preserve all current per-location sensors, including user-customized entity
+  names, while cleaning only obsolete TerraLyra source assignments.
+- Add regression coverage for selective and complete location-source cleanup.
+
+## 0.7.2
+
+- Preserve every managed monitoring location when the general active-fire
+  options form updates the transition monitoring center or radius.
+- Keep secondary location source assignments active across general options
+  reloads instead of turning their existing entities unavailable.
+- Add regression coverage for a three-location Home, California and Uganda
+  configuration.
+
+## 0.7.1
+
+- Retry failed FRMv3 fire-risk refreshes after 15, 30 and at most 60 minutes
+  instead of leaving the entities unavailable until the next normal 12-hour
+  cycle.
+- Create a warning Repair after three consecutive FRMv3 failures and clear it
+  automatically after the forecast service recovers.
+- Report active-fire data as delayed once the latest product is older than the
+  60-minute situation-assessment freshness limit.
+
+## 0.7.0
+
+- Add one user-facing source-assignment sensor for every enabled monitored
+  location, showing the number, readable names and satellites of all
+  automatically selected equal-peer active-fire sources.
+- Enrich bounded coverage attributes with readable assignment details while
+  keeping monitored coordinates out of entity state attributes.
+- Add explicit Europe/United States automatic-assignment regression coverage
+  and refresh documentation to remove remaining primary/secondary wording.
+
+## 0.6.0
+
+- Replace the configured primary/supplemental active-fire hierarchy with
+  automatic source assignment for every enabled monitored location.
+- Use all geographically relevant, configured sources as equal peers: MTG in
+  its safe coverage area, GOES-18/19 in the Western Hemisphere, and NASA FIRMS
+  globally when its key is configured.
+- Continue updating from healthy peers during a partial provider outage and
+  expose bounded per-source health and assignment details.
+- Merge nearby observations from independent satellites into one incident,
+  preserving multi-source confirmation without double-counting observed FRP.
+- Migrate existing entries without requiring users to reselect a provider and
+  add translated, provider-neutral setup, entity and Repair wording.
+- Clarify active-fire entity scopes and document Home Assistant map-card
+  limitations, attribution and recommended TerraLyra dashboard naming.
+
+## 0.5.2
+
+- Disambiguate simultaneous same-place fire markers without changing their
+  stable incident-backed Home Assistant identities.
+- Use the nearest actually affected monitored location for map distance,
+  scalar location attributes and localized new-fire notifications.
+- Include all other affected monitored-location names in one physical
+  incident event instead of creating duplicate alerts.
+- Query every enabled monitored location when optional NASA FIRMS
+  corroboration is active, merging overlapping safe request boxes, keeping
+  distant boxes separate and deduplicating repeated observations.
+
+## 0.5.1
+
+- Keep Home Assistant geolocation entity identities tied to stable TerraLyra
+  incident IDs so a later fire cannot inherit another incident's history.
+- Merge connected same-product detection chains during clustering, reducing
+  overlapping map markers caused by source-pixel ordering.
+- Remove the internal `firms-` prefix from fallback NASA FIRMS fire names.
+- Add regression coverage for stable incident identities, connected clustering
+  and user-facing FIRMS fallback names.
+
+## 0.5.0
+
+- Rename the existing active-fire cluster sensor to make clear that it counts
+  only detections from the configured primary provider.
+- Add a separate NASA FIRMS supplemental-cluster sensor containing only
+  detections that are not already represented by a correlated primary-source
+  incident.
+- Add a combined active-fire cluster sensor that reports the deduplicated
+  current total across the primary provider and supplemental NASA FIRMS data.
+- Expose explicit count-scope and provider attributes, update all supported
+  translations, and document why the primary count can be zero while the map
+  still contains supplemental observations.
+
+## 0.4.1
+
+- Fix migration of legacy custom monitoring centers when Home Assistant uses an
+  uppercase config-entry identifier by assigning a stable, validated local
+  location ID instead of deriving one from the config entry.
+
+## 0.4.0
+
+- Replace the single custom monitoring center with a locally managed list of
+  enabled monitored locations, each with its own name, coordinates and active-
+  fire radius.
+- Match active-fire incidents to every affected monitored location while
+  retaining a stable primary-location distance for Home Assistant entities.
+- Add translated location-management flows with strict validation and safe
+  migration of existing single-center installations.
+- Distinguish the configured primary active-fire provider from the provider
+  actually observed in the latest product, avoiding misleading source labels.
+- Add conservative per-location EUMETSAT LSA SAF and NOAA GOES coverage
+  reporting, including an appropriate-provider recommendation when uncovered.
+- Add actionable Home Assistant Repairs for rejected provider credentials,
+  three consecutive provider failures and uncovered monitored locations.
+  Repairs clear automatically when the underlying condition is corrected.
+- Extend regression coverage and documentation for multi-location matching,
+  provider identity, geographic coverage and repair-notice behavior.
+
+## 0.3.0
+
+- Add a setup and options workflow for choosing Home or one named custom
+  active-fire monitoring center with strictly validated coordinates.
+- Use the selected center consistently for the primary active-fire provider,
+  NASA FIRMS bounds, distance calculations, alerts and map markers while
+  keeping FRMv3 fire risk and land-surface temperature tied to Home.
+- Allow European Home Assistant installations to create a coverage-gated NOAA
+  GOES entry for a safely covered Western Hemisphere test location.
+- Show the center name and rounded coordinates as attributes of the active-fire
+  data-source sensor and use the name in localized mobile notifications.
+- Separate persisted incident tracks and activity history when the center
+  changes so detections from two locations cannot be mixed.
+- Add English, Hungarian, German, French, Spanish and Italian setup text plus
+  regression tests for custom centers, validation, GOES coverage and alerts.
+
+## 0.2.7
+
+- Audit all English, Hungarian, German, French, Spanish and Italian translation
+  schemas and guard against accidental English fallback text.
+- Reconcile the README with the released GOES primary-provider workflow,
+  provider-neutral map behavior, current architecture and remaining roadmap.
+
+## 0.2.6
+
+- Add a translated primary-provider setup step for EUMETSAT LSA SAF and NOAA
+  GOES-18/19.
+- Allow safely covered Western Hemisphere installations to use GOES without an
+  LSA SAF account while retaining the existing credential flow for LSA SAF.
+- Explain GOES coverage, account and additional-download implications before
+  activation, and reject uncovered Home locations before creating an entry.
+- Add a regression test for the exact geolocation attributes consumed by Home
+  Assistant's native Map-card source selector.
+- Add a strict primary-provider factory that preserves existing LSA SAF entries
+  while preparing a coverage-gated GOES runtime path without silent fallback.
+- Test LSA SAF compatibility, GOES-East selection, European exclusion, missing
+  credentials and unknown-provider rejection at the provider boundary.
+- Show the selected active-fire provider, satellite and product in a translated
+  Home Assistant sensor, and expose the `terralyra` map-source identifier on
+  the active-fire summary even when no marker is currently available.
+- Add a network-free end-to-end GOES runtime test covering bounded download,
+  temporary-file cleanup, direct NetCDF decoding and provider normalization.
+- Add conservative spherical coverage selection for the operational GOES-18
+  and GOES-19 satellites while rejecting Europe and near-limb locations.
+- Add a fixed-host, redirect-free and size-limited NOAA catalogue discovery
+  client that inspects only the current and previous UTC product hour.
+- Strictly validate GOES catalogue XML, object paths, filenames, satellite
+  identity, timestamps and advertised NetCDF object size before download, using
+  a pinned attack-resistant XML parser.
+- Add tests for satellite selection, European exclusion, UTC prefixes and
+  malformed, oversized or cross-satellite catalogue objects.
+- Document the completed production foundation and retain NetCDF downloading
+  behind a separate package-size, memory and ARM compatibility gate.
+- Record a real GOES-18/19 ARM64 decoder benchmark and select direct `h5py`
+  conditionally; keep the native dependency and user option out until the
+  bounded production decoder and miniature fixtures pass the remaining gate.
+- Add the bounded direct-`h5py` FDCF decoder with stripe-based mask scanning,
+  strict dimensions/chunks/units/projection validation, optional-value
+  preservation and synthetic miniature fixtures. The decoder remains
+  disconnected from normal integration operation pending provider activation.
+- Add redirect-free, advertised-size-verified streaming downloads with
+  executor-backed file writes and cancellation-safe temporary-file cleanup.
+- Add a dedicated Python 3.14 GOES compatibility workflow on Linux x86-64 and
+  ARM64 GitHub-hosted runners.
+- Add a provider-neutral GOES active-fire adapter with conservative coverage
+  selection, explicit freshness states and strict decoded-product identity
+  checks. It remains unregistered until multi-provider coordination is ready.
+
+## 0.2.5
+
+- Localize generated fire-place descriptions and mobile notification text in
+  English, Hungarian, German, Spanish, French, and Italian, with an English
+  fallback for other Home Assistant languages.
+
+- Audit and update the README against the current integration behavior,
+  entities, options, privacy boundaries and provider attribution.
+- Verify the native Map-card geolocation-source YAML and document why
+  `terralyra` may be absent while no recent fire marker exists.
+- Add complete NASA FIRMS setup, behavior, failure-isolation, privacy and
+  supplemental-marker guidance.
+- Correct obsolete MTLST roadmap and architecture descriptions, remove a
+  duplicated installation step and decouple map history wording from alert
+  memory.
+- Remove a stale development version from the NASA FIRMS HTTP User-Agent.
+
+## 0.2.4
+
+- Reconcile persisted NASA FIRMS-only tracks with primary LSA SAF incidents
+  across refresh cycles, preventing historical cross-provider duplicates.
+- Prefix supplemental map entity names with `NASA FIRMS` so their source is
+  immediately visible on Home Assistant maps and entity dialogs.
+- Document migration of manually configured geolocation cards from the legacy
+  `lsa_saf` source to `terralyra`.
+
+## 0.2.3
+
+- Show NASA FIRMS-only VIIRS detections as supplemental Home Assistant map
+  markers when FIRMS corroboration is enabled.
+- Suppress duplicate FIRMS markers when the same detection already corroborates
+  an LSA SAF incident.
+- Resolve the nearest settlement locally for supplemental FIRMS incidents and
+  retain explicit NASA FIRMS source attribution.
+- Use a separate identifier namespace for FIRMS incidents to prevent entity
+  identity collisions with primary LSA SAF incidents.
+- Keep FIRMS-only markers out of primary LSA SAF alerts and situation scoring.
+
+## 0.2.2
+
+- Add a separate, dashboard-adjustable 1–48 hour fire-history window for map
+  markers.
+- Keep inactive incidents visible for the selected history period without
+  extending same-fire alert suppression.
+- Preserve the previous six-hour behavior by default for existing users.
+
+## 0.2.1
+
+- Add a translated, explainable evidence-strength sensor for the nearest active
+  fire detection, with `limited`, `moderate`, and `strong` states.
+- Explain the assessment with bounded factors and cautions covering independent
+  satellite corroboration, freshness, FRP, primary confidence, and pixel count.
+- Explicitly label the assessment as integration-calculated and not an official
+  emergency confirmation.
+
+## 0.2.0
+
+- Activate optional NASA FIRMS corroboration with the user's personal MAP_KEY.
+- Query bounded NOAA-20 and NOAA-21 VIIRS feeds no more than once every 15
+  minutes and keep FIRMS failures isolated from primary LSA SAF monitoring.
+- Correlate independent detections within explicit 5 km and 6 hour gates.
+- Expose translated source-confirmation states and per-incident provider,
+  confirmation, and corroborating-detection attributes.
+
+## 0.1.1
+
+- Replace the fire-specific branding with TerraLyra's provider-neutral globe
+  and observation-eye identity.
+- Include a scalable SVG source and transparent 256 px and 512 px icons.
+
+## 0.1.0
+
+- Launch TerraLyra as a clean, provider-neutral Home Assistant integration
+  under the new `terralyra` domain and `TerraLyra/ha-terralyra` repository.
+- Include EUMETSAT LSA SAF active-fire monitoring, persistent incident tracking,
+  trend and situation indicators, offline place-name lookup, and map entities.
+- Include the FRMv3 ten-day fire-risk forecast, calendar, sensors, and bounded
+  forecast-map camera with offline country borders.
+- Include optional, default-off MTLST land-surface temperature monitoring with
+  clear location-disclosure text.
+- Include optional, default-off NASA FIRMS configuration and secure provider
+  foundation for future multi-source corroboration.
+- Preserve bounded downloads, strict URL and host validation, TLS verification,
+  decompression and image limits, credential redaction, and privacy-safe
+  diagnostics.
+- Provide English, Hungarian, German, French, Spanish, and Italian interface
+  translations.
+
+TerraLyra does not automatically migrate the earlier `lsa_saf` development
+integration. Remove the old integration before installing TerraLyra, then
+recreate dashboards and automations with the new entity and event names.

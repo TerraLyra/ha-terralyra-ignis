@@ -1,0 +1,210 @@
+"""Tests for privacy-safe diagnostics."""
+from __future__ import annotations
+
+from datetime import UTC, date, datetime
+from types import SimpleNamespace
+
+import pytest
+
+from custom_components.terralyra_ignis.const import (
+    CONF_FIRMS_MAP_KEY,
+    CONF_MONITORED_LOCATIONS,
+    CONF_MONITORING_CENTER_NAME,
+    CONF_MONITORING_LATITUDE,
+    CONF_MONITORING_LONGITUDE,
+    CONF_PASSWORD,
+    CONF_USERNAME,
+)
+from custom_components.terralyra_ignis.diagnostics import (
+    async_get_config_entry_diagnostics,
+)
+from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.products.fire_risk import (
+    FireRiskDay,
+    FireRiskForecast,
+)
+
+
+@pytest.mark.asyncio
+async def test_diagnostics_are_bounded_and_redacted(hass) -> None:
+    """Diagnostics expose health/counts but no secrets or precise locations."""
+    account_value = "test-account"
+    credential_value = "-".join(("test", "credential"))
+    firms_key_value = "F" * 32
+    product_time = datetime(2026, 8, 27, 16, 20, tzinfo=UTC)
+    generated_at = datetime(2026, 8, 27, 16, 21, tzinfo=UTC)
+    active_data = SimpleNamespace(
+        product_time=product_time,
+        active_clusters=[object(), object()],
+        tracked_fires=[object(), object(), object()],
+        raw_pixels_in_radius=4,
+        source_url="https://example.invalid/private-product",
+    )
+    risk_data = FireRiskForecast(
+        latitude=46.123456,
+        longitude=18.654321,
+        generated_at=generated_at,
+        days=(FireRiskDay(date(2026, 8, 27), 5),),
+        area_level=4,
+        area_latitude=46.2,
+        area_longitude=18.7,
+        radius_km=100,
+    )
+    entry = SimpleNamespace(
+        data={
+            CONF_USERNAME: account_value,
+            CONF_PASSWORD: credential_value,
+            CONF_FIRMS_MAP_KEY: firms_key_value,
+        },
+        options={
+            "radius_km": 25.0,
+            CONF_MONITORING_CENTER_NAME: "Secret cabin",
+            CONF_MONITORING_LATITUDE: 45.123456,
+            CONF_MONITORING_LONGITUDE: 17.654321,
+            CONF_MONITORED_LOCATIONS: [
+                {
+                    "id": "private-place",
+                    "name": "Private property",
+                    "latitude": 44.111111,
+                    "longitude": 16.222222,
+                    "radius_km": 20,
+                    "enabled": True,
+                    "source": "manual",
+                }
+            ],
+        },
+        runtime_data=SimpleNamespace(
+            coordinator=SimpleNamespace(
+                data=active_data,
+                last_update_success=True,
+                provider_status=ProviderStatus.AVAILABLE,
+                provider_name="eumetsat_lsa_saf",
+                satellite="mtg",
+                provider_product="MTFRPPixel",
+                product_timestamp=product_time,
+                received_timestamp=generated_at,
+                last_update_duration_ms=24.5,
+                last_fetch_duration_ms=20.0,
+                last_processing_duration_ms=4.5,
+                last_completed_processing={
+                    "stages": {"clustering": {"wall_ms": 4.0, "thread_cpu_ms": 3.5}},
+                },
+                last_input_detection_count=123,
+                unchanged_update_skips=7,
+                state_write_count=3,
+                monitored_locations=(
+                    MonitoredLocation(
+                        id="private-place",
+                        name="Private property",
+                        latitude=44.111111,
+                        longitude=16.222222,
+                        radius_km=20,
+                        enabled=True,
+                        source="manual",
+                    ),
+                ),
+                provider=SimpleNamespace(health=()),
+            ),
+            fire_risk_coordinator=SimpleNamespace(
+                data=risk_data, last_update_success=True
+            ),
+            place_name_resolver=object(),
+        ),
+    )
+
+    result = await async_get_config_entry_diagnostics(hass, entry)
+    serialized = repr(result)
+
+    assert result["active_fire"]["active_cluster_count"] == 2
+    assert result["active_fire"]["tracked_fire_count"] == 3
+    assert result["active_fire"]["incident_lifecycle_counts"] == {
+        "new": 0,
+        "continuing": 0,
+        "inactive": 0,
+    }
+    assert result["active_fire"]["provider_status"] == "available"
+    assert result["active_fire"]["source_selection"] == "automatic_equal_peers"
+    assert result["active_fire"]["performance"] == {
+        "last_completed_processing": {
+            "stages": {"clustering": {"wall_ms": 4.0, "thread_cpu_ms": 3.5}},
+        },
+        "last_update_duration_ms": 24.5,
+        "last_fetch_duration_ms": 20.0,
+        "last_processing_duration_ms": 4.5,
+        "last_input_detection_count": 123,
+        "unchanged_update_skips": 7,
+        "state_write_count": 3,
+    }
+    assert result["active_fire"]["geographic_coverage"] == {
+        "status": "covered",
+        "enabled_location_count": 1,
+        "covered_location_count": 1,
+        "uncovered_location_count": 0,
+        "provider_assignment_counts": {
+            "eumetsat_lsa_saf": 1,
+            "eumetsat_lsa_saf_iodc": 1,
+            "noaa_goes": 0,
+            "nasa_firms": 1,
+        },
+    }
+    assert result["fire_risk"]["near_home_risk"] == "extreme"
+    assert result["fire_risk"]["area_risk"] == "very_high"
+    assert result["fire_risk"]["source_selection"] == (
+        "automatic_equal_peers_by_location_coverage"
+    )
+    assert result["fire_risk"]["coverage"] == {
+        "status": "covered",
+        "enabled_location_count": 1,
+        "covered_location_count": 1,
+        "uncovered_location_count": 0,
+        "provider_assignment_counts": {"eumetsat_lsa_saf_frmv3": 1},
+        "inactive_opportunity_counts": {"jrc_gwis_fwi": 1},
+    }
+    assert account_value not in serialized
+    assert credential_value not in serialized
+    assert firms_key_value not in serialized
+    assert "46.123456" not in serialized
+    assert "18.654321" not in serialized
+    assert "Secret cabin" not in serialized
+    assert "45.123456" not in serialized
+    assert "17.654321" not in serialized
+    assert "Private property" not in serialized
+    assert "44.111111" not in serialized
+    assert "16.222222" not in serialized
+    assert "example.invalid" not in serialized
+
+
+@pytest.mark.asyncio
+async def test_diagnostics_handle_coordinators_without_data(hass) -> None:
+    """Diagnostics remain downloadable before optional forecast data arrives."""
+    credential_value = "-".join(("test", "credential"))
+    entry = SimpleNamespace(
+        data={CONF_USERNAME: "test-account", CONF_PASSWORD: credential_value},
+        options={},
+        runtime_data=SimpleNamespace(
+            coordinator=SimpleNamespace(
+                data=None,
+                last_update_success=False,
+                provider_status=ProviderStatus.INITIALIZING,
+                provider_name=None,
+                satellite=None,
+                provider_product=None,
+                product_timestamp=None,
+                received_timestamp=None,
+                monitored_locations=(),
+                provider=SimpleNamespace(health=()),
+            ),
+            fire_risk_coordinator=SimpleNamespace(
+                data=None, last_update_success=False
+            ),
+            place_name_resolver=None,
+        ),
+    )
+
+    result = await async_get_config_entry_diagnostics(hass, entry)
+
+    assert result["active_fire"]["product_time"] is None
+    assert result["fire_risk"]["near_home_risk"] is None
+    assert result["fire_risk"]["coverage"]["status"] == "unknown"
+    assert result["place_names_enabled"] is False
