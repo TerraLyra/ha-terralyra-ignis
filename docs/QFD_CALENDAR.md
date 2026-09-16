@@ -1,10 +1,10 @@
-# Queensland QFD report calendar — local unreleased integration
+# Queensland QFD report calendar
 
 ## Enablement and scope
 
 The integration now registers **Reports — Queensland QFD** (Hungarian:
-**Jelentések — Queensland QFD**), disabled by default. After a separately approved
-release and HACS update/restart, enable the entity in the IGNIS entity list and add
+**Jelentések — Queensland QFD**), disabled by default. Available since 0.26.0. With a version containing this calendar installed,
+enable the entity in the IGNIS entity list and add
 its actual entity ID to your calendar card. Do not guess a generated entity ID.
 No existing dashboard configuration is changed by this implementation.
 
@@ -51,16 +51,18 @@ return an empty calendar. Diagnostics expose feed state and parser omission coun
 spatial/undated counters refer to the last calendar query, not a live incident count.
 The exact upstream meaning of QFD expiry remains unresolved and is not guessed.
 
-## Validation / deployment boundary
+## Historical implementation validation
 
 Tests cover default-disabled registry behavior, enablement, listener removal, no
 request without enabled locations, actual worker execution via the test executor,
 overlapping locations, Queensland source day versus HA range boundaries, Hungarian
 labels, stale/planned context, warning-area relevance, missing dates and unavailability.
-This is local implementation only. No release, GitHub publication, HACS installation,
-HA restart, live entity enablement or dashboard edit has been performed.
+The following local results describe the original implementation checkpoint, not
+new tests run during the 2026-09-16 documentation review. Publication followed in
+0.26.0; see [release validation](RELEASE_0_26_0.md). Installed HA version and entity
+enablement must be checked separately for each installation.
 
 Local result: full suite 867 passed, config-flow coverage 100%; the six QFD calendar
 tests passed again after adding the undated-query diagnostic. Compilation/diff checks
-passed. Two existing NumPy/h5py reload warnings remain. Linux CI/HACS/Hassfest and
-live Home Assistant validation are still required before treating this as deployed.
+passed. Two existing NumPy/h5py reload warnings remain. Subsequent Linux CI/HACS/Hassfest results are recorded in the release notes.
+These historical test counts do not describe the current full suite.

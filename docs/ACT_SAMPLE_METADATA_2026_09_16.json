@@ -1,0 +1,42 @@
+{
+  "checked_date": "2026-09-16",
+  "endpoint": "https://esa.act.gov.au/feeds/currentincidents.xml",
+  "http_status": 200,
+  "bytes": 5685,
+  "sha256": "149d11dd433b1519cb20f08a12d97e90de616d687aa8e76fdfce4033087aeddb",
+  "content_type": "text/xml; charset=UTF-8",
+  "record_count": 7,
+  "observed_types": {
+    "AMBULANCE RESPONSE": 7
+  },
+  "guid_cadid_match_in_sample": true,
+  "point_count": 7,
+  "observed_item_fields": [
+    "agency",
+    "cadid",
+    "controlStatus",
+    "description",
+    "georss:point",
+    "guid",
+    "link",
+    "pubDate",
+    "resourceStatus",
+    "title",
+    "type"
+  ],
+  "fire_record_observed": false,
+  "raw_payload_committed": false,
+  "probe_limits": {
+    "max_bytes": 1048576,
+    "timeout_seconds": 25,
+    "follow_redirects": false
+  },
+  "licence_evidence": "https://esa.act.gov.au/be-emergency-ready/warnings-alerts",
+  "licence": "CC BY 4.0 for Current Incidents",
+  "limitations": [
+    "Single sample; no proof of ID stability or completeness.",
+    "Publication timestamps differ from description Updated values.",
+    "Description timestamps lack explicit UTC offset.",
+    "No CAP licence inference from Current Incidents licence."
+  ]
+}

@@ -1,32 +1,66 @@
-# Official-source register — 2026-09-14
+# Official-source register — reviewed 2026-09-16
 
 Research status, not a statement of live feed health or authorization to redistribute
-all listed products. New feeds have not been enabled. Documentation was checked on
-this date; each adapter still needs a bounded direct sample/schema/freshness probe.
+all listed products. NSW and Queensland adapters are implemented; other listed sources are research
+candidates. This review did not enable feeds or change Home Assistant. Each new
+adapter still needs a bounded direct sample/schema/freshness probe.
 
 | Jurisdiction | Official documentation / product | Evidence and remaining gate | Order |
 | --- | --- | --- | --- |
 | NSW | [RFS feeds](https://www.rfs.nsw.gov.au/news-and-media/stay-up-to-date/feeds) | GeoJSON calendar already shipped. CAP, warnings, ratings/bans are separate extensions. Preserve RFS attribution; check each added product's terms. | 1 |
-| Queensland | [QFD dataset](https://www.data.qld.gov.au/dataset/queensland-fire-and-rescue-current-bushfire-incidents) | JSON/XML/CAP-AU/KMZ listed, CC BY 4.0; documented 30-minute incidents cadence. Points describe general areas, not fire spread. Resolve current resource URL and inspect schema/timestamps; old catalogue metadata is not live freshness. | 2 |
-| Victoria | [CFA feeds](https://www.cfa.vic.gov.au/rss-feeds) | RSS and developer XML/JSON listed; developer access managed by EMV. Resolve applicable redistribution conditions before implementation. | 3; may swap with QLD |
-| Western Australia | [DFES FAQ](https://www.dfes.wa.gov.au/emergencywa/faq), [Emergency WA terms](https://www.emergency.wa.gov.au/about) | DFES documents SLIP access using ArcGIS/WMS/WFS and RSS/CAP. Identify specific official layer, geometry role, access and reuse terms. No guessed map-backend scraping. | 4–5 |
+| Queensland | [QFD dataset](https://www.data.qld.gov.au/dataset/queensland-fire-and-rescue-current-bushfire-incidents) | JSON/XML/CAP-AU/KMZ listed, CC BY 4.0; documented 30-minute incidents cadence. Points describe general areas, not fire spread. Optional report calendar implemented since 0.26.0; see [QFD calendar](QFD_CALENDAR.md). Explicit expiry semantics remain unresolved; catalogue metadata is not live freshness. | 2 |
+| Victoria | [CFA feeds](https://www.cfa.vic.gov.au/rss-feeds) | RSS and developer XML/JSON listed; developer access managed by EMV. Resolve applicable redistribution conditions before implementation. | 3 |
+| Western Australia | [DFES FAQ](https://www.dfes.wa.gov.au/emergencywa/faq), [Emergency WA terms](https://www.emergency.wa.gov.au/about) | DFES documents SLIP access using ArcGIS/WMS/WFS and RSS/CAP. DFES-066 points and DFES-064 incident areas list CC BY 4.0; DFES-068 warning areas lists CC BY-ND 4.0. SLIP/DFES approval required. See [WA readiness](WESTERN_AUSTRALIA_ADAPTER_READINESS.md); no live sample or guessed map-backend scraping. | 4–5 |
 | South Australia | [CFS feeds](https://www.cfs.sa.gov.au/warnings-restrictions/warnings/rss-feeds/) | Separate incidents, warnings, ratings/bans and CAP. Inspect linked resources and reuse terms. Reader refresh advice is not proof of exact publisher cadence. | 4–5 |
 | Tasmania | [TFS feeds](https://www.fire.tas.gov.au/Show?pageId=xmlFeedsHome) | CC BY 4.0 with mandatory received-update display and prescribed disclaimer. Select statewide incidents/alerts; preserve required text in implementation after full terms review. | 6–8 |
-| ACT | [ESA warnings](https://esa.act.gov.au/be-emergency-ready/warnings-alerts) | Official page references current-incidents XML and CAP at data.esa.act.gov.au. Verify current HTTPS resource, schema, access and terms. | 6–8 |
+| ACT | [ESA warnings](https://esa.act.gov.au/be-emergency-ready/warnings-alerts) | Current Incidents HTTPS sample succeeded; explicit CC BY 4.0. Seven ambulance records, no fire sample. Fire types/time semantics remain pending; CAP separate. See [ACT readiness](ACT_ADAPTER_READINESS.md). | 6–8 |
 | Northern Territory | [NT fire map](https://pfes.nt.gov.au/fire-and-rescue-service/fire-incident-map) | Documented approximate 10–15-minute updates. Map says points/polygons represent general areas, not fire spread. Machine endpoint and reuse terms remain unverified. | 6–8 |
 
 NSW existing endpoint: https://www.rfs.nsw.gov.au/feeds/majorIncidents.json
 ACT documented CAP candidate: https://data.esa.act.gov.au/feeds/esa-cap-incidents.xml
 These links are research inputs; they have not all passed direct parser checks here.
 
-## Second-adapter decision
+## Implementation and next-source decision
 
-Start with Queensland's JSON incident resource after checking the actual current payload.
-It has an explicit dataset licence and contrasts with NSW in field semantics. Incident
-and warning resources may have different timing: the [Queensland media guide](https://www.qld.gov.au/emergency/dealing-disasters/disaster-types/bushfires/bushfire-and-the-media/media-information-sources-for-bushfires)
-mentions warning-feed delay up to five minutes; do not apply that promise to all feeds.
-If the incident resource is unusable, evaluate Victoria access before changing order.
-Do not automatically fall back between sources with different meanings.
+NSW and Queensland are implemented. Queensland's opt-in calendar handles incident
+points and warning areas separately; it is not an archive or satellite confirmation.
+The source register previously described Queensland as a future adapter; that text
+was obsolete. See [QFD calendar](QFD_CALENDAR.md) and the historical
+[0.26.0 release notes](RELEASE_0_26_0.md).
+
+Next engineering candidate remains Victoria, conditional on developer-feed terms.
+The [CFA page](https://www.cfa.vic.gov.au/rss-feeds) distinguishes personal,
+non-commercial RSS use from EMV-managed developer XML/JSON access. Do not apply
+RSS permission or generic Victorian portal terms to an unverified developer product.
+The published developer JSON candidate is
+https://data.emergency.vic.gov.au/Show?pageId=getIncidentJSON .
+A bounded direct JSON sample succeeded on 2026-09-16: HTTP 200, 2,825 bytes,
+four records. See [sample metadata](VICTORIA_SAMPLE_METADATA_2026_09_16.json) and
+[adapter readiness](VICTORIA_ADAPTER_READINESS.md). Developer reuse permission
+remains unverified; technical reachability alone does not resolve this gate.
+
+On 2026-09-16 the following alternatives still had concrete readiness gaps:
+
+- **South Australia:** the [national official dataset catalogue](https://data.gov.au/data/dataset/south-australian-country-fire-service-current-incidents-rss-feed)
+  lists incidents RSS/JSON and warning CAP resources, but marks the licence as
+  unspecified. Its general website footer licence is not a resource-specific grant.
+  The original South Australian catalogue returned HTTP 403 to the research tool.
+  The [CFS feed page](https://www.cfs.sa.gov.au/warnings-restrictions/warnings/rss-feeds/)
+  links https://data.eso.sa.gov.au/feeds/prod/cap-au.xml ; the research reader could
+  not parse its XML content type. That is not evidence of a feed outage. Confirm
+  product terms and inspect bounded payloads before choosing incidents versus CAP.
+- **Tasmania:** the [TFS feed page](https://www.fire.tas.gov.au/Show?pageId=xmlFeedsHome)
+  gives CC BY 4.0 terms plus mandatory received-update display and a prescribed
+  disclaimer. Its statewide incidents link,
+  https://www.fire.tas.gov.au/Show?pageId=colBushfireSummariesRss , returned HTTP 410
+  to the research tool. Resolve a current official replacement and its own terms;
+  do not assume the old licence automatically covers a replacement TasAlert API.
+
+These are dated research observations, not continuous availability checks or a legal
+opinion. No new adapter is production-ready on this evidence alone. The next bounded
+step is to resolve Victoria's developer conditions, then inspect timestamps, stable
+IDs, planned-burn distinctions and geometry using a bounded sample. If access remains
+unresolved, evaluate WA's documented SLIP products without guessing map backends.
 
 ## Gate record required per product
 
@@ -89,4 +123,5 @@ returned the S3 resource URL. On 2026-09-14 at 19:22 UTC a bounded JSON read ret
 HTTP 200, 90,629 bytes, 37 records (33 Points, 4 Polygons); Last-Modified was 19:18:27 UTC.
 These are sample-specific figures, not expected stable counts. See the adjacent sample
 metadata JSON and `OFFICIAL_REPORT_MODEL_PROPOSAL.md` for the mixed schema and time
-semantics. Direct access is no longer blocked; semantic validation remains pending.
+semantics. Direct access is no longer blocked; the parser and optional calendar were subsequently implemented. The exact upstream
+meaning of expiry remains unresolved; see `QFD_CALENDAR.md` for current behavior.
