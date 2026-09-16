@@ -31,3 +31,37 @@ Important limits:
 - Global coordinate validity does not establish ACT membership or spatial accuracy.
 
 See `docs/ACT_ADAPTER_READINESS.md` for dated evidence and remaining production gates.
+
+## NIFC query-page inspection
+
+`nifc_page.inspect_page` checks an already decoded, bounded JSON point-query page
+requested with OBJECTID ascending and outSR=4326. It rejects error envelopes,
+invalid/repeated/unordered object IDs, excessive records and unexpected spatial
+references. This is a page-envelope check, not full geometry/incident validation.
+Its ID tuple is transient paging metadata, not a durable incident identity or a
+privacy-filtered output suitable for publishing.
+
+An explicit transfer-limit true means more results, even on a short/empty page.
+Missing transfer-limit metadata remains unknown. Explicit false reports a terminal
+response only: it does not certify a complete, consistent multi-page snapshot.
+No network client, next-offset calculation or automatic history reconciliation exists.
+Future retrieval must bound pages/bytes and handle changing source data; missing
+records must never imply incident closure or trigger history deletion.
+
+Reference: https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer/
+Validation: eight synthetic NIFC tests, 49 total offline tests passed locally. The
+five-record live sample was correctly classified as requiring continuation. No
+additional pages or full incident dataset were fetched.
+
+`nifc_pages.inspect_pages` checks a supplied tuple of decoded pages with configurable
+page, total-record and per-page limits. It rejects cross-page duplicate/reversed IDs,
+error pages and pages after a terminal/unknown continuation. Missing terminal pages
+remain incomplete; missing continuation metadata remains unknown. Empty intermediate
+pages with an explicit continuation do not end the sequence.
+
+The result reports counts and terminal status, never complete snapshot status.
+The caller must retain query and offset provenance and bound JSON input bytes;
+this checker cannot discover a skipped page from ID gaps, because IDs need not be
+consecutive. Source changes between requests also remain unresolved. It performs no
+network requests or history reconciliation. Eight sequence tests bring the complete
+offline suite to 57 passing tests.
