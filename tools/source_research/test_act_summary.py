@@ -41,6 +41,13 @@ class SummaryTests(unittest.TestCase):
         with self.assertRaises(InvalidFeed):
             summarize_feed(feed(record('GRASS AND BUSH FIRE'))[:-5])
 
+    def test_planned_burn_is_counted_separately(self):
+        result = summarize_feed(feed(record('HAZARD REDUCTION BURN','a'),
+                                     record('GRASS AND BUSH FIRE','b')))
+        self.assertEqual(result['categories'], {'planned_burn':1,'vegetation_fire_candidate':1})
+        self.assertEqual(result['record_count'],2)
+        self.assertEqual(result['production_readiness'],'not_established')
+
     def test_limits_propagate(self):
         with self.assertRaises(InvalidFeed):
             summarize_feed(feed(record('UNKNOWN'),record('UNKNOWN')),max_items=1)

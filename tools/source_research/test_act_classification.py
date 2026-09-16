@@ -42,6 +42,23 @@ class ClassificationTests(unittest.TestCase):
                 self.assertEqual(result.exercise_evidence, E.MARKED)
                 self.assertEqual(result.marker_fields, ('description',))
 
+    def test_planned_burn_is_separate_from_fire_candidate(self):
+        result = classify_item(ActItem((('type', 'HAZARD REDUCTION BURN'),
+                                       ('title', 'Synthetic planned burn'))))
+        self.assertEqual(result.category, C.PLANNED_BURN)
+        self.assertEqual(result.exercise_evidence, E.NOT_ESTABLISHED)
+
+    def test_test_marked_planned_burn_stays_marked(self):
+        result = classify_item(ActItem((('type', 'HAZARD REDUCTION BURN'),
+                                       ('title', 'TEST ONLY'))))
+        self.assertEqual(result.category, C.PLANNED_BURN)
+        self.assertEqual(result.exercise_evidence, E.MARKED)
+
+    def test_planned_burn_words_do_not_override_source_type(self):
+        result = classify_item(ActItem((('type', 'GRASS AND BUSH FIRE'),
+                                       ('description', 'Near a hazard reduction burn'))))
+        self.assertEqual(result.category, C.VEGETATION_FIRE_CANDIDATE)
+
     def test_duplicate_fields_rejected(self):
         with self.assertRaises(ValueError):
             classify_item(ActItem((('type', 'AMBULANCE RESPONSE'), ('type', 'GRASS AND BUSH FIRE'))))
