@@ -126,3 +126,16 @@ storage or fetch data. Explicit refresh requires enablement and enabled monitore
 locations; concurrent callers skip and completed callers share the cooldown.
 Missing saved state still blocks rather than initializing implicitly. No entity,
 scheduler, first-install initialization or recovery action is registered yet.
+
+## Explicit initialization checkpoint
+
+The shared owner exposes a first-use initialization method with confirmation defaulting
+to false. A separate initialization ledger is written as started before creating the
+cooldown and ready afterward. Started/unknown ledger states block initialization and
+refresh for review, including when a cooldown file already exists. An established
+ledger with missing cooldown never becomes a new installation. Existing valid cooldowns
+are adopted without modification, preserving server waits and manual pauses.
+
+This API is not wired to a UI/service or invoked during setup. The future caller must
+establish first-use intent independently; absence of both files cannot prove a new
+installation rather than external deletion. No automatic recovery is implemented.
