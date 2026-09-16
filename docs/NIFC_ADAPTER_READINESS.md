@@ -195,3 +195,13 @@ ownership until a cancelled save settles. Fixed diagnostics identify load/save
 failures without raw errors or paths. 121 offline tests pass. Actual HA Store wiring,
 translated Repairs, manual recovery and hung-storage handling remain outstanding;
 this is not a deployed HA adapter and performs no actual HA storage operations.
+
+## Translated repair helper preparation
+
+A currently uncalled HA repair helper maps fixed NIFC diagnostic codes to English
+and Hungarian messages for load/save errors, manual review, unexpected data and
+access denial. No automatic reset or fix flow is offered. Unknown/transitional
+statuses do not clear existing actionable issues; explicit recovery or disablement
+clears only the issue scoped to that entry. Transient outages remain diagnostics.
+Real issue-registry tests cover mapping, translations, entry isolation and clearing.
+No runtime caller, NIFC option, source activation or history operation is added.
