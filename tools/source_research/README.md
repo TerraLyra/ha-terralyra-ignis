@@ -65,3 +65,20 @@ this checker cannot discover a skipped page from ID gaps, because IDs need not b
 consecutive. Source changes between requests also remain unresolved. It performs no
 network requests or history reconciliation. Eight sequence tests bring the complete
 offline suite to 57 passing tests.
+
+
+## NIFC incident records
+
+`nifc_records.normalize_page` validates the page envelope and returns immutable
+records with normalized IRWIN UUIDs, separate WF/RX/CX categories, WGS84 coordinates
+and independent UTC discovery/modification dates. Missing/null dates and geometry
+stay missing; malformed values and duplicate IDs reject the whole page. UUID syntax
+is deliberately narrow; future schema differences require review, not guessed IDs.
+No geometry means the record cannot be spatially matched yet. Valid global bounds
+do not establish an accurate source position or membership in the USA.
+
+This function does not certify completeness: retain `inspect_page` continuation
+results and sequence checks separately. It does not check cross-page IRWIN conflicts,
+complex membership, source-date ordering or freshness, or perform network/history
+operations. The caller still bounds decoded input bytes. Discovery is not ignition.
+See `docs/NIFC_ADAPTER_READINESS.md` for primary sources and remaining gates.
