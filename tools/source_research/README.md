@@ -65,3 +65,73 @@ this checker cannot discover a skipped page from ID gaps, because IDs need not b
 consecutive. Source changes between requests also remain unresolved. It performs no
 network requests or history reconciliation. Eight sequence tests bring the complete
 offline suite to 57 passing tests.
+
+
+## NIFC incident records
+
+`nifc_records.normalize_page` validates the page envelope and returns immutable
+records with normalized IRWIN UUIDs, separate WF/RX/CX categories, WGS84 coordinates
+and independent UTC discovery/modification dates. Missing/null dates and geometry
+stay missing; malformed values and duplicate IDs reject the whole page. UUID syntax
+is deliberately narrow; future schema differences require review, not guessed IDs.
+No geometry means the record cannot be spatially matched yet. Valid global bounds
+do not establish an accurate source position or membership in the USA.
+
+This function does not certify completeness: retain `inspect_page` continuation
+results and sequence checks separately. It does not check cross-page IRWIN conflicts,
+complex membership, source-date ordering or freshness, or perform network/history
+operations. The caller still bounds decoded input bytes. Discovery is not ignition.
+See `docs/NIFC_ADAPTER_READINESS.md` for primary sources and remaining gates.
+
+## Opt-in NIFC research retrieval
+
+`nifc_fetch.fetch_incidents()` is an explicit network operation, outside HA runtime.
+It requests only the reviewed official endpoint, with a fixed nationwide query,
+OBJECTID order and WGS84 output; it sends no user coordinates or credentials.
+Nothing fetches on import. There is no scheduler, CLI auto-run, persistence or retry.
+
+Default limits: 500 records/page, 20 pages, 10,000 records, 1 MiB/page, 10 MiB total,
+20-second socket timeout. The timeout is NOT a total wall-clock deadline: a slowly
+streaming peer can extend runtime. A production asynchronous transport still needs
+an overall deadline, cancellation, rate policy and explicit HA enablement design.
+Redirects and compressed responses are refused. Bytes are capped during reading;
+duplicate JSON keys, non-finite constants, malformed pages, repeated paging IDs and
+cross-page IRWIN identities reject the operation. No partial records are returned
+on failure. The injected-reader tests make no network requests.
+
+The offset advances by the requested page size, even for short/empty continuation
+pages. Unknown continuation and exhausted budgets fail closed. A terminal response
+reports only the server's pagination end; concurrent source changes can still cause
+missed records. It must never trigger deletion or closure of retained incidents.
+No guarantee of national completeness, freshness or fire safety is made.
+
+Validation: 76 synthetic offline tests pass, including ten retrieval tests. The
+network transport was tested with mocked responses, not a live multi-page crawl.
+
+## Cancellable research retrieval
+
+`await nifc_async.fetch_incidents_async()` adds an overall 60-second asynchronous
+network deadline across every page and streamed body. It reuses the synchronous
+validator through a request generator, so identity, pagination and budget rules
+cannot drift between implementations. The default transport requires aiohttp;
+the standard-library offline tests inject readers and need no additional package.
+The aiohttp session is scoped to the operation, refuses redirects/compression, does
+not inherit proxy credentials and closes on cancellation. No request runs on import.
+
+Cancellation and timeouts are cooperative: an injected reader must not block the
+event loop or suppress cancellation. Bounded synchronous JSON validation cannot be
+preempted, so this is not a hard real-time CPU deadline. The older synchronous entry
+point remains socket-timeout-only. Neither path retries automatically; HTTP 429 and
+5xx abort the operation. A scheduled production client still needs a provider-aware
+cooldown/backoff policy; this tool creates no scheduler or HA integration.
+
+Validation: 81 offline tests pass, including overall deadline, external cancellation,
+shared multi-page validation and failure without retry/partial output. The default
+aiohttp transport has not yet been verified with a live multi-page source request.
+Reference: https://docs.aiohttp.org/en/stable/client_reference.html
+
+The subsequent bounded live check exercised the actual aiohttp transport on two
+five-record pages; both required continuation, and the record cap correctly aborted
+the operation. No terminal-page or national completeness claim is made. Four more
+synthetic transport tests bring the suite to 85 passing tests (Python 3.9 and 3.13).
+See the dated live verification in `docs/NIFC_ADAPTER_READINESS.md`.
