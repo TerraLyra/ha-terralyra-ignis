@@ -102,3 +102,18 @@ caller-owned session and disables decompression/redirects per request without cl
 or reconfiguring that session. HA tests cover success, HTTP failure and cancellation
 using the actual HA session with synthetic responses. No runtime registration or
 polling is added. Cooldown/coordinator extraction and enablement remain outstanding.
+
+## State-management extraction checkpoint
+
+Cooldown policy, request coordination, asynchronous Store lifecycle and aggregate
+summary now live in the integration-owned NIFC package. Research wrappers retain old
+entry-point names but reference identical implementations. Canonical runtime classes
+are NifcCoordinator and NifcStoredCoordinator. The standalone synchronous file-storage
+experiments remain research-only and are not imported by runtime modules.
+
+Existing isolated HA Store/Repair lifecycle tests now exercise these runtime-owned
+classes through the same compatibility aliases. All 136 offline tests pass locally
+on Python 3.9 and 3.13; HA identity tests verify alias equivalence. No source owner,
+Store key, entity registration, recovery flow or background polling is yet registered.
+The next runtime wiring must inject NifcClient.async_fetch using the HA-owned session;
+it must not rely on the standalone fetcher's self-owned session default.

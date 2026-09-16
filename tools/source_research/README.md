@@ -291,3 +291,9 @@ research modules re-export those implementations. The standalone loader uses the
 canonical package name without importing HA setup; it is research-only. Production
 must use ordinary relative imports and never depend on tools/source_research.
 All existing 136 offline tests still pass on Python 3.9 and 3.13 after extraction.
+
+Cooldown, coordinator, async storage lifecycle and summary implementations have also
+moved into the integration-owned package. Existing research names are compatibility
+aliases (ResearchCoordinator -> NifcCoordinator; AsyncStoredResearchCoordinator ->
+NifcStoredCoordinator). There is no duplicated state implementation. The synchronous
+file-storage experiment remains tooling only. HA setup still does not activate NIFC.

@@ -24,3 +24,14 @@ def test_normalized_record_is_integration_owned(monkeypatch):
     record, = records.normalize_page(fixture)
     assert type(record) is records.IncidentRecord
     assert record.__class__.__module__ == 'custom_components.terralyra_ignis.official_sources.nifc.records'
+
+
+def test_runtime_state_and_research_wrappers_share_identity(monkeypatch):
+    from custom_components.terralyra_ignis.official_sources.nifc import (
+        coordinator, refresh, stored_coordinator, summary,
+    )
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'tools' / 'source_research'))
+    assert import_module('nifc_refresh').RefreshState is refresh.RefreshState
+    assert import_module('nifc_coordinator').ResearchCoordinator is coordinator.NifcCoordinator
+    assert import_module('nifc_async_storage').AsyncStoredResearchCoordinator is stored_coordinator.NifcStoredCoordinator
+    assert import_module('nifc_summary').summarize is summary.summarize
