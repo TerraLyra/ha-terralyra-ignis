@@ -174,3 +174,39 @@ def async_sync_coverage_issue(
         translation_key="provider_coverage",
         translation_placeholders={"locations": names},
     )
+
+
+def async_sync_nifc_research_issue(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    *,
+    enabled: bool = False,
+    problem: str | None = "not_loaded",
+) -> None:
+    """Prepare translated NIFC diagnostics; no runtime caller enables this yet.
+
+    Only explicit recovery (None) or disablement clears the scoped issue. Unknown
+    or transitional status never clears an existing actionable warning. This helper
+    does not reset cooldowns, fetch, write history or offer an unimplemented fix.
+    """
+    issue_id = _issue_id(entry, "nifc_research")
+    if not enabled or problem is None:
+        ir.async_delete_issue(hass, DOMAIN, issue_id)
+        return
+    messages = {
+        "storage_load_failed": "nifc_storage_load",
+        "storage_save_failed": "nifc_storage_save",
+        "review_required": "nifc_review_required",
+        "request_failed": "nifc_review_required",
+        "refresh_failed_invalid_data": "nifc_source_invalid",
+        "refresh_failed_access_denied": "nifc_access_denied",
+    }
+    if not isinstance(problem, str) or problem not in messages:
+        return
+    ir.async_create_issue(
+        hass, DOMAIN, issue_id,
+        is_fixable=False,
+        is_persistent=False,
+        severity=ir.IssueSeverity.WARNING,
+        translation_key=messages[problem],
+    )

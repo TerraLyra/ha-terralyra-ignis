@@ -206,6 +206,26 @@
     "provider_coverage": {
       "title": "Néhány figyelt helyet egyetlen beállított tűzforrás sem fed le",
       "description": "A TerraLyra IGNIS jelenleg nem tud használható műholdas forrást rendelni ezekhez: {locations}. Helyezd át vagy kapcsold ki a támogatott megfigyelési területeken kívüli helyeket. A többi hely frissítése folytatódik."
+    },
+    "nifc_storage_load": {
+      "title": "Nem tölthető be a NIFC frissítési állapota",
+      "description": "A NIFC frissítése szünetel, mert a mentett várakozási állapot hiányzik vagy nem olvasható. Ellenőrizd az integráció diagnosztikáját, és a folytatás előtt állíts helyre érvényes állapotot. A hiba megoldásához ne töröld az események előzményeit."
+    },
+    "nifc_storage_save": {
+      "title": "Nem menthető a NIFC frissítési állapota",
+      "description": "A NIFC frissítése szünetel, mert a várakozási állapotot nem sikerült megbízhatóan menteni. Ellenőrizd a szabad tárhelyet és az integráció diagnosztikáját. A korábban letöltött adatot ne tekintsd aktuálisnak. A hiba megoldásához ne töröld az események előzményeit."
+    },
+    "nifc_review_required": {
+      "title": "A NIFC frissítése felülvizsgálatot igényel",
+      "description": "A NIFC frissítése egy megszakadt vagy bizonytalan kimenetelű művelet után szünetel. Folytatás előtt tekintsd át az integráció diagnosztikáját. A Home Assistant újraindítása nem oldja fel ezt a szünetet. Automatikus visszaállítás nem érhető el."
+    },
+    "nifc_source_invalid": {
+      "title": "A NIFC váratlan adatot adott vissza",
+      "description": "A NIFC frissítése szünetel, mert egy válasz nem felelt meg az elvárt formátumnak vagy a letöltési korlátoknak. Folytatás előtt ellenőrizd a diagnosztikát és az adatforrás kompatibilitását. Ez nem jelenti azt, hogy nincsenek tüzek."
+    },
+    "nifc_access_denied": {
+      "title": "A NIFC megtagadta a hozzáférést",
+      "description": "A NIFC szolgáltatása megtagadta a hozzáférést. A frissítés felülvizsgálatig szünetel. Ellenőrizd a szolgáltatás elérhetőségét és az integráció diagnosztikáját; ez az üzenet nem kér fiókot vagy hozzáférési adatokat."
     }
   },
   "entity": {

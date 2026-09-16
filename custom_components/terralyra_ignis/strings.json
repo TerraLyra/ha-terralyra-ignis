@@ -183,6 +183,26 @@
     "provider_coverage": {
       "title": "No configured active-fire source covers some monitored locations",
       "description": "TerraLyra IGNIS cannot currently assign a usable satellite source to: {locations}. Move or disable locations outside the supported observation footprints. Other covered locations continue updating."
+    },
+    "nifc_storage_load": {
+      "title": "NIFC refresh state could not be loaded",
+      "description": "NIFC refreshes are paused because the saved waiting state is missing or unreadable. Check integration diagnostics and restore a valid state before resuming. Do not delete incident history to resolve this issue."
+    },
+    "nifc_storage_save": {
+      "title": "NIFC refresh state could not be saved",
+      "description": "NIFC refreshes are paused because the waiting state could not be saved reliably. Check available storage and integration diagnostics. Previous response data must not be treated as current. Do not delete incident history to resolve this issue."
+    },
+    "nifc_review_required": {
+      "title": "NIFC refreshes require review",
+      "description": "NIFC refreshes are paused after an interrupted or uncertain operation. Review integration diagnostics before resuming. Restarting Home Assistant does not clear this pause. No automatic reset is available."
+    },
+    "nifc_source_invalid": {
+      "title": "NIFC returned unexpected data",
+      "description": "NIFC refreshes are paused because a response did not meet the expected format or retrieval limits. Check integration diagnostics and source compatibility before resuming. This does not mean there are no fires."
+    },
+    "nifc_access_denied": {
+      "title": "NIFC access was denied",
+      "description": "The NIFC service denied access. Refreshes are paused for review. Check service availability and integration diagnostics; this message does not request an account or credentials."
     }
   },
   "entity": {

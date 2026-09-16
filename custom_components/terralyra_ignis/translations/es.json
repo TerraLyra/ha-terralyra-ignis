@@ -206,6 +206,26 @@
     "provider_coverage": {
       "title": "Ninguna fuente configurada cubre algunas ubicaciones",
       "description": "TerraLyra IGNIS no puede asignar una fuente satelital utilizable a: {locations}. Mueve o desactiva las ubicaciones fuera de las áreas de observación compatibles. Las demás siguen actualizándose."
+    },
+    "nifc_storage_load": {
+      "title": "No se pudo cargar el estado de actualización de NIFC",
+      "description": "Las actualizaciones de NIFC están pausadas porque falta el estado de espera guardado o no se puede leer. Revisa el diagnóstico de la integración y restaura un estado válido antes de continuar. No borres el historial de incidentes."
+    },
+    "nifc_storage_save": {
+      "title": "No se pudo guardar el estado de actualización de NIFC",
+      "description": "Las actualizaciones de NIFC están pausadas porque no se pudo guardar el estado de espera de forma fiable. Revisa el espacio disponible y el diagnóstico. Los datos anteriores no deben considerarse actuales. No borres el historial de incidentes."
+    },
+    "nifc_review_required": {
+      "title": "Las actualizaciones de NIFC requieren revisión",
+      "description": "Las actualizaciones de NIFC están pausadas tras una operación interrumpida o de resultado incierto. Revisa el diagnóstico antes de continuar. Reiniciar Home Assistant no elimina esta pausa. No hay un restablecimiento automático disponible."
+    },
+    "nifc_source_invalid": {
+      "title": "NIFC devolvió datos inesperados",
+      "description": "Las actualizaciones de NIFC están pausadas porque una respuesta no cumple el formato esperado o los límites de descarga. Revisa el diagnóstico y la compatibilidad de la fuente. Esto no significa que no haya incendios."
+    },
+    "nifc_access_denied": {
+      "title": "NIFC denegó el acceso",
+      "description": "El servicio NIFC denegó el acceso. Las actualizaciones están pausadas hasta su revisión. Comprueba la disponibilidad del servicio y el diagnóstico. Este mensaje no solicita una cuenta ni credenciales."
     }
   },
   "entity": {
