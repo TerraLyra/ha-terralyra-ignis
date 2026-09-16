@@ -524,3 +524,13 @@ def test_map_matches_exclude_outsiders_without_changing_cluster_contract(inside)
         assert "location_comparisons" not in attrs
     assert cluster.location_matches == matches
     assert cluster.attrs() == original
+
+
+@pytest.fixture(autouse=True)
+def isolate_nifc_display_binding():
+    """These existing unit tests use stub HA objects and exercise satellite maps.
+
+    NIFC binding/lifecycle has separate real-HA tests in test_nifc_map.py.
+    """
+    with patch('custom_components.terralyra_ignis.geo_location.get_nifc_map'):
+        yield

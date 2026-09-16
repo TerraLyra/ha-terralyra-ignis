@@ -22,6 +22,7 @@ from .const import (
 )
 from .coordinator import FireCluster
 from .entity import IgnisEntity
+from .nifc_map import get_nifc_map
 from .models import FireLifecycle
 from .monitoring import MonitoredLocation
 
@@ -49,6 +50,8 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up and maintain one map entity per active fire cluster."""
+    nifc_map = get_nifc_map(hass, entry)
+    nifc_map.bind(async_add_entities)
     coordinator = entry.runtime_data.coordinator
     entities: dict[str, IgnisFireLocation] = {}
     monitored_locations = {

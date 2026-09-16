@@ -1,8 +1,9 @@
 # NIFC runtime delivery status
 
 Updated 2026-09-16. This supersedes the earlier chronological preparation checkpoints.
-Scope: opt-in source diagnostics and verified nationwide source-record retrieval.
-Map markers, calendars, alerts and independent active-fire totals are later work.
+Scope: opt-in source diagnostics, verified nationwide source-record retrieval and
+optional local map/calendar presentation. Alerts and independent active-fire totals
+are not inferred from this source.
 
 ## Implemented
 
@@ -59,3 +60,18 @@ Enabling the entity and explicit first-use initialization are separate choices.
 No release or live HA installation is implied by merging this implementation.
 Existing optimization remains paused. No incident history migration, purge, inferred
 closure, advanced correlation or private intelligence code is part of this work.
+
+## Map/calendar extension
+
+The disabled-by-default report calendar and initially-off map switch subscribe
+independently alongside the diagnostic sensor. A consumer-specific listener key
+prevents one display from replacing or unloading another. All reuse the same owner
+and request/cooldown; no new provider request path exists. Map projection uses each
+monitored circle and preserves all matches, with distance relative to the nearest
+match. It never substitutes Home coordinates or infers complex membership.
+
+Calendar markers use source modification/discovery timestamps, with one second only
+as an explicitly labelled visual marker. No fallback to receipt/current time, all-day
+grouping or fire-duration inference. Map entities are dynamic display-only records
+without registry deletion or incident-store mutation. Queued additions after disable
+are retired after the HA platform finishes its initial state write.

@@ -35,8 +35,8 @@ for the currently verified public endpoint.
 categories separate. Complex parents and children can overlap. Never use their sum
 as an independent active-fire count. Receipt age measures time since download;
 `source_freshness` and national completeness remain unestablished. Discovery/modification
-fields retain their source meaning; this diagnostic adapter creates no map/calendar
-entities, alerts or inferred ignition/extinction times.
+fields retain their source meaning; no alerts or inferred ignition/extinction times
+are created. Optional map/calendar presentation is described below.
 
 ## Recovery
 
@@ -63,4 +63,36 @@ exact coverage for each subset. It rejects partial/truncated, conflicting or ove
 results. Boundaries are 10,000 records, 10 MiB total and 60 seconds overall; a source
 change during retrieval causes a failed attempt rather than an incomplete display.
 It is not an atomic national snapshot or an emergency warning service. Follow the
-relevant authority's original advice. Maps/calendars remain a separate planned stage.
+relevant authority's original advice.
+
+## Optional calendar and map
+
+The **NIFC official reports** calendar is disabled by default. Enable it separately
+in the entity list. It shares the same initialized source owner as the diagnostic
+sensor; the sensor does not have to remain enabled for the calendar to work.
+
+Calendar entries use the exact source modification timestamp, with reported discovery
+time as the fallback. Missing dates are omitted and counted in calendar attributes.
+A one-second event is only a display marker, never an assertion of fire duration.
+Events are timed rather than grouped as all-day events. The description distinguishes
+source records from satellite observations and warns when a prior response is retained.
+This is a view of the current response, not a persistent historical calendar archive.
+
+Turn on **NIFC report map** (Hungarian: **NIFC jelentéstérkép**) to show report markers.
+The switch initially starts off and restores your last on/off choice after restart.
+Select the `terralyra_ignis_nifc_reports` geolocation source in a map card if the card
+filters sources. Wildfire reports, prescribed-fire reports and complex containers
+have distinct labels/icons. They are not new satellite detections or independent
+active-fire totals.
+
+Each source point is compared locally with every enabled monitored location. The
+marker's distance refers to the nearest matching location, identified explicitly in
+its attributes; it never falls back to Home. All matching locations remain listed.
+Missing geometry produces no marker. Complex relationships are retained, not merged.
+
+A maximum of 500 matching source records can be displayed. If more match, the map
+shows no subset and the switch reports `display_limit_exceeded` plus the match count;
+reduce the monitored area before retrying. Turning the switch off removes only the
+current markers. A record disappearing from a later source response removes its
+marker but does not establish that the fire ended. No recorder/incident-history purge
+is performed. Other NIFC consumers continue independently when the map is turned off.

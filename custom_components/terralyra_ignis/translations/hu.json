@@ -229,6 +229,7 @@
     }
   },
   "entity": {
+    "switch": {"nifc_map": {"name": "NIFC jelentéstérkép"}},
     "geo_location": {
       "monitoring_area": {
         "name": "Hely: {location_name} — Aktívtűz-megfigyelési terület"
@@ -420,6 +421,7 @@
       }
     },
     "calendar": {
+      "nifc_reports": {"name": "NIFC hatósági jelentések"},
       "official_reports": {
         "name": "Közlemények — BM OKF"
       },

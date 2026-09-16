@@ -229,6 +229,7 @@
     }
   },
   "entity": {
+    "switch": {"nifc_map": {"name": "NIFC-Berichtskarte"}},
     "geo_location": {
       "monitoring_area": {
         "name": "Ort: {location_name} — Aktivbrand-Überwachungsbereich"
@@ -420,6 +421,7 @@
       }
     },
     "calendar": {
+      "nifc_reports": {"name": "NIFC-Behördenberichte"},
       "official_reports": {
         "name": "Meldungen — BM OKF"
       },

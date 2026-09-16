@@ -229,6 +229,7 @@
     }
   },
   "entity": {
+    "switch": {"nifc_map": {"name": "Carte des rapports NIFC"}},
     "geo_location": {
       "monitoring_area": {
         "name": "Lieu : {location_name} — Zone de surveillance des feux actifs"
@@ -420,6 +421,7 @@
       }
     },
     "calendar": {
+      "nifc_reports": {"name": "Rapports officiels NIFC"},
       "official_reports": {
         "name": "Communiqués — BM OKF"
       },

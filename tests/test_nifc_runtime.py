@@ -162,3 +162,21 @@ async def test_disabling_all_locations_cancels_inflight_retrieval(hass,hass_stor
         assert runtime.owner.state.last_success is None
         assert (await runtime.owner._store.async_load())['wait_seconds'] is None
         await runtime.detach(selected)
+
+
+async def test_independent_consumers_on_same_entry_do_not_replace_each_other(hass):
+    runtime=get_nifc_runtime(hass);selected=entry(hass)
+    diagnostic,calendar,map_listener=Mock(),Mock(),Mock()
+    with patch('custom_components.terralyra_ignis.nifc_runtime.resolve_monitored_locations',return_value=[]):
+        runtime.attach(selected,diagnostic)
+        runtime.attach(selected,calendar,consumer='calendar')
+        runtime.attach(selected,map_listener,consumer='map')
+        assert len(runtime._listeners)==3
+        runtime.notify()
+        assert diagnostic.called and calendar.called and map_listener.called
+        await runtime.detach(selected)
+        assert len(runtime._listeners)==2 and runtime._timer is not None
+        await runtime.detach(selected,consumer='calendar')
+        assert len(runtime._listeners)==1 and runtime._timer is not None
+        await runtime.detach(selected,consumer='map')
+        assert not runtime._listeners and runtime._timer is None
