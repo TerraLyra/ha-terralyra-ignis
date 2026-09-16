@@ -131,3 +131,18 @@ retries are explicitly disabled, including for rate limits and server errors.
 The production scheduling/cooldown policy and live transport verification remain
 open. Synchronous validation is byte-bounded but not preemptible. No HA configuration,
 release, history write or live source request was performed. All 81 offline tests pass.
+
+## Live bounded transport verification — 2026-09-16
+
+Using Python 3.13 and aiohttp 3.14.3 in an isolated temporary environment, the actual
+async HTTP transport fetched two pages at offsets 0 and 5, five records each.
+Each response was 2,260 bytes and explicitly reported further results. Both passed
+page, record and cross-page identity checks. The operation then raised the expected
+record-budget exhaustion error without returning a successful result. This verifies
+two-page interoperability and fail-closed limits, NOT a complete national snapshot
+or a successful terminal-page run. No raw incident payload was saved or published.
+
+Synthetic transport tests additionally cover streamed byte overflow, refused
+redirects/429/503/compression, and response cleanup after cancellation. The complete
+85-test offline suite passed on local Python 3.9 and 3.13. Production activation,
+automatic retry scheduling and full snapshot consistency remain out of scope.

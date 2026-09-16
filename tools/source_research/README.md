@@ -129,3 +129,9 @@ Validation: 81 offline tests pass, including overall deadline, external cancella
 shared multi-page validation and failure without retry/partial output. The default
 aiohttp transport has not yet been verified with a live multi-page source request.
 Reference: https://docs.aiohttp.org/en/stable/client_reference.html
+
+The subsequent bounded live check exercised the actual aiohttp transport on two
+five-record pages; both required continuation, and the record cap correctly aborted
+the operation. No terminal-page or national completeness claim is made. Four more
+synthetic transport tests bring the suite to 85 passing tests (Python 3.9 and 3.13).
+See the dated live verification in `docs/NIFC_ADAPTER_READINESS.md`.
