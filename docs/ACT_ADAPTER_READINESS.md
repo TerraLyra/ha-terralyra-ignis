@@ -1,7 +1,9 @@
 # ACT current-incidents readiness — 2026-09-16
 
-Status: accessible and explicitly licensed current-incidents feed; fire mapping and
-source-time semantics still need verification before a production adapter.
+Current status: experimental, disabled by default, research-only. Explicit test
+markers are supported and are not a research blocker. Timestamp semantics remain
+unverified; no production HA entities or calendars are connected. Earlier checkpoints
+below are historical; the latest interpretation checkpoint supersedes their gates.
 
 The [ESA source page](https://esa.act.gov.au/be-emergency-ready/warnings-alerts)
 licenses Current Incidents and News Alerts under CC BY 4.0 with ESA attribution.
@@ -141,3 +143,72 @@ separately from vegetation-fire candidates. Free-text mention of a planned burn 
 not change another source type. Exercise flags remain independent. This classification
 does not declare a burn safe, active, contained or complete, and suppresses no satellite
 observations. Four added synthetic tests bring the offline suite to 38 passing tests.
+
+## Source verification follow-up — 2026-09-16
+
+A new bounded HTTPS read of Current Incidents returned HTTP 200 and 4,977 bytes:
+six medical records, matching guid/cadid pairs, valid GeoRSS points, no repeated
+matching IDs and no vegetation-fire records. All three time fields remained
+`timezone_unverified`; exercise evidence remained `not_established`. The response
+was processed in memory and only these aggregate observations were retained.
+No raw medical records, identifiers or coordinates were saved.
+
+Official non-test historical bushfire reports were verified on the ESA website:
+[Corin Dam, January 2026](https://esa.act.gov.au/advice-bushfires-namadgi-national-park-stay-informed-corin-dam)
+and [Mt Ainslie, February 2026](https://esa.act.gov.au/advice-grass-and-bushfire-northern-side-mt-ainslie-avoid-area).
+Both are explicitly no longer current. Search excerpts associate the exact
+GRASS AND BUSH FIRE label with these pages, but the opened page bodies do not
+expose the structured type field. These are historical editorial reports, not
+captured Current Incidents XML fixtures. They therefore strengthen contextual
+evidence without closing the feed-level classification or exercise-metadata gates.
+
+The official feed description still confirms Current Incidents licensing and its
+CAD origin, but does not specify the timezone of Updated/Time of Call, DST fold/gap
+handling, stable ID lifetime or machine-readable exercise discrimination. Targeted
+search did not locate such a specification; this is not proof none exists.
+
+Production ACT integration remains incomplete. No source timestamp is converted
+by inference, no calendar event is created from retrieval time, and no enabled
+HA entity or network polling is added. The independent source question list is in
+[ACT_PROVIDER_QUESTIONS.md](ACT_PROVIDER_QUESTIONS.md). No message was sent to ESA.
+
+## Experimental interpretation checkpoint — 2026-09-16 21:05 UTC
+
+Per the current project decision, explicit test recognition is not a blocker.
+The offline classifier retains the immutable original `ActItem` and adds tri-state
+`is_test`: explicit TEST/TEST ONLY/NO ACTION REQUIRED (also EXERCISE/DRILL) wording
+sets True; absent or recognized negated wording leaves None, never confirmed-real.
+This is a review heuristic, not an upstream structured guarantee. It performs no
+filtering: uncertain records and original text remain available. Aggregate research
+logs continue to omit raw medical data; retaining source text in the parsed object
+is not permission to publish or persist every feed record.
+
+`act_time_interpretation.py` implements an explicit ACT-only Australia/Sydney rule
+using stdlib ZoneInfo. It does not change raw inspection or infer HA/host timezone.
+Winter/summer offsets follow the timezone database. Nonexistent clocks are rejected;
+repeated clocks remain ambiguous unless a consistent AEST/AEDT label disambiguates.
+Contradictory seasonal labels are reported, not silently corrected. Unique results
+are marked `provider_interpretation_unverified`, even when a synthetic test passes.
+CAP ISO timestamps with explicit offsets use that offset without a Sydney override;
+their event meaning remains unverified. Raw input is retained in both paths.
+
+Fresh sequential bounded reads (1 MiB each, 25-second request timeout, no redirects,
+identity encoding) of GeoRSS/CAP/web returned HTTP 200, respectively 5,764 / 27,583 /
+309,689 bytes. HTTP Date was 21:05:50 / 21:05:50 / 21:05:51 GMT; XML responses had no
+Last-Modified or Age. Cache-Control was max-age 30 / 60 / 180, public. HTTP dates
+identify response metadata, not incident time. No raw payloads were persisted.
+
+RSS contained seven medical records. All inspected RSS clocks were offsetless
+(description) or abbreviation-labelled (publication), with semantics unresolved.
+CAP contained seven alerts; sent/effective/expires all had explicit +10:00 offsets.
+Provisional guid-substring joins matched seven records: CAP sent equalled RSS call
+wall time in seven, and RSS Updated in zero. This is not a verified identity join.
+Exact raw RSS update/call strings did not appear in the fetched map HTML (zero
+matches each); client rendering or different formatting remains possible, so no
+web-display equivalence is claimed. Summer and transition source samples remain
+missing. These findings do not promote the provider beyond experimental.
+
+Synthetic winter, summer, gap, fold, seasonal-label conflict, explicit-offset and
+missing-date tests pass. The complete source-research suite has 157 passing tests.
+There are no ACT production imports, HA entities, calendars, polling, history writes
+or releases. Research proceeds to Victoria while ACT evidence remains incomplete.
