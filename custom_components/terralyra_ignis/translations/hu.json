@@ -374,6 +374,16 @@
       },
       "land_surface_temperature": {
         "name": "Hely: Otthon — Felszínhőmérséklet"
+      },
+      "nifc_source_status": {
+        "name": "NIFC forrásállapot",
+        "state": {
+          "not_requested": "Még nincs lekérés",
+          "available": "Válasz elérhető",
+          "waiting": "Várakozás",
+          "retained_response": "Megőrzött válasz",
+          "review_required": "Ellenőrzés szükséges"
+        }
       }
     },
     "event": {

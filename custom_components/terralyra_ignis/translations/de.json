@@ -374,6 +374,16 @@
       },
       "land_surface_temperature": {
         "name": "Ort: Zuhause — Landoberflächentemperatur"
+      },
+      "nifc_source_status": {
+        "name": "NIFC-Quellenstatus",
+        "state": {
+          "not_requested": "Nicht angefordert",
+          "available": "Antwort verfügbar",
+          "waiting": "Warten",
+          "retained_response": "Beibehaltene Antwort",
+          "review_required": "Prüfung erforderlich"
+        }
       }
     },
     "event": {

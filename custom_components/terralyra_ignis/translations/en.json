@@ -374,6 +374,16 @@
       },
       "land_surface_temperature": {
         "name": "Location: Home — Land-surface temperature"
+      },
+      "nifc_source_status": {
+        "name": "NIFC source status",
+        "state": {
+          "not_requested": "Not requested",
+          "available": "Response available",
+          "waiting": "Waiting",
+          "retained_response": "Retained response",
+          "review_required": "Review required"
+        }
       }
     },
     "event": {
