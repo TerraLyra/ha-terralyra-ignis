@@ -129,6 +129,7 @@ async def test_slow_storage_is_owned_after_unload_and_blocks_recovery(hass,hass_
             assert guarded.pending
         finally:
             release.set();await guarded._pending
+    guarded._timeout=30
     await runtime.owner.async_recover()
     assert not guarded.blocked
     assert (await guarded.async_load())['wait_seconds'] >= 899
@@ -145,3 +146,19 @@ async def test_reload_restores_server_wait_without_request(hass,hass_storage):
     assert await restarted.async_refresh(enabled=True,has_enabled_locations=True)=='skipped'
     assert restarted.state.failures==1
     assert restarted.state.last_success is None
+
+
+async def test_disabling_all_locations_cancels_inflight_retrieval(hass,hass_storage):
+    started=asyncio.Event()
+    async def fetch(self,**kwargs):
+        started.set();await asyncio.Future()
+    location=SimpleNamespace(enabled=True)
+    with patch('custom_components.terralyra_ignis.official_sources.nifc.owner.NifcClient.async_fetch',fetch), patch('custom_components.terralyra_ignis.nifc_runtime.resolve_monitored_locations',return_value=[location]):
+        runtime=get_nifc_runtime(hass);await runtime.owner.async_initialize(confirmed_new=True)
+        selected=entry(hass);runtime.attach(selected,Mock());await started.wait()
+        location.enabled=False
+        runtime.request_refresh()
+        with pytest.raises(asyncio.CancelledError):await runtime._task
+        assert runtime.owner.state.last_success is None
+        assert (await runtime.owner._store.async_load())['wait_seconds'] is None
+        await runtime.detach(selected)
