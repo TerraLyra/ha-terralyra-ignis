@@ -713,6 +713,24 @@ def _location_operational_status(
                 "name": getattr(item, "label", None),
                 "satellite": satellite,
                 "status": state,
+                # A successful cached response can contain old observations.
+                # Neither field certifies a recent satellite pass at this location.
+                "retrieval_status": (
+                    "failed"
+                    if getattr(item, "failure_type", None)
+                    or state in {"outage", "auth_error"}
+                    else "successful"
+                    if state in {"available", "delayed"}
+                    and getattr(item, "received_timestamp", None) is not None
+                    else "unknown"
+                ),
+                "data_freshness": (
+                    "within_provider_threshold"
+                    if state == "available"
+                    else "older_than_provider_threshold"
+                    if state == "delayed"
+                    else "unknown"
+                ),
                 "reason": {
                     "available": "source_data_available",
                     "delayed": "source_data_delayed",
