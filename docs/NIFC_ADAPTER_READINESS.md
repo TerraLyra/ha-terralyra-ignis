@@ -261,3 +261,12 @@ ID-inventory verification retrieved 523 records in eight requests / 160,970 byte
 both inventories and all requested batch IDs matched. Older statements above about
 missing runtime registration are historical. See NIFC_RUNTIME_PLAN.md and NIFC_USAGE.md
 for current scope, limits and instructions. No release or live installation is implied.
+
+## Optional display extension — 2026-09-16
+
+The source now also supports a disabled-by-default timed report calendar and an
+initially-off map switch. Both use the same source cache/cooldown and independent
+consumer subscriptions. Projection uses each enabled monitored location, with no
+Home fallback. Source modification/discovery times remain labelled source metadata;
+there is no inferred ignition, duration, closure or active-fire count. Current report
+markers are distinct from satellite/history entities. See NIFC_USAGE.md for limits.

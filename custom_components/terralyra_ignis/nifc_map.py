@@ -153,7 +153,8 @@ class NifcMapRecord(GeolocationEvent):
         if self.manager.entities.get(self.item.record.irwin_id) is self:
             self.manager.entities.pop(self.item.record.irwin_id)
         if self.manager.enabled:
-            self.manager.schedule()
+            # Reuse the stable entity ID only after HA finishes the old removal.
+            asyncio.get_running_loop().call_soon(self.manager.schedule)
         await super().async_will_remove_from_hass()
 
 

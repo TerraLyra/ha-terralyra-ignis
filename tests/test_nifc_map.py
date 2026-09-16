@@ -73,3 +73,29 @@ async def test_excess_markers_are_reported_not_silently_truncated(hass):
         assert manager.relevant_count==501
         assert not queued and not manager.entities
         await manager.close()
+
+
+async def test_rapid_reenable_keeps_one_stable_marker(hass):
+    entry=MockConfigEntry(domain=DOMAIN);entry.add_to_hass(hass)
+    manager=get_nifc_map(hass,entry)
+    manager.runtime.owner.coordinator._inner=SimpleNamespace(state=RefreshState(last_success=result(RECORD),status='retrieved'))
+    queued=[]
+    component=EntityComponent(logging.getLogger(__name__),'geo_location',hass)
+    with patch.object(manager.runtime,'request_refresh'), patch('custom_components.terralyra_ignis.nifc_map.resolve_monitored_locations',return_value=(LOC,)):
+        manager.bind(queued.extend)
+        await manager.set_enabled(True)
+        first=queued[0]
+        await manager.set_enabled(False)
+        await manager.set_enabled(True)
+        await component.async_add_entities([first])
+        await hass.async_block_till_done()
+        assert len(queued)==2
+        assert hass.states.get(first.entity_id) is None
+        await component.async_add_entities([queued[1]])
+        await hass.async_block_till_done()
+        assert queued[1].entity_id==first.entity_id
+        assert len(manager.entities)==1
+        assert hass.states.get(first.entity_id) is not None
+        await manager.close()
+        await hass.async_block_till_done()
+        assert hass.states.get(first.entity_id) is None
