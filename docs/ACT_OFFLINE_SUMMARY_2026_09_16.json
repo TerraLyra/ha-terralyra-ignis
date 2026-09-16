@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "purpose": "offline_source_research",
+  "production_readiness": "not_established",
+  "record_count": 7,
+  "categories": {
+    "medical": 7
+  },
+  "exercise_evidence": {
+    "not_established": 7
+  },
+  "identity": {
+    "matching_pair": 7
+  },
+  "location": {
+    "valid_point": 7
+  },
+  "times": {
+    "publication": {
+      "timezone_unverified": 7
+    },
+    "updated": {
+      "timezone_unverified": 7
+    },
+    "call": {
+      "timezone_unverified": 7
+    }
+  },
+  "repeated_matching_id_groups": 0,
+  "records_in_repeated_matching_id_groups": 0
+}

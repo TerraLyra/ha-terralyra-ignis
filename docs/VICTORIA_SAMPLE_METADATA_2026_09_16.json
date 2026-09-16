@@ -1,0 +1,62 @@
+{
+  "checked_date": "2026-09-16",
+  "endpoint": "https://data.emergency.vic.gov.au/Show?pageId=getIncidentJSON",
+  "http_status": 200,
+  "content_type": "application/json; charset=UTF-8",
+  "bytes": 2825,
+  "sha256": "f35b83fde391ae6281cbcefadd348dd638aa3a29e45a01333b1bb7543a48d099",
+  "record_count": 4,
+  "top_level_keys": [
+    "results"
+  ],
+  "record_field_names": [
+    "agency",
+    "category1",
+    "category2",
+    "catg1CssClass",
+    "createdDt",
+    "eventCode",
+    "feedType",
+    "fireDistrict",
+    "incidentLocation",
+    "incidentNo",
+    "incidentSize",
+    "incidentSizeFmt",
+    "incidentStatus",
+    "incidentType",
+    "lastUpdateDateTime",
+    "lastUpdatedDt",
+    "lastUpdatedDtStr",
+    "latitude",
+    "longitude",
+    "municipality",
+    "name",
+    "originDateTime",
+    "originDateTimeStr",
+    "originStatus",
+    "resourceCount",
+    "territory",
+    "type"
+  ],
+  "category_counts": {
+    "Accident / Rescue": 1,
+    "Fire": 1,
+    "Other": 2
+  },
+  "unique_incident_ids_in_sample": true,
+  "epoch_milliseconds_match_melbourne_local_update_strings": true,
+  "planned_burn_schema_observed": false,
+  "warning_area_schema_observed": false,
+  "raw_payload_committed": false,
+  "developer_reuse_permission_verified": false,
+  "probe_limits": {
+    "max_bytes": 1048576,
+    "timeout_seconds": 25,
+    "follow_redirects": false
+  },
+  "limitations": [
+    "One sample does not establish identifier stability, completeness or cadence.",
+    "Epoch milliseconds and Australia/Melbourne are sample-supported interpretations, not verified provider specifications.",
+    "No raw incident payload is included in this record."
+  ]
+}

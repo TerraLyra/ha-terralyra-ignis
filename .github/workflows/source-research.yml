@@ -1,0 +1,31 @@
+name: Official source research
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  offline:
+    name: Offline source checks (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run synthetic offline checks
+        run: python -m unittest discover -s tools/source_research -v
+      - name: Validate research metadata JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for pattern in ('*_SAMPLE_METADATA_*.json', 'ACT_OFFLINE_SUMMARY_*.json'):
+              for path in Path('docs').glob(pattern):
+                  json.loads(path.read_text())
+          PY
