@@ -117,3 +117,12 @@ on Python 3.9 and 3.13; HA identity tests verify alias equivalence. No source ow
 Store key, entity registration, recovery flow or background polling is yet registered.
 The next runtime wiring must inject NifcClient.async_fetch using the HA-owned session;
 it must not rely on the standalone fetcher's self-owned session default.
+
+## Shared owner registration checkpoint
+
+HA setup now registers one lazy NIFC owner per HA instance. It borrows the HA session
+and uses the dedicated nifc_cooldown Store key. Construction does not read/write
+storage or fetch data. Explicit refresh requires enablement and enabled monitored
+locations; concurrent callers skip and completed callers share the cooldown.
+Missing saved state still blocks rather than initializing implicitly. No entity,
+scheduler, first-install initialization or recovery action is registered yet.
