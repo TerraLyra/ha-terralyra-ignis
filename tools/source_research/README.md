@@ -282,3 +282,12 @@ source records current. Both age thresholds are caller inputs, not selected defa
 136 offline tests pass on Python 3.9 and 3.13. This is a display-data prototype, not
 an HA sensor/calendar/dashboard or a fire-warning decision. Production UI, location
 matching and end-to-end source activation remain outstanding.
+
+## Integration-owned pure primitives
+
+Page and sequence validation, record normalization and source-age/complex assessment
+now live in `custom_components/terralyra_ignis/official_sources/nifc/`. The original
+research modules re-export those implementations. The standalone loader uses the
+canonical package name without importing HA setup; it is research-only. Production
+must use ordinary relative imports and never depend on tools/source_research.
+All existing 136 offline tests still pass on Python 3.9 and 3.13 after extraction.
