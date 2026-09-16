@@ -78,7 +78,7 @@ def _fetch_steps(*, page_size=500, max_pages=20,
         if remaining <= 0:
             raise ValueError('Total byte budget exhausted')
         query = urlencode(dict(f='json', where='1=1',
-            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt',
+            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt,IsCpxChild,CpxID',
             returnGeometry='true', outSR=4326, orderByFields='OBJECTID ASC',
             resultOffset=index * page_size, resultRecordCount=page_size))
         payload = yield ENDPOINT + '?' + query, remaining, timeout

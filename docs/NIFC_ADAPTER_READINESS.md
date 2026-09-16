@@ -214,3 +214,12 @@ cover preflight save failure preventing any fetch, missing state followed by exp
 synthetic recovery, preservation of another entry's issue, and cancelled requests
 remaining paused after reload. Production setup still has no NIFC runtime caller;
 the synthetic recovery is not an implemented user-facing reset action.
+
+## Source-age and complex assessment
+
+The prototype now requests IsCpxChild/CpxID and distinguishes complex containers,
+linked members and unresolved relationships. Missing membership is not independence.
+Source modification age uses an explicit caller threshold; absent/future dates remain
+separate. These diagnostics do not establish observation freshness, close incidents,
+delete history or produce independent-fire totals. 128 local tests pass. The expanded
+live query and production display policy remain to be verified.
