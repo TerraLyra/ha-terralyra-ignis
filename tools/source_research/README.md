@@ -82,3 +82,28 @@ results and sequence checks separately. It does not check cross-page IRWIN confl
 complex membership, source-date ordering or freshness, or perform network/history
 operations. The caller still bounds decoded input bytes. Discovery is not ignition.
 See `docs/NIFC_ADAPTER_READINESS.md` for primary sources and remaining gates.
+
+## Opt-in NIFC research retrieval
+
+`nifc_fetch.fetch_incidents()` is an explicit network operation, outside HA runtime.
+It requests only the reviewed official endpoint, with a fixed nationwide query,
+OBJECTID order and WGS84 output; it sends no user coordinates or credentials.
+Nothing fetches on import. There is no scheduler, CLI auto-run, persistence or retry.
+
+Default limits: 500 records/page, 20 pages, 10,000 records, 1 MiB/page, 10 MiB total,
+20-second socket timeout. The timeout is NOT a total wall-clock deadline: a slowly
+streaming peer can extend runtime. A production asynchronous transport still needs
+an overall deadline, cancellation, rate policy and explicit HA enablement design.
+Redirects and compressed responses are refused. Bytes are capped during reading;
+duplicate JSON keys, non-finite constants, malformed pages, repeated paging IDs and
+cross-page IRWIN identities reject the operation. No partial records are returned
+on failure. The injected-reader tests make no network requests.
+
+The offset advances by the requested page size, even for short/empty continuation
+pages. Unknown continuation and exhausted budgets fail closed. A terminal response
+reports only the server's pagination end; concurrent source changes can still cause
+missed records. It must never trigger deletion or closure of retained incidents.
+No guarantee of national completeness, freshness or fire safety is made.
+
+Validation: 76 synthetic offline tests pass, including ten retrieval tests. The
+network transport was tested with mocked responses, not a live multi-page crawl.

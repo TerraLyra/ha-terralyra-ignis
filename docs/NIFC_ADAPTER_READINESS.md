@@ -108,3 +108,16 @@ IRWIN identifiers must retain this representation.
 
 Validation: 66 synthetic offline tests passed locally, including nine new record
 normalization tests. No live feed request or HA operation is performed by these tests.
+
+## Bounded research retrieval follow-up
+
+An opt-in standard-library research fetcher now connects envelope validation and
+record normalization, with fixed query provenance and byte/page/record budgets.
+It rejects unknown continuation, service/transport errors and cross-page identity
+conflicts without returning partial records. This remains outside HA runtime.
+There was no live multi-page crawl in this step. All 76 offline tests passed.
+
+Before runtime integration: implement a cancellable overall network deadline and
+request-rate/backoff policy, validate live multi-page behavior, model complex/member
+relationships, and decide freshness and opt-in UI behavior. Pagination termination
+still does not establish a consistent snapshot or authorize history reconciliation.
