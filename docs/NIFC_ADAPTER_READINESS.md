@@ -223,3 +223,18 @@ Source modification age uses an explicit caller threshold; absent/future dates r
 separate. These diagnostics do not establish observation freshness, close incidents,
 delete history or produce independent-fire totals. 128 local tests pass. The expanded
 live query and production display policy remain to be verified.
+
+## Expanded live query check — 2026-09-16 18:48 UTC
+
+A bounded two-page sample (5 records/page, 2,670 bytes/page) returned IsCpxChild and
+CpxID for all ten records. All were explicitly non-child records. With an illustrative
+24-hour modification-age threshold, nine were older and one within threshold. This
+is a sample diagnostic, not a selected production threshold or evidence of closure.
+Both pages required continuation; the operation correctly stopped at its record cap.
+
+One additional targeted query (IsCpxChild = 1 OR IncidentTypeCategory = 'CX', at most
+five records) returned five wildfire members, 2,850 bytes, with further results.
+Their parent complexes were absent from that small result and were correctly marked
+unresolved. No missing parent was treated as an independent fire. This verifies live
+child-field compatibility but does not verify a complete complex/member graph or
+national totals. Only aggregates were retained; raw incident data was not saved.
