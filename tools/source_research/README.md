@@ -159,3 +159,70 @@ process restarts; restart-safe cooldown persistence remains future work.
 The async transport preserves HTTP status and Retry-After in a typed error without
 retaining response bodies. The synchronous research transport is unchanged.
 Reference: https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after
+
+## Explicit research coordinator and cooldown checkpoints
+
+`ResearchCoordinator.refresh(enabled=True)` connects the policy to the async fetcher.
+Enablement defaults to false. A single instance on one event loop excludes overlapping
+requests; callers arriving during a request skip instead of queuing. Cancellation
+propagates without changing state. Known HTTP, timeout, connection and validation
+failures update cooldowns while retaining the previous response. Unexpected programming
+errors propagate. TLS validation errors stop eligibility for review.
+
+`checkpoint` exports only cooldown metadata; `restore_checkpoint` restores it against
+a new process monotonic clock. The full saved remaining wait is applied again, ignoring
+time spent offline to avoid shortening it due to wall-clock changes. This can delay a
+refresh longer than necessary. Corrupt metadata raises an error; it is not a fresh-start
+signal. These helpers do not write files: atomic durable storage, handling missing
+checkpoints, restart orchestration and cache restoration remain unimplemented.
+The checkpoint contains no incident records or user history. It must be saved after
+state transitions by a future storage adapter. Cross-instance/process locking and a
+HA scheduler are also outside this prototype. No background work starts on import.
+
+Validation: 103 synthetic tests cover concurrency, cancellation, failure retention,
+clock-independent cooldown restoration and malformed checkpoints.
+
+## Explicit cooldown file storage
+
+`nifc_storage.save_cooldown(directory, state, now=...)` writes only the fixed
+`nifc-research-cooldown.json` name in an existing trusted application-owned directory.
+It validates metadata, writes a private temporary file, flushes/fsyncs its contents,
+and atomically replaces the checkpoint. Replacement failure leaves the previous file
+intact. Only the operation's own temporary file is cleaned up. Symlink targets are
+rejected; this is not a hardened interface for directories controlled by other users.
+
+`load_cooldown` reads at most 4 KiB plus an overflow byte and validates the schema.
+Missing, duplicate-key, malformed and oversized checkpoints raise errors rather than
+resetting eligibility. First-time initialization must be an explicit caller decision.
+This module does not read or write incident records/history. It is not yet wired to
+the coordinator lifecycle: loading before enablement, saving after transitions and
+handling save failures remain the caller's responsibility. No HA storage is touched.
+
+A real subprocess test verifies that a new process restores the saved wait against a
+new monotonic-clock origin. Other tests cover replacement failure, unrelated history
+preservation, manual pause and corrupt files. All 109 offline tests passed locally on
+Python 3.9 and 3.13. Directory metadata is not fsynced, so sudden-power-loss durability
+is not claimed. Cross-process writers and automatic restart orchestration remain open.
+
+## Persistent research lifecycle
+
+`PersistentResearchCoordinator` now connects loading and saving to explicit refresh
+calls. Construction requires an existing valid checkpoint; initial setup is an
+explicit `save_cooldown` call with a chosen initial state. Missing/corrupt state never
+silently enables requests. Each eligible request first saves a manual-pause marker,
+then fetches and saves the resulting cooldown. If interrupted after that marker, a
+restart stays paused for review. Normal success/transient failure replaces the marker
+with the policy wait. Cancellation does not immediately retry.
+
+Preflight save failure prevents network access and pauses the current instance.
+Final save failure retains the previous in-memory response and leaves the persisted
+pause marker. Exceptions propagate; callers must surface them. The guarantee assumes
+atomic filesystem replacement, not power-loss durability. If a preflight save fails,
+no new marker was committed; durable recovery of that storage failure is not claimed.
+One owner per directory is required; separate processes are not mutually excluded.
+
+This is still research tooling: synchronous file I/O must be adapted before use on
+HA's event loop. There is no scheduler, HA activation, incident-history persistence or
+automatic manual-pause reset. Seven lifecycle tests bring the offline suite to 116
+passing tests on Python 3.9 and 3.13, including save failures, restart cooldowns,
+cancellation, concurrency and disabled behavior. No live requests run in these tests.

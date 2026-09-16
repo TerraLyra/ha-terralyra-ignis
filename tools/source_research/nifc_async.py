@@ -55,7 +55,12 @@ async def fetch_incidents_async(*, reader=None, total_timeout=60, **limits):
         import aiohttp
         async with aiohttp.ClientSession(auto_decompress=False, trust_env=False) as session:
             async def read(*args):
-                return await _read(session, *args)
+                try:
+                    return await _read(session, *args)
+                except aiohttp.ClientSSLError as error:
+                    raise ValueError('TLS validation failure') from error
+                except (aiohttp.ClientConnectionError, aiohttp.ClientPayloadError) as error:
+                    raise OSError('Source connection or response interrupted') from error
             return await drive(read)
 
     return await asyncio.wait_for(run(), timeout=total_timeout)

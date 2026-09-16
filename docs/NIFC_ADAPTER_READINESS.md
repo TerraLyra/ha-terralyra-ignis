@@ -157,3 +157,32 @@ time. These are proposed client defaults, not a provider-authorized request rate
 No scheduler or HA adapter uses this policy yet. Monotonic clock deadlines are
 process-local; persistent cooldown recovery and atomic in-flight coordination remain
 runtime integration requirements. An empty response never instructs history deletion.
+
+## Coordinator prototype
+
+An explicit, disabled-by-default research coordinator connects fetches and refresh
+policy, excludes concurrent requests within one instance/event loop, and retains the
+last response on known failures. Cooldown-only checkpoint export/restore survives a
+new monotonic-clock origin by conservatively restarting the saved remaining wait.
+There is still no durable storage adapter, HA scheduling or actual restart test with
+persisted state. History is not read or written. 103 offline tests pass.
+
+## Cooldown storage follow-up
+
+An explicit dedicated-file storage helper now atomically replaces validated cooldown
+metadata and rejects missing/corrupt/oversized files without resetting eligibility.
+A separate-process test verified restoration with a new monotonic-clock origin.
+Synthetic disk replacement failure preserved the prior checkpoint and an unrelated
+history file. 109 tests passed on Python 3.9 and 3.13. No actual HA history was touched.
+Coordinator lifecycle wiring, storage-failure handling, cross-process coordination and
+power-loss durability remain unimplemented. No automatic startup or HA activation.
+
+## Persistent lifecycle prototype
+
+The persistent wrapper now loads before eligibility, saves a pause marker before
+network access, and saves final policy state after completion. Cancellation or a
+final save failure leaves manual review required after restart; a preflight save
+failure prevents the request. Previous in-memory response data is retained on storage
+failure. 116 synthetic tests pass. Remaining runtime work includes nonblocking HA
+storage integration, one-owner enforcement, user-facing diagnostics/recovery and
+source freshness/complex semantics. No live HA configuration or history was changed.
