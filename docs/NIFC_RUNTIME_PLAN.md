@@ -83,3 +83,13 @@ an explicit deployment step. This plan neither creates a release nor enables NIF
 live HA. Existing optimization remains paused. No migration, purge, source-expiry
 closure or history deletion is authorized by this plan. Australia remains the first
 regional priority; ACT/Victoria/WA gates and the global country screen are unchanged.
+
+## Implementation checkpoint
+
+The first extraction moves pure page/sequence validation, record normalization and
+source-age/complex assessment into `official_sources/nifc/`. Research entry points
+are compatibility wrappers, not copies. Standalone tests load only this pure package
+under its canonical module name without importing HA setup; production uses normal
+package imports and has no research-tool dependency. HA tests assert identical class
+and function identity between the wrappers and integration-owned implementation.
+Retrieval, lifecycle and summary extraction remain outstanding. No runtime activation.
