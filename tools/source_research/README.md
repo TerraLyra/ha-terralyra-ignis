@@ -181,3 +181,25 @@ HA scheduler are also outside this prototype. No background work starts on impor
 
 Validation: 103 synthetic tests cover concurrency, cancellation, failure retention,
 clock-independent cooldown restoration and malformed checkpoints.
+
+## Explicit cooldown file storage
+
+`nifc_storage.save_cooldown(directory, state, now=...)` writes only the fixed
+`nifc-research-cooldown.json` name in an existing trusted application-owned directory.
+It validates metadata, writes a private temporary file, flushes/fsyncs its contents,
+and atomically replaces the checkpoint. Replacement failure leaves the previous file
+intact. Only the operation's own temporary file is cleaned up. Symlink targets are
+rejected; this is not a hardened interface for directories controlled by other users.
+
+`load_cooldown` reads at most 4 KiB plus an overflow byte and validates the schema.
+Missing, duplicate-key, malformed and oversized checkpoints raise errors rather than
+resetting eligibility. First-time initialization must be an explicit caller decision.
+This module does not read or write incident records/history. It is not yet wired to
+the coordinator lifecycle: loading before enablement, saving after transitions and
+handling save failures remain the caller's responsibility. No HA storage is touched.
+
+A real subprocess test verifies that a new process restores the saved wait against a
+new monotonic-clock origin. Other tests cover replacement failure, unrelated history
+preservation, manual pause and corrupt files. All 109 offline tests passed locally on
+Python 3.9 and 3.13. Directory metadata is not fsynced, so sudden-power-loss durability
+is not claimed. Cross-process writers and automatic restart orchestration remain open.

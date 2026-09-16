@@ -166,3 +166,13 @@ last response on known failures. Cooldown-only checkpoint export/restore survive
 new monotonic-clock origin by conservatively restarting the saved remaining wait.
 There is still no durable storage adapter, HA scheduling or actual restart test with
 persisted state. History is not read or written. 103 offline tests pass.
+
+## Cooldown storage follow-up
+
+An explicit dedicated-file storage helper now atomically replaces validated cooldown
+metadata and rejects missing/corrupt/oversized files without resetting eligibility.
+A separate-process test verified restoration with a new monotonic-clock origin.
+Synthetic disk replacement failure preserved the prior checkpoint and an unrelated
+history file. 109 tests passed on Python 3.9 and 3.13. No actual HA history was touched.
+Coordinator lifecycle wiring, storage-failure handling, cross-process coordination and
+power-loss durability remain unimplemented. No automatic startup or HA activation.
