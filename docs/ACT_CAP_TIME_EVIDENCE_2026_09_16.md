@@ -31,3 +31,11 @@ Remaining gates: authoritative CAP licence scope, identifier mapping, update/can
 examples, vegetation-fire sample, RSS timezone and CAP timestamp semantics. The explicit
 CC BY 4.0 statement for Current Incidents is not assumed to cover CAP automatically.
 No agency contact, HA change, release or production adapter was made in this review.
+
+## Offline classification update
+
+The observed RSS HOUSE FIRE type now maps to structure_fire, independently from
+vegetation-fire candidates and planned burns. Test markers remain independent.
+No unobserved STRUCTURE FIRE spelling or other fire subtype is assumed equivalent.
+Three synthetic regression tests cover category separation, source type precedence
+and exercise flags. All 41 offline tests pass with system Python.
