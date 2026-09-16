@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.26.5
+
+- Distinguish retrieval success from source snapshot freshness in per-location source details.
+- Preserve existing status values, thresholds, identifiers and history handling.
+- Document cached responses, old observations and empty-result limitations.
+
 ## 0.26.4
 
 - First stable release from `TerraLyra/ha-terralyra-ignis`, with source provenance preserved.
