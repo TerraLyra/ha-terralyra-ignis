@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "Preparar el almacenamiento inicial de NIFC",
+      "description": "Solo administradores; almacenamiento compartido por todas las entradas IGNIS. No activa consultas ni reinicia esperas. No usar tras borrar datos existentes. Una inicialización interrumpida requiere revisión.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrada IGNIS"
+        },
+        "confirm_first_use": {
+          "name": "Confirmo el primer uso, no una recuperación ni un reinicio"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Guardar vínculo revisado de aviso",
       "description": "Guardar un candidato aprobado manualmente con su token de revisión. No es confirmación oficial; los incidentes satelitales no cambian."

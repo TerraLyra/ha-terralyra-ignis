@@ -158,3 +158,17 @@ activation: first-use UI, request scheduling, unload/write lifecycle and complet
 bounded national retrieval still gate activation. Source health is separate from
 fire danger and active-fire counts; no source-age threshold is invented. Six
 languages include the sensor name and retrieval state labels.
+
+## Explicit administrator action checkpoint
+
+`terralyra_ignis.initialize_nifc` is now registered as a response-only admin action.
+An identified admin, a loaded IGNIS entry and strict boolean confirm_first_use=true
+are required. The six-language form warns that this is shared first-use preparation,
+not recovery after deleting stores. It returns initialized/existing and explicitly
+reports retrieval_enabled=false. Existing cooldowns remain unchanged. No scheduler,
+network call, incident-history write or automatic recovery is introduced.
+
+The action validates the entry before starting the shared storage transaction. Once
+started, the transaction belongs to the HA-wide owner rather than to that entry;
+entry unload does not reset or discard it. Hung-write/shutdown lifecycle handling
+remains a gate before automatic retrieval, as does a complete bounded source query.

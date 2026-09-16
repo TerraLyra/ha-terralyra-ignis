@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "NIFC-Speicher erstmals vorbereiten",
+      "description": "Nur für Administratoren; gemeinsamer Speicher aller IGNIS-Einträge. Aktiviert keinen Abruf und setzt keine Wartezeit zurück. Nicht nach dem Löschen bestehender Daten verwenden. Unterbrochene Initialisierung erfordert Prüfung.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-Eintrag"
+        },
+        "confirm_first_use": {
+          "name": "Ich bestätige die Erstnutzung, keine Wiederherstellung oder Zurücksetzung"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Geprüfte Meldungszuordnung speichern",
       "description": "Einen manuell genehmigten Kandidaten mit seinem Prüftoken speichern. Keine amtliche Bestätigung; Satellitenereignisse bleiben unverändert."

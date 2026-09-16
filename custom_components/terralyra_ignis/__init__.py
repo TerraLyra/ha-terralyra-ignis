@@ -18,6 +18,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
+from .nifc_service import register_nifc_initialization
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
     CONF_ENABLE_FIRMS,
@@ -99,6 +100,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.data[DOMAIN]["nsw_rfs_client"] = NswRfsClient(async_get_clientsession(hass))
     hass.data[DOMAIN]["qfd_client"] = QfdClient(async_get_clientsession(hass))
     get_nifc_owner(hass)  # Lazy registration only: no NIFC request or storage write.
+    register_nifc_initialization(hass)
     hass.data[DOMAIN]["gdacs_client"] = GdacsClient(
         async_get_clientsession(hass),
         GdacsArchive(Store(hass, 1, f"{DOMAIN}.gdacs_context_archive")),

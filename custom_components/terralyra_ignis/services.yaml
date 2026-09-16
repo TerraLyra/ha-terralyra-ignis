@@ -172,3 +172,18 @@ probe_msg_iodc:
       selector:
         config_entry:
           integration: terralyra_ignis
+initialize_nifc:
+  name: Initialize NIFC first-use storage
+  description: Administrator-only preparation of shared NIFC storage. Does not enable retrieval. Use only for confirmed first use, never after deleting established storage or to reset a wait. Existing valid cooldowns are preserved; interrupted initialization requires review.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_first_use:
+      required: true
+      name: I confirm first use, not recovery or reset
+      description: Missing files alone do not prove first use. This action is shared by all IGNIS entries.
+      selector:
+        boolean:
