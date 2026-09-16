@@ -1,4 +1,6 @@
 """Opt-in official report markers, separate from satellite incident entities."""
+import asyncio
+
 from homeassistant.components.geo_location import GeolocationEvent
 from homeassistant.const import UnitOfLength
 from homeassistant.core import callback
@@ -139,7 +141,12 @@ class NifcMapRecord(GeolocationEvent):
         if (self.retired or not self.manager.enabled or self.manager._add_entities is None
                 or self.manager.entities.get(self.item.record.irwin_id) is not self):
             # An add queued just before disable must not leave a late marker behind.
-            self.hass.async_create_task(self.async_remove(), 'Remove disabled NIFC marker')
+            self.hass.async_create_task(self._remove_after_add(), 'Remove disabled NIFC marker')
+
+    async def _remove_after_add(self):
+        # Let EntityPlatform finish its initial state write before removing it.
+        await asyncio.sleep(0)
+        await self.async_remove()
 
     async def async_will_remove_from_hass(self):
         self.added = False

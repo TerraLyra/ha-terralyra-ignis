@@ -48,7 +48,7 @@ class NifcMapSwitch(SwitchEntity, RestoreEntity):
 
     @property
     def extra_state_attributes(self):
-        return {'map_status': self._manager.status,
+        return {**self._manager.runtime.owner.diagnostics(), 'map_status': self._manager.status,
                 'matched_source_records': self._manager.relevant_count,
                 'visible_markers': sum(not entity.retired for entity in self._manager.entities.values()),
                 'source_freshness': 'not_established'}

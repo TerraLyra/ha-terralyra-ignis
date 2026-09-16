@@ -945,4 +945,6 @@ HACS installation and rollback.
 The disabled-by-default **NIFC source status** sensor retrieves US official source
 records through one shared, cooldown-aware client. Explicit administrator first-use
 initialization is required. It reports retrieval health and source-record categories,
-not an independent active-fire total. [Enablement, interpretation and recovery](docs/NIFC_USAGE.md).
+not an independent active-fire total. An optional timed report calendar and initially-off
+map switch share the same source and match each monitored location locally.
+[Enablement, interpretation and recovery](docs/NIFC_USAGE.md).

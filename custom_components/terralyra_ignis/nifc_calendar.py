@@ -77,14 +77,24 @@ class NifcCalendar(CalendarEntity):
 
     @property
     def extra_state_attributes(self):
+        state = self._runtime.owner.state
+        result = state.last_success if state is not None else None
+        rows = project_nifc(result, resolve_monitored_locations(self.hass, self._entry)) if self.hass else ()
         return {**self._runtime.owner.diagnostics(), 'attribution': ATTRIBUTION,
+                'undated_matched_source_records': sum(item.record.modified_at is None and
+                    item.record.discovered_at is None for item in rows),
+                'unlocated_source_records': sum(record.latitude is None or record.longitude is None
+                    for record in result.records) if result is not None else None,
                 'retention': 'current_source_response_only', 'date_basis': 'modified_then_discovery',
                 'marker_duration_seconds': 1}
 
     async def async_get_events(self, hass, start_date, end_date):
         self._runtime.request_refresh()
+        locations = resolve_monitored_locations(hass, self._entry)
+        if not any(location.enabled for location in locations):
+            return []
         state = self._runtime.owner.state
         if state is None or state.last_success is None:
             raise HomeAssistantError('NIFC has no validated response yet; check source diagnostics')
-        return render_nifc_events(state.last_success, resolve_monitored_locations(hass, self._entry),
+        return render_nifc_events(state.last_success, locations,
             start_date, end_date, language=hass.config.language, retained=state.status != 'retrieved')

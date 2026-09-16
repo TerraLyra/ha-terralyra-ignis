@@ -57,3 +57,19 @@ async def test_late_queued_add_after_disable_is_removed(hass,hass_storage):
         assert not manager.entities
         assert hass.states.get(queued[0].entity_id) is None
         await manager.close()
+
+
+async def test_excess_markers_are_reported_not_silently_truncated(hass):
+    from dataclasses import replace
+    entry=MockConfigEntry(domain=DOMAIN);entry.add_to_hass(hass)
+    manager=get_nifc_map(hass,entry)
+    records=[replace(RECORD,irwin_id=f'12345678-1234-1234-1234-{n:012d}') for n in range(501)]
+    manager.runtime.owner.coordinator._inner=SimpleNamespace(state=RefreshState(last_success=result(*records),status='retrieved'))
+    queued=[]
+    with patch.object(manager.runtime,'request_refresh'), patch('custom_components.terralyra_ignis.nifc_map.resolve_monitored_locations',return_value=(LOC,)):
+        manager.bind(queued.extend)
+        await manager.set_enabled(True)
+        assert manager.status=='display_limit_exceeded'
+        assert manager.relevant_count==501
+        assert not queued and not manager.entities
+        await manager.close()

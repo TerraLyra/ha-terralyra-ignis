@@ -104,7 +104,7 @@ screen has NOT yet been executed. Refresh it before claiming comprehensive prior
 Do not rank countries solely by hotspot counts or total savanna burned area.
 
 USA: NIFC now has an opt-in runtime diagnostic adapter with verified ID-inventory retrieval.
-It is disabled by default; map/calendar projection remains separate work.
+It is disabled by default; optional map/calendar projection uses local monitored locations.
 See [readiness evidence](NIFC_ADAPTER_READINESS.md) and the
 [bounded runtime delivery plan](NIFC_RUNTIME_PLAN.md).
 Canada candidate: [CWFIS/CWFIF service catalogue](https://cwfis.cfs.nrcan.gc.ca/downloads/docs/en/references/cwfif/cwfis-data-placemat.pdf).
