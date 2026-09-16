@@ -6,9 +6,13 @@ remains `terralyra_ignis`. Both repositories install into the same directory:
 
 ## Status
 
-HACS 2.0.5 source inspection and registering both custom repositories have been
-checked. The complete live switch remains to be verified. Do not interpret
-repository registration or CI success as proof of restored historical data.
+The ordered switch from old-repository 0.26.3 to new-repository 0.26.4 was
+exercised on one HACS 2.0.5 installation, followed by an update to 0.26.5.
+The existing configuration entry, device identity and fixed device-entity count
+were retained; sampled pre-switch activity and calendar entries remained visible.
+This was a UI-level check, not a byte-for-byte archive/database comparison or a
+backup-restore drill. Dynamic map-entity counts changed; their individual IDs
+were not exhaustively compared. Other installations still need the checks below.
 
 ## Ordered switch
 

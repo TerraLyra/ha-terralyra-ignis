@@ -19,14 +19,16 @@ Repository: `https://github.com/TerraLyra/ha-terralyra-ignis`
 > TerraLyra IGNIS is an independent project. It is not an official EUMETSAT, LSA SAF,
 > NASA, or FIRMS integration.
 
-> **One-time product migration:** release 0.14.0 uses the new
-> `terralyra_ignis` Home Assistant domain. Remove the pre-release **TerraLyra**
-> (`terralyra`) integration before installing this version, then add
-> **TerraLyra IGNIS** as a new integration. Settings and entity IDs cannot be
-> moved safely across Home Assistant integration domains. Update dashboards,
-> map source filters and automations to the new `terralyra_ignis_*` identities.
-> Follow the complete [0.14 migration checklist](docs/MIGRATION_TO_IGNIS.md)
-> before deleting the old integration.
+<details>
+<summary>Historical migration: pre-0.14 TerraLyra installations only</summary>
+
+The old `terralyra` domain was replaced by `terralyra_ignis` in 0.14.0.
+The [historical checklist](docs/MIGRATION_TO_IGNIS.md) applies only to those
+legacy installations. It does **not** apply to an existing IGNIS installation
+or to the move from `ha-ignis` to this repository. Keep existing IGNIS entries,
+entity IDs and history when updating or switching repository sources.
+
+</details>
 
 ## Product boundary
 
@@ -39,6 +41,12 @@ are recorded in
 [`docs/PRODUCT_ARCHITECTURE.md`](docs/PRODUCT_ARCHITECTURE.md).
 
 ## Product status
+
+Stable 0.26.5 includes separate retrieval-result and snapshot-freshness fields
+in each location's source details. See [source health](docs/SOURCE_HEALTH.md).
+The repository move was exercised on HACS 2.0.5 with existing configuration and
+sample historical entries retained. This is not a guarantee for every installation;
+follow the backup and rollback steps in the migration guide.
 
 Version 0.25.0 adds an opt-in **Reports — NSW RFS fires** calendar for
 regional fire reports inside enabled monitored-location radii. This uses the
