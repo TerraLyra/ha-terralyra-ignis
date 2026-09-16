@@ -52,3 +52,16 @@ Reference: https://developers.arcgis.com/rest/services-reference/enterprise/quer
 Validation: eight synthetic NIFC tests, 49 total offline tests passed locally. The
 five-record live sample was correctly classified as requiring continuation. No
 additional pages or full incident dataset were fetched.
+
+`nifc_pages.inspect_pages` checks a supplied tuple of decoded pages with configurable
+page, total-record and per-page limits. It rejects cross-page duplicate/reversed IDs,
+error pages and pages after a terminal/unknown continuation. Missing terminal pages
+remain incomplete; missing continuation metadata remains unknown. Empty intermediate
+pages with an explicit continuation do not end the sequence.
+
+The result reports counts and terminal status, never complete snapshot status.
+The caller must retain query and offset provenance and bound JSON input bytes;
+this checker cannot discover a skipped page from ID gaps, because IDs need not be
+consecutive. Source changes between requests also remain unresolved. It performs no
+network requests or history reconciliation. Eight sequence tests bring the complete
+offline suite to 57 passing tests.
