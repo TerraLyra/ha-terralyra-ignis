@@ -238,3 +238,12 @@ Their parent complexes were absent from that small result and were correctly mar
 unresolved. No missing parent was treated as an independent fire. This verifies live
 child-field compatibility but does not verify a complete complex/member graph or
 national totals. Only aggregates were retained; raw incident data was not saved.
+
+## Aggregate display prototype
+
+A bounded aggregate summary now separates source category, record modification age,
+complex role and missing location/time fields. It distinguishes no cached response,
+empty terminal response and retained response after failure. Retrieval age never
+substitutes for source age; no active-fire total or national completeness is asserted.
+The output contains aggregate diagnostics only. 136 local tests pass. No entities,
+HA dashboard changes, history operations or production display thresholds are added.

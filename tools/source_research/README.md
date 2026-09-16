@@ -264,3 +264,21 @@ without merging/deleting records or producing independent-fire totals. Nested co
 relationships remain unresolved. Input must be normalized with unique incident IDs.
 128 tests pass locally on Python 3.9 and 3.13. Expanded live-query compatibility and
 production display policy are not yet verified or implemented.
+
+## Aggregate display preparation
+
+`nifc_summary.summarize` consumes a normalized refresh cache and explicit display
+thresholds. It reports source-record counts by category, modification age and complex
+role, plus missing location/discovery-time counts. These are overlapping dimensions,
+not additive independent-fire totals. It exposes no raw IDs, coordinates or source
+dates. No records are filtered, merged, persisted or deleted.
+
+No cached response has a null record count; a terminal empty response has zero source
+records but no asserted active-fire count. National completeness always remains
+unestablished. Retrieval age and source modification age are separate. Retained data
+after a failed refresh is explicitly labeled; no receipt-time fallback makes old
+source records current. Both age thresholds are caller inputs, not selected defaults.
+
+136 offline tests pass on Python 3.9 and 3.13. This is a display-data prototype, not
+an HA sensor/calendar/dashboard or a fire-warning decision. Production UI, location
+matching and end-to-end source activation remain outstanding.
