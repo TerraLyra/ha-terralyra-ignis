@@ -1,5 +1,10 @@
 # USA NIFC / WFIGS readiness — 2026-09-16
 
+Current delivery status: research prototype verified, **not activated in HA**.
+See [runtime delivery plan](NIFC_RUNTIME_PLAN.md) for the consolidated remaining work.
+The dated sections below are chronological evidence; later checkpoints supersede
+earlier statements about missing tests or helpers.
+
 Decision: prioritize current incident points for the first USA official-source
 adapter. Keep perimeters as a separate later model extension. Research and offline preparation only; no
 runtime adapter, feed activation or claim of complete national coverage.
