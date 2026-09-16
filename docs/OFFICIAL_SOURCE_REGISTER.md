@@ -103,7 +103,8 @@ for evidence gathering, supplemented with national reports. The all-country quan
 screen has NOT yet been executed. Refresh it before claiming comprehensive prioritization.
 Do not rank countries solely by hotspot counts or total savanna burned area.
 
-USA: NIFC is now a live-sampled, tested research prototype, not a runtime adapter.
+USA: NIFC now has an opt-in runtime diagnostic adapter with verified ID-inventory retrieval.
+It is disabled by default; map/calendar projection remains separate work.
 See [readiness evidence](NIFC_ADAPTER_READINESS.md) and the
 [bounded runtime delivery plan](NIFC_RUNTIME_PLAN.md).
 Canada candidate: [CWFIS/CWFIF service catalogue](https://cwfis.cfs.nrcan.gc.ca/downloads/docs/en/references/cwfif/cwfis-data-placemat.pdf).

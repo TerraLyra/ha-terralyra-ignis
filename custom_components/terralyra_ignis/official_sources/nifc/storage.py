@@ -14,6 +14,7 @@ class GuardedStore:
         self._store, self._create_task, self._timeout = store, create_task, timeout
         self._pending = None
         self._blocked = False
+        self.problem = None
 
     @property
     def pending(self):
@@ -27,19 +28,19 @@ class GuardedStore:
         if self.pending:
             raise OSError('Storage operation still pending')
         self._blocked = False
+        self.problem = None
 
-    def _done(self, task):
-        if task.cancelled():
+    def _done(self, task, problem):
+        if task.cancelled() or task.exception() is not None:
             self._blocked = True
-        elif task.exception() is not None:
-            self._blocked = True
+            self.problem = problem
 
-    async def _run(self, method, *args):
+    async def _run(self, problem, method, *args):
         if self.pending or self._blocked:
             raise OSError('Storage requires review')
         task = self._create_task(method(*args), 'NIFC storage')
         self._pending = task
-        task.add_done_callback(self._done)
+        task.add_done_callback(lambda done: self._done(done, problem))
         try:
             done, _ = await asyncio.wait({task}, timeout=self._timeout)
             if not done:
@@ -47,10 +48,11 @@ class GuardedStore:
             return task.result()
         except BaseException:
             self._blocked = True
+            self.problem = problem
             raise
 
     async def async_load(self):
-        return await self._run(self._store.async_load)
+        return await self._run("storage_load_failed", self._store.async_load)
 
     async def async_save(self, data):
-        return await self._run(self._store.async_save, data)
+        return await self._run("storage_save_failed", self._store.async_save, data)

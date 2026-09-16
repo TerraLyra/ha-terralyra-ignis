@@ -56,7 +56,9 @@ class NifcDiagnosticSensor(SensorEntity):
             for record in result.records:
                 categories[record.category] = categories.get(record.category, 0) + 1
         return {**self._owner.diagnostics(), 'retrieval_enabled': enabled,
-                'activation_status': 'enabled' if enabled else 'disabled_or_no_locations',
+                'activation_status': ('initialization_required' if enabled and
+                    self._owner.initialization_status == 'required' else
+                    'enabled' if enabled else 'disabled_or_no_locations'),
                 'source_record_count': len(result.records) if result is not None else None,
                 'records_by_category': categories,
                 'retrieval_method': result.retrieval_method if result else None,

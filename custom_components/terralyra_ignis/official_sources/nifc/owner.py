@@ -43,7 +43,8 @@ class NifcOwner:
         diagnostics['storage_pending'] = any(getattr(store, 'pending', False) for store in stores)
         diagnostics['storage_review_required'] = any(getattr(store, 'blocked', False) for store in stores)
         if diagnostics['storage_review_required']:
-            diagnostics['problem'] = 'storage_save_failed'
+            diagnostics['problem'] = next((store.problem for store in stores
+                if isinstance(store, GuardedStore) and store.blocked), 'storage_save_failed')
         diagnostics['initialization_status'] = self.initialization_status
         diagnostics['in_flight'] = self._lock.locked() or diagnostics['in_flight']
         return diagnostics

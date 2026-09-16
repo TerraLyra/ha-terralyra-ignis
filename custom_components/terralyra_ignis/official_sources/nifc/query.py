@@ -156,6 +156,6 @@ def _fetch_id_steps(*, page_size=100, max_pages=100, max_records=10000,
         pages += 1
     final_ids = inventory((yield from request(dict(where='1=1', returnIdsOnly='true'))))
     if final_ids != ids:
-        raise ValueError('Source inventory changed during retrieval')
+        raise OSError('Source inventory changed during retrieval')
     return FetchResult(tuple(records), pages + 2, byte_count, 'terminal_reported',
                        retrieval_method='verified_id_inventory')

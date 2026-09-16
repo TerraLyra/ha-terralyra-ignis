@@ -1,174 +1,61 @@
-# NIFC runtime delivery plan
+# NIFC runtime delivery status
 
-Status: proposed implementation contract after PR #22, 2026-09-16.
-This file describes the next runtime change, not an enabled feature.
+Updated 2026-09-16. This supersedes the earlier chronological preparation checkpoints.
+Scope: opt-in source diagnostics and verified nationwide source-record retrieval.
+Map markers, calendars, alerts and independent active-fire totals are later work.
 
-## What is actually ready
+## Implemented
 
-| Area | Verified result | Remaining limit |
-| --- | --- | --- |
-| Provider access | Bounded anonymous live queries, explicit WGS84, UTC fields | No complete terminal national retrieval verified |
-| Parsing | UUID identity, separate WF/RX/CX, source times, complex links | A live complete parent/member graph is unverified |
-| Retrieval | Byte/page/record limits, overall async deadline, cancellation | Must use HA-owned shared session and handle persistent truncation |
-| Cooldown | Exponential waits, Retry-After, pause checkpoints | Fresh installation and deliberate recovery need runtime lifecycle handling |
-| Persistence | Actual HA Store API exercised in isolated tests | No production Store key or ownership registration exists |
-| Diagnostics | Fixed problem codes, six-language Repair helper | Helper has no production caller |
-| Aggregates | 136 offline tests; no misleading active-fire totals | No entity or UI consumes the summary |
+- Integration-owned normalization, shared HA HTTP session, bounded async retrieval.
+- ID inventory before and after retrieval, exact ID coverage in each batch, duplicate
+  IRWIN rejection. No partial result becomes available. This verifies the returned
+  inventory, not an atomic snapshot or the existence of every fire in the country.
+- One disabled-by-default diagnostic sensor per config entry. Enabled sensors share
+  a single HA-wide task and cooldown. No enabled sensors or monitored locations means
+  no source request. No user coordinates are sent to NIFC.
+- A one-minute eligibility tick; successful requests are at least 15 minutes apart.
+  Manual refresh joins this schedule. Backoff and Retry-After can only extend waits.
+- Explicit first-use admin action with separate initialization ledger. Setup never
+  initializes storage automatically. Missing established or corrupt state blocks.
+- Guarded storage: 30-second caller bound, no cancellation of the underlying write
+  merely to satisfy that bound. Outstanding tasks remain referenced and registered
+  with HA; completion/exception is always observed. Timeout/cancellation latches a
+  review requirement and prevents overlapping operations.
+- Final listener unload or shutdown cancels the request task. It waits up to five
+  seconds for completion, then leaves a still-pending operation owned and blocked;
+  no unobserved task or replacement request is created. HA handles final process
+  shutdown; power loss cannot be made equivalent to a completed disk write.
+- Fixed, translated Repair diagnostics scoped to each enabled entry.
+- Explicit admin recovery validates both stores, refuses pending writes and preserves
+  disk plus in-memory wait bounds. A newly issued recoverable pause has a version-2
+  checkpoint with a review wait bound. Recovery adds at least 15 minutes, retains
+  cached response/history, and never requests immediately. Version-1 finite waits
+  remain readable. Unknown legacy/unbounded pauses and corrupt/missing checkpoints
+  cannot be reset; investigate or restore validated backup instead.
 
-The full HA suite most recently verified before the summary change had 924 passing
-tests; PR #22 also passed full CI. Test counts do not mean runtime activation.
-Research remains in `tools/source_research`; production must not import that directory.
+## Live verification
 
-## First deliverable: opt-in diagnostic source status
+On 2026-09-16 around 20:00 UTC, the offset-based full query stopped at a response
+without exceededTransferLimit. No partial result was accepted. A 500-ID subset
+request subsequently returned HTTP 404; repeating the inventory strategy with
+100-ID subsets succeeded: 523 records, 8 requests (two inventory plus six record
+batches), 160,970 bytes. Both inventories agreed and every requested ID was returned.
+No raw incident payload was persisted or committed for these probes.
 
-Implement one diagnostic sensor per config entry, disabled in the entity registry by
-default, using the existing QFD opt-in entity pattern. Its state describes retrieval
-health (not requested, available, waiting, retained response, review required), never
-fire danger or number of active fires. Attribute values contain aggregate source
-record counts and separate receipt/source-time information, not incident identifiers
-or coordinates. Do not call a source record "fresh" solely because it was downloaded.
+Runtime uses 100 IDs per batch and at most 100 batches / 10,000 records, with unchanged
+10 MiB total, 1 MiB response and 60-second overall bounds. The batch count accommodates
+the smaller URLs rather than removing the record/byte/time limits. Oversized inventories,
+missing records and malformed responses fail closed. A changing final inventory
+requires a later retry, not partial success. This sample does not guarantee future
+availability or source correctness.
 
-No new calendar, map points, alerts or independent-fire total in this first deliverable.
-This keeps a bounded first runtime change testable without guessing display semantics.
+Protocol reference: [Esri query documentation](https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer/),
+returnIdsOnly and objectIds subsets. Attribution: NIFC / WFIGS / IRWIN.
 
-## Runtime implementation order and acceptance
+## User operation
 
-1. Move the validated provider-specific primitives into a pure package under
-   `official_sources/nifc/`. Keep research scripts as thin callers; avoid duplicate
-   implementations. Adapt standalone imports, then run existing offline fixtures
-   and HA tests against the same implementation. PUBLIC IP scope: adapter, basic
-   normalization and HA plumbing only; no cross-source intelligence or scoring.
-2. Add a client using the HA shared aiohttp session, explicit timeout/byte caps and
-   disabled redirects. The client must not close the shared session. One shared
-   source owner per HA instance excludes duplicate nationwide retrieval across entries.
-   No monitored-location coordinates are sent to the service.
-3. Add HA Store-backed cooldown ownership, with an explicit first-install path.
-   Missing state is allowed only during known first initialization; corrupt or
-   unexpectedly missing established state requires review. Preserve a durable pause
-   before requests. Do not reuse any incident/history/archive storage key.
-4. Add lifecycle unload and cancellation. Keep outstanding writes owned until settled;
-   define how a hung write is reported and how shutdown avoids an unobserved task.
-   Do not silently add arbitrary timeout cancellation around durable writes.
-5. Register the disabled diagnostic entity. No request or background polling while
-   disabled, unloaded, or without enabled monitored locations. Use a shared proposed
-   15-minute refresh interval with cooldown enforcement; this is a client policy,
-   not a published service rate allowance. Prevent manual refresh bypasses.
-6. Connect fixed diagnostics to the existing Repair helper. Transient outage remains
-   diagnostic; storage, schema and access failures pause. Recovery must be an explicit
-   admin action after validation, without deleting history or shortening a valid
-   server cooldown. Do not present a working recovery button before it exists.
-7. Verify a complete bounded terminal response or diagnose why configured budgets
-   cannot achieve it. Do not turn budget exhaustion into an available partial sensor.
-   If a complete result cannot be obtained responsibly, reconsider query scope before
-   activation instead of merely increasing limits.
-
-Acceptance tests must cover two entries sharing one request; disabled/no-location
-zero requests; shared session survival; missing/corrupt Store states; server cooldown
-across reload; storage failures; cancellation/unload; issue isolation; and a separate
-synthetic incident-history Store remaining unchanged. Full existing CI must pass.
-
-## Later map/calendar scope
-
-Use each monitored location's coordinates and radius, never Home as a fallback.
-Missing coordinates remain unmatchable. Discovery and modification dates keep their
-source meaning, with no inferred ignition date/duration. Complex containers and
-members must not be counted together as independent fires. Missing parents remain
-unresolved. A display-age threshold requires an explicit product decision; the
-24-hour live sample diagnostic did not establish a production threshold.
-
-## Release and operational boundary
-
-First deliverable completion requires runtime tests, review of the actual diff and
-an explicit deployment step. This plan neither creates a release nor enables NIFC in
-live HA. Existing optimization remains paused. No migration, purge, source-expiry
-closure or history deletion is authorized by this plan. Australia remains the first
-regional priority; ACT/Victoria/WA gates and the global country screen are unchanged.
-
-## Implementation checkpoint
-
-The first extraction moves pure page/sequence validation, record normalization and
-source-age/complex assessment into `official_sources/nifc/`. Research entry points
-are compatibility wrappers, not copies. Standalone tests load only this pure package
-under its canonical module name without importing HA setup; production uses normal
-package imports and has no research-tool dependency. HA tests assert identical class
-and function identity between the wrappers and integration-owned implementation.
-Retrieval, lifecycle and summary extraction remain outstanding. No runtime activation.
-
-## Network extraction checkpoint
-
-The bounded query protocol, HTTP error type and asynchronous client now reside in
-`official_sources/nifc/`; research entry points reuse them. `NifcClient` borrows a
-caller-owned session and disables decompression/redirects per request without closing
-or reconfiguring that session. HA tests cover success, HTTP failure and cancellation
-using the actual HA session with synthetic responses. No runtime registration or
-polling is added. Cooldown/coordinator extraction and enablement remain outstanding.
-
-## State-management extraction checkpoint
-
-Cooldown policy, request coordination, asynchronous Store lifecycle and aggregate
-summary now live in the integration-owned NIFC package. Research wrappers retain old
-entry-point names but reference identical implementations. Canonical runtime classes
-are NifcCoordinator and NifcStoredCoordinator. The standalone synchronous file-storage
-experiments remain research-only and are not imported by runtime modules.
-
-Existing isolated HA Store/Repair lifecycle tests now exercise these runtime-owned
-classes through the same compatibility aliases. All 136 offline tests pass locally
-on Python 3.9 and 3.13; HA identity tests verify alias equivalence. No source owner,
-Store key, entity registration, recovery flow or background polling is yet registered.
-The next runtime wiring must inject NifcClient.async_fetch using the HA-owned session;
-it must not rely on the standalone fetcher's self-owned session default.
-
-## Shared owner registration checkpoint
-
-HA setup now registers one lazy NIFC owner per HA instance. It borrows the HA session
-and uses the dedicated nifc_cooldown Store key. Construction does not read/write
-storage or fetch data. Explicit refresh requires enablement and enabled monitored
-locations; concurrent callers skip and completed callers share the cooldown.
-Missing saved state still blocks rather than initializing implicitly. No entity,
-scheduler, first-install initialization or recovery action is registered yet.
-
-## Explicit initialization checkpoint
-
-The shared owner exposes a first-use initialization method with confirmation defaulting
-to false. A separate initialization ledger is written as started before creating the
-cooldown and ready afterward. Started/unknown ledger states block initialization and
-refresh for review, including when a cooldown file already exists. An established
-ledger with missing cooldown never becomes a new installation. Existing valid cooldowns
-are adopted without modification, preserving server waits and manual pauses.
-
-This API is not wired to a UI/service or invoked during setup. The future caller must
-establish first-use intent independently; absence of both files cannot prove a new
-installation rather than external deletion. No automatic recovery is implemented.
-
-## Owner diagnostics checkpoint
-
-Refresh reports initialization-ledger read failures as storage_load_failed and
-interrupted/unknown ledger phases as review_required. Owner-level storage reads
-are included in in_flight. A later successful ledger validation clears only this
-owner-level override; coordinator errors remain visible. No exception text is
-exposed in diagnostics. Entity registration and first-use UI remain outstanding.
-
-## Passive diagnostic entity checkpoint
-
-One disabled-by-default diagnostic enum sensor per entry now reads the shared
-owner's memory. HA entity polling and manual entity updates perform no storage or
-network I/O. Its attributes explicitly report retrieval_enabled=false and
-runtime_activation_pending. This is an observable preparation stage, not source
-activation: first-use UI, request scheduling, unload/write lifecycle and complete
-bounded national retrieval still gate activation. Source health is separate from
-fire danger and active-fire counts; no source-age threshold is invented. Six
-languages include the sensor name and retrieval state labels.
-
-## Explicit administrator action checkpoint
-
-`terralyra_ignis.initialize_nifc` is now registered as a response-only admin action.
-An identified admin, a loaded IGNIS entry and strict boolean confirm_first_use=true
-are required. The six-language form warns that this is shared first-use preparation,
-not recovery after deleting stores. It returns initialized/existing and explicitly
-reports retrieval_enabled=false. Existing cooldowns remain unchanged. No scheduler,
-network call, incident-history write or automatic recovery is introduced.
-
-The action validates the entry before starting the shared storage transaction. Once
-started, the transaction belongs to the HA-wide owner rather than to that entry;
-entry unload does not reset or discard it. Hung-write/shutdown lifecycle handling
-remains a gate before automatic retrieval, as does a complete bounded source query.
+See [NIFC usage and recovery](NIFC_USAGE.md). The adapter remains disabled by default.
+Enabling the entity and explicit first-use initialization are separate choices.
+No release or live HA installation is implied by merging this implementation.
+Existing optimization remains paused. No incident history migration, purge, inferred
+closure, advanced correlation or private intelligence code is part of this work.

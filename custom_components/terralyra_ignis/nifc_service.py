@@ -27,7 +27,7 @@ def register_nifc_initialization(hass):
         runtime = hass.data.get(DOMAIN, {}).get('nifc_runtime')
         enabled = False
         if runtime is not None:
-            enabled = any(runtime.eligible(e) for e, _ in runtime._listeners.values())
+            enabled = runtime.enabled
             runtime.request_refresh()
         return {'status': status, 'retrieval_enabled': enabled, 'history_changed': False}
 

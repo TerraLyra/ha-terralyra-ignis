@@ -36,7 +36,7 @@ class InventoryTests(unittest.TestCase):
                  [ids([1]),encoded(more=True)], [ids([True])],
                  [ids([1]),encoded(2)], [ids([1]),b'{"error":{}}']]
         for payloads in cases:
-            with self.subTest(payloads=payloads), self.assertRaises(ValueError):
+            with self.subTest(payloads=payloads), self.assertRaises((ValueError, OSError)):
                 self.drive(payloads)
 
     def test_budgets(self):
@@ -48,3 +48,14 @@ class InventoryTests(unittest.TestCase):
         result,calls=self.drive([ids([2,1]),encoded(1),encoded(2),ids([1,2])],page_size=1)
         self.assertEqual(len(result.records),2)
         self.assertEqual(len(calls),4)
+
+    def test_conflicting_identity_across_batches_fails(self):
+        duplicate=encoded(2).replace(b'000000000002',b'000000000001')
+        with self.assertRaises(ValueError):
+            self.drive([ids([1,2]),encoded(1),duplicate],page_size=1)
+
+    def test_inventory_limit_flag_and_invalid_json_fail(self):
+        for payload in (b'{"objectIdFieldName":"OBJECTID","objectIds":[],"exceededTransferLimit":true}',
+                        b'{"objectIdFieldName":"OBJECTID","objectIds":[],"objectIds":[]}',
+                        b'{"objectIdFieldName":"OBJECTID","objectIds":[NaN]}'):
+            with self.assertRaises(ValueError):self.drive([payload])

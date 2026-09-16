@@ -106,3 +106,42 @@ async def test_shutdown_stops_scheduler(hass,hass_storage):
         assert runtime._task is None
         assert runtime._timer is None
         await runtime.detach(selected)
+
+
+async def test_slow_storage_is_owned_after_unload_and_blocks_recovery(hass,hass_storage):
+    runtime=get_nifc_runtime(hass)
+    await runtime.owner.async_initialize(confirmed_new=True)
+    guarded=runtime.owner._store
+    guarded._timeout=0.01
+    entered,release=asyncio.Event(),asyncio.Event()
+    raw_save=guarded._store.async_save
+    async def slow_save(data):
+        entered.set();await release.wait();await raw_save(data)
+    selected=entry(hass)
+    with patch.object(guarded._store,'async_save',side_effect=slow_save), patch('custom_components.terralyra_ignis.nifc_runtime.resolve_monitored_locations',return_value=[SimpleNamespace(enabled=True)]):
+        runtime.attach(selected,Mock())
+        await entered.wait();await runtime._task
+        try:
+            assert guarded.pending
+            assert runtime.owner.diagnostics()['storage_review_required']
+            await runtime.detach(selected)
+            with pytest.raises(OSError):await runtime.owner.async_recover()
+            assert guarded.pending
+        finally:
+            release.set();await guarded._pending
+    await runtime.owner.async_recover()
+    assert not guarded.blocked
+    assert (await guarded.async_load())['wait_seconds'] >= 899
+
+
+async def test_reload_restores_server_wait_without_request(hass,hass_storage):
+    from custom_components.terralyra_ignis.official_sources.nifc.owner import NifcOwner, INITIALIZATION_KEY
+    from custom_components.terralyra_ignis.official_sources.nifc.errors import SourceHTTPError
+    with patch('custom_components.terralyra_ignis.official_sources.nifc.owner.NifcClient.async_fetch',side_effect=SourceHTTPError(429,'7200')) as fetch:
+        runtime=get_nifc_runtime(hass);await runtime.owner.async_initialize(confirmed_new=True)
+        assert await runtime.owner.async_refresh(enabled=True,has_enabled_locations=True)=='failed'
+        fetch.assert_awaited_once()
+    restarted=NifcOwner(None,Store(hass,1,STORE_KEY),Store(hass,1,INITIALIZATION_KEY))
+    assert await restarted.async_refresh(enabled=True,has_enabled_locations=True)=='skipped'
+    assert restarted.state.failures==1
+    assert restarted.state.last_success is None

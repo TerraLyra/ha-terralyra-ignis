@@ -37,9 +37,13 @@ class NifcRuntime:
         return (entry.entry_id in self._listeners and not self._stopping
                 and any(loc.enabled for loc in resolve_monitored_locations(self.hass, entry)))
 
+    @property
+    def enabled(self):
+        return any(self.eligible(e) for e, _ in self._listeners.values())
+
     @callback
     def request_refresh(self, _now=None):
-        if self._stopping or not any(self.eligible(e) for e, _ in self._listeners.values()):
+        if self._stopping or not self.enabled:
             if self._task is not None and not self._task.done():
                 self._task.cancel()
             self.notify()
@@ -54,7 +58,7 @@ class NifcRuntime:
         self.notify()
 
     async def _run(self):
-        if not any(self.eligible(e) for e, _ in self._listeners.values()):
+        if not self.enabled:
             return
         try:
             await self.owner.async_refresh(enabled=True, has_enabled_locations=True, allow_uninitialized=True)
@@ -85,7 +89,7 @@ class NifcRuntime:
                 self._timer()
                 self._timer = None
             await self._cancel_refresh()
-        elif not any(self.eligible(e) for e, _ in self._listeners.values()):
+        elif not self.enabled:
             await self._cancel_refresh()
 
     async def async_stop(self, _event=None):
