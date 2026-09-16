@@ -8,6 +8,7 @@ from act_feed import ActItem
 
 class IncidentCategory(str, Enum):
     VEGETATION_FIRE_CANDIDATE = 'vegetation_fire_candidate'
+    PLANNED_BURN = 'planned_burn'
     MEDICAL = 'medical'
     UNKNOWN = 'unknown'
 
@@ -38,6 +39,7 @@ def classify_item(item: ActItem) -> Classification:
     category = {
         'GRASS AND BUSH FIRE': IncidentCategory.VEGETATION_FIRE_CANDIDATE,
         'AMBULANCE RESPONSE': IncidentCategory.MEDICAL,
+        'HAZARD REDUCTION BURN': IncidentCategory.PLANNED_BURN,
     }.get(raw_type, IncidentCategory.UNKNOWN)
     markers = tuple(name for name in ('title', 'description', 'type')
                     if re.search(r'\b(?:TEST|EXERCISE|DRILL)\b',

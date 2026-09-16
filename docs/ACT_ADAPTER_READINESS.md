@@ -127,3 +127,17 @@ All 34 offline tests passed with system Python. The previously retrieved sample 
 also processed; see `ACT_OFFLINE_SUMMARY_2026_09_16.json`. This is a historical sample,
 not a new live fetch or a current incident report. Empty or technically valid data
 never establishes production readiness, absence of danger or confirmed active fires.
+
+## Planned-burn classification follow-up — 2026-09-16
+
+The [official ESA map page](https://esa.act.gov.au/?fullmap=true) exposes the type
+`HAZARD REDUCTION BURN` in its incident listing. The retrieved page contains earlier
+dates and an unavailable-updates message; this establishes a published label, not
+current incident status or a new RSS sample. Its linked incident detail returned a
+page-not-found message. No current wildfire or timezone specification was verified.
+
+The offline classifier now maps only that exact normalized type to `planned_burn`,
+separately from vegetation-fire candidates. Free-text mention of a planned burn does
+not change another source type. Exercise flags remain independent. This classification
+does not declare a burn safe, active, contained or complete, and suppresses no satellite
+observations. Four added synthetic tests bring the offline suite to 38 passing tests.
