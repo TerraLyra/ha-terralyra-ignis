@@ -55,3 +55,20 @@ async def test_cancellation_closes_response_but_not_shared_session(hass):
         with pytest.raises(asyncio.CancelledError): await task
     assert response.closed
     assert not session.closed
+
+
+async def test_inventory_transport_uses_shared_session_and_verifies_empty_result(hass):
+    from unittest.mock import patch
+    from homeassistant.helpers.aiohttp_client import async_get_clientsession
+    from custom_components.terralyra_ignis.official_sources.nifc.client import NifcClient
+    session=async_get_clientsession(hass)
+    calls=[]
+    async def read(borrowed,url,limit,timeout):
+        assert borrowed is session
+        calls.append(url)
+        return b'{"objectIdFieldName":"OBJECTID","objectIds":[]}'
+    with patch('custom_components.terralyra_ignis.official_sources.nifc.client._read',read):
+        result=await NifcClient(session).async_fetch(inventory=True)
+    assert len(calls)==2
+    assert result.retrieval_method=='verified_id_inventory'
+    assert not session.closed

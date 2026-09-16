@@ -46,6 +46,7 @@ class RefreshState:
     failures: int = 0
     next_attempt_at: float = 0
     status: str = 'never_fetched'
+    resume_after_review_at: float | None = None
 
 
 def _clock(value):
@@ -82,5 +83,8 @@ def failed(state: RefreshState, *, now: float, kind: str,
         delay = math.inf
     if server_wait is not None:
         delay = max(delay, server_wait)
+    resume = None
+    if kind in ('invalid_data', 'access_denied') and not math.isinf(server_wait or 0):
+        resume = max(state.next_attempt_at, now + max(900, server_wait or 0))
     return replace(state, failures=failures, next_attempt_at=max(state.next_attempt_at, now + delay),
-                   status='refresh_failed_' + kind)
+                   status='refresh_failed_' + kind, resume_after_review_at=resume)

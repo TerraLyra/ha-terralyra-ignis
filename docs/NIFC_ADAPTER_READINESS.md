@@ -252,3 +252,12 @@ empty terminal response and retained response after failure. Retrieval age never
 substitutes for source age; no active-fire total or national completeness is asserted.
 The output contains aggregate diagnostics only. 136 local tests pass. No entities,
 HA dashboard changes, history operations or production display thresholds are added.
+
+## Completed diagnostic runtime — 2026-09-16
+
+The integration now owns the opt-in shared runtime, guarded Store operations, explicit
+admin initialization/recovery, cooldown-aware scheduler and scoped Repairs. The live
+ID-inventory verification retrieved 523 records in eight requests / 160,970 bytes;
+both inventories and all requested batch IDs matched. Older statements above about
+missing runtime registration are historical. See NIFC_RUNTIME_PLAN.md and NIFC_USAGE.md
+for current scope, limits and instructions. No release or live installation is implied.

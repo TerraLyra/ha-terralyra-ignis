@@ -939,3 +939,10 @@ The repository bundles local normal- and high-DPI brand icons for Home Assistant
 is accepted into the separate upstream `home-assistant/brands` repository. Each
 stable integration version is published as a GitHub release for predictable
 HACS installation and rollback.
+
+### Optional NIFC / WFIGS source diagnostics
+
+The disabled-by-default **NIFC source status** sensor retrieves US official source
+records through one shared, cooldown-aware client. Explicit administrator first-use
+initialization is required. It reports retrieval health and source-record categories,
+not an independent active-fire total. [Enablement, interpretation and recovery](docs/NIFC_USAGE.md).

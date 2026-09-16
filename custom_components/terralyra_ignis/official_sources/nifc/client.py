@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 
-from .query import _fetch_steps
+from .query import _fetch_steps, _fetch_id_steps
 from .errors import SourceHTTPError
 
 
@@ -26,7 +26,7 @@ async def _read(session, url, byte_limit, timeout):
         return b''.join(chunks)
 
 
-async def fetch_incidents_async(*, reader=None, total_timeout=60, **limits):
+async def fetch_incidents_async(*, reader=None, total_timeout=60, inventory=False, **limits):
     """Overall async deadline covers all requests and body reads.
 
     Injected readers must cooperate with asyncio cancellation, honor byte caps and
@@ -37,7 +37,7 @@ async def fetch_incidents_async(*, reader=None, total_timeout=60, **limits):
         raise ValueError('Total timeout must be a positive integer')
 
     async def drive(read):
-        steps = _fetch_steps(**limits)
+        steps = (_fetch_id_steps if inventory else _fetch_steps)(**limits)
         try:
             request = next(steps)
             while True:

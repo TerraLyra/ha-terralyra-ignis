@@ -187,3 +187,17 @@ initialize_nifc:
       description: Missing files alone do not prove first use. This action is shared by all IGNIS entries.
       selector:
         boolean:
+recover_nifc:
+  name: Resume NIFC after review
+  description: Administrator-only recovery after reviewing source access, schema and storage. Preserves known waits and adds at least 15 minutes. No immediate source request. Cannot reset missing/corrupt state or an unknown/unbounded pause. Never deletes history.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_review:
+      required: true
+      name: I reviewed and resolved the source or storage problem
+      selector:
+        boolean:

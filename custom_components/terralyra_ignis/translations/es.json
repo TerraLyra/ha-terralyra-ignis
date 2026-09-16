@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "Reanudar NIFC tras revisión",
+      "description": "Recuperación por administrador tras revisar fuente y almacenamiento. Conserva esperas conocidas, al menos 15 minutos. No reinicia datos ausentes o dañados ni pausas desconocidas o ilimitadas. Conserva el historial.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrada IGNIS"
+        },
+        "confirm_review": {
+          "name": "He revisado y resuelto el problema de fuente o almacenamiento"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "Preparar el almacenamiento inicial de NIFC",
       "description": "Solo administradores; almacenamiento compartido por todas las entradas IGNIS. No activa consultas ni reinicia esperas. No usar tras borrar datos existentes. Una inicialización interrumpida requiere revisión.",

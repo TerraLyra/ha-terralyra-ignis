@@ -31,7 +31,7 @@ async def test_two_callers_share_request_and_cooldown(hass,hass_storage):
     await Store(hass,1,STORE_KEY).async_save({'version':1,'wait_seconds':0,'failures':0})
     entered,release=asyncio.Event(),asyncio.Event()
     calls=[]
-    async def fetch(self):
+    async def fetch(self, **kwargs):
         calls.append(1); entered.set(); await release.wait()
         return FetchResult((),1,1,'terminal_reported')
     with patch('custom_components.terralyra_ignis.official_sources.nifc.owner.NifcClient.async_fetch',fetch):

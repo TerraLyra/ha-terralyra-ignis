@@ -183,7 +183,7 @@ def async_sync_nifc_research_issue(
     enabled: bool = False,
     problem: str | None = "not_loaded",
 ) -> None:
-    """Prepare translated NIFC diagnostics; no runtime caller enables this yet.
+    """Synchronize fixed NIFC diagnostics for enabled runtime entries.
 
     Only explicit recovery (None) or disablement clears the scoped issue. Unknown
     or transitional status never clears an existing actionable warning. This helper

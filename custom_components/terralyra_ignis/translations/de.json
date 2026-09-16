@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "NIFC nach Prüfung fortsetzen",
+      "description": "Administrator-Wiederherstellung nach Prüfung von Quelle und Speicher. Bekannte Wartezeiten bleiben erhalten, mindestens 15 Minuten. Fehlende oder beschädigte Daten und unbekannte oder unbegrenzte Pausen können nicht zurückgesetzt werden. Der Verlauf bleibt erhalten.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-Eintrag"
+        },
+        "confirm_review": {
+          "name": "Ich habe das Quellen- oder Speicherproblem geprüft und behoben"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "NIFC-Speicher erstmals vorbereiten",
       "description": "Nur für Administratoren; gemeinsamer Speicher aller IGNIS-Einträge. Aktiviert keinen Abruf und setzt keine Wartezeit zurück. Nicht nach dem Löschen bestehender Daten verwenden. Unterbrochene Initialisierung erfordert Prüfung.",
