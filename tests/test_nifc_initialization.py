@@ -58,3 +58,33 @@ async def test_started_ledger_blocks_refresh_even_with_valid_checkpoint(hass,has
         with pytest.raises(ValueError):
             await owner.async_refresh(enabled=True,has_enabled_locations=True)
         setup.assert_not_awaited()
+
+    assert owner.diagnostics()['problem'] == 'review_required'
+    assert owner.diagnostics()['in_flight'] is False
+
+
+async def test_ledger_load_failure_is_visible_and_retry_clears_it(hass, hass_storage):
+    owner = get_nifc_owner(hass)
+    with patch.object(owner._initialization_store, 'async_load', side_effect=OSError('private path')):
+        with pytest.raises(OSError):
+            await owner.async_refresh(enabled=True, has_enabled_locations=True)
+    assert owner.diagnostics()['problem'] == 'storage_load_failed'
+    assert 'private path' not in str(owner.diagnostics())
+    await owner.async_initialize(confirmed_new=True)
+    # Keep a real future cooldown so this diagnostic retry performs no request.
+    await owner._store.async_save({'version': 1, 'wait_seconds': 7200, 'failures': 0})
+    with patch.object(owner.client, 'async_fetch', new_callable=AsyncMock) as fetch:
+        assert await owner.async_refresh(enabled=True, has_enabled_locations=True) == 'skipped'
+        fetch.assert_not_awaited()
+    assert owner.diagnostics()['problem'] is None
+
+
+async def test_ledger_read_counts_as_in_flight(hass, hass_storage):
+    owner = get_nifc_owner(hass)
+    async def load():
+        assert owner.diagnostics()['in_flight'] is True
+        return {'version': 1, 'phase': 'started'}
+    with patch.object(owner._initialization_store, 'async_load', side_effect=load):
+        with pytest.raises(ValueError):
+            await owner.async_refresh(enabled=True, has_enabled_locations=True)
+    assert owner.diagnostics()['in_flight'] is False

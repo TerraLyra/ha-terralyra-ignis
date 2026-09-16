@@ -139,3 +139,11 @@ are adopted without modification, preserving server waits and manual pauses.
 This API is not wired to a UI/service or invoked during setup. The future caller must
 establish first-use intent independently; absence of both files cannot prove a new
 installation rather than external deletion. No automatic recovery is implemented.
+
+## Owner diagnostics checkpoint
+
+Refresh reports initialization-ledger read failures as storage_load_failed and
+interrupted/unknown ledger phases as review_required. Owner-level storage reads
+are included in in_flight. A later successful ledger validation clears only this
+owner-level override; coordinator errors remain visible. No exception text is
+exposed in diagnostics. Entity registration and first-use UI remain outstanding.
