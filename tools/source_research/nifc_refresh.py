@@ -10,12 +10,8 @@ import re
 from nifc_fetch import FetchResult
 
 
-class SourceHTTPError(ValueError):
-    """Status and Retry-After only; never retain response body or credentials."""
-    def __init__(self, status, retry_after=None):
-        super().__init__(f'Source HTTP status {status}')
-        self.status = status
-        self.retry_after = retry_after
+from nifc_package import load_module
+SourceHTTPError = load_module("errors").SourceHTTPError
 
 
 def retry_after_seconds(value, *, now: datetime):
