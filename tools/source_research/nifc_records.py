@@ -18,6 +18,8 @@ class IncidentRecord:
     latitude: float | None
     discovered_at: datetime | None
     modified_at: datetime | None
+    complex_child: bool | None = None
+    parent_complex_id: str | None = None
 
 
 def _identity(value):
@@ -80,10 +82,18 @@ def normalize_page(page: dict, *, max_records: int = 2000) -> tuple[IncidentReco
         category = attributes.get('IncidentTypeCategory')
         if not isinstance(category, str) or category not in categories:
             raise ValueError('Unknown incident category')
+        child = attributes.get('IsCpxChild')
+        if child is not None and (type(child) is not int or child not in (0, 1)):
+            raise ValueError('Invalid complex-child flag')
+        parent = attributes.get('CpxID')
+        parent = None if parent is None or parent == '' else _identity(parent)
+        if parent == identity or (child == 0 and parent is not None):
+            raise ValueError('Conflicting complex relationship')
         longitude, latitude = _point(feature.get('geometry'))
         records.append(IncidentRecord(
             identity, categories[category], longitude, latitude,
             _time(attributes.get('FireDiscoveryDateTime')),
             _time(attributes.get('ModifiedOnDateTime_dt')),
+            None if child is None else bool(child), parent,
         ))
     return tuple(records)

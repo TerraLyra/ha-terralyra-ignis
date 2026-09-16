@@ -247,3 +247,20 @@ not yet translated HA Repair issues or automatic recovery actions.
 
 121 offline tests passed locally, including asynchronous storage lifecycle, restart
 cooldown, cancellation during writes, failed loading/saving and event-loop progress.
+
+## Source age and complex relationships
+
+The research query now requests documented IsCpxChild/CpxID fields. Normalization
+preserves unknown membership, validates 0/1 flags and UUID parents, and rejects
+self-links or explicit non-child/parent contradictions. A missing parent is unresolved.
+
+`nifc_assessment.source_age` requires an explicit positive age threshold and aware
+assessment time. It distinguishes missing, future, within-threshold and older source
+modification times. Receipt time is never substituted. Record modification is not
+fire observation time or proof of active fire. No display threshold is selected.
+
+`complex_roles` labels containers, linked members, absent parents and conflicts
+without merging/deleting records or producing independent-fire totals. Nested complex
+relationships remain unresolved. Input must be normalized with unique incident IDs.
+128 tests pass locally on Python 3.9 and 3.13. Expanded live-query compatibility and
+production display policy are not yet verified or implemented.
