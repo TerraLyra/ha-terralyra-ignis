@@ -206,6 +206,26 @@
     "provider_coverage": {
       "title": "Nessuna fonte configurata copre alcune località",
       "description": "TerraLyra IGNIS non può assegnare una fonte satellitare utilizzabile a: {locations}. Sposta o disattiva le località fuori dalle aree di osservazione supportate. Le altre località continuano ad aggiornarsi."
+    },
+    "nifc_storage_load": {
+      "title": "Impossibile caricare lo stato di aggiornamento NIFC",
+      "description": "Gli aggiornamenti NIFC sono sospesi perché lo stato di attesa salvato manca o non è leggibile. Controlla la diagnostica e ripristina uno stato valido prima di continuare. Non eliminare la cronologia degli eventi."
+    },
+    "nifc_storage_save": {
+      "title": "Impossibile salvare lo stato di aggiornamento NIFC",
+      "description": "Gli aggiornamenti NIFC sono sospesi perché lo stato di attesa non è stato salvato in modo affidabile. Controlla lo spazio disponibile e la diagnostica. I dati precedenti non devono essere considerati attuali. Non eliminare la cronologia degli eventi."
+    },
+    "nifc_review_required": {
+      "title": "Gli aggiornamenti NIFC richiedono una verifica",
+      "description": "Gli aggiornamenti NIFC sono sospesi dopo un’operazione interrotta o dall’esito incerto. Controlla la diagnostica prima di continuare. Il riavvio di Home Assistant non rimuove la sospensione. Non è disponibile un ripristino automatico."
+    },
+    "nifc_source_invalid": {
+      "title": "NIFC ha restituito dati inattesi",
+      "description": "Gli aggiornamenti NIFC sono sospesi perché una risposta non rispetta il formato previsto o i limiti di download. Controlla la diagnostica e la compatibilità della fonte. Questo non significa che non ci siano incendi."
+    },
+    "nifc_access_denied": {
+      "title": "Accesso NIFC negato",
+      "description": "Il servizio NIFC ha negato l’accesso. Gli aggiornamenti sono sospesi in attesa di verifica. Controlla la disponibilità del servizio e la diagnostica. Questo messaggio non richiede un account o credenziali."
     }
   },
   "entity": {

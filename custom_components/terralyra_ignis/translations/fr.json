@@ -206,6 +206,26 @@
     "provider_coverage": {
       "title": "Aucune source configurée ne couvre certains lieux",
       "description": "TerraLyra IGNIS ne peut actuellement attribuer de source satellitaire utilisable à : {locations}. Déplacez ou désactivez les lieux hors des zones d’observation prises en charge. Les autres lieux continuent à être actualisés."
+    },
+    "nifc_storage_load": {
+      "title": "Impossible de charger l’état de mise à jour NIFC",
+      "description": "Les mises à jour NIFC sont suspendues car l’état d’attente enregistré est absent ou illisible. Vérifiez le diagnostic de l’intégration et restaurez un état valide avant de reprendre. Ne supprimez pas l’historique des événements."
+    },
+    "nifc_storage_save": {
+      "title": "Impossible d’enregistrer l’état de mise à jour NIFC",
+      "description": "Les mises à jour NIFC sont suspendues car l’état d’attente n’a pas pu être enregistré de manière fiable. Vérifiez l’espace disponible et le diagnostic. Les anciennes données ne doivent pas être considérées comme actuelles. Ne supprimez pas l’historique des événements."
+    },
+    "nifc_review_required": {
+      "title": "Les mises à jour NIFC nécessitent une vérification",
+      "description": "Les mises à jour NIFC sont suspendues après une opération interrompue ou incertaine. Consultez le diagnostic avant de reprendre. Redémarrer Home Assistant ne lève pas cette suspension. Aucune réinitialisation automatique n’est disponible."
+    },
+    "nifc_source_invalid": {
+      "title": "NIFC a renvoyé des données inattendues",
+      "description": "Les mises à jour NIFC sont suspendues car une réponse ne respecte pas le format attendu ou les limites de téléchargement. Vérifiez le diagnostic et la compatibilité de la source. Cela ne signifie pas qu’il n’y a aucun incendie."
+    },
+    "nifc_access_denied": {
+      "title": "Accès NIFC refusé",
+      "description": "Le service NIFC a refusé l’accès. Les mises à jour sont suspendues en attendant une vérification. Vérifiez la disponibilité du service et le diagnostic. Ce message ne demande ni compte ni identifiants."
     }
   },
   "entity": {

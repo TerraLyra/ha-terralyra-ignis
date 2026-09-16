@@ -206,6 +206,26 @@
     "provider_coverage": {
       "title": "Keine konfigurierte Aktivbrandquelle deckt einige Orte ab",
       "description": "TerraLyra IGNIS kann derzeit keine nutzbare Satellitenquelle zuweisen für: {locations}. Verschieben oder deaktivieren Sie Orte außerhalb der unterstützten Beobachtungsbereiche. Andere Orte werden weiter aktualisiert."
+    },
+    "nifc_storage_load": {
+      "title": "NIFC-Aktualisierungsstatus konnte nicht geladen werden",
+      "description": "NIFC-Aktualisierungen sind pausiert, weil der gespeicherte Wartezustand fehlt oder nicht lesbar ist. Prüfe die Integrationsdiagnose und stelle vor dem Fortsetzen einen gültigen Zustand wieder her. Lösche dafür keinen Ereignisverlauf."
+    },
+    "nifc_storage_save": {
+      "title": "NIFC-Aktualisierungsstatus konnte nicht gespeichert werden",
+      "description": "NIFC-Aktualisierungen sind pausiert, weil der Wartezustand nicht zuverlässig gespeichert werden konnte. Prüfe freien Speicherplatz und Integrationsdiagnose. Frühere Daten gelten nicht als aktuell. Lösche keinen Ereignisverlauf."
+    },
+    "nifc_review_required": {
+      "title": "NIFC-Aktualisierungen müssen überprüft werden",
+      "description": "NIFC-Aktualisierungen sind nach einem unterbrochenen oder unklaren Vorgang pausiert. Prüfe vor dem Fortsetzen die Integrationsdiagnose. Ein Neustart von Home Assistant hebt die Pause nicht auf. Eine automatische Rücksetzung ist nicht verfügbar."
+    },
+    "nifc_source_invalid": {
+      "title": "NIFC hat unerwartete Daten geliefert",
+      "description": "NIFC-Aktualisierungen sind pausiert, weil eine Antwort nicht dem erwarteten Format oder den Abrufgrenzen entspricht. Prüfe Diagnose und Quellenkompatibilität. Dies bedeutet nicht, dass keine Brände vorhanden sind."
+    },
+    "nifc_access_denied": {
+      "title": "NIFC-Zugriff verweigert",
+      "description": "Der NIFC-Dienst hat den Zugriff verweigert. Aktualisierungen sind bis zur Überprüfung pausiert. Prüfe Dienstverfügbarkeit und Integrationsdiagnose. Diese Meldung fordert kein Konto und keine Zugangsdaten an."
     }
   },
   "entity": {
