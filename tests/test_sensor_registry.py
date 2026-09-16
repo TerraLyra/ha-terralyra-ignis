@@ -416,3 +416,40 @@ def test_source_timestamps_compare_instants_not_timezone_strings() -> None:
         {"product_timestamp": "2026-09-11T12:00:00+09:00"},
         {"product_timestamp": "2026-09-11T05:00:00+00:00"},
     ]) == {"last_product_at": "2026-09-11T05:00:00+00:00", "last_received_at": None}
+
+
+@pytest.mark.parametrize(
+    ("state", "failure", "received", "retrieval", "freshness"),
+    [
+        (ProviderStatus.DELAYED, None, True, "successful", "older_than_provider_threshold"),
+        (ProviderStatus.AVAILABLE, None, True, "successful", "within_provider_threshold"),
+        (ProviderStatus.OUTAGE, "timeout", True, "failed", "unknown"),
+        (ProviderStatus.AUTH_ERROR, "authentication", False, "failed", "unknown"),
+        (ProviderStatus.NO_PRODUCT, "no_product", True, "failed", "unknown"),
+        (ProviderStatus.AVAILABLE, None, False, "unknown", "within_provider_threshold"),
+    ],
+)
+def test_retrieval_is_separate_from_snapshot_freshness(
+    state, failure, received, retrieval, freshness
+) -> None:
+    """Old data can arrive successfully; cached success cannot hide a timeout."""
+    plan = LocationSourcePlan("home", "Home", ("eumetsat_sentinel3a",), ("S3A",))
+    health = SimpleNamespace(
+        provider_id="eumetsat_sentinel3a", satellite="S3A", location_ids=("home",),
+        status=state, failure_type=failure,
+        received_timestamp=datetime.fromisoformat("2026-09-16T06:36:00+00:00") if received else None,
+        product_timestamp=datetime.fromisoformat("2026-09-15T23:09:00+00:00"),
+    )
+    _, rows = sensor._location_operational_status(plan, (health,))
+    assert rows[0]["retrieval_status"] == retrieval
+    assert rows[0]["data_freshness"] == freshness
+    assert rows[0]["status"] == state.value
+    assert rows[0]["product_timestamp"] == "2026-09-15T23:09:00+00:00"
+
+
+def test_initializing_source_does_not_claim_success_or_fresh_data() -> None:
+    plan = LocationSourcePlan("home", "Home", ("eumetsat_sentinel3a",), ("S3A",))
+    status, rows = sensor._location_operational_status(plan, ())
+    assert status == "initializing"
+    assert rows[0]["retrieval_status"] == "unknown"
+    assert rows[0]["data_freshness"] == "unknown"
