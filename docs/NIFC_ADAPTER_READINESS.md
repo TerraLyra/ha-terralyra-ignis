@@ -157,3 +157,12 @@ time. These are proposed client defaults, not a provider-authorized request rate
 No scheduler or HA adapter uses this policy yet. Monotonic clock deadlines are
 process-local; persistent cooldown recovery and atomic in-flight coordination remain
 runtime integration requirements. An empty response never instructs history deletion.
+
+## Coordinator prototype
+
+An explicit, disabled-by-default research coordinator connects fetches and refresh
+policy, excludes concurrent requests within one instance/event loop, and retains the
+last response on known failures. Cooldown-only checkpoint export/restore survives a
+new monotonic-clock origin by conservatively restarting the saved remaining wait.
+There is still no durable storage adapter, HA scheduling or actual restart test with
+persisted state. History is not read or written. 103 offline tests pass.

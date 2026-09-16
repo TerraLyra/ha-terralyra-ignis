@@ -159,3 +159,25 @@ process restarts; restart-safe cooldown persistence remains future work.
 The async transport preserves HTTP status and Retry-After in a typed error without
 retaining response bodies. The synchronous research transport is unchanged.
 Reference: https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after
+
+## Explicit research coordinator and cooldown checkpoints
+
+`ResearchCoordinator.refresh(enabled=True)` connects the policy to the async fetcher.
+Enablement defaults to false. A single instance on one event loop excludes overlapping
+requests; callers arriving during a request skip instead of queuing. Cancellation
+propagates without changing state. Known HTTP, timeout, connection and validation
+failures update cooldowns while retaining the previous response. Unexpected programming
+errors propagate. TLS validation errors stop eligibility for review.
+
+`checkpoint` exports only cooldown metadata; `restore_checkpoint` restores it against
+a new process monotonic clock. The full saved remaining wait is applied again, ignoring
+time spent offline to avoid shortening it due to wall-clock changes. This can delay a
+refresh longer than necessary. Corrupt metadata raises an error; it is not a fresh-start
+signal. These helpers do not write files: atomic durable storage, handling missing
+checkpoints, restart orchestration and cache restoration remain unimplemented.
+The checkpoint contains no incident records or user history. It must be saved after
+state transitions by a future storage adapter. Cross-instance/process locking and a
+HA scheduler are also outside this prototype. No background work starts on import.
+
+Validation: 103 synthetic tests cover concurrency, cancellation, failure retention,
+clock-independent cooldown restoration and malformed checkpoints.
