@@ -205,3 +205,12 @@ statuses do not clear existing actionable issues; explicit recovery or disableme
 clears only the issue scoped to that entry. Transient outages remain diagnostics.
 Real issue-registry tests cover mapping, translations, entry isolation and clearing.
 No runtime caller, NIFC option, source activation or history operation is added.
+
+## Combined storage/diagnostic lifecycle tests
+
+Test-only wiring now synchronizes prototype diagnostics into the real HA issue
+registry while using the actual HA Store API with isolated pytest storage. Scenarios
+cover preflight save failure preventing any fetch, missing state followed by explicit
+synthetic recovery, preservation of another entry's issue, and cancelled requests
+remaining paused after reload. Production setup still has no NIFC runtime caller;
+the synthetic recovery is not an implemented user-facing reset action.
