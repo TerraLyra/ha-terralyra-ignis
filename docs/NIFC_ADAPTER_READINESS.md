@@ -146,3 +146,14 @@ Synthetic transport tests additionally cover streamed byte overflow, refused
 redirects/429/503/compression, and response cleanup after cancellation. The complete
 85-test offline suite passed on local Python 3.9 and 3.13. Production activation,
 automatic retry scheduling and full snapshot consistency remain out of scope.
+
+## Refresh policy prototype — 2026-09-16
+
+Pure, offline-testable refresh state transitions now specify a 15-minute normal
+interval and capped exponential waits for transient errors. Server Retry-After and
+existing longer cooldowns are respected. Invalid data/access denial stop automatic
+eligibility until review. Failures preserve the last successful response and receipt
+time. These are proposed client defaults, not a provider-authorized request rate.
+No scheduler or HA adapter uses this policy yet. Monotonic clock deadlines are
+process-local; persistent cooldown recovery and atomic in-flight coordination remain
+runtime integration requirements. An empty response never instructs history deletion.
