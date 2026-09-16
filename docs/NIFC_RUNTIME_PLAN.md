@@ -147,3 +147,14 @@ interrupted/unknown ledger phases as review_required. Owner-level storage reads
 are included in in_flight. A later successful ledger validation clears only this
 owner-level override; coordinator errors remain visible. No exception text is
 exposed in diagnostics. Entity registration and first-use UI remain outstanding.
+
+## Passive diagnostic entity checkpoint
+
+One disabled-by-default diagnostic enum sensor per entry now reads the shared
+owner's memory. HA entity polling and manual entity updates perform no storage or
+network I/O. Its attributes explicitly report retrieval_enabled=false and
+runtime_activation_pending. This is an observable preparation stage, not source
+activation: first-use UI, request scheduling, unload/write lifecycle and complete
+bounded national retrieval still gate activation. Source health is separate from
+fire danger and active-fire counts; no source-age threshold is invented. Six
+languages include the sensor name and retrieval state labels.

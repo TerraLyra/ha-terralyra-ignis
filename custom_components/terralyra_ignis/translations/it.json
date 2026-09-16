@@ -374,6 +374,16 @@
       },
       "land_surface_temperature": {
         "name": "Località: Casa — Temperatura della superficie"
+      },
+      "nifc_source_status": {
+        "name": "Stato della fonte NIFC",
+        "state": {
+          "not_requested": "Non richiesto",
+          "available": "Risposta disponibile",
+          "waiting": "In attesa",
+          "retained_response": "Risposta conservata",
+          "review_required": "Verifica necessaria"
+        }
       }
     },
     "event": {
