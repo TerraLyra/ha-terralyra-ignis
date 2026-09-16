@@ -107,3 +107,25 @@ No guarantee of national completeness, freshness or fire safety is made.
 
 Validation: 76 synthetic offline tests pass, including ten retrieval tests. The
 network transport was tested with mocked responses, not a live multi-page crawl.
+
+## Cancellable research retrieval
+
+`await nifc_async.fetch_incidents_async()` adds an overall 60-second asynchronous
+network deadline across every page and streamed body. It reuses the synchronous
+validator through a request generator, so identity, pagination and budget rules
+cannot drift between implementations. The default transport requires aiohttp;
+the standard-library offline tests inject readers and need no additional package.
+The aiohttp session is scoped to the operation, refuses redirects/compression, does
+not inherit proxy credentials and closes on cancellation. No request runs on import.
+
+Cancellation and timeouts are cooperative: an injected reader must not block the
+event loop or suppress cancellation. Bounded synchronous JSON validation cannot be
+preempted, so this is not a hard real-time CPU deadline. The older synchronous entry
+point remains socket-timeout-only. Neither path retries automatically; HTTP 429 and
+5xx abort the operation. A scheduled production client still needs a provider-aware
+cooldown/backoff policy; this tool creates no scheduler or HA integration.
+
+Validation: 81 offline tests pass, including overall deadline, external cancellation,
+shared multi-page validation and failure without retry/partial output. The default
+aiohttp transport has not yet been verified with a live multi-page source request.
+Reference: https://docs.aiohttp.org/en/stable/client_reference.html

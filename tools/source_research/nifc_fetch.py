@@ -56,7 +56,7 @@ class FetchResult:
     snapshot_consistency: str = 'not_established'
 
 
-def fetch_incidents(*, reader=read_url, page_size=500, max_pages=20,
+def _fetch_steps(*, page_size=500, max_pages=20,
                     max_records=10000, max_page_bytes=1048576,
                     max_total_bytes=10485760, timeout=20) -> FetchResult:
     """Fetch explicit opt-in research data; no partial records on failure.
@@ -81,7 +81,7 @@ def fetch_incidents(*, reader=read_url, page_size=500, max_pages=20,
             outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt',
             returnGeometry='true', outSR=4326, orderByFields='OBJECTID ASC',
             resultOffset=index * page_size, resultRecordCount=page_size))
-        payload = reader(ENDPOINT + '?' + query, remaining, timeout)
+        payload = yield ENDPOINT + '?' + query, remaining, timeout
         if not isinstance(payload, bytes) or len(payload) > remaining:
             raise ValueError('Reader returned invalid or excessive payload')
         byte_count += len(payload)
@@ -109,3 +109,16 @@ def fetch_incidents(*, reader=read_url, page_size=500, max_pages=20,
         if len(records) >= max_records:
             raise ValueError('Record budget exhausted before terminal page')
     raise ValueError('Page budget exhausted before terminal page')
+
+
+def fetch_incidents(*, reader=read_url, **limits) -> FetchResult:
+    """Synchronous research API; socket timeout only, no overall deadline."""
+    steps = _fetch_steps(**limits)
+    try:
+        request = next(steps)
+        while True:
+            request = steps.send(reader(*request))
+    except StopIteration as completed:
+        return completed.value
+    finally:
+        steps.close()

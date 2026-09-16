@@ -121,3 +121,13 @@ Before runtime integration: implement a cancellable overall network deadline and
 request-rate/backoff policy, validate live multi-page behavior, model complex/member
 relationships, and decide freshness and opt-in UI behavior. Pagination termination
 still does not establish a consistent snapshot or authorize history reconciliation.
+
+## Asynchronous deadline follow-up
+
+The research-only asynchronous entry point now bounds the whole network operation
+with a 60-second default deadline and supports external cancellation. It shares the
+same validation and limit implementation as the synchronous fetcher. Automatic
+retries are explicitly disabled, including for rate limits and server errors.
+The production scheduling/cooldown policy and live transport verification remain
+open. Synchronous validation is byte-bounded but not preemptible. No HA configuration,
+release, history write or live source request was performed. All 81 offline tests pass.
