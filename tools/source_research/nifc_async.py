@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 
 from nifc_fetch import _fetch_steps
+from nifc_refresh import SourceHTTPError
 
 
 async def _read(session, url, byte_limit, timeout):
@@ -12,7 +13,9 @@ async def _read(session, url, byte_limit, timeout):
     async with session.get(url, allow_redirects=False,
                            timeout=aiohttp.ClientTimeout(total=timeout),
                            headers={'Accept': 'application/json', 'Accept-Encoding': 'identity'}) as response:
-        if response.status != 200 or response.headers.get('Content-Encoding', 'identity') != 'identity':
+        if response.status != 200:
+            raise SourceHTTPError(response.status, response.headers.get('Retry-After'))
+        if response.headers.get('Content-Encoding', 'identity') != 'identity':
             raise ValueError('Unexpected HTTP response; automatic retry disabled')
         chunks, size = [], 0
         async for chunk in response.content.iter_chunked(16384):

@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from nifc_async import _read
+from nifc_refresh import SourceHTTPError
 
 
 class Response:
@@ -63,4 +64,13 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
         await started.wait()
         task.cancel()
         with self.assertRaises(asyncio.CancelledError): await task
+        self.assertTrue(response.closed)
+
+    async def test_rate_limit_metadata_survives_without_body(self):
+        response = Response([b'not retained'],429,{'Retry-After':'3600'})
+        with self.assertRaises(SourceHTTPError) as caught:
+            await self.read(response)
+        self.assertEqual(caught.exception.status,429)
+        self.assertEqual(caught.exception.retry_after,'3600')
+        self.assertEqual(response.read_count,0)
         self.assertTrue(response.closed)

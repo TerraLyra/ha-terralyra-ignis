@@ -135,3 +135,27 @@ five-record pages; both required continuation, and the record cap correctly abor
 the operation. No terminal-page or national completeness claim is made. Four more
 synthetic transport tests bring the suite to 85 passing tests (Python 3.9 and 3.13).
 See the dated live verification in `docs/NIFC_ADAPTER_READINESS.md`.
+
+## Refresh policy prototype
+
+`nifc_refresh` provides pure state transitions only: it does not schedule or issue
+requests, enable HA entities, persist cache/history or automatically classify all
+transport exceptions. The caller must distinguish transient failures, rate limits,
+invalid data and access denial. Cancellation is not a failure transition.
+
+Engineering defaults (not published NIFC request-rate permission): 15 minutes after
+successful retrieval; transient failure delays of 15, 30, 60, 120, 240, then at most
+360 minutes. Retry-After seconds or timezone-aware HTTP dates can extend this wait;
+existing cooldowns are never shortened. Invalid data/access denial require manual
+review. `due` also requires explicit enablement and no in-flight request; a future
+coordinator must enforce that check atomically. There is no background retry loop.
+
+All failure transitions retain the exact last successful result and its receipt
+time. A successful terminal empty response is a latest-response cache update, NOT
+incident-history deletion. Retrieval success does not establish source freshness or
+snapshot consistency. The in-memory monotonic deadline cannot be serialized across
+process restarts; restart-safe cooldown persistence remains future work.
+
+The async transport preserves HTTP status and Retry-After in a typed error without
+retaining response bodies. The synchronous research transport is unchanged.
+Reference: https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after
