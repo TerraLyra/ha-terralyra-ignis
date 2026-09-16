@@ -59,6 +59,17 @@ class ClassificationTests(unittest.TestCase):
                                        ('description', 'Near a hazard reduction burn'))))
         self.assertEqual(result.category, C.VEGETATION_FIRE_CANDIDATE)
 
+    def test_house_fire_is_not_vegetation_fire(self):
+        result = classify_item(ActItem((('type', 'HOUSE FIRE'),
+                                       ('title', 'Near grass and bush fire'))))
+        self.assertEqual(result.category, C.STRUCTURE_FIRE)
+        self.assertEqual(result.exercise_evidence, E.NOT_ESTABLISHED)
+
+    def test_test_house_fire_stays_marked(self):
+        result = classify_item(ActItem((('type', ' house  fire '), ('title', 'TEST ONLY'))))
+        self.assertEqual(result.category, C.STRUCTURE_FIRE)
+        self.assertEqual(result.exercise_evidence, E.MARKED)
+
     def test_duplicate_fields_rejected(self):
         with self.assertRaises(ValueError):
             classify_item(ActItem((('type', 'AMBULANCE RESPONSE'), ('type', 'GRASS AND BUSH FIRE'))))

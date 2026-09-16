@@ -48,6 +48,14 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(result['record_count'],2)
         self.assertEqual(result['production_readiness'],'not_established')
 
+    def test_fire_types_remain_separate_in_summary(self):
+        result = summarize_feed(feed(record('HOUSE FIRE','a'),
+                                     record('GRASS AND BUSH FIRE','b'),
+                                     record('HAZARD REDUCTION BURN','c')))
+        self.assertEqual(result['categories'], {'structure_fire':1,
+            'vegetation_fire_candidate':1,'planned_burn':1})
+        self.assertEqual(result['record_count'],3)
+
     def test_limits_propagate(self):
         with self.assertRaises(InvalidFeed):
             summarize_feed(feed(record('UNKNOWN'),record('UNKNOWN')),max_items=1)
