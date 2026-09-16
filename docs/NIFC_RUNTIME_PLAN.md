@@ -93,3 +93,12 @@ under its canonical module name without importing HA setup; production uses norm
 package imports and has no research-tool dependency. HA tests assert identical class
 and function identity between the wrappers and integration-owned implementation.
 Retrieval, lifecycle and summary extraction remain outstanding. No runtime activation.
+
+## Network extraction checkpoint
+
+The bounded query protocol, HTTP error type and asynchronous client now reside in
+`official_sources/nifc/`; research entry points reuse them. `NifcClient` borrows a
+caller-owned session and disables decompression/redirects per request without closing
+or reconfiguring that session. HA tests cover success, HTTP failure and cancellation
+using the actual HA session with synthetic responses. No runtime registration or
+polling is added. Cooldown/coordinator extraction and enablement remain outstanding.
