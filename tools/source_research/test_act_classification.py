@@ -74,6 +74,20 @@ class ClassificationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             classify_item(ActItem((('type', 'AMBULANCE RESPONSE'), ('type', 'GRASS AND BUSH FIRE'))))
 
+class ExplicitMarkerTests(unittest.TestCase):
+    def test_explicit_markers_preserve_original(self):
+        for text in ('TEST', 'TEST ONLY', 'No action required', 'NO  ACTION\nREQUIRED'):
+            item = ActItem((('description', text),))
+            result = classify_item(item)
+            self.assertTrue(result.is_test)
+            self.assertIs(result.upstream,item)
+            self.assertEqual(result.upstream.fields,item.fields)
+
+    def test_uncertain_not_automatically_real_or_excluded(self):
+        for text in ('Not a test', 'This is not an exercise', 'Latest report', 'Near Drilldown Road'):
+            result = classify_item(ActItem((('title', text),)))
+            self.assertIsNone(result.is_test)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -52,3 +52,20 @@ requires its own scope check. No enquiry was sent and no agreement was accepted.
 
 This review changes documentation only. Victoria remains a priority, but deployment
 depends on the outstanding product-specific conditions and semantic checks above.
+
+## Research continuation after ACT — 2026-09-16 21:06 UTC
+
+Rechecked the official CFA feed page: RSS retains personal/non-commercial and
+unmodified-content restrictions, while the separate developer section delegates
+access to EMV and lists XML/JSON endpoints. These are distinct products; the RSS
+conditions neither grant nor conclusively deny the required developer permission.
+Targeted official-site searches did not locate a product-specific developer licence.
+
+A new bounded read of the documented JSON endpoint returned HTTP 200, 1,417 bytes,
+application/json; charset=UTF-8, no redirect, HTTP Date 21:06:53 GMT. The root is a
+JSON object with a `results` key. This probe establishes availability/envelope only,
+not empty-feed semantics, completeness or reuse permission; no raw incidents saved.
+Next work is a synthetic envelope/time inspector and verification of EMV developer
+conditions before distribution of an operational adapter. ACT uncertainty does not
+block that research. WA catalogue also continues to mark incident products as
+subject to approval; it is not an unrestricted fallback for Victoria.
