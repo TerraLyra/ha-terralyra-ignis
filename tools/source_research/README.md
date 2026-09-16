@@ -226,3 +226,24 @@ HA's event loop. There is no scheduler, HA activation, incident-history persiste
 automatic manual-pause reset. Seven lifecycle tests bring the offline suite to 116
 passing tests on Python 3.9 and 3.13, including save failures, restart cooldowns,
 cancellation, concurrency and disabled behavior. No live requests run in these tests.
+
+## Async store interface prototype
+
+`AsyncStoredResearchCoordinator` accepts an injected store with `async_load` and
+`async_save`, matching the interface used by the integration's existing archives.
+Explicit setup validates saved state; no implicit initialization is performed.
+The lifecycle awaits storage instead of doing file I/O on the event loop. Production
+HA Store has not been wired in: tests use asynchronous in-memory stores only.
+
+A shielded save retains coordinator ownership until the write settles even when its
+caller is cancelled, preventing an older write from racing a subsequent request.
+A permanently hung store can delay cancellation; production storage recovery remains
+open. No cross-process ownership or power-loss guarantee is introduced.
+
+Diagnostics expose only fixed problem codes, in-flight state, a previous-response
+presence flag and failure count. They never include source records, paths or raw
+exception text, and never equate retrieval success with source freshness. These are
+not yet translated HA Repair issues or automatic recovery actions.
+
+121 offline tests passed locally, including asynchronous storage lifecycle, restart
+cooldown, cancellation during writes, failed loading/saving and event-loop progress.

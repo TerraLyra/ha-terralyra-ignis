@@ -186,3 +186,12 @@ failure prevents the request. Previous in-memory response data is retained on st
 failure. 116 synthetic tests pass. Remaining runtime work includes nonblocking HA
 storage integration, one-owner enforcement, user-facing diagnostics/recovery and
 source freshness/complex semantics. No live HA configuration or history was changed.
+
+## Async storage interface and diagnostics prototype
+
+The existing integration uses async_load/async_save store interfaces. A separate
+research coordinator now accepts that interface, awaits writes and preserves request
+ownership until a cancelled save settles. Fixed diagnostics identify load/save
+failures without raw errors or paths. 121 offline tests pass. Actual HA Store wiring,
+translated Repairs, manual recovery and hung-storage handling remain outstanding;
+this is not a deployed HA adapter and performs no actual HA storage operations.
