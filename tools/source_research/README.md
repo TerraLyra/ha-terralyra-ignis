@@ -203,3 +203,26 @@ new monotonic-clock origin. Other tests cover replacement failure, unrelated his
 preservation, manual pause and corrupt files. All 109 offline tests passed locally on
 Python 3.9 and 3.13. Directory metadata is not fsynced, so sudden-power-loss durability
 is not claimed. Cross-process writers and automatic restart orchestration remain open.
+
+## Persistent research lifecycle
+
+`PersistentResearchCoordinator` now connects loading and saving to explicit refresh
+calls. Construction requires an existing valid checkpoint; initial setup is an
+explicit `save_cooldown` call with a chosen initial state. Missing/corrupt state never
+silently enables requests. Each eligible request first saves a manual-pause marker,
+then fetches and saves the resulting cooldown. If interrupted after that marker, a
+restart stays paused for review. Normal success/transient failure replaces the marker
+with the policy wait. Cancellation does not immediately retry.
+
+Preflight save failure prevents network access and pauses the current instance.
+Final save failure retains the previous in-memory response and leaves the persisted
+pause marker. Exceptions propagate; callers must surface them. The guarantee assumes
+atomic filesystem replacement, not power-loss durability. If a preflight save fails,
+no new marker was committed; durable recovery of that storage failure is not claimed.
+One owner per directory is required; separate processes are not mutually excluded.
+
+This is still research tooling: synchronous file I/O must be adapted before use on
+HA's event loop. There is no scheduler, HA activation, incident-history persistence or
+automatic manual-pause reset. Seven lifecycle tests bring the offline suite to 116
+passing tests on Python 3.9 and 3.13, including save failures, restart cooldowns,
+cancellation, concurrency and disabled behavior. No live requests run in these tests.

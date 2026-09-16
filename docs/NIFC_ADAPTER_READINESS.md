@@ -176,3 +176,13 @@ Synthetic disk replacement failure preserved the prior checkpoint and an unrelat
 history file. 109 tests passed on Python 3.9 and 3.13. No actual HA history was touched.
 Coordinator lifecycle wiring, storage-failure handling, cross-process coordination and
 power-loss durability remain unimplemented. No automatic startup or HA activation.
+
+## Persistent lifecycle prototype
+
+The persistent wrapper now loads before eligibility, saves a pause marker before
+network access, and saves final policy state after completion. Cancellation or a
+final save failure leaves manual review required after restart; a preflight save
+failure prevents the request. Previous in-memory response data is retained on storage
+failure. 116 synthetic tests pass. Remaining runtime work includes nonblocking HA
+storage integration, one-owner enforcement, user-facing diagnostics/recovery and
+source freshness/complex semantics. No live HA configuration or history was changed.
