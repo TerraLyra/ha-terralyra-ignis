@@ -26,13 +26,18 @@ class NifcOwner:
         self.client = NifcClient(session)
         self.coordinator = NifcStoredCoordinator(store, fetcher=self.client.async_fetch)
         self._lock = asyncio.Lock()
+        self._ledger_problem = None
 
     @property
     def state(self):
         return self.coordinator.state
 
     def diagnostics(self):
-        return self.coordinator.diagnostics()
+        diagnostics = self.coordinator.diagnostics()
+        if self._ledger_problem is not None:
+            diagnostics['problem'] = self._ledger_problem
+        diagnostics['in_flight'] = self._lock.locked() or diagnostics['in_flight']
+        return diagnostics
 
     async def async_initialize(self, *, confirmed_new=False):
         """Explicit first-use operation; never overwrite an existing cooldown.
@@ -73,9 +78,15 @@ class NifcOwner:
         # HA calls on a single event loop; no await between guard and acquisition.
         async with self._lock:
             if self._initialization_store is not None:
-                ledger = await self._initialization_store.async_load()
+                try:
+                    ledger = await self._initialization_store.async_load()
+                except Exception:
+                    self._ledger_problem = 'storage_load_failed'
+                    raise
                 if ledger is not None and ledger != {"version": 1, "phase": "ready"}:
+                    self._ledger_problem = 'review_required'
                     raise ValueError("Initialization requires review")
+            self._ledger_problem = None
             await self.coordinator.setup()
             return await self.coordinator.refresh(enabled=True)
 
