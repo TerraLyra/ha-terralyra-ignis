@@ -91,6 +91,7 @@ MAX_MONITORED_LOCATIONS = 10
 DEFAULT_UPDATE_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL_MINUTES)
 
 PLATFORMS = [
+    "switch",
     "sensor",
     "event",
     "number",

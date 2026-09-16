@@ -229,6 +229,7 @@
     }
   },
   "entity": {
+    "switch": {"nifc_map": {"name": "NIFC report map"}},
     "geo_location": {
       "monitoring_area": {
         "name": "Location: {location_name} — Active-fire monitoring area"
@@ -420,6 +421,7 @@
       }
     },
     "calendar": {
+      "nifc_reports": {"name": "NIFC official reports"},
       "official_reports": {
         "name": "Reports — BM OKF notices"
       },

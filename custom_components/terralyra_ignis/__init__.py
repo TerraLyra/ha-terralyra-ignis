@@ -282,4 +282,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> boo
 
 async def async_unload_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> bool:
     """Unload a TerraLyra IGNIS config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unloaded:
+        manager = hass.data.get(DOMAIN, {}).get("nifc_maps", {}).get(entry.entry_id)
+        if manager is not None:
+            await manager.close()
+    return unloaded

@@ -26,15 +26,15 @@ class NifcRuntime:
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.async_stop)
 
     @callback
-    def attach(self, entry, listener):
-        self._listeners[entry.entry_id] = (entry, listener)
+    def attach(self, entry, listener, *, consumer="diagnostic"):
+        self._listeners[(entry.entry_id, consumer)] = (entry, listener)
         if self._timer is None and not self._stopping:
             # Timer checks eligibility only; the owner enforces >=15 minute requests.
             self._timer = async_track_time_interval(self.hass, self.request_refresh, timedelta(minutes=1))
         self.request_refresh()
 
     def eligible(self, entry):
-        return (entry.entry_id in self._listeners and not self._stopping
+        return (any(key[0] == entry.entry_id for key in self._listeners) and not self._stopping
                 and any(loc.enabled for loc in resolve_monitored_locations(self.hass, entry)))
 
     @property
@@ -81,9 +81,10 @@ class NifcRuntime:
             if not done:
                 _LOGGER.warning('NIFC storage task remains owned during shutdown; source is paused')
 
-    async def detach(self, entry):
-        self._listeners.pop(entry.entry_id, None)
-        async_sync_nifc_research_issue(self.hass, entry, enabled=False)
+    async def detach(self, entry, *, consumer="diagnostic"):
+        self._listeners.pop((entry.entry_id, consumer), None)
+        if not any(key[0] == entry.entry_id for key in self._listeners):
+            async_sync_nifc_research_issue(self.hass, entry, enabled=False)
         if not self._listeners:
             if self._timer is not None:
                 self._timer()
