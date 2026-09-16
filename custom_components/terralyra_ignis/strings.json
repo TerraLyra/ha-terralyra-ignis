@@ -409,6 +409,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "Initialize NIFC first-use storage",
+      "description": "Administrator-only preparation shared by all IGNIS entries. Does not enable retrieval or reset waits. Do not use after deleting established storage. Interrupted initialization requires review.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS entry"
+        },
+        "confirm_first_use": {
+          "name": "I confirm first use, not recovery or reset"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Save reviewed report link",
       "description": "Save one manually approved candidate using its review token. Not official confirmation; satellite incidents remain unchanged."

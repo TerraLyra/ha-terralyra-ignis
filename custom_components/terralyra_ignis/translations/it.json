@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "Preparare lo spazio iniziale NIFC",
+      "description": "Solo amministratori; archivio condiviso da tutte le voci IGNIS. Non attiva richieste né azzera attese. Non usare dopo aver eliminato dati esistenti. Un’inizializzazione interrotta richiede verifica.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Voce IGNIS"
+        },
+        "confirm_first_use": {
+          "name": "Confermo il primo utilizzo, non un recupero o ripristino"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Salva collegamento verificato dell’avviso",
       "description": "Salva un candidato approvato manualmente con il suo token di verifica. Non è una conferma ufficiale; gli eventi satellitari restano invariati."

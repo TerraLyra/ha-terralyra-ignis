@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "NIFC első használatának előkészítése",
+      "description": "Csak rendszergazdáknak; minden IGNIS-bejegyzés közös tárolóját készíti elő. Nem indít adatlekérést és nem állítja vissza a várakozást. Meglévő tároló törlése után ne használd. Megszakadt inicializálásnál ellenőrzés szükséges.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-bejegyzés"
+        },
+        "confirm_first_use": {
+          "name": "Megerősítem az első használatot; nem helyreállítás vagy visszaállítás"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Ellenőrzött hírkapcsolat mentése",
       "description": "Egy kézzel jóváhagyott jelölt mentése az ellenőrzési azonosítójával. Nem hivatalos megerősítés; a műholdas események változatlanok."

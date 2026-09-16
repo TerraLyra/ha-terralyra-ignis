@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "initialize_nifc": {
+      "name": "Préparer le stockage initial NIFC",
+      "description": "Administrateurs uniquement ; stockage commun à toutes les entrées IGNIS. Ne lance aucune requête et ne réinitialise aucun délai. Ne pas utiliser après suppression du stockage existant. Une initialisation interrompue nécessite une vérification.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée IGNIS"
+        },
+        "confirm_first_use": {
+          "name": "Je confirme une première utilisation, sans récupération ni réinitialisation"
+        }
+      }
+    },
     "save_official_report_link": {
       "name": "Enregistrer une association de bulletin vérifiée",
       "description": "Enregistrer un candidat approuvé manuellement avec son jeton de vérification. Ce n’est pas une confirmation officielle ; les incidents satellitaires restent inchangés."
