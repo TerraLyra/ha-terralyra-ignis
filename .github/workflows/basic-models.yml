@@ -1,0 +1,48 @@
+name: Basic model packaging pilot
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  wheel:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip wheel --no-deps . --wheel-dir dist
+      - name: Inspect allowlisted wheel contents
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          wheel, = Path('dist').glob('*.whl')
+          with zipfile.ZipFile(wheel) as archive:
+              names = archive.namelist()
+              assert 'terralyra_ignis_models/__init__.py' in names
+              assert all(n == 'terralyra_ignis_models/__init__.py' or n.startswith('terralyra_ignis_models-0.0.1.dev0.dist-info/') for n in names), names
+              metadata = archive.read('terralyra_ignis_models-0.0.1.dev0.dist-info/METADATA').decode()
+              assert 'Requires-Dist:' not in metadata
+          PY
+      - name: Install and import without Home Assistant
+        run: |
+          python -m venv /tmp/model-consumer
+          /tmp/model-consumer/bin/pip install --no-deps dist/*.whl
+          cd /tmp
+          /tmp/model-consumer/bin/python -I - <<'PY'
+          from datetime import datetime, timezone
+          import sys
+          from terralyra_ignis_models import FireDetection, ProviderSnapshot, ProviderStatus
+          now = datetime.now(timezone.utc)
+          detection = FireDetection('synthetic', 'test', 'test', now, 0.0, 0.0, frp_mw=0.0)
+          snapshot = ProviderSnapshot('synthetic', 'test', 'test', now, now, ProviderStatus.AVAILABLE, 'https://example.invalid', 'synthetic', (detection,))
+          assert snapshot.detections[0] is detection
+          assert detection.frp_mw == 0.0 and detection.confidence is None
+          assert snapshot.status.value == 'available'
+          assert not any(n.startswith(('homeassistant', 'custom_components')) for n in sys.modules)
+          PY
