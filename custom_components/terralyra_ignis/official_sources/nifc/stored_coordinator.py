@@ -69,15 +69,40 @@ class NifcStoredCoordinator:
             stage = 'storage_save_failed'
             try:
                 await _settled_save(self._store, checkpoint(
-                    replace(previous, next_attempt_at=math.inf), now=self._clock()))
+                    replace(previous, next_attempt_at=math.inf,
+                            resume_after_review_at=max(previous.next_attempt_at, self._clock()+900)), now=self._clock()))
                 stage = 'request_failed'
                 outcome = await self._inner.refresh(enabled=True)
                 stage = 'storage_save_failed'
                 await _settled_save(self._store, checkpoint(self.state, now=self._clock()))
             except (Exception, asyncio.CancelledError):
+                current = self.state
+                resume = (current.resume_after_review_at if math.isinf(current.next_attempt_at)
+                          else max(current.next_attempt_at, self._clock()+900))
                 self._inner.state = replace(previous, next_attempt_at=math.inf,
-                                            status='persistence_review_required')
+                                            status='persistence_review_required', resume_after_review_at=resume)
                 self._problem = stage
                 raise
             self._problem = None if outcome == 'retrieved' else self.state.status
             return outcome
+
+    async def recover(self):
+        """Explicit review only; validate disk and preserve all known wait bounds."""
+        async with self._lock:
+            now = self._clock()
+            restored = restore_checkpoint(await self._store.async_load(), now=now)
+            bounds = [now + 900]
+            for state in (restored, self.state):
+                if state is None:
+                    continue
+                if math.isinf(state.next_attempt_at):
+                    if state.resume_after_review_at is None:
+                        raise ValueError('Unknown or unbounded pause cannot be reset')
+                    bounds.append(state.resume_after_review_at)
+                else:
+                    bounds.append(state.next_attempt_at)
+            state = replace(self.state or restored, next_attempt_at=max(bounds),
+                            resume_after_review_at=None, status='restored_cooldown')
+            await _settled_save(self._store, checkpoint(state, now=self._clock()))
+            self._inner = NifcCoordinator(state=state, clock=self._clock, **self._kwargs)
+            self._problem = None

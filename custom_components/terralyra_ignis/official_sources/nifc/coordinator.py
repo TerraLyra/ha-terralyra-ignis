@@ -14,8 +14,12 @@ def checkpoint(state, *, now):
     """Export cooldown metadata only; no records or process-specific timestamps."""
     _clock(now)
     wait = max(0, state.next_attempt_at - now)
-    return dict(version=1, wait_seconds=None if math.isinf(wait) else math.ceil(wait),
+    data = dict(version=1, wait_seconds=None if math.isinf(wait) else math.ceil(wait),
                 failures=state.failures)
+    if math.isinf(wait) and state.resume_after_review_at is not None:
+        _clock(state.resume_after_review_at)
+        data.update(version=2, resume_wait_seconds=math.ceil(max(0, state.resume_after_review_at - now)))
+    return data
 
 
 def restore_checkpoint(data, *, now):
@@ -26,17 +30,26 @@ def restore_checkpoint(data, *, now):
     No saved response or user history is read, replaced or deleted here.
     """
     _clock(now)
-    if not isinstance(data, dict) or set(data) != {'version','wait_seconds','failures'}:
+    keys = {'version','wait_seconds','failures'}
+    if isinstance(data, dict) and data.get('version') == 2:
+        keys.add('resume_wait_seconds')
+    if not isinstance(data, dict) or set(data) != keys:
         raise ValueError('Invalid cooldown checkpoint')
-    if type(data['version']) is not int or data['version'] != 1:
+    if type(data['version']) is not int or data['version'] not in (1, 2):
         raise ValueError('Unsupported cooldown version')
     count, wait = data['failures'], data['wait_seconds']
     if type(count) is not int or not 0 <= count <= 32:
         raise ValueError('Invalid failure count')
     if wait is not None and (type(wait) is not int or not 0 <= wait <= 10**12):
         raise ValueError('Invalid saved wait')
+    resume = None
+    if data['version'] == 2:
+        seconds = data['resume_wait_seconds']
+        if wait is not None or type(seconds) is not int or not 0 <= seconds <= 10**12:
+            raise ValueError('Invalid recovery wait')
+        resume = now + seconds
     return RefreshState(failures=count, next_attempt_at=math.inf if wait is None else now+wait,
-                        status='restored_cooldown')
+                        status='restored_cooldown', resume_after_review_at=resume)
 
 
 class NifcCoordinator:

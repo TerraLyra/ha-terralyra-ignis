@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "Resume NIFC after review",
+      "description": "Administrator recovery after reviewing source access, schema and storage. Preserves known waits, with at least 15 minutes before a request. Missing/corrupt data or an unknown/unbounded pause cannot be reset. History is preserved.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS entry"
+        },
+        "confirm_review": {
+          "name": "I reviewed and resolved the source or storage problem"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "Initialize NIFC first-use storage",
       "description": "Administrator-only preparation shared by all IGNIS entries. Does not enable retrieval or reset waits. Do not use after deleting established storage. Interrupted initialization requires review.",

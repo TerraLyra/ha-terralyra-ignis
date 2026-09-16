@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "NIFC folytatása ellenőrzés után",
+      "description": "Rendszergazdai helyreállítás a forrás és a tárolás ellenőrzése után. Megőrzi az ismert várakozást; legalább 15 perc múlva lehet új lekérés. Hiányzó vagy sérült adat, illetve ismeretlen vagy korlátlan várakozás nem állítható vissza. Az előzmények megmaradnak.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-bejegyzés"
+        },
+        "confirm_review": {
+          "name": "Ellenőriztem és elhárítottam a forrás vagy a tárolás hibáját"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "NIFC első használatának előkészítése",
       "description": "Csak rendszergazdáknak; minden IGNIS-bejegyzés közös tárolóját készíti elő. Nem indít adatlekérést és nem állítja vissza a várakozást. Meglévő tároló törlése után ne használd. Megszakadt inicializálásnál ellenőrzés szükséges.",

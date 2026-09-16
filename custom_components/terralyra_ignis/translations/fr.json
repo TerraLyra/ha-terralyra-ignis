@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "Reprendre NIFC après vérification",
+      "description": "Récupération administrateur après vérification de la source et du stockage. Conserve les délais connus, au moins 15 minutes. Ne réinitialise pas les données absentes ou corrompues ni les pauses inconnues ou illimitées. Historique conservé.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée IGNIS"
+        },
+        "confirm_review": {
+          "name": "J’ai vérifié et résolu le problème de source ou de stockage"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "Préparer le stockage initial NIFC",
       "description": "Administrateurs uniquement ; stockage commun à toutes les entrées IGNIS. Ne lance aucune requête et ne réinitialise aucun délai. Ne pas utiliser après suppression du stockage existant. Une initialisation interrompue nécessite une vérification.",

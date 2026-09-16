@@ -443,6 +443,18 @@
     }
   },
   "services": {
+    "recover_nifc": {
+      "name": "Riprendere NIFC dopo verifica",
+      "description": "Recupero amministratore dopo verifica di fonte e archivio. Conserva le attese note, almeno 15 minuti. Non ripristina dati mancanti o corrotti né pause sconosciute o illimitate. Conserva la cronologia.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Voce IGNIS"
+        },
+        "confirm_review": {
+          "name": "Ho verificato e risolto il problema della fonte o dell’archivio"
+        }
+      }
+    },
     "initialize_nifc": {
       "name": "Preparare lo spazio iniziale NIFC",
       "description": "Solo amministratori; archivio condiviso da tutte le voci IGNIS. Non attiva richieste né azzera attese. Non usare dopo aver eliminato dati esistenti. Un’inizializzazione interrotta richiede verifica.",

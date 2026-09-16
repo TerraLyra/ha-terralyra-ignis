@@ -14,7 +14,7 @@ PATH = Path(__file__).resolve().parents[2] / 'custom_components' / 'terralyra_ig
 
 
 def load_module(name):
-    if name not in ('page', 'pages', 'records', 'assessment', 'query', 'errors', 'client', 'refresh', 'coordinator', 'stored_coordinator', 'summary'):
+    if name not in ('page', 'pages', 'records', 'assessment', 'query', 'errors', 'client', 'refresh', 'coordinator', 'stored_coordinator', 'summary', 'storage'):
         raise ValueError('Unknown pure NIFC module')
     if PACKAGE not in sys.modules:
         spec = importlib.util.spec_from_file_location(PACKAGE, PATH / '__init__.py',

@@ -80,3 +80,29 @@ async def test_unloaded_entry_and_missing_confirmation(hass, action):
         with pytest.raises(ServiceValidationError):
             await call(hass, action)
         initialize.assert_not_awaited()
+
+
+async def test_recovery_action_is_explicit_and_preserves_server_wait(hass,hass_storage,action):
+    owner=get_nifc_owner(hass)
+    await owner.async_initialize(confirmed_new=True)
+    await owner._store.async_save({'version':2,'wait_seconds':None,'failures':1,'resume_wait_seconds':7200})
+    data={'config_entry_id':action['config_entry_id'],'confirm_review':True}
+    with patch.object(hass.auth,'async_get_user',AsyncMock(return_value=SimpleNamespace(is_admin=True))):
+        result=await hass.services.async_call(DOMAIN,'recover_nifc',data,
+            context=Context(user_id='admin'),blocking=True,return_response=True)
+    assert result['status']=='recovered'
+    assert result['retrieval_enabled'] is False
+    assert (await owner._store.async_load())['wait_seconds'] >= 7199
+
+
+async def test_recovery_cannot_reset_unknown_pause(hass,hass_storage,action):
+    owner=get_nifc_owner(hass)
+    await owner.async_initialize(confirmed_new=True)
+    saved={'version':1,'wait_seconds':None,'failures':1}
+    await owner._store.async_save(saved)
+    with patch.object(hass.auth,'async_get_user',AsyncMock(return_value=SimpleNamespace(is_admin=True))):
+        with pytest.raises(ServiceValidationError):
+            await hass.services.async_call(DOMAIN,'recover_nifc',
+                {'config_entry_id':action['config_entry_id'],'confirm_review':True},
+                context=Context(user_id='admin'),blocking=True,return_response=True)
+    assert await owner._store.async_load()==saved
