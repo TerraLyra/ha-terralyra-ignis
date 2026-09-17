@@ -69,3 +69,28 @@ Next work is a synthetic envelope/time inspector and verification of EMV develop
 conditions before distribution of an operational adapter. ACT uncertainty does not
 block that research. WA catalogue also continues to mark incident products as
 subject to approval; it is not an unrestricted fallback for Victoria.
+
+## Offline envelope inspector — 2026-09-17
+
+`tools/source_research/victoria_feed.py` now validates the observed `results` array
+inside a bounded UTF-8 JSON response. It rejects duplicate keys, non-finite numbers,
+malformed/extra envelopes, oversized arrays, nested or empty records and incomplete
+responses. Unknown scalar fields and original values are retained without category,
+identity, timezone or freshness inference. Empty valid arrays remain distinct from
+failures. Diagnostic summaries expose only fixed labels and record counts. It has
+no network, persistence or production HA imports. Six synthetic tests bring the
+complete offline source suite to 163 passing tests.
+
+A newly located [official support article](https://support.emergency.vic.gov.au/hc/en-gb/articles/235717508-How-do-I-access-the-VicEmergency-data-feed)
+says access was not public and invites expressions of interest. It was last updated
+6 February 2019, so it cannot establish the current status of the separately listed,
+reachable CFA developer endpoint. Its linked EMV emergency-data page returned 403
+to the research browser; no access restriction was bypassed. The current CFA page
+still lists developer XML/JSON links. These conflicting/dated descriptions leave
+product-specific permission unresolved, rather than proving access is prohibited.
+
+Next evidence needed: current EMV developer conditions covering local fetching,
+filtering/display, attribution, polling and retention. A request could reference the
+exact CFA-listed getIncidentJSON endpoint and distinguish public local HACS use from
+any future commercial Cloud product. No enquiry was sent, agreement accepted, live
+HA entity created or release published. ACT remains experimental and unchanged.
