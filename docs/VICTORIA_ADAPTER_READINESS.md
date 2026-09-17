@@ -164,3 +164,32 @@ text, coordinate bounds, non-finite/boolean/string values, missing pairs and pri
 aggregate output. All 177 offline tests pass. No production imports, entities,
 network polling or history changes are added. Developer permission and real summer/
 transition evidence remain unresolved; the provider is still experimental.
+
+## Unified offline report — 2026-09-17
+
+`victoria_report.py` now validates a complete bounded response once and combines
+identity, duplicate-ID, update-time, category and coordinate counts. Invalid envelopes
+raise before any partial report. Diagnostic output uses fixed labels only: no source
+IDs, names, dates, coordinates or unknown-category strings. Dimensions overlap and
+must not be added together. Even a valid empty feed keeps production readiness
+unestablished and is never an all-clear. Known evidence limitations accompany every
+report rather than being inferred away by successful parsing.
+
+Run locally on an already available sample:
+
+```sh
+python3 tools/source_research/victoria_report.py /path/to/sample.json
+```
+
+Or pass `-` for standard input. The command performs no network requests and writes
+no source files. It reads at most 1 MiB plus one detection byte. Invalid/unreadable
+input produces a fixed failure object and exit code 2 without raw parser errors,
+payload fragments, file paths or partial counts. Success returns exit code 0 and
+one JSON report. Retain original upstream data only in an appropriately protected
+research workflow; do not commit raw incident samples.
+
+Six new tests exercise mixed findings, duplicate IDs, empty feeds, whole-response
+validation, redaction and command success/failure. All 183 source-research tests
+pass. No runtime integration, release or HA/history change is included. This report
+consolidates existing evidence; it does not close developer-access, summer/DST,
+identifier-lifetime, planned-burn taxonomy or feed-completeness questions.
