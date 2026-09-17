@@ -94,3 +94,36 @@ filtering/display, attribution, polling and retention. A request could reference
 exact CFA-listed getIncidentJSON endpoint and distinguish public local HACS use from
 any future commercial Cloud product. No enquiry was sent, agreement accepted, live
 HA entity created or release published. ACT remains experimental and unchanged.
+
+## Identity and update-time research — 2026-09-17
+
+`victoria_records.py` adds offline inspection of `incidentNo`, `lastUpdatedDt` and
+`lastUpdateDateTime`. Candidate IDs retain their exact type/value: integer 1 and
+string "1" are not silently merged. Missing, invalid and duplicated identities are
+reported; snapshot comparisons reject unusable/duplicate IDs and report overlap
+only. Disappearance is not closure and overlap is not lifetime stability.
+
+Update-time inspection explicitly tests the candidate rule: integer Unix epoch
+milliseconds versus dd/mm/yyyy HH:MM:SS in Australia/Melbourne using ZoneInfo.
+The rule remains unverified provider semantics, even when fields agree. The epoch
+candidate is preserved with millisecond precision; comparison uses the second
+precision of the local source text. Invalid, missing, conflicting and nonexistent
+local clocks have separate outcomes. Fold matches are labelled separately; the
+supplied epoch distinguishes the candidate instants without choosing a fold from
+local text alone. No current-time, origin-time, host-timezone or yearless-display
+fallback is used. Original inputs remain in the evidence object.
+
+Seven synthetic tests cover winter/summer offsets, both autumn-fold instants,
+spring gaps, disagreement, millisecond precision, invalid input, typed identities,
+duplicates, snapshot changes and redacted summaries. All 170 offline source tests
+pass. Production HA imports, data persistence and operational entities remain absent.
+
+Two fresh, bounded HTTPS reads at 08:44:53 and 08:45:55 UTC returned HTTP 200,
+8,478 and 9,197 bytes. The first contained 12 records, the second 13. All 25 field
+pairs matched the candidate time rule; neither snapshot contained duplicate IDs.
+Twelve typed IDs were shared and one appeared only in the second response. Requests
+used a 25-second timeout, 1 MiB limit, identity encoding and no redirects; raw data
+and IDs stayed in memory. This September sample supports only the observed winter
+representation. It proves neither summer/DST-transition behavior, source timestamp
+meaning, long-term ID stability nor feed completeness. No source data is a committed
+fixture; repository tests use synthetic records only.
