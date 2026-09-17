@@ -127,3 +127,40 @@ and IDs stayed in memory. This September sample supports only the observed winte
 representation. It proves neither summer/DST-transition behavior, source timestamp
 meaning, long-term ID stability nor feed completeness. No source data is a committed
 fixture; repository tests use synthetic records only.
+
+## Type and coordinate inspection — 2026-09-17
+
+`victoria_spatial.py` adds offline, exact-field research labels. Fire/Bushfire becomes
+a vegetation-fire candidate, Fire/Building a structure-fire report, and Fire/False
+Alarm a reported-false-alarm label. Other Fire subtypes remain fire_unspecified;
+Medical, Accident / Rescue and Other remain separate. Unknown categories, including
+unverified planned-burn feed spellings, remain unknown. No title, agency or status
+can override the source category. These labels neither confirm an active wildfire
+nor establish a complete provider taxonomy. No records are automatically removed.
+Original upstream fields remain in the returned evidence, including test wording.
+
+The [official VicEmergency map legend](https://emergency.vic.gov.au/) explains that
+Fire includes vegetation/building fires and alarms, and that an incident icon does
+not show fire spread. Planned burns are a separate map category; a map label is not
+proof of the developer JSON field combination. The inspector makes no warning-area,
+fire-extent, safety or satellite-confirmation inference.
+
+Named latitude/longitude values require finite JSON numbers within global bounds;
+booleans and strings are rejected. Missing and incomplete pairs are distinct from
+invalid values. There is no swapping, clamping, geocoding or Home fallback. A valid
+point does not establish Victorian jurisdiction or positional accuracy; even 0,0
+is only numerically valid and is not declared an authentic incident location.
+
+A bounded live read at 08:52:26 UTC returned HTTP 200 and 8,521 bytes, with 12 records:
+three Fire/Building, one Fire/Bushfire, one Fire/Other, one Fire/False Alarm, one
+Accident / Rescue/Road Accident, four Other/Other and one Medical/Medical. All 12
+coordinate pairs were numeric and globally valid. Request limits were 1 MiB and
+25 seconds, identity encoding, no redirects. Only category counts and validation
+outcomes were retained; no source IDs, medical locations or raw payload fixtures.
+This is one observation, not completeness or continued-activity evidence.
+
+Seven new synthetic tests cover category separation, unknowns, unchanged source
+text, coordinate bounds, non-finite/boolean/string values, missing pairs and private
+aggregate output. All 177 offline tests pass. No production imports, entities,
+network polling or history changes are added. Developer permission and real summer/
+transition evidence remain unresolved; the provider is still experimental.
