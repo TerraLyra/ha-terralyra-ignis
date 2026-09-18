@@ -377,8 +377,8 @@
 
 ## 0.14.0
 
-- Rename the wildfire product to **TerraLyra IGNIS** and move its repository to
-  `TerraLyra/ha-ignis`, establishing the product boundary needed for future
+- Rename the wildfire product to **TerraLyra IGNIS** and establish a dedicated
+  repository, defining the product boundary needed for future
   TerraLyra integrations such as TREMOR, FLUMEN and AERIS.
 - Adopt the collision-resistant `terralyra_ignis` Home Assistant domain now,
   before public distribution. This intentionally creates new config entries,

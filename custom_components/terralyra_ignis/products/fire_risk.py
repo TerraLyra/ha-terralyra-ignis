@@ -31,7 +31,7 @@ MAX_ERROR_BYTES = 1024
 MAX_CAPABILITIES_BYTES = 1024 * 1024
 MAP_CACHE_TTL = timedelta(hours=1)
 MAP_STALE_TTL = timedelta(hours=24)
-USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-ignis)"
+USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-terralyra-ignis)"
 EUROPE_BOUNDS = (-9.975, 34.475, 45.525, 69.975)
 LOCAL_SAMPLE_RADIUS_KM = 10.0
 

@@ -24,7 +24,7 @@ class IgnisEntity(CoordinatorEntity[IgnisCoordinator]):
             name=NAME,
             manufacturer=MANUFACTURER,
             model="Wildfire intelligence and early warning",
-            configuration_url="https://github.com/TerraLyra/ha-ignis",
+            configuration_url="https://github.com/TerraLyra/ha-terralyra-ignis",
         )
 
 
@@ -41,7 +41,7 @@ class IgnisFireRiskEntity(CoordinatorEntity[FireRiskCoordinator]):
             name=NAME,
             manufacturer=MANUFACTURER,
             model="Wildfire intelligence and early warning",
-            configuration_url="https://github.com/TerraLyra/ha-ignis",
+            configuration_url="https://github.com/TerraLyra/ha-terralyra-ignis",
         )
 
 
@@ -60,5 +60,5 @@ class IgnisLandSurfaceTemperatureEntity(
             name=NAME,
             manufacturer=MANUFACTURER,
             model="Wildfire intelligence and early warning",
-            configuration_url="https://github.com/TerraLyra/ha-ignis",
+            configuration_url="https://github.com/TerraLyra/ha-terralyra-ignis",
         )
