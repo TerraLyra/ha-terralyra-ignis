@@ -24,7 +24,7 @@ MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 MAX_FEATURES = 10_000
 MAX_AREAS = 10
 MAX_BBOX_SPAN_DEGREES = 20.0
-USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-ignis)"
+USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-terralyra-ignis)"
 _ALLOWED_CHANNELS = frozenset({"S7", "F1"})
 _FEATURE_ID_PREFIXES = {
     "S3A": "Sentinel3A_SLSTR_L2P_FRP_",

@@ -193,7 +193,7 @@ class MultiProviderPool:
                 if any(snapshot.status is ProviderStatus.AVAILABLE for snapshot in snapshots)
                 else ProviderStatus.DELAYED
             ),
-            source_url="https://github.com/TerraLyra/ha-ignis",
+            source_url="https://github.com/TerraLyra/ha-terralyra-ignis",
             filename="terralyra_ignis-multi-source",
             detections=tuple(
                 sorted(

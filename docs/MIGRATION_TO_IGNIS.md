@@ -1,8 +1,7 @@
 # Migrating from TerraLyra to TerraLyra IGNIS
 
 Release 0.14.0 intentionally changes the Home Assistant integration domain
-from `terralyra` to `terralyra_ignis` and moves the project from
-`TerraLyra/ha-terralyra` to `TerraLyra/ha-ignis`.
+from `terralyra` to `terralyra_ignis` and establishes a dedicated wildfire integration.
 
 Home Assistant cannot safely transfer config entries or entity-registry records
 between custom-integration domains. A clean reinstall is therefore required.
@@ -23,7 +22,7 @@ namespace inside the new product.
 1. Remove the old **TerraLyra** integration from Home Assistant.
 2. In HACS, remove the old custom repository entry if it still points to
    `TerraLyra/ha-terralyra`.
-3. Add `TerraLyra/ha-ignis` as a custom **Integration** repository and install
+3. Add `TerraLyra/ha-terralyra-ignis` as a custom **Integration** repository and install
    **TerraLyra IGNIS**.
 4. Restart Home Assistant.
 5. Add **TerraLyra IGNIS** under **Settings → Devices & services** and recreate

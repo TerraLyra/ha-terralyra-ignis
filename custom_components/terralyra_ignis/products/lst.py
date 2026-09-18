@@ -17,7 +17,7 @@ TEMPORAL_RESOLUTION_MINUTES = 10
 SPATIAL_RESOLUTION_KM = 2
 TIMEOUT = ClientTimeout(total=20, connect=5, sock_read=15)
 MAX_JSON_BYTES = 32 * 1024
-USER_AGENT = "ha-ignis/0.7.0 (https://github.com/TerraLyra/ha-ignis)"
+USER_AGENT = "ha-ignis/0.7.0 (https://github.com/TerraLyra/ha-terralyra-ignis)"
 WMS_BOUNDS = (-73.113074, -74.196257, 73.113074, 74.196257)
 
 

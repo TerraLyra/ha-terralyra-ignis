@@ -1,4 +1,4 @@
-# Moving from ha-ignis
+# Historical repository migration
 
 The new repository is `TerraLyra/ha-terralyra-ignis`. The integration domain
 remains `terralyra_ignis`. Both repositories install into the same directory:

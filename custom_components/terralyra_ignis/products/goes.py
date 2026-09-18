@@ -27,7 +27,7 @@ DOWNLOAD_CHUNK_BYTES = 1024 * 1024
 MAX_KEY_LENGTH = 512
 TIMEOUT = ClientTimeout(total=20, connect=6, sock_read=12)
 DOWNLOAD_TIMEOUT = ClientTimeout(total=60, connect=6, sock_read=30)
-USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-ignis)"
+USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-terralyra-ignis)"
 
 
 class GoesDiscoveryError(Exception):
