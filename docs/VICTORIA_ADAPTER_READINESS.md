@@ -193,3 +193,19 @@ validation, redaction and command success/failure. All 183 source-research tests
 pass. No runtime integration, release or HA/history change is included. This report
 consolidates existing evidence; it does not close developer-access, summer/DST,
 identifier-lifetime, planned-burn taxonomy or feed-completeness questions.
+
+## Two-snapshot offline report — 2026-09-18
+
+The report now accepts `--previous /path/to/earlier.json` alongside the current
+sample. Both inputs are bounded and fully validated before output. Typed-ID overlap,
+only-before and only-after counts contain no raw identifiers. Invalid/duplicate
+identities make comparison unavailable rather than selecting a winner. Caller-supplied
+ordering is explicitly unverified; disappearance is never closure and overlap does
+not establish lifetime stability. Unreadable or malformed prior input fails the
+whole command without leaking its path or returning a partial report.
+
+Five additional tests cover overlapping/empty snapshots, typed IDs, duplicate/missing
+identity, per-input limits and actual file/stdin command behavior. All 188 source
+research tests pass. There are no network calls, source-file modifications or new
+runtime imports. The new [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) applies
+before future provider development; Victoria approval is not assumed received.
