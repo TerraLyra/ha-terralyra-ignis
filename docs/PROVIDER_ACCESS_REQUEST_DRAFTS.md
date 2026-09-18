@@ -58,3 +58,37 @@ not assume that DFES-066 terms apply to DFES-064 or DFES-068. Any future commerc
 cloud service would also be assessed separately.
 
 Thank you.
+
+## South Australia CFS — licence clarification
+
+Route: the official dataset page's "Ask a question about this dataset" form:
+https://data.gov.au/data/dataset/south-australian-country-fire-service-current-incidents-rss-feed
+Subject: TerraLyra IGNIS – CFS incident feed licence and developer-use clarification
+
+Hello CFS data team,
+
+We are developing TerraLyra IGNIS, an open-source Home Assistant integration, and
+are checking the applicable terms before implementing a South Australian provider.
+
+The original data.sa.gov.au catalogue API lists CC BY-NC-ND 4.0 for the CFS Current
+Incidents RSS Feed package, including the JSON resource at:
+https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.json
+The national catalogue mirror instead shows Licence Not Specified, while the CFS
+website has a general CC BY 4.0 statement. Could you confirm the current terms for
+this specific JSON product and any separate conditions for RSS or CAP?
+
+Our proposed initial use is local fetching, filtering around user-selected locations,
+and attributed display of official reports on each user's Home Assistant installation,
+with temporary caching and clear links to official information. We would not imply
+endorsement or turn incident points into fire-extent or safety claims.
+
+Please clarify whether this use is covered, the required credits/disclaimers,
+request intervals and retention rules. If any part needs additional permission,
+please advise the process. Any future commercial Cloud use would need to be
+considered separately; no commercial-use permission is assumed.
+
+Your current feed page links /feeds/prod/cap-au.xml while the catalogue lists
+/prod/cfs/criimson/cfs_cap_incidents.xml. Please identify the supported CAP product
+and its terms if it is suitable for a future, separately scoped warning adapter.
+
+Thank you.

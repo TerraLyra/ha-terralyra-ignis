@@ -14,7 +14,7 @@ adapter still needs a bounded direct sample/schema/freshness probe.
 | Queensland | [QFD dataset](https://www.data.qld.gov.au/dataset/queensland-fire-and-rescue-current-bushfire-incidents) | JSON/XML/CAP-AU/KMZ listed, CC BY 4.0; documented 30-minute incidents cadence. Points describe general areas, not fire spread. Optional report calendar implemented since 0.26.0; see [QFD calendar](QFD_CALENDAR.md). Explicit expiry semantics remain unresolved; catalogue metadata is not live freshness. | 2 |
 | Victoria | [CFA feeds](https://www.cfa.vic.gov.au/rss-feeds) | Offline validation and paired-snapshot reports implemented; no runtime provider. EMV developer-product conditions remain unresolved; request submission/approval not confirmed. | 3 |
 | Western Australia | [DFES FAQ](https://www.dfes.wa.gov.au/emergencywa/faq), [Emergency WA terms](https://www.emergency.wa.gov.au/about) | DFES documents SLIP access using ArcGIS/WMS/WFS and RSS/CAP. DFES-066 points and DFES-064 incident areas list CC BY 4.0; DFES-068 warning areas lists CC BY-ND 4.0. SLIP/DFES approval required. See [WA readiness](WESTERN_AUSTRALIA_ADAPTER_READINESS.md); no live sample or guessed map-backend scraping. | 4–5 |
-| South Australia | [CFS feeds](https://www.cfs.sa.gov.au/warnings-restrictions/warnings/rss-feeds/) | Separate incidents, warnings, ratings/bans and CAP. Inspect linked resources and reuse terms. Reader refresh advice is not proof of exact publisher cadence. | 4–5 |
+| South Australia | [CFS feeds](https://www.cfs.sa.gov.au/warnings-restrictions/warnings/rss-feeds/) | Original SA catalogue API reports CC BY-NC-ND 4.0; national mirror licence is missing. Clarification raised before adapter work. See [SA review](SOUTH_AUSTRALIA_ADAPTER_READINESS.md). | 4–5 |
 | Tasmania | [TFS feeds](https://www.fire.tas.gov.au/Show?pageId=xmlFeedsHome) | Legacy TFS terms do not cover the replacement automatically. TasALERT explicitly requires feed permission: info@alert.tas.gov.au. See [preflight](PROVIDER_ACCESS_PREFLIGHT.md). | 6–8 |
 | ACT | [ESA warnings](https://esa.act.gov.au/be-emergency-ready/warnings-alerts) | Current Incidents has explicit CC BY 4.0. Offline reader, test markers and experimental DST-aware interpretation implemented; no production entities. Real timestamp semantics remain unverified; CAP separate. See [ACT readiness](ACT_ADAPTER_READINESS.md). | 6–8 |
 | Northern Territory | [NT fire map](https://pfes.nt.gov.au/fire-and-rescue-service/fire-incident-map) | Documented approximate 10–15-minute updates. Map says points/polygons represent general areas, not fire spread. Machine endpoint and reuse terms remain unverified. | 6–8 |
@@ -131,3 +131,10 @@ These are sample-specific figures, not expected stable counts. See the adjacent 
 metadata JSON and `OFFICIAL_REPORT_MODEL_PROPOSAL.md` for the mixed schema and time
 semantics. Direct access is no longer blocked; the parser and optional calendar were subsequently implemented. The exact upstream
 meaning of expiry remains unresolved; see `QFD_CALENDAR.md` for current behavior.
+
+## South Australia primary-licence follow-up — 2026-09-18
+
+The original SA catalogue API is accessible and lists CC BY-NC-ND 4.0 for the CFS
+package. This supersedes the earlier unspecified-only licence observation; the
+national mirror remains incomplete. [Detailed evidence and next action](SOUTH_AUSTRALIA_ADAPTER_READINESS.md).
+No adapter or approval is implied.
