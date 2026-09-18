@@ -36,7 +36,9 @@ IGNIS is TerraLyra's wildfire product. It combines relevant observations from
 multiple providers into location-aware incidents without relabelling
 third-party data as its own. Future earthquake, flood and atmospheric-hazard
 products can live in separate integrations without sharing IGNIS's Home
-Assistant domain or entity namespace. The durable naming and repository rules
+Assistant domain or entity namespace. Evapotranspiration, solar radiation and
+vegetation metrics are planned for a separate integration, outside the IGNIS
+roadmap. The durable naming and repository rules
 are recorded in
 [`docs/PRODUCT_ARCHITECTURE.md`](docs/PRODUCT_ARCHITECTURE.md).
 
@@ -68,9 +70,6 @@ before enabling it. Existing BM OKF links need no migration.
 | Fire Risk Map v3 Forecast | FRMv3 | Europe / daily, day 0…9 | **Implemented** |
 | MTG Land Surface Temperature | LSA-007 / MTLST | ~2 km / 10 min; up to 60 min publication delay | **Implemented, optional** |
 | Independent active-fire corroboration | NASA FIRMS NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS NRT | ~375 m–1 km / provider-dependent NRT latency | **Implemented, optional** |
-| Evapotranspiration | LSA SAF ET family | product-dependent | Roadmap |
-| Solar radiation / fluxes | LSA SAF radiation family | product-dependent | Roadmap |
-| Vegetation metrics | NDVI/FVC/LAI/FAPAR/GPP | product-dependent | Roadmap |
 
 The integration automatically enables all credential-free sources covering a
 location and any configured credentialed source. It also enables the public
@@ -781,12 +780,6 @@ normal source updates use the separately bounded production decoder.
   emergency confirmation
 - add deduplication, caching, request limits, safe URL validation, content-size
   limits, redacted logging, and tests before enabling network news enrichment
-
-### Later
-
-- evapotranspiration useful for irrigation logic
-- surface solar radiation
-- selected vegetation metrics where satellite resolution is meaningful
 
 ## Home Assistant Repairs
 
