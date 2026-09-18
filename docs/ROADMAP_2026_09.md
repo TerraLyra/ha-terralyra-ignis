@@ -31,7 +31,10 @@ Status reviewed on 2026-09-16 against stable 0.26.5.
    second engine and create no extra repository without a demonstrated need.
 2. Verify standalone local monitoring with no Cloud account or private-package
    dependency. Keep compatibility tests for IDs, events and stored histories.
-3. Expand official Australian source coverage after checking official endpoints,
+3. Begin every new provider/product with [access preflight](PROVIDER_ACCESS_PREFLIGHT.md).
+   Notify the user of approval/registration requirements before substantial adapter
+   work; prepare the request while independent development continues.
+   Expand official Australian source coverage after checking official endpoints,
    usage terms, timestamps, geometry and attribution. Separate warnings, active
    incidents and planned burns; do not treat reports as satellite observations.
 4. Assess other severely affected regions using the same source-quality gates.

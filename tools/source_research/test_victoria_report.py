@@ -53,3 +53,49 @@ class VictoriaReportTests(unittest.TestCase):
         self.assertEqual(result.returncode,2)
         self.assertEqual(json.loads(result.stdout),{'status':'failed','reason':'input_unreadable_or_invalid'})
         self.assertEqual(result.stderr,b'')
+
+class SnapshotReportTests(unittest.TestCase):
+    def payload(self,ids):
+        return json.dumps({'results':[{'incidentNo':value} for value in ids]}).encode()
+
+    def test_overlap_and_disappearance_not_closure(self):
+        report=inspect_report(self.payload([2,3]),previous=self.payload([1,2]))
+        self.assertEqual(report['snapshot_comparison'],{
+            'status':'compared','shared':1,'only_before':1,'only_after':1,
+            'identity_stability':'not_established','previous_record_count':2,
+            'chronology':'caller_supplied_unverified','disappearance_means_closure':False})
+        self.assertEqual(report['record_count'],2)
+
+    def test_empty_and_typed_ids(self):
+        self.assertEqual(inspect_report(self.payload([]),previous=self.payload([1]))['snapshot_comparison']['only_before'],1)
+        comparison=inspect_report(self.payload(['1']),previous=self.payload([1]))['snapshot_comparison']
+        self.assertEqual(comparison['shared'],0)
+
+    def test_unusable_comparison_does_not_choose_winner_or_leak_ids(self):
+        for previous,current in ((['secret','secret'],[1]),([1],[None]),([None],[1]),([1],[2,2])):
+            comparison=inspect_report(self.payload(current),previous=self.payload(previous))['snapshot_comparison']
+            self.assertEqual(comparison['status'],'unavailable')
+            self.assertNotIn('shared',comparison)
+            self.assertNotIn('secret',json.dumps(comparison))
+
+    def test_invalid_previous_or_limits_no_partial_report(self):
+        for previous in (b'private invalid',b'{"results":[],"error":"partial"}'):
+            with self.assertRaises(InvalidFeed):inspect_report(self.payload([]),previous=previous)
+        with self.assertRaises(InvalidFeed):
+            inspect_report(self.payload([]),previous=self.payload([1,2]),max_records=1)
+
+    def test_cli_previous_file_and_redacted_read_failure(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            previous=Path(folder)/'private-previous.json'
+            previous.write_bytes(self.payload([1,2]))
+            command=[sys.executable,str(Path(__file__).with_name('victoria_report.py')),'-',
+                     '--previous',str(previous)]
+            result=subprocess.run(command,input=self.payload([2,3]),capture_output=True,timeout=10)
+            self.assertEqual(result.returncode,0)
+            self.assertEqual(json.loads(result.stdout)['snapshot_comparison']['shared'],1)
+            previous.unlink()
+            result=subprocess.run(command,input=self.payload([]),capture_output=True,timeout=10)
+            self.assertEqual(result.returncode,2)
+            self.assertNotIn(b'private-previous',result.stdout+result.stderr)
+            self.assertEqual(result.stderr,b'')
