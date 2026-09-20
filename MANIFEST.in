@@ -1,0 +1,7 @@
+# Keep the standalone model source distribution independent of the HA repository.
+global-exclude *
+include MANIFEST.in
+include LICENSE
+include pyproject.toml
+include docs/BASIC_MODEL_PACKAGE.md
+include custom_components/terralyra_ignis/basic_models/__init__.py

@@ -8,3 +8,8 @@ __pycache__/
 .coverage
 .coverage.*
 htmlcov/
+
+# Local Python package builds.
+build/
+dist/
+*.egg-info/
