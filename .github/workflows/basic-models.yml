@@ -56,16 +56,4 @@ jobs:
         run: |
           python -m venv /tmp/model-consumer
           /tmp/model-consumer/bin/pip install --no-deps dist/*.whl
-          cd /tmp
-          /tmp/model-consumer/bin/python -I - <<'PY'
-          from datetime import datetime, timezone
-          import sys
-          from terralyra_ignis_models import FireDetection, ProviderSnapshot, ProviderStatus
-          now = datetime.now(timezone.utc)
-          detection = FireDetection('synthetic', 'test', 'test', now, 0.0, 0.0, frp_mw=0.0)
-          snapshot = ProviderSnapshot('synthetic', 'test', 'test', now, now, ProviderStatus.AVAILABLE, 'https://example.invalid', 'synthetic', (detection,))
-          assert snapshot.detections[0] is detection
-          assert detection.frp_mw == 0.0 and detection.confidence is None
-          assert snapshot.status.value == 'available'
-          assert not any(n.startswith(('homeassistant', 'custom_components')) for n in sys.modules)
-          PY
+          /tmp/model-consumer/bin/python -I tools/model_consumer_contract.py

@@ -26,3 +26,10 @@ part of the standalone package. CI builds the wheel from that source archive,
 checks both archive boundaries and imports the installed result in a clean
 consumer environment on Python 3.11 and 3.14. Run `python -m build` to exercise
 this same source-to-wheel path locally. These checks do not publish either artifact.
+
+The installed-wheel check and HA compatibility suite also share consumer scenarios
+for exact observation IDs, absent versus zero values, source-family identity,
+timezone/precision preservation, immutable copies and distinct receipt/source
+update times. They run in separate model namespaces; they do not introduce a JSON
+wire protocol or promise cross-namespace class identity. The check script remains
+outside both distribution archives.
