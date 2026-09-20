@@ -29,7 +29,9 @@ government open-data licensing must not be substituted for this product's terms.
 Needed evidence: an EMV developer agreement or official product-specific licence
 covering fetching, filtering and display in a distributed Home Assistant integration,
 with attribution, polling limits and retention conditions. Commercial Cloud reuse
-requires its own scope check. No enquiry was sent and no agreement was accepted.
+requires its own scope check. The user confirmed submitting the VicEmergency
+support form on 2026-09-20. A response and developer permission remain pending;
+no agreement has been accepted. Earlier entries below describe historical checks.
 
 ## Adapter acceptance criteria once access is resolved
 
