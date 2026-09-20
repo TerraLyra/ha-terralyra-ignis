@@ -17,3 +17,12 @@ The public integration continues using bundled relative imports and does not
 require a package-index download or Cloud account. The standalone package has
 no dependency on the integration parent initializer. Other models and attrs()
 adapters remain outside this pilot. No release or deployment is implied.
+
+## Source-distribution boundary
+
+The source archive is allowlisted to the canonical model module, build metadata,
+MIT licence and this package guide. HA tests and the integration README are not
+part of the standalone package. CI builds the wheel from that source archive,
+checks both archive boundaries and imports the installed result in a clean
+consumer environment on Python 3.11 and 3.14. Run `python -m build` to exercise
+this same source-to-wheel path locally. These checks do not publish either artifact.
