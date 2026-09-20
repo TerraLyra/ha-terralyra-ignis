@@ -15,7 +15,7 @@ observations. Attribution: **NIFC / WFIGS / IRWIN**.
    Do not use it after deleting existing NIFC storage or to reset a pause.
 3. The enabled sensor requests data once initialized. Successful requests are separated
    by at least 15 minutes; service waits/failures may extend this. Manual entity updates
-   cannot bypass the wait. With no enabled NIFC sensor there is no source polling.
+   cannot bypass the wait. Polling stops when no NIFC consumer is enabled (sensor, calendar or active map).
 
 Initialization alone does not enable a disabled sensor. An already-enabled sensor can
 start automatically after initialization. No API key or additional account is needed
