@@ -92,3 +92,34 @@ Your current feed page links /feeds/prod/cap-au.xml while the catalogue lists
 and its terms if it is suitable for a future, separately scoped warning adapter.
 
 Thank you.
+
+## Northern Territory — supported feed and reuse clarification
+
+Routing: Corporate Communications and Recognition Unit identified by the
+[PFES copyright page](https://pfes.nt.gov.au/node/849); a dedicated developer
+email has not been verified. Draft only, not sent.
+
+Subject: TerraLyra IGNIS – NT Fire Incident Map developer feed and reuse enquiry
+
+Hello NT Fire Incident Map team,
+
+We are developing TerraLyra IGNIS, an open-source Home Assistant integration.
+Could you identify the supported machine-readable product behind the official
+NT Fire Incident Map and the current developer access and reuse conditions?
+
+Our proposed use is local fetching on each user's Home Assistant installation,
+filtering around selected locations and attributed display of official reports.
+We would distinguish incidents, warning areas and planned burns, preserve source
+status and update times, and not imply endorsement or replace official warnings.
+
+Does this publicly distributed HACS integration require written approval,
+registration or individual credentials? Please confirm required attribution,
+request intervals, temporary caching and retention. Any future commercial Cloud
+use would be considered separately.
+
+We would appreciate documentation on identifiers and reuse, timestamp meanings
+and offsets, category/status codes, geometry, completeness and what removal from
+the feed means. We would not infer an all-clear from closure or disappearance.
+If another team manages this product, please direct us to that team.
+
+Thank you.
