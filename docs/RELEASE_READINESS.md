@@ -1,14 +1,18 @@
 # Release readiness
 
-Stable 0.26.4 established the new public repository; stable 0.26.5 adds source
-health details. Source provenance is recorded in SNAPSHOT_PROVENANCE.md. Main
-is protected by required checks and the pull-request flow.
+The previous stable release is 0.26.5. The 0.27.0 candidate adds optional NIFC
+source diagnostics, calendar and map; see [release notes](RELEASE_0_27_0.md).
+The manifest, changelog and README identify the same integration version. The
+standalone model packaging pilot retains its independent experimental version.
 
-Release gates: tests and config-flow coverage, Python/JSON validation, HACS,
-Hassfest, security checks and GOES ARM64/x86-64 compatibility. These passed for
-0.26.5. That release was installed and its new fields checked on a live HA.
+Release gates: tests and 100% config-flow coverage, Python/JSON validation, HACS,
+Hassfest, security, model packaging and GOES ARM64/x86-64 compatibility. Require
+successful checks on the exact candidate commit before tagging a stable release.
+Do not substitute earlier PR results for the candidate's results.
 
-The HACS 2.0.5 repository switch has been exercised on one installation with
-identity and sampled-history checks. It was not a full database equivalence or
-restore test. See REPOSITORY_MIGRATION.md for the sequence and limitations.
-The old repository remains available for rollback.
+NIFC is opt-in and requires administrator first-use initialization. Live validation
+on the user's HA remains pending: check existing entities/history after restart,
+then enable NIFC explicitly and verify source state and local map/calendar matching.
+Retain a backup. Do not delete history or storage to bypass initialization/recovery.
+ACT/Victoria research does not enable production providers. Access approvals remain
+separate release gates for those future providers. Issue #41 remains open.

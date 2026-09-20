@@ -42,11 +42,13 @@ are recorded in
 
 ## Product status
 
-Stable 0.26.5 includes separate retrieval-result and snapshot-freshness fields
-in each location's source details. See [source health](docs/SOURCE_HEALTH.md).
-The repository move was exercised on HACS 2.0.5 with existing configuration and
-sample historical entries retained. This is not a guarantee for every installation;
-follow the backup and rollback steps in the migration guide.
+Version 0.27.0 adds optional NIFC / WFIGS official US reports, with a source-status
+sensor, timed calendar and location-aware map. They require explicit enablement
+and administrator first-use initialization. See [NIFC setup](docs/NIFC_USAGE.md)
+and [release notes](docs/RELEASE_0_27_0.md).
+
+Per-location source details retain separate retrieval-result and snapshot-freshness
+fields introduced in 0.26.5. See [source health](docs/SOURCE_HEALTH.md).
 
 Version 0.25.0 adds an opt-in **Reports — NSW RFS fires** calendar for
 regional fire reports inside enabled monitored-location radii. This uses the

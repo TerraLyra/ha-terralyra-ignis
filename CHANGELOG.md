@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.27.0
+
+- Add opt-in NIFC / WFIGS official US reports: source-status sensor, timed calendar and location-aware map. Reports remain separate from satellite detections.
+- Require explicit administrator first-use initialization; share bounded retrieval, persistent cooldowns and review/recovery diagnostics across consumers.
+- Preserve existing incident history, identifiers and configuration. NIFC storage is separate; reports do not create satellite alerts or imply an all-clear.
+- Prepare a standalone observation-model packaging pilot with HA compatibility checks; no external package or Cloud account is required.
+- Update repository links and CI tooling. ACT and Victoria remain offline research only, without production entities or calendars.
+
+See [0.27.0 release notes](docs/RELEASE_0_27_0.md) and [NIFC setup](docs/NIFC_USAGE.md).
+
 ## 0.26.5
 
 - Distinguish retrieval success from source snapshot freshness in per-location source details.
