@@ -35,3 +35,7 @@ migration review. See ../../../docs/CANADA_ADAPTER_READINESS.md.
 `presentation.match_record` provides per-location spherical distance and radius
 matching, preserving unknown source codes and old source dates. It does not use
 a Home fallback. 42 synthetic tests pass locally.
+
+Implementation lives in `custom_components/terralyra_ignis/official_sources/canada`.
+These entry points preserve standalone research usage and share the same module
+identity. Packaging does not register entities, a scheduler, or network activity.

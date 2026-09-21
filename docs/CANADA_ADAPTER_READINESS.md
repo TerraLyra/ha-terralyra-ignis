@@ -1,6 +1,6 @@
 # Canada CWFIF readiness — 2026-09-21
 
-Status: experimental research client; no production HA provider or calendar.
+Status: experimental integration-owned client; no registered HA provider or calendar.
 
 ## Access evidence
 
@@ -46,6 +46,10 @@ warnings; containment outside 0–100 is unknown. Multiple enabled monitored pla
 are matched independently with a deterministic nearest-place distance reference,
 without a Home fallback. Removing or disabling a place removes its presentation
 match without changing the source record.
+
+The canonical client now lives in `official_sources/canada`; standalone research
+entry points load the same modules. Import and construction perform no I/O.
+HA package identity is covered separately in the full integration test suite.
 
 An isolated lifecycle adapter now shares one task across eligible consumers, is
 disabled by default, cancels when its last consumer leaves, and waits for
