@@ -1,7 +1,7 @@
 # Next release readiness
 
-Reviewed 2026-09-21. Stable release remains 0.27.0; this is an unreleased
-maintenance scope, not authorization to publish or deploy.
+Reviewed 2026-09-21. Stable release remains 0.27.0; 0.27.1 is the prepared, unreleased
+maintenance candidate, not authorization to publish or deploy.
 
 ## Included changes
 
@@ -20,8 +20,9 @@ All GitHub checks passed for #51 at commit
 `f7b1505d36e6da35d535dda582838ca56ccca68e`. CI covers the restart regression,
 unknown/delayed/unavailable source health and existing count behavior.
 
-1. Select the patch version and prepare matching manifest/release notes after release
-   authorization. Validate the exact release candidate with the required CI checks.
+1. Manifest version 0.27.1 and matching [release notes](RELEASE_0_27_1.md) are
+   prepared. Validate this exact candidate with the required CI checks. Publication
+   authorization remains a separate step.
 2. Publish only after that candidate is green. No tag or release is created by this document.
 3. After user-approved installation, inspect count attributes in HA: available
    sources should be reported; FIRMS attributes should contain only FIRMS health.

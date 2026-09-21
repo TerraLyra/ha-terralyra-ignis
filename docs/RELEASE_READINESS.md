@@ -2,7 +2,8 @@
 
 Stable 0.27.0 has been published, following 0.26.5. It adds optional NIFC
 source diagnostics, calendar and map; see [release notes](RELEASE_0_27_0.md).
-The manifest, changelog and README identify the same integration version. The
+The 0.27.1 candidate is prepared but unpublished; see
+[next release readiness](NEXT_RELEASE_READINESS.md). The
 standalone model packaging pilot retains its independent experimental version.
 
 Release gates: tests and 100% config-flow coverage, Python/JSON validation, HACS,
