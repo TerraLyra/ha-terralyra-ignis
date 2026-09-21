@@ -1,6 +1,8 @@
 pytest
 pytest-cov
 pytest-homeassistant-custom-component
+# Required by HA camera imports; matches HA 2026.9.3 camera/manifest.json.
+# Reassess with the tested HA camera requirement, not an independent major bump.
 PyTurboJPEG==1.8.3
 defusedxml==0.7.1
 h5py==3.16.0

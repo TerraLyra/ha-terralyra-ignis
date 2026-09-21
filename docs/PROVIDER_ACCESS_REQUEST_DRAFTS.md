@@ -1,4 +1,4 @@
-# Provider access requests — drafts, not sent
+# Provider access request templates and submission status
 
 Prepared 2026-09-18. Use the organization's working mailbox. Add the sender's actual
 name/role; no legal entity status, existing approval or affiliation is implied.
@@ -6,7 +6,7 @@ name/role; no legal entity status, existing approval or affiliation is implied.
 ## Tasmania
 
 Permission route rechecked 2026-09-21 against the official
-[developer-feed FAQ](https://alert.tas.gov.au/about-app). Draft remains unsent.
+[developer-feed FAQ](https://alert.tas.gov.au/about-app). The user confirmed sending the request on 2026-09-21; response and approval are pending. The text below is the prepared template, not a record of private correspondence.
 
 To: info@alert.tas.gov.au
 Subject: TerraLyra IGNIS – request for TasALERT developer data-feed access
