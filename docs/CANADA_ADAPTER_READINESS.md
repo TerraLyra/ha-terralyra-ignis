@@ -45,7 +45,8 @@ No source raw samples or private monitored locations are committed.
 
 ## Remaining production gates
 
-- Location-radius filtering and presentation distinct from satellite observations.
+- HA presentation distinct from satellite observations; research radius matching
+  and conservative status labels now have synthetic coverage.
 - Unknown/new category handling and metadata warnings without false certainty.
 - HA lifecycle, storage ownership and post-restart behavior in integration tests.
 - Attribution/UI review; no unsupported emergency-warning or all-clear claims.

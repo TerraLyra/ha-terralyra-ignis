@@ -31,3 +31,7 @@ Response completeness does not imply national coverage or an all-clear.
 Before production: provider attribution and user presentation, location filtering,
 unknown category policy, HA lifecycle and storage integration, compatibility and
 migration review. See ../../../docs/CANADA_ADAPTER_READINESS.md.
+
+`presentation.match_record` provides per-location spherical distance and radius
+matching, preserving unknown source codes and old source dates. It does not use
+a Home fallback. 42 synthetic tests pass locally.
