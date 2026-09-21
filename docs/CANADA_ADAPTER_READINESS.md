@@ -83,8 +83,11 @@ Existing valid state is adopted without replacement. Storage errors latch a bloc
 for the owner lifetime. Cancellation waits for a controller-owned save before
 releasing its lock. Research file storage and HA storage share the same codec.
 
+HA storage waits are bounded to 30 seconds. Timed-out operations remain owned
+and HA-tracked until completion; no overlapping write or new request is allowed.
+Late failure is retrieved and the review block remains even after late success.
+
 Synthetic storage tests cover restart, corruption, failed reservation writes and
 cancellation during persistence. HA tests cover lazy ownership and real Store
-roundtrip. An administrator-facing initialization/recovery flow, bounded HA
-storage waits, scheduler and source-status entity remain outstanding before
+roundtrip. An administrator-facing initialization/recovery flow, scheduler and source-status entity remain outstanding before
 activation. No history migration or removal is performed.

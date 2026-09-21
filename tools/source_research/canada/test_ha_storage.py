@@ -106,3 +106,72 @@ class HAStorageTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(owner.lock.locked())
         await self.owner(CanadaStore(disk), fetcher).refresh()
         fetcher.assert_not_awaited()
+
+    async def test_write_timeout_keeps_task_owned_and_blocks_new_work(self):
+        disk = MemoryStore()
+        store = CanadaStore(disk, timeout=0.02)
+        await store.async_initialize(confirmed_new=True)
+        entered, release = asyncio.Event(), asyncio.Event()
+        original_save = disk.async_save
+        async def delayed_save(data):
+            entered.set()
+            await release.wait()
+            await original_save(data)
+        disk.async_save = delayed_save
+        fetcher = AsyncMock()
+        with self.assertRaises(OSError):
+            await self.owner(store, fetcher).refresh()
+        self.assertTrue(entered.is_set())
+        self.assertTrue(store.pending)
+        self.assertTrue(store.blocked)
+        self.assertEqual(store.problem, 'storage_timeout')
+        fetcher.assert_not_awaited()
+        with self.assertRaises(OSError):
+            await store.async_save(RefreshState())
+        release.set()
+        await store._pending
+        self.assertFalse(store.pending)
+        self.assertTrue(store.blocked)
+        # A fresh owner must honor the late completed reservation.
+        await self.owner(CanadaStore(disk), fetcher).refresh()
+        fetcher.assert_not_awaited()
+
+    async def test_read_timeout_and_late_failure_are_consumed(self):
+        disk = MemoryStore()
+        release = asyncio.Event()
+        async def delayed_load():
+            await release.wait()
+            raise OSError('late private path')
+        disk.async_load = delayed_load
+        store = CanadaStore(disk, timeout=0.01)
+        with self.assertRaises(OSError):
+            await store.async_load()
+        self.assertTrue(store.pending)
+        release.set()
+        await asyncio.wait({store._pending})
+        await asyncio.sleep(0)
+        self.assertEqual(store.problem, 'storage_failed')
+        self.assertTrue(store.blocked)
+        self.assertFalse(store.pending)
+        self.assertEqual(disk.writes, 0)
+
+    async def test_cancelled_initialization_retains_pending_write(self):
+        disk = MemoryStore()
+        entered, release = asyncio.Event(), asyncio.Event()
+        original_save = disk.async_save
+        async def delayed_save(data):
+            entered.set()
+            await release.wait()
+            await original_save(data)
+        disk.async_save = delayed_save
+        store = CanadaStore(disk)
+        task = asyncio.create_task(store.async_initialize(confirmed_new=True))
+        await entered.wait()
+        task.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await task
+        self.assertTrue(store.pending)
+        self.assertTrue(store.blocked)
+        release.set()
+        await store._pending
+        self.assertEqual(disk.writes, 1)
