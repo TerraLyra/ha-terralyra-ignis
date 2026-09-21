@@ -503,6 +503,11 @@ def test_source_specific_and_combined_counts_do_not_double_count() -> None:
     assert combined.extra_state_attributes == {
         "distinct_clusters": 2,
         "count_scope": "deduplicated_current_clusters_all_sources",
+        "source_retrieval_status": "unknown",
+        "source_statuses": {},
+        "unavailable_sources": [],
+        "delayed_sources": [],
+        "observation_completeness": "not_established",
     }
 
 
