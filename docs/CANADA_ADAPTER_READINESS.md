@@ -47,6 +47,13 @@ are matched independently with a deterministic nearest-place distance reference,
 without a Home fallback. Removing or disabling a place removes its presentation
 match without changing the source record.
 
+An isolated lifecycle adapter now shares one task across eligible consumers, is
+disabled by default, cancels when its last consumer leaves, and waits for
+cancellation cleanup on shutdown. Restart honors the persisted request pause.
+Repeated shutdown does not re-cancel a pending durable write. This adapter is
+not registered with Home Assistant; HA event/timer/storage integration remains
+a production gate.
+
 No source raw samples or private monitored locations are committed.
 
 ## Remaining production gates
