@@ -215,7 +215,7 @@ async def test_restart_with_partial_first_pool_response_preserves_history(runtim
     await first._async_setup()
     initial, _ = await refresh(first)
     assert initial == (2, 1, 2)
-    retained_ids = {record["incident_id"] for record in stored["incident_history"]}
+    retained_ids = {record["track_id"] for record in stored["incident_history"]}
     assert retained_ids
 
     firms.async_fetch_latest.side_effect = ProviderUnavailableError()
@@ -226,11 +226,11 @@ async def test_restart_with_partial_first_pool_response_preserves_history(runtim
     assert partial == (1, 0, 1)
     assert all(sensor.available for sensor in sensors)
     assert restarted.provider.health[0].status == ProviderStatus.OUTAGE
-    assert retained_ids <= {record["incident_id"] for record in stored["incident_history"]}
+    assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
 
     current[0] += timedelta(minutes=6)
     firms.async_fetch_latest.side_effect = None
     recovered, _ = await refresh(restarted)
     assert recovered == initial
     assert restarted.provider.health[0].status == ProviderStatus.AVAILABLE
-    assert retained_ids <= {record["incident_id"] for record in stored["incident_history"]}
+    assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
