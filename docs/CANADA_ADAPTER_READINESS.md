@@ -1,6 +1,6 @@
 # Canada CWFIF readiness — 2026-09-21
 
-Status: experimental research client; no production HA provider or calendar.
+Status: experimental integration-owned client; no registered HA provider or calendar.
 
 ## Access evidence
 
@@ -41,6 +41,23 @@ All 382 sampled records used containment -1, which must remain unknown.
 The isolated client and synthetic tests cover bounded downloads, total network
 deadline, partial responses, identities, coordinates, separate source timestamps,
 retry pauses, cancellation, single-owner concurrency and persistent reservations.
+The presentation preserves malformed/unknown optional status metadata with explicit
+warnings; containment outside 0–100 is unknown. Multiple enabled monitored places
+are matched independently with a deterministic nearest-place distance reference,
+without a Home fallback. Removing or disabling a place removes its presentation
+match without changing the source record.
+
+The canonical client now lives in `official_sources/canada`; standalone research
+entry points load the same modules. Import and construction perform no I/O.
+HA package identity is covered separately in the full integration test suite.
+
+An isolated lifecycle adapter now shares one task across eligible consumers, is
+disabled by default, cancels when its last consumer leaves, and waits for
+cancellation cleanup on shutdown. Restart honors the persisted request pause.
+Repeated shutdown does not re-cancel a pending durable write. This adapter is
+not registered with Home Assistant; HA event/timer/storage integration remains
+a production gate.
+
 No source raw samples or private monitored locations are committed.
 
 ## Remaining production gates

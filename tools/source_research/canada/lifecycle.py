@@ -2,7 +2,7 @@
 import sys
 from canada_package import load_module
 
-_module = load_module('records')
+_module = load_module('lifecycle')
 if __name__ == "__main__":
     import runpy
     runpy.run_module(_module.__name__, run_name="__main__")
