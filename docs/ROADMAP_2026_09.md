@@ -39,17 +39,16 @@ Status reviewed on 2026-09-21 against stable 0.27.0.
 | NSW RFS / Queensland QFD | Existing optional report calendars | Maintain compatibility and source-specific semantics |
 | Victoria | Offline inspectors complete; user submitted access request on 2026-09-20 | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
-| Tasmania TasALERT | Access-request draft ready; official permission route rechecked 2026-09-21 | User sends request, then review granted endpoints and terms |
+| Tasmania TasALERT | User confirmed access request sent on 2026-09-21 | Await response, then review granted endpoints and terms |
 | Western Australia DFES | Access-request draft ready | Clarify dataset approval and distributed local authentication |
 | South Australia CFS | Licence-clarification draft ready | Resolve product-specific reuse terms |
 | Northern Territory | Access preflight and enquiry draft ready | Confirm supported feed and reuse scope |
 
-All drafts except the separately confirmed Victoria submission remain unsent unless
-confirmed by the user. No approval is inferred from a publicly reachable endpoint.
+Victoria and Tasmania submissions are confirmed by the user; other drafts remain
+unsent unless separately confirmed. No approval is inferred from a publicly reachable endpoint.
 See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) and
-[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). Tasmania is the next proposed
-request because its operator explicitly documents both the permission requirement
-and contact route; this is not a promised implementation order.
+[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). Victoria and Tasmania can now progress through external review in parallel;
+this is not a promised implementation order.
 
 ## Development sequence
 
