@@ -1,9 +1,9 @@
 # Release readiness
 
-Stable 0.27.0 has been published, following 0.26.5. It adds optional NIFC
-source diagnostics, calendar and map; see [release notes](RELEASE_0_27_0.md).
-The 0.27.1 candidate is prepared but unpublished; see
-[next release readiness](NEXT_RELEASE_READINESS.md). The
+Stable 0.27.1 was published on 2026-09-21, adding source retrieval diagnostics to
+current fire counts. See [release notes](RELEASE_0_27_1.md) and
+[release validation](NEXT_RELEASE_READINESS.md). Optional NIFC reports shipped in
+0.27.0. The
 standalone model packaging pilot retains its independent experimental version.
 
 Release gates: tests and 100% config-flow coverage, Python/JSON validation, HACS,

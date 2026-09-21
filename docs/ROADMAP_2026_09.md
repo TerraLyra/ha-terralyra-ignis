@@ -1,6 +1,6 @@
 # IGNIS public development roadmap
 
-Status reviewed on 2026-09-21 against stable 0.27.0.
+Status reviewed on 2026-09-21 against stable 0.27.1.
 
 ## Delivered
 
@@ -68,7 +68,8 @@ Optimization remains paused. Advanced service-side algorithms and evaporation,
 solar-radiation and vegetation products are outside this integration's roadmap.
 New releases and live deployment require their own validation and authorization.
 
-## Prepared after 0.27.0
+## Maintenance release 0.27.1
 
 Source retrieval diagnostics for current counts and the partial-restart regression
-are merged but not released. See [next release readiness](NEXT_RELEASE_READINESS.md).
+shipped in 0.27.1. Sampled live checks confirmed all three count types expose the
+new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
