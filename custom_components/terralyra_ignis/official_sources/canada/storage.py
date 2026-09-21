@@ -24,6 +24,11 @@ def load(path):
             raw = handle.read(LIMIT + 1)
     except FileNotFoundError:
         return RefreshState()
+    return decode(raw)
+
+
+def decode(raw):
+    """Validate serialized state for file and HA storage alike."""
     try:
         if len(raw) > LIMIT:
             raise ValueError('Storage too large')
@@ -55,8 +60,8 @@ def load(path):
         return RefreshState(status='storage_error', review_required=True)
 
 
-def save(path, state):
-    path = Path(path)
+def encode(state):
+    """Bound the serialized state before any write."""
     if state.status == 'storage_error':
         raise ValueError('Do not overwrite unreadable storage')
     body = dict(vars(state))
@@ -65,6 +70,12 @@ def save(path, state):
     raw = json.dumps({'version':1,'state':body},allow_nan=False).encode()
     if len(raw) > LIMIT:
         raise ValueError('Storage too large')
+    return raw
+
+
+def save(path, state):
+    path = Path(path)
+    raw = encode(state)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.',dir=path.parent)
     try:
         with os.fdopen(fd,'wb') as handle:

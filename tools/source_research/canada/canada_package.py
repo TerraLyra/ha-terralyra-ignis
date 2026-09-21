@@ -14,7 +14,7 @@ PATH = Path(__file__).resolve().parents[3] / 'custom_components' / 'terralyra_ig
 
 
 def load_module(name):
-    if name not in ('geometry', 'identity', 'inspect_sample', 'records', 'fetch', 'async_transport', 'retry', 'storage', 'controller', 'presentation', 'lifecycle'):
+    if name not in ('geometry', 'identity', 'inspect_sample', 'records', 'fetch', 'async_transport', 'retry', 'storage', 'controller', 'presentation', 'lifecycle', 'ha_storage'):
         raise ValueError('Unknown pure Canada module')
     if PACKAGE not in sys.modules:
         spec = importlib.util.spec_from_file_location(PACKAGE, PATH / '__init__.py',
