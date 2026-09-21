@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.27.1 (prepared; not yet published)
 
 - Expose source retrieval health alongside active, combined, FIRMS and raw-pixel counts. Partial source availability is visible without changing count values, identifiers or persisted history. Successful retrieval does not certify observation completeness.
 - Cover full → partial → recovered source responses after restart, including preserved incident history. The cause of the historical counter discontinuity (#41) remains unproven.
