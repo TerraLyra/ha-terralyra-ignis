@@ -5,6 +5,9 @@ name/role; no legal entity status, existing approval or affiliation is implied.
 
 ## Tasmania
 
+Permission route rechecked 2026-09-21 against the official
+[developer-feed FAQ](https://alert.tas.gov.au/about-app). Draft remains unsent.
+
 To: info@alert.tas.gov.au
 Subject: TerraLyra IGNIS – request for TasALERT developer data-feed access
 
