@@ -703,7 +703,7 @@ def _count_source_attributes(coordinator: Any, provider: str | None = None) -> d
     FIRMS-only counts must not inherit the health of unrelated peers.
     """
     health = [
-        item for item in getattr(coordinator.provider, "health", ())
+        item for item in getattr(getattr(coordinator, "provider", None), "health", ())
         if provider is None or item.provider_id == provider
         or item.provider_id.startswith(f"{provider}:")
     ]
