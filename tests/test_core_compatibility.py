@@ -173,3 +173,64 @@ def test_family_merge_split_preserves_persisted_anchor_under_reordering():
         assert {m.source_track_ids: m.track_id for m in split} == {
             ("anchor",): "anchor", ("peer",): "peer",
         }
+
+
+@pytest.mark.asyncio
+async def test_restart_with_partial_first_pool_response_preserves_history(runtime):
+    """Current-response counts can fall independently of restored history."""
+    from types import SimpleNamespace
+    from custom_components.terralyra_ignis.providers.base import ProviderUnavailableError
+    from custom_components.terralyra_ignis.providers.pool import MultiProviderPool, ProviderBinding
+    from custom_components.terralyra_ignis.sensor import (
+        CombinedFireCountSensor, RawPixelCountSensor, SupplementalFireCountSensor,
+    )
+
+    create, stored = runtime
+    current = [NOW]
+    firms = AsyncMock()
+    firms.async_fetch_latest.return_value = snapshot()
+    peer = AsyncMock()
+    peer.async_fetch_latest.return_value = replace(
+        snapshot(latitude=39), provider="noaa_goes", satellite="G18",
+        detections=(replace(snapshot(latitude=39).detections[0],
+                            provider="noaa_goes", satellite="G18"),),
+    )
+
+    def pool():
+        return MultiProviderPool((
+            ProviderBinding("nasa_firms", "FIRMS", "N21", ("california",), firms),
+            ProviderBinding("noaa_goes", "GOES", "G18", ("california",), peer),
+        ), now=lambda: current[0])
+
+    async def refresh(instance):
+        instance.async_set_updated_data(await instance._async_update_data())
+        instance.entry.runtime_data = SimpleNamespace(coordinator=instance)
+        sensors = [cls(instance.entry) for cls in (
+            CombinedFireCountSensor, SupplementalFireCountSensor, RawPixelCountSensor,
+        )]
+        return tuple(sensor.native_value for sensor in sensors), sensors
+
+    first = create()
+    first.provider = pool()
+    await first._async_setup()
+    initial, _ = await refresh(first)
+    assert initial == (2, 1, 2)
+    retained_ids = {record["track_id"] for record in stored["incident_history"]}
+    assert retained_ids
+
+    firms.async_fetch_latest.side_effect = ProviderUnavailableError()
+    restarted = create()
+    restarted.provider = pool()  # Fresh provider caches, persisted coordinator store.
+    await restarted._async_setup()
+    partial, sensors = await refresh(restarted)
+    assert partial == (1, 0, 1)
+    assert all(sensor.available for sensor in sensors)
+    assert restarted.provider.health[0].status == ProviderStatus.OUTAGE
+    assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
+
+    current[0] += timedelta(minutes=6)
+    firms.async_fetch_latest.side_effect = None
+    recovered, _ = await refresh(restarted)
+    assert recovered == initial
+    assert restarted.provider.health[0].status == ProviderStatus.AVAILABLE
+    assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
