@@ -41,6 +41,12 @@ All 382 sampled records used containment -1, which must remain unknown.
 The isolated client and synthetic tests cover bounded downloads, total network
 deadline, partial responses, identities, coordinates, separate source timestamps,
 retry pauses, cancellation, single-owner concurrency and persistent reservations.
+The presentation preserves malformed/unknown optional status metadata with explicit
+warnings; containment outside 0–100 is unknown. Multiple enabled monitored places
+are matched independently with a deterministic nearest-place distance reference,
+without a Home fallback. Removing or disabling a place removes its presentation
+match without changing the source record.
+
 No source raw samples or private monitored locations are committed.
 
 ## Remaining production gates
