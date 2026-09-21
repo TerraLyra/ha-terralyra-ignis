@@ -29,8 +29,9 @@ Status reviewed on 2026-09-21 against stable 0.27.0.
   emergency all-clear. Map/calendar limits remain documented per provider.
 - The standalone package is an unpublished experimental model subset, not a complete
   independently deployable Core or stable SDK. The integration parent still uses HA.
-- The unused direct PyTurboJPEG test pin is removed; the test framework governs
-  any transitive dependency. No JPEG runtime requirement is added to IGNIS.
+- PyTurboJPEG 1.8.3 remains a required test dependency through HA camera imports,
+  matching the tested HA 2026.9.3 camera manifest. Reassess together with HA;
+  no separate JPEG runtime requirement is added to IGNIS.
 
 ## Australian provider queue
 
