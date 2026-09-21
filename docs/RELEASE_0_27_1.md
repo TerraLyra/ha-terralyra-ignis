@@ -1,6 +1,6 @@
 # 0.27.1 — source health alongside fire counts
 
-Prepared maintenance release; publication pending.
+Published as stable v0.27.1 on 2026-09-21.
 
 ## What changes
 
@@ -20,7 +20,7 @@ contribute during an outage.
 ## Upgrade and check
 
 1. Retain a Home Assistant backup before updating.
-2. After this version is published, update through HACS and restart Home Assistant.
+2. Update through HACS and restart Home Assistant.
 3. Confirm version 0.27.1 and inspect an existing count entity's attributes.
 4. Check that existing locations, entity identities and sampled history remain
    accessible. No storage reset, history deletion or NIFC reinitialization is needed.
@@ -33,8 +33,8 @@ awaiting permission or timestamp evidence remain outside production.
 
 Automated regression covers full → partial → recovered source responses after a
 restart while preserving incident history, plus missing and delayed source health.
-The release candidate must pass the full required CI checks before publication.
-Live verification of these new attributes remains a post-installation step;
+All 12 required checks passed on the exact release commit before publication.
+Sampled live verification of all three count types passed after installation;
 do not deliberately interrupt production sources to reproduce an outage.
 
 The original September 10 counter discontinuity (#41) remains unresolved. These

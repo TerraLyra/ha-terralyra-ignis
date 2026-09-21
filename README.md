@@ -42,9 +42,9 @@ are recorded in
 
 ## Product status
 
-The prepared 0.27.1 maintenance update adds source retrieval diagnostics to current
+The 0.27.1 maintenance update adds source retrieval diagnostics to current
 fire counts without changing their values or stored history. See
-[0.27.1 release notes](docs/RELEASE_0_27_1.md). Publication is pending.
+[0.27.1 release notes](docs/RELEASE_0_27_1.md).
 
 Version 0.27.0 adds optional NIFC / WFIGS official US reports, with a source-status
 sensor, timed calendar and location-aware map. They require explicit enablement
