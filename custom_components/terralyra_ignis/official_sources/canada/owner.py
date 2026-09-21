@@ -15,5 +15,6 @@ def get_canada_owner(hass):
     data = hass.data.setdefault(DOMAIN, {})
     if DATA_KEY not in data:
         data[DATA_KEY] = Controller(None, async_get_clientsession(hass),
-                                  store=CanadaStore(Store(hass, 1, STORE_KEY)))
+                                  store=CanadaStore(Store(hass, 1, STORE_KEY),
+                                      create_task=hass.async_create_background_task))
     return data[DATA_KEY]
