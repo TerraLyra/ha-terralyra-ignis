@@ -213,8 +213,9 @@ async def test_restart_with_partial_first_pool_response_preserves_history(runtim
     first = create()
     first.provider = pool()
     await first._async_setup()
-    initial, _ = await refresh(first)
+    initial, sensors = await refresh(first)
     assert initial == (2, 1, 2)
+    assert all(s.extra_state_attributes["source_retrieval_status"] == "available" for s in sensors)
     retained_ids = {record["track_id"] for record in stored["incident_history"]}
     assert retained_ids
 
@@ -224,13 +225,45 @@ async def test_restart_with_partial_first_pool_response_preserves_history(runtim
     await restarted._async_setup()
     partial, sensors = await refresh(restarted)
     assert partial == (1, 0, 1)
+    assert [s.extra_state_attributes["source_retrieval_status"] for s in sensors] == [
+        "partial", "unavailable", "partial",
+    ]
+    assert all(s.extra_state_attributes["unavailable_sources"] == ["nasa_firms"] for s in sensors)
+    assert sensors[1].extra_state_attributes["source_statuses"] == {"nasa_firms": "outage"}
     assert all(sensor.available for sensor in sensors)
     assert restarted.provider.health[0].status == ProviderStatus.OUTAGE
     assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
 
     current[0] += timedelta(minutes=6)
     firms.async_fetch_latest.side_effect = None
-    recovered, _ = await refresh(restarted)
+    recovered, sensors = await refresh(restarted)
     assert recovered == initial
+    assert all(s.extra_state_attributes["source_retrieval_status"] == "available" for s in sensors)
     assert restarted.provider.health[0].status == ProviderStatus.AVAILABLE
     assert retained_ids <= {record["track_id"] for record in stored["incident_history"]}
+
+
+@pytest.mark.parametrize(
+    ("statuses", "expected"),
+    [
+        ((), "unknown"),
+        ((ProviderStatus.AVAILABLE,), "available"),
+        ((ProviderStatus.DELAYED,), "degraded"),
+        ((ProviderStatus.INITIALIZING,), "unavailable"),
+        ((ProviderStatus.AUTH_ERROR,), "unavailable"),
+        ((ProviderStatus.AVAILABLE, ProviderStatus.NO_PRODUCT), "partial"),
+    ],
+)
+def test_count_source_attributes_do_not_claim_observation_completeness(statuses, expected):
+    from types import SimpleNamespace
+    from custom_components.terralyra_ignis.sensor import _count_source_attributes
+
+    health = tuple(
+        SimpleNamespace(provider_id=f"source:{index}", status=status)
+        for index, status in enumerate(statuses)
+    )
+    coordinator = SimpleNamespace(provider=SimpleNamespace(health=health))
+    attrs = _count_source_attributes(coordinator)
+    assert attrs["source_retrieval_status"] == expected
+    assert attrs["observation_completeness"] == "not_established"
+    assert _count_source_attributes(coordinator, "nasa_firms")["source_retrieval_status"] == "unknown"

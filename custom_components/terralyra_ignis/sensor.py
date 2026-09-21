@@ -218,6 +218,7 @@ class ActiveFireCountSensor(IgnisEntity, SensorEntity):
                 "inactive_incidents": 0,
                 "map_markers": 0,
                 "map_source": "terralyra_ignis",
+                **_count_source_attributes(self.coordinator),
             }
         inactive = sum(
             cluster.lifecycle is not None and cluster.lifecycle.value == "inactive"
@@ -229,6 +230,7 @@ class ActiveFireCountSensor(IgnisEntity, SensorEntity):
             "inactive_incidents": inactive,
             "map_markers": len(data.tracked_fires),
             "map_source": "terralyra_ignis",
+            **_count_source_attributes(self.coordinator),
         }
 
 
@@ -260,6 +262,7 @@ class SupplementalFireCountSensor(IgnisEntity, SensorEntity):
             "provider": "nasa_firms",
             "count_scope": "deduplicated_clusters_observed_by_provider",
             "provider_role": "equal_peer",
+            **_count_source_attributes(self.coordinator, "nasa_firms"),
         }
 
 
@@ -289,6 +292,7 @@ class CombinedFireCountSensor(IgnisEntity, SensorEntity):
         distinct = len(data.active_clusters) if data else 0
         return {
             "distinct_clusters": distinct,
+            **_count_source_attributes(self.coordinator),
             "count_scope": "deduplicated_current_clusters_all_sources",
         }
 
@@ -307,6 +311,10 @@ class RawPixelCountSensor(IgnisEntity, SensorEntity):
     @property
     def native_value(self) -> int:
         return self.coordinator.data.raw_pixels_in_radius if self.coordinator.data else 0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return _count_source_attributes(self.coordinator)
 
 
 class ProductTimeSensor(IgnisEntity, SensorEntity):
@@ -686,6 +694,36 @@ class MonitoredLocationNextUpdateSensor(IgnisEntity, SensorEntity):
             "sources": [item.attrs() for item in estimates],
             "estimate_note": "estimated_not_guaranteed",
         }
+
+
+def _count_source_attributes(coordinator: Any, provider: str | None = None) -> dict[str, Any]:
+    """Describe retrieval health, never certify observation completeness.
+
+    Retained or cached observations may still contribute during a source outage.
+    FIRMS-only counts must not inherit the health of unrelated peers.
+    """
+    health = [
+        item for item in getattr(coordinator.provider, "health", ())
+        if provider is None or item.provider_id == provider
+        or item.provider_id.startswith(f"{provider}:")
+    ]
+    states = {item.provider_id: item.status.value for item in health}
+    fresh = [key for key, state in states.items() if state == "available"]
+    delayed = [key for key, state in states.items() if state == "delayed"]
+    missing = [key for key, state in states.items() if state not in {"available", "delayed"}]
+    status = (
+        "unknown" if not states else
+        "partial" if missing and (fresh or delayed) else
+        "unavailable" if missing else
+        "degraded" if delayed else "available"
+    )
+    return {
+        "source_retrieval_status": status,
+        "source_statuses": states,
+        "unavailable_sources": missing,
+        "delayed_sources": delayed,
+        "observation_completeness": "not_established",
+    }
 
 
 def _location_operational_status(

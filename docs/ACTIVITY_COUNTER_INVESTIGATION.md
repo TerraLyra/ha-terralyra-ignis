@@ -67,3 +67,20 @@ unchanged successful polls still age the count without rerunning tracking.
 These are source-observation counts, not distinct physical fires. The original
 historical spike remains unproven and should not be marked resolved solely
 because these reproducible mechanisms have been corrected.
+
+### Count source retrieval diagnostics
+
+Current cluster counts (including the legacy active count), FIRMS cluster counts,
+and raw pixel counts expose `source_retrieval_status`, `source_statuses`,
+`unavailable_sources`, and `delayed_sources`. FIRMS counts report only FIRMS health.
+The retrieval summary is `available` when all scoped sources are available,
+`degraded` when usable sources include delayed data, `partial` when only some
+sources are usable, `unavailable` when none are usable, and `unknown` when no
+health records exist. Initializing sources are not yet usable.
+
+These attributes do not change the numeric count or restore observations into the
+current snapshot. Cached observations may still contribute during an outage.
+`observation_completeness` remains `not_established`: successful retrieval does
+not establish complete satellite coverage. The restart regression verifies the
+full → partial → recovered transition and preservation of incident history.
+This does not establish the cause of the historical issue #41 report.
