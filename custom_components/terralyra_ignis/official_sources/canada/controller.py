@@ -9,14 +9,16 @@ from .storage import load, save
 
 
 class Controller:
-    def __init__(self, path, session, *, clock=lambda: datetime.now(UTC), fetcher=fetch_async):
+    def __init__(self, path, session, *, clock=lambda: datetime.now(UTC), fetcher=fetch_async, store=None):
         self.path, self.session = path, session
         self.clock, self.fetcher = clock, fetcher
         self.lock = asyncio.Lock()
+        self.store = store
 
     async def refresh(self):
         async with self.lock:
-            state = await asyncio.to_thread(load, self.path)
+            state = (await self.store.async_load() if self.store is not None
+                     else await asyncio.to_thread(load, self.path))
             started = self.clock()
             if started.utcoffset() is None:
                 raise ValueError('Aware clock required')
@@ -49,7 +51,9 @@ class Controller:
             return state
 
     async def _save(self, state):
-        task = asyncio.create_task(asyncio.to_thread(save, self.path, state))
+        operation = (self.store.async_save(state) if self.store is not None
+                     else asyncio.to_thread(save, self.path, state))
+        task = asyncio.create_task(operation)
         try:
             await asyncio.shield(task)
         except asyncio.CancelledError:

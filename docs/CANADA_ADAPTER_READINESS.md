@@ -72,3 +72,19 @@ No source raw samples or private monitored locations are committed.
 
 The user has added a Canadian monitored point for later validation. No point
 coordinates were sent upstream in this research. Optimization remains paused.
+
+## HA persistence boundary — 2026-09-22
+
+A lazy HA owner now supplies the shared HA HTTP session and a dedicated
+`terralyra_ignis.canada_state` Store to the existing controller. The owner is not
+registered or invoked by setup. The adapter requires explicit first-use
+initialization; missing or corrupt data cannot silently reset the request pause.
+Existing valid state is adopted without replacement. Storage errors latch a block
+for the owner lifetime. Cancellation waits for a controller-owned save before
+releasing its lock. Research file storage and HA storage share the same codec.
+
+Synthetic storage tests cover restart, corruption, failed reservation writes and
+cancellation during persistence. HA tests cover lazy ownership and real Store
+roundtrip. An administrator-facing initialization/recovery flow, bounded HA
+storage waits, scheduler and source-status entity remain outstanding before
+activation. No history migration or removal is performed.
