@@ -41,14 +41,14 @@ Status reviewed on 2026-09-21 against stable 0.27.0.
 | Victoria | Offline inspectors complete; user submitted access request on 2026-09-20 | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
 | Tasmania TasALERT | User confirmed access request sent on 2026-09-21 | Await response, then review granted endpoints and terms |
-| Western Australia DFES | Access-request draft ready | Clarify dataset approval and distributed local authentication |
-| South Australia CFS | Licence-clarification draft ready | Resolve product-specific reuse terms |
+| Western Australia DFES | User confirmed access request sent on 2026-09-21 | Clarify dataset approval and distributed local authentication |
+| South Australia CFS | User confirmed clarification request sent on 2026-09-21 | Resolve product-specific reuse terms |
 | Northern Territory | Access preflight and enquiry draft ready | Confirm supported feed and reuse scope |
 
-Victoria and Tasmania submissions are confirmed by the user; other drafts remain
-unsent unless separately confirmed. No approval is inferred from a publicly reachable endpoint.
+Victoria, Tasmania, Western Australia and South Australia submissions are confirmed
+by the user; Northern Territory remains a draft. No approval is inferred from a publicly reachable endpoint.
 See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) and
-[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). Victoria and Tasmania can now progress through external review in parallel;
+[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). The submitted requests can progress through external review in parallel;
 this is not a promised implementation order.
 
 ## Development sequence
@@ -67,3 +67,8 @@ this is not a promised implementation order.
 Optimization remains paused. Advanced service-side algorithms and evaporation,
 solar-radiation and vegetation products are outside this integration's roadmap.
 New releases and live deployment require their own validation and authorization.
+
+## Prepared after 0.27.0
+
+Source retrieval diagnostics for current counts and the partial-restart regression
+are merged but not released. See [next release readiness](NEXT_RELEASE_READINESS.md).
