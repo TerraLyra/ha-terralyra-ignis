@@ -35,6 +35,8 @@ Thank you.
 
 ## Western Australia
 
+The user confirmed sending the request on 2026-09-21; response and approval are pending. The text below remains a template, not private correspondence.
+
 To: statepublicinfo@dfes.wa.gov.au
 Subject: TerraLyra IGNIS – DFES-066 access and distributed local integration enquiry
 
@@ -63,6 +65,8 @@ cloud service would also be assessed separately.
 Thank you.
 
 ## South Australia CFS — licence clarification
+
+The user confirmed sending the request on 2026-09-21; response and approval are pending. The text below remains a template, not private correspondence.
 
 Route: the official dataset page's "Ask a question about this dataset" form:
 https://data.gov.au/data/dataset/south-australian-country-fire-service-current-incidents-rss-feed

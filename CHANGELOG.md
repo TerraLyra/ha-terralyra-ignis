@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Expose source retrieval health alongside active, combined, FIRMS and raw-pixel counts. Partial source availability is visible without changing count values, identifiers or persisted history. Successful retrieval does not certify observation completeness.
+- Cover full → partial → recovered source responses after restart, including preserved incident history. The cause of the historical counter discontinuity (#41) remains unproven.
+- Document the HA camera test dependency and refresh provider-request status; no additional official provider is enabled.
+
 ## 0.27.0
 
 - Add opt-in NIFC / WFIGS official US reports: source-status sensor, timed calendar and location-aware map. Reports remain separate from satellite detections.
