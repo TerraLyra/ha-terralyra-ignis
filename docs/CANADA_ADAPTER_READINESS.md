@@ -91,3 +91,12 @@ Synthetic storage tests cover restart, corruption, failed reservation writes and
 cancellation during persistence. HA tests cover lazy ownership and real Store
 roundtrip. An administrator-facing initialization/recovery flow, scheduler and source-status entity remain outstanding before
 activation. No history migration or removal is performed.
+
+## Administrator preparation and recovery
+
+`initialize_canada` and `recover_canada` require an identified administrator,
+a loaded IGNIS entry and an explicit confirmation. Registration performs no I/O.
+Initialization preserves existing state. Recovery refuses pending storage work,
+missing/corrupt data or a missing cooldown. It preserves cached reports and adds
+at least one hour without shortening a longer server wait. Neither action enables
+retrieval. Canada remains without runtime scheduling or entities.

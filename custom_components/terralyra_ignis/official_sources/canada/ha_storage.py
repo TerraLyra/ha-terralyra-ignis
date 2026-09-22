@@ -99,3 +99,30 @@ class CanadaStore:
             except BaseException:
                 self.blocked = True
                 raise
+
+    async def async_recover(self, *, confirmed_review=False, now):
+        """Resume valid existing state after review, never shorten a known pause."""
+        from datetime import timedelta
+        if confirmed_review is not True or now.utcoffset() is None:
+            raise ValueError('Explicit review and aware clock required')
+        async with self._lock:
+            if self.pending:
+                raise OSError('Storage operation still pending')
+            self.blocked = False
+            self.problem = None
+            try:
+                data = await self._run(self.store.async_load)
+                if data is None:
+                    raise ValueError('Missing established state')
+                state = self._decode(data)
+                if state.status == 'storage_error' or state.next_attempt is None:
+                    raise ValueError('Valid existing cooldown required')
+                state.next_attempt = max(state.next_attempt, now + timedelta(hours=1))
+                state.review_required = False
+                if state.status == 'review_required':
+                    state.status = 'unavailable'
+                await self._run(self.store.async_save, json.loads(encode(state)))
+                return state
+            except BaseException:
+                self.blocked = True
+                raise
