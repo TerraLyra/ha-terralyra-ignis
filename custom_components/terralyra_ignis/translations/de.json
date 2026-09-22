@@ -229,7 +229,11 @@
     }
   },
   "entity": {
-    "switch": {"nifc_map": {"name": "NIFC-Berichtskarte"}},
+    "switch": {
+      "nifc_map": {
+        "name": "NIFC-Berichtskarte"
+      }
+    },
     "geo_location": {
       "monitoring_area": {
         "name": "Ort: {location_name} — Aktivbrand-Überwachungsbereich"
@@ -385,6 +389,16 @@
           "retained_response": "Beibehaltene Antwort",
           "review_required": "Prüfung erforderlich"
         }
+      },
+      "canada_source_status": {
+        "name": "Canada CWFIF-Quellenstatus",
+        "state": {
+          "not_requested": "Nicht angefordert",
+          "available": "Antwort verfügbar",
+          "waiting": "Warten",
+          "retained_response": "Beibehaltene Antwort",
+          "review_required": "Prüfung erforderlich"
+        }
       }
     },
     "event": {
@@ -421,7 +435,9 @@
       }
     },
     "calendar": {
-      "nifc_reports": {"name": "NIFC-Behördenberichte"},
+      "nifc_reports": {
+        "name": "NIFC-Behördenberichte"
+      },
       "official_reports": {
         "name": "Meldungen — BM OKF"
       },

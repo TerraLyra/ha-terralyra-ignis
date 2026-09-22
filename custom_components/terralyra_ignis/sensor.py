@@ -42,6 +42,8 @@ from .observation_counts import summarize_counts
 from .products.fire_risk import WMS_URL
 from .products.lst import WMS_URL as LST_WMS_URL
 from .nifc_sensor import NifcDiagnosticSensor
+from .canada_sensor import CanadaDiagnosticSensor
+from .official_sources.canada.owner import get_canada_owner
 from .official_sources.nifc.owner import get_nifc_owner
 from .situation import MAX_PRODUCT_AGE
 
@@ -55,6 +57,7 @@ async def async_setup_entry(
     _remove_orphaned_location_entities(hass, entry, location_plans)
     entities = [
         NifcDiagnosticSensor(entry, get_nifc_owner(hass)),
+        CanadaDiagnosticSensor(entry, get_canada_owner(hass)),
         NearestFireSensor(entry),
         ActiveFireCountSensor(entry),
         SupplementalFireCountSensor(entry),

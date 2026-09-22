@@ -229,7 +229,11 @@
     }
   },
   "entity": {
-    "switch": {"nifc_map": {"name": "Carte des rapports NIFC"}},
+    "switch": {
+      "nifc_map": {
+        "name": "Carte des rapports NIFC"
+      }
+    },
     "geo_location": {
       "monitoring_area": {
         "name": "Lieu : {location_name} — Zone de surveillance des feux actifs"
@@ -385,6 +389,16 @@
           "retained_response": "Réponse conservée",
           "review_required": "Vérification nécessaire"
         }
+      },
+      "canada_source_status": {
+        "name": "État de la source Canada CWFIF",
+        "state": {
+          "not_requested": "Non demandé",
+          "available": "Réponse disponible",
+          "waiting": "En attente",
+          "retained_response": "Réponse conservée",
+          "review_required": "Vérification nécessaire"
+        }
       }
     },
     "event": {
@@ -421,7 +435,9 @@
       }
     },
     "calendar": {
-      "nifc_reports": {"name": "Rapports officiels NIFC"},
+      "nifc_reports": {
+        "name": "Rapports officiels NIFC"
+      },
       "official_reports": {
         "name": "Communiqués — BM OKF"
       },

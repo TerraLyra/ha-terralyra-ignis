@@ -13,6 +13,32 @@ DATA_KEY = 'canada_owner'
 class CanadaOwner(Controller):
     """Serialize admin operations with refresh; no automatic activation."""
 
+    state = None
+    initialization_status = 'not_checked'
+    problem = None
+
+    async def async_refresh(self, *, enabled=False, has_enabled_locations=False, allow_uninitialized=False):
+        if type(enabled) is not bool or type(has_enabled_locations) is not bool:
+            raise ValueError('Explicit eligibility required')
+        if not enabled or not has_enabled_locations or self.lock.locked():
+            return
+        try:
+            if not await self.store.async_is_initialized():
+                self.initialization_status = 'required'
+                return
+            self.state = await self.refresh()
+            self.initialization_status = 'ready'
+            self.problem = None
+        except (OSError, ValueError):
+            self.problem = 'storage_review_required'
+            raise
+
+    def diagnostics(self):
+        return {'problem': self.problem or self.store.problem,
+                'storage_pending': self.store.pending,
+                'storage_review_required': self.store.blocked,
+                'initialization_status': self.initialization_status}
+
     async def async_initialize(self, *, confirmed_new=False):
         async with self.lock:
             return await self.store.async_initialize(confirmed_new=confirmed_new)
