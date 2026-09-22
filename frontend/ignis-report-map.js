@@ -177,6 +177,8 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       if (!view || view.unavailable) {this.dialog.append(element('p',w.unavailable));return;}
       const body = state.attributes.incident_text;
       const content = typeof body === 'string' && body.trim() ? body.slice(0,4000) :
+        state.attributes.incident_text_status === 'not_in_feed'
+          ? (this._hass.language?.startsWith('hu') ? 'Ez az adatfolyam eseményadatokat ad, szöveges leírásmezőt nem tartalmaz.' : 'This feed supplies incident data without a narrative description field.') :
         state.attributes.incident_text_status === 'not_provided'
           ? (this._hass.language?.startsWith('hu') ? 'A forrás ennél az eseménynél nem adott meg leírást.' : 'The source did not provide a description for this incident.') : w.absent;
       const paragraph=element('p',content);paragraph.style.whiteSpace='pre-wrap';

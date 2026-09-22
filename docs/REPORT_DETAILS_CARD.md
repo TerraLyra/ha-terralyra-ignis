@@ -8,7 +8,9 @@ It neither patches HA globally nor changes entity IDs, history or source fetchin
 The modal shows existing attributed structured fields. NIFC now requests the official IncidentName (50 characters) and
 IncidentShortDescription (80 characters) fields. These are source strings, not
 a generated article. Missing fields (older installations), empty descriptions
-and supplied descriptions are distinguished. Canada has no text adapter yet. The source link opens the source catalogue, not a
+and supplied descriptions are distinguished. Canada is explicitly labelled `not_in_feed`: its WFS DescribeFeatureType schema
+checked on 2026-09-22 contains no narrative description field. This claim is
+limited to this feed, not all Canadian agency products. The source link opens the source catalogue, not a
 fabricated incident-specific URL. Missing timestamps stay missing; HA state-change
 time is never presented as publication or retrieval time. Unknown control codes
 remain the original source values. Text is rendered as text, never upstream HTML.

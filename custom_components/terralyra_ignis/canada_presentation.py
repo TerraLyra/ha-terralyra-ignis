@@ -39,4 +39,4 @@ def record_attributes(item):
         'distance_reference_name', 'stage_of_control', 'prescribed_status',
         'current_activity', 'observation_completeness')} | {
         'attribution': ATTRIBUTION, 'source_url': SOURCE_URL, 'license_url': LICENSE_URL,
-        'source_freshness': 'not_established'}
+        'source_freshness': 'not_established', 'incident_text_status': 'not_in_feed'}
