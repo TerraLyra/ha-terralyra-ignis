@@ -229,7 +229,11 @@
     }
   },
   "entity": {
-    "switch": {"nifc_map": {"name": "NIFC jelentéstérkép"}},
+    "switch": {
+      "nifc_map": {
+        "name": "NIFC jelentéstérkép"
+      }
+    },
     "geo_location": {
       "monitoring_area": {
         "name": "Hely: {location_name} — Aktívtűz-megfigyelési terület"
@@ -385,6 +389,16 @@
           "retained_response": "Megőrzött válasz",
           "review_required": "Ellenőrzés szükséges"
         }
+      },
+      "canada_source_status": {
+        "name": "Canada CWFIF forrásállapot",
+        "state": {
+          "not_requested": "Még nincs lekérés",
+          "available": "Válasz elérhető",
+          "waiting": "Várakozás",
+          "retained_response": "Megőrzött válasz",
+          "review_required": "Ellenőrzés szükséges"
+        }
       }
     },
     "event": {
@@ -421,7 +435,9 @@
       }
     },
     "calendar": {
-      "nifc_reports": {"name": "NIFC hatósági jelentések"},
+      "nifc_reports": {
+        "name": "NIFC hatósági jelentések"
+      },
       "official_reports": {
         "name": "Közlemények — BM OKF"
       },

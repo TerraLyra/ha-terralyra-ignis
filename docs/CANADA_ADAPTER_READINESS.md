@@ -100,3 +100,16 @@ Initialization preserves existing state. Recovery refuses pending storage work,
 missing/corrupt data or a missing cooldown. It preserves cached reports and adds
 at least one hour without shortening a longer server wait. Neither action enables
 retrieval. Canada remains without runtime scheduling or entities.
+
+## Opt-in diagnostic runtime
+
+The Canada source-status diagnostic sensor is registered disabled by default.
+An enabled sensor attaches to a single HA runtime shared by config entries.
+The one-minute timer only checks eligibility; persisted request pauses remain
+owned by the controller. No enabled monitored place means no request. Missing
+first-use storage is surfaced as initialization_required without creating it.
+The admin initialization action wakes an already enabled runtime. Last-consumer
+unload and HA shutdown cancel retrieval and remove the timer.
+
+This step exposes retrieval health only, not an active-fire count or warning.
+Canada map/calendar entities and release validation are still outstanding.

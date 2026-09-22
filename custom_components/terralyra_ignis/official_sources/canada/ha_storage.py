@@ -126,3 +126,8 @@ class CanadaStore:
             except BaseException:
                 self.blocked = True
                 raise
+
+    async def async_is_initialized(self):
+        """An absent first-use store is a prompt, not consent to initialize."""
+        async with self._lock:
+            return await self._run(self.store.async_load) is not None

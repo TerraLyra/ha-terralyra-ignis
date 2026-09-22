@@ -24,8 +24,10 @@ def register_canada_initialization(hass):
             raise ServiceValidationError('Select a loaded TerraLyra IGNIS entry')
 
     def finish(status):
-        # Preparation only: the Canada runtime is not registered yet.
-        return {'status': status, 'retrieval_enabled': False, 'history_changed': False}
+        runtime = hass.data.get(DOMAIN, {}).get('canada_runtime')
+        if runtime is not None:
+            runtime.request_refresh()
+        return {'status': status, 'retrieval_enabled': runtime.enabled if runtime else False, 'history_changed': False}
 
     async def initialize(call):
         validate(call)
