@@ -289,4 +289,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> bo
         manager = hass.data.get(DOMAIN, {}).get("nifc_maps", {}).get(entry.entry_id)
         if manager is not None:
             await manager.close()
+        canada = hass.data.get(DOMAIN, {}).get("canada_maps", {}).get(entry.entry_id)
+        if canada is not None:
+            await canada.close()
     return unloaded
