@@ -113,3 +113,18 @@ unload and HA shutdown cancel retrieval and remove the timer.
 
 This step exposes retrieval health only, not an active-fire count or warning.
 Canada map/calendar entities and release validation are still outstanding.
+
+## Official map and calendar presentation
+
+Canada now has a separate opt-in map switch and disabled-by-default official
+reports calendar. Map coordinates come from validated upstream Points; distances
+refer to the nearest matching enabled monitored location, never an unrelated Home.
+IDs derive from agency and national fire ID, not changing transport feature IDs.
+More than 500 relevant reports raises a display-limit status rather than silently
+showing a subset. Removing display entities does not edit source/history storage.
+
+Calendar markers use status_date with its explicit offset. A one-second marker is
+not fire duration or ignition; record validity and situation timestamps remain
+separately described. Retained responses are identified. Attribution, catalogue
+and licence links are included. Final release validation and live opt-in checks
+are still required; no release is published by this change.

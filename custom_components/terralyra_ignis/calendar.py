@@ -20,6 +20,7 @@ from .gdacs_calendar import GdacsCalendar
 from .nsw_rfs_calendar import NswRfsCalendar
 from .qfd_calendar import QfdCalendar
 from .nifc_calendar import NifcCalendar
+from .canada_calendar import CanadaCalendar
 
 RISK_LABELS = {
     "en": {
@@ -164,6 +165,7 @@ async def async_setup_entry(
             NswRfsCalendar(hass, entry, hass.data[DOMAIN]["nsw_rfs_client"]),
             QfdCalendar(hass, entry, hass.data[DOMAIN]["qfd_client"]),
             NifcCalendar(hass, entry),
+            CanadaCalendar(hass, entry),
         ]
     )
 

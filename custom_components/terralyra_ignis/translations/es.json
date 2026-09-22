@@ -232,6 +232,9 @@
     "switch": {
       "nifc_map": {
         "name": "Mapa de informes NIFC"
+      },
+      "canada_map": {
+        "name": "Mapa de informes Canada CWFIF"
       }
     },
     "geo_location": {
@@ -446,6 +449,9 @@
       },
       "fire_incident_history": {
         "name": "Resumen — Historial de incendios"
+      },
+      "canada_reports": {
+        "name": "Informes oficiales Canada CWFIF"
       }
     },
     "number": {

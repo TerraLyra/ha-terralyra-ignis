@@ -232,6 +232,9 @@
     "switch": {
       "nifc_map": {
         "name": "NIFC jelentéstérkép"
+      },
+      "canada_map": {
+        "name": "Canada CWFIF jelentéstérkép"
       }
     },
     "geo_location": {
@@ -446,6 +449,9 @@
       },
       "fire_incident_history": {
         "name": "Áttekintés — Tűzesemény-előzmények"
+      },
+      "canada_reports": {
+        "name": "Canada CWFIF hatósági jelentések"
       }
     },
     "number": {
