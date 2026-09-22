@@ -15,6 +15,21 @@ def sample():
 
 
 class RecordTests(unittest.TestCase):
+    def test_optional_description_missing_empty_and_original_text(self):
+        page = sample()
+        self.assertEqual(normalize_page(page)[0].incident_text_status, "not_requested")
+        attrs = page['features'][0]['attributes']
+        attrs['IncidentShortDescription'] = None
+        self.assertEqual(normalize_page(page)[0].incident_text_status, "not_provided")
+        attrs['IncidentShortDescription'] = '<b>Original report</b>'
+        attrs['IncidentName'] = 'Example'
+        record = normalize_page(page)[0]
+        self.assertEqual(record.incident_text, '<b>Original report</b>')
+        self.assertEqual(record.incident_name, 'Example')
+        self.assertEqual(record.incident_text_status, 'available')
+        attrs['IncidentShortDescription'] = 'x' * 100
+        self.assertEqual(len(normalize_page(page)[0].incident_text), 80)
+
     def test_identity_coordinates_and_distinct_utc_times(self):
         record, = normalize_page(sample())
         self.assertEqual(record.irwin_id, '12345678-1234-1234-1234-123456789abc')

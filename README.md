@@ -42,6 +42,13 @@ are recorded in
 
 ## Product status
 
+Version 0.29.0 adds an optional report map card with independent satellite, Canada
+and NIFC layers, report-update age filters, and readable report dialogs. NIFC
+records now include source-provided names and short descriptions when supplied.
+The card requires a separate dashboard resource installation; a HACS integration
+update alone does not install or update it. See [card setup](docs/REPORT_DETAILS_CARD.md)
+and [0.29.0 release notes](docs/RELEASE_0_29_0.md).
+
 Version 0.28.0 adds optional Canadian official reports through CWFIF: a source-status
 sensor, location-aware map and a calendar of reported status updates. These remain
 separate from satellite detections and require explicit first-use preparation.

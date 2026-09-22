@@ -20,6 +20,16 @@ class IncidentRecord:
     modified_at: datetime | None
     complex_child: bool | None = None
     parent_complex_id: str | None = None
+    incident_name: str | None = None
+    incident_text: str | None = None
+    incident_text_status: str = "not_requested"
+
+
+def _optional_text(value, limit):
+    """Bound optional source text without invalidating geographic records."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value[:limit]
 
 
 def _identity(value):
@@ -95,5 +105,9 @@ def normalize_page(page: dict, *, max_records: int = 2000) -> tuple[IncidentReco
             _time(attributes.get('FireDiscoveryDateTime')),
             _time(attributes.get('ModifiedOnDateTime_dt')),
             None if child is None else bool(child), parent,
+            _optional_text(attributes.get("IncidentName"), 50),
+            _optional_text(attributes.get("IncidentShortDescription"), 80),
+            ("not_requested" if "IncidentShortDescription" not in attributes else
+             "available" if _optional_text(attributes.get("IncidentShortDescription"), 80) else "not_provided"),
         ))
     return tuple(records)
