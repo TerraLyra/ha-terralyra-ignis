@@ -55,7 +55,7 @@ def _fetch_steps(*, page_size=500, max_pages=20,
         if remaining <= 0:
             raise ValueError('Total byte budget exhausted')
         query = urlencode(dict(f='json', where='1=1',
-            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt,IsCpxChild,CpxID',
+            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt,IsCpxChild,CpxID,IncidentName,IncidentShortDescription',
             returnGeometry='true', outSR=4326, orderByFields='OBJECTID ASC',
             resultOffset=index * page_size, resultRecordCount=page_size))
         payload = yield ENDPOINT + '?' + query, remaining, timeout
@@ -142,7 +142,7 @@ def _fetch_id_steps(*, page_size=100, max_pages=100, max_records=10000,
     for offset in range(0, len(ids), page_size):
         expected = ids[offset:offset+page_size]
         page = yield from request(dict(objectIds=','.join(map(str, expected)),
-            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt,IsCpxChild,CpxID',
+            outFields='OBJECTID,IrwinID,IncidentTypeCategory,FireDiscoveryDateTime,ModifiedOnDateTime_dt,IsCpxChild,CpxID,IncidentName,IncidentShortDescription',
             returnGeometry='true', outSR=4326, orderByFields='OBJECTID ASC'))
         inspection = inspect_page(page, max_records=page_size)
         if inspection.object_ids != expected or inspection.continuation == 'more':

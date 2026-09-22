@@ -67,6 +67,8 @@ def record_attributes(item):
     record = item.record
     return {'irwin_id': record.irwin_id, 'report_category': record.category,
             'source_url': SOURCE_URL, 'attribution': ATTRIBUTION,
+            'incident_name': record.incident_name, 'incident_text': record.incident_text,
+            'incident_text_status': record.incident_text_status,
             'source_modified_at': record.modified_at.isoformat() if record.modified_at else None,
             'source_discovered_at': record.discovered_at.isoformat() if record.discovered_at else None,
             'complex_role': item.complex_role, 'parent_complex_id': record.parent_complex_id,
