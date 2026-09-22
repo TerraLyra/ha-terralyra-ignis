@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.28.0
+
+- Add optional Canadian official fire reports from CWFIF: source status, location-aware map and timed calendar, separate from satellite observations.
+- Share bounded retrieval, persistent retry pauses and explicit administrator preparation/recovery across all enabled consumers. Canada remains opt-in.
+- Preserve existing monitored locations, entity identities and incident history. Include official attribution and licence links; source timestamps and unknown fields keep their original meaning.
+
+See [release notes](docs/RELEASE_0_28_0.md) and [Canada setup](docs/CANADA_USAGE.md).
+
 ## 0.27.1
 
 - Expose source retrieval health alongside active, combined, FIRMS and raw-pixel counts. Partial source availability is visible without changing count values, identifiers or persisted history. Successful retrieval does not certify observation completeness.

@@ -10,7 +10,7 @@ from homeassistant.helpers.service import async_register_admin_service
 from .const import DOMAIN
 from .official_sources.canada.owner import get_canada_owner
 
-SERVICE_INITIALIZE_Canada = 'initialize_canada'
+SERVICE_INITIALIZE_CANADA = 'initialize_canada'
 
 
 def register_canada_initialization(hass):
@@ -41,7 +41,7 @@ def register_canada_initialization(hass):
         return finish(status)
 
     async_register_admin_service(
-        hass, DOMAIN, SERVICE_INITIALIZE_Canada, initialize,
+        hass, DOMAIN, SERVICE_INITIALIZE_CANADA, initialize,
         schema=vol.Schema({
             vol.Required('config_entry_id'): cv.string,
             vol.Required('confirm_first_use'): vol.All(bool, vol.In([True])),
