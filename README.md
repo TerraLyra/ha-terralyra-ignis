@@ -42,6 +42,11 @@ are recorded in
 
 ## Product status
 
+Version 0.28.0 adds optional Canadian official reports through CWFIF: a source-status
+sensor, location-aware map and a calendar of reported status updates. These remain
+separate from satellite detections and require explicit first-use preparation.
+See [Canada setup](docs/CANADA_USAGE.md) and [0.28.0 release notes](docs/RELEASE_0_28_0.md).
+
 The 0.27.1 maintenance update adds source retrieval diagnostics to current
 fire counts without changing their values or stored history. See
 [0.27.1 release notes](docs/RELEASE_0_27_1.md).
