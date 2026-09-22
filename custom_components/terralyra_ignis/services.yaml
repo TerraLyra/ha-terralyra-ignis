@@ -201,3 +201,33 @@ recover_nifc:
       name: I reviewed and resolved the source or storage problem
       selector:
         boolean:
+
+initialize_canada:
+  name: Initialize Canada first-use storage
+  description: Administrator-only preparation of shared Canada storage. Does not enable retrieval. Use only for confirmed first use, never after deleting established storage or to reset a wait. Existing valid cooldowns are preserved; interrupted initialization requires review.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_first_use:
+      required: true
+      name: I confirm first use, not recovery or reset
+      description: Missing files alone do not prove first use. This action is shared by all IGNIS entries.
+      selector:
+        boolean:
+recover_canada:
+  name: Resume Canada after review
+  description: Administrator-only recovery after reviewing source access, schema and storage. Preserves known waits and adds at least one hour. No immediate source request. Cannot reset missing/corrupt state or an unknown/unbounded pause. Never deletes history.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_review:
+      required: true
+      name: I reviewed and resolved the source or storage problem
+      selector:
+        boolean:

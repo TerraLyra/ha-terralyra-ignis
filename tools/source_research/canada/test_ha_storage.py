@@ -175,3 +175,49 @@ class HAStorageTests(unittest.IsolatedAsyncioTestCase):
         release.set()
         await store._pending
         self.assertEqual(disk.writes, 1)
+
+    async def test_review_preserves_cache_and_longer_server_wait(self):
+        from datetime import timedelta
+        disk = MemoryStore()
+        store = CanadaStore(disk)
+        await store.async_initialize(confirmed_new=True)
+        fetcher = AsyncMock(return_value=EMPTY)
+        owner = self.owner(store, fetcher)
+        state = await owner.refresh()
+        state.review_required = True
+        state.status = 'review_required'
+        state.next_attempt = owner.clock() + timedelta(days=2)
+        await store.async_save(state)
+        store.blocked = True
+        recovered = await store.async_recover(confirmed_review=True, now=owner.clock())
+        self.assertEqual(recovered.next_attempt, state.next_attempt)
+        self.assertEqual(recovered.last_success[0], state.last_success[0])
+        self.assertEqual(recovered.last_success_at, state.last_success_at)
+        self.assertFalse(recovered.review_required)
+        await owner.refresh()
+        fetcher.assert_awaited_once()
+
+    async def test_review_cannot_initialize_missing_or_replace_corrupt_state(self):
+        for data in (None, {'version': 999}):
+            disk = MemoryStore()
+            disk.data = data
+            store = CanadaStore(disk)
+            with self.assertRaises(ValueError):
+                await store.async_recover(confirmed_review=True,
+                    now=datetime(2026, 9, 22, tzinfo=UTC))
+            self.assertEqual(disk.data, data)
+            self.assertEqual(disk.writes, 0)
+            self.assertTrue(store.blocked)
+
+    async def test_review_requires_confirmation_and_retains_minimum_pause(self):
+        from datetime import timedelta
+        disk = MemoryStore()
+        store = CanadaStore(disk)
+        await store.async_initialize(confirmed_new=True)
+        owner = self.owner(store, AsyncMock(return_value=EMPTY))
+        await owner.refresh()
+        later = owner.clock() + timedelta(days=1)
+        with self.assertRaises(ValueError):
+            await store.async_recover(now=later)
+        state = await store.async_recover(confirmed_review=True, now=later)
+        self.assertEqual(state.next_attempt, later + timedelta(hours=1))
