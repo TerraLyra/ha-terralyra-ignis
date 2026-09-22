@@ -43,6 +43,19 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>Object.hasOwn(card.map.hass.states,'geo_location.report')),true);
   await page.getByRole('checkbox',{name:'Kanadai jelentések'}).uncheck();
   assert.equal(await page.evaluate(()=>Object.hasOwn(card.map.hass.states,'geo_location.report')),false);
+  await page.getByRole('checkbox',{name:'Kanadai jelentések'}).check();
+  await page.getByRole('combobox').selectOption('7');
+  assert.equal(await page.evaluate(()=>Object.hasOwn(card.map.hass.states,'geo_location.report')),false);
+  assert.equal(await page.evaluate(()=>Object.hasOwn(card._hass.states,'geo_location.report')),true);
+  await page.getByRole('combobox').selectOption('0');
+  assert.equal(await page.evaluate(()=>Object.hasOwn(card.map.hass.states,'geo_location.report')),true);
+  await page.evaluate(()=>{
+    report={...report,attributes:{...report.attributes,incident_text:'Official <script>alert(1)</script> description'}};
+    card.hass={language:'hu',states:{[report.entity_id]:report}};
+    card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true}));
+  });
+  assert.match(await page.locator('dialog').innerText(),/Official <script>alert\(1\)<\/script> description/);
+  assert.equal(await page.locator('dialog script').count(),0);
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
