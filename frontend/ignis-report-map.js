@@ -95,7 +95,8 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         this.renderReport();
         this.dialog.showModal();
       });
-      this.dialog.addEventListener('close',()=>{this.selected = null;});
+      // A queued close event may arrive after another report has opened.
+      this.dialog.addEventListener('close',()=>{if (!this.dialog.open) this.selected = null;});
     }
     setConfig(config) {
       this.config = {...config, type:'map'};

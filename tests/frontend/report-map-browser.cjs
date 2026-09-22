@@ -35,6 +35,9 @@ const assert=require('node:assert/strict');
   await page.evaluate(()=>card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:'geo_location.satellite'},bubbles:true,composed:true})));
   assert.deepEqual(await page.evaluate(()=>nativeClicks),['geo_location.report','geo_location.satellite']);
   await page.evaluate(()=>card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true})));
+  // Reproduce a delayed close event from the previous dialog deterministically.
+  await page.evaluate(()=>card.dialog.dispatchEvent(new Event('close')));
+  assert.equal(await page.evaluate(()=>card.selected), 'geo_location.report');
   await page.evaluate(()=>{card.hass={language:'hu',states:{}};});
   assert.match(await page.locator('dialog').innerText(),/már nem érhető el/);
   await page.keyboard.press('Escape');
