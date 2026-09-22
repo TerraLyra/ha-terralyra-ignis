@@ -1,4 +1,4 @@
-# Report details map — development preview
+# Report details map — 0.29.0
 
 This optional dashboard resource wraps Home Assistant's existing map card. It
 intercepts report clicks only inside this card, for the Canada and NIFC sources.
@@ -15,12 +15,19 @@ fabricated incident-specific URL. Missing timestamps stay missing; HA state-chan
 time is never presented as publication or retrieval time. Unknown control codes
 remain the original source values. Text is rendered as text, never upstream HTML.
 
-## Preview installation
+## Installation and updates
 
-Not installed automatically and not included in the published 0.28.0 release.
+The JavaScript card is distributed separately from the HACS integration.
+Download it from the 0.29.0 release assets. It is not installed automatically.
 Copy `frontend/ignis-report-map.js` to `/config/www/ignis-report-map.js` and register
 `/local/ignis-report-map.js` as a JavaScript module in Dashboard resources.
-On a duplicate test card, retain all existing map settings and change only:
+For an update, replace the card file, change its resource URL query to
+`?v=0.29.0`, and reload the browser. Keep only one resource entry for this card.
+If you already use a differently named card file, update that file or point the
+existing resource entry to the new one. A browser reload is required because
+an already registered custom element cannot be replaced in the current page.
+
+On a duplicate card, retain all existing map settings and change only:
 
 ```yaml
 type: custom:ignis-report-map
@@ -46,7 +53,10 @@ This test uses a stub map element; it is not a real HA compatibility test.
 Before release, validate the nested HA map and click forwarding in the installed
 HA frontend on desktop and mobile. Check keyboard close/focus, source failures,
 entity removal while open, multiple cards and unchanged satellite dialogs.
-This is a development preview until the real HA compatibility check succeeds.
+The layer switches and age filter were verified on live HA: Canada markers
+58 -> 0 when disabled and 58 -> 16 with the seven-day filter; 46 satellite
+markers remained. The user confirmed the earlier report dialog. Updated NIFC
+text retrieval still requires post-upgrade live validation.
 
 Calendar-only BM OKF, NSW RFS, Queensland and GDACS reports are not automatically
 map entities. Their text adapters and a shared report contract remain necessary;
