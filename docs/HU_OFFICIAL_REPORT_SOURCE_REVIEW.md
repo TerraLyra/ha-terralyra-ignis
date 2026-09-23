@@ -121,3 +121,107 @@ empty feeds, malformed XML, duplicate updates and ambiguous incident matches.
 Keep satellite counts, notification eligibility and evidence strength unchanged
 by report association. Feed failures must not create a Repair requiring no
 action from the user.
+
+## Offline settlement-mention prototype (2026-09-23)
+
+`tools/source_research/bm_location_candidates.py` now provides a research-only
+`review_locations` helper. It takes already available RSS title/description text
+and a caller-supplied list of reviewed settlement names and explicit aliases.
+It performs no network requests and is not imported by the HA integration.
+
+The result preserves title, description, source URL and exact matched evidence
+with field-relative character offsets. Every match requires human review,
+including single-name results: responding fire stations, street names, negated
+locations and earlier incidents can all mention settlements. Multiple settlement
+IDs remain separate candidates, including names shared by several places.
+No fire classification, coordinates, map entities or satellite association are
+created. Truncated inputs produce no candidates. Unmatched names are unknown,
+not proof of absence. Only explicitly listed inflections match; this is not a
+complete Hungarian language parser.
+
+Seven synthetic tests cover evidence preservation, false-location contexts,
+word boundaries, alias ambiguity, truncation, bounds and lack of coordinates.
+Before production use, select a redistributable, attributed settlement gazetteer,
+review its Hungarian aliases and evaluate precision on permitted real RSS
+samples. No gazetteer or linked event-page data was acquired for this prototype.
+The existing event-page permission gate remains unchanged.
+
+### Reuse of the existing bundled database
+
+The research adapter `bm_bundled_places.py` reads the existing
+`data/geonames_cities500.sqlite3` in SQLite read-only mode, selecting Hungary.
+The inspected bundle contains 1,226 Hungarian records. No additional country
+extract, online geocoder or new database is needed for this prototype. Existing
+GeoNames CC BY 4.0 attribution in `data/README.txt` applies. The database is a
+reduced cities500 extract, not a complete Hungarian settlement register.
+
+Seven manually reviewed sets of Hungarian inflected aliases are included; all
+other places currently match their primary names only. Alternate names are not
+present in the bundled schema. No suffix is guessed automatically. Local
+content-derived IDs distinguish same-name records; these are not GeoNames IDs
+and are not suitable as persistent HA entity identities. Coordinates are read
+only to distinguish source rows and are never exposed as incident locations.
+
+The previously downloaded two-item BM OKF RSS snapshot was evaluated locally:
+Vértesszőlős/Tatabánya plus Komárom/Esztergom (from the county name), and
+Nyíradony/Nyírbátor/Debrecen were found. County-name components are an additional
+false-location context that the current matcher does not exclude. Both require
+review: event locations and responding-unit locations coexist in the text.
+This small, vocabulary-informed sample is a smoke check, not an independent
+accuracy measurement. No raw notice text is committed. Five additional tests
+check unchanged database bytes, missing-file handling, source validation,
+homonyms and reviewed inflections. All 201 offline source tests passed.
+
+Next: evaluate a separate sample and add contextual evidence for event versus
+responder mentions. No automatic geographic association or map publication is
+ready yet. The earlier proposal to select a new gazetteer is superseded by reuse
+of the existing bundle; additional data is only needed for demonstrated gaps.
+
+### Context clues, without automatic exclusion
+
+Mentions now carry optional `context_hints` with exact original evidence and
+field-relative offsets. Narrow lexical rules flag a name inside a county-name
+phrase (including compound names with hyphen/en dash), or an adjectival name
+immediately followed by a firefighter/unit expression. A clue describes wording,
+not a verified semantic role; none removes a candidate or sets an event location.
+A settlement mentioned independently remains separate from its occurrence in a
+county name. No cross-sentence responder association is attempted.
+
+Coordinated lists such as several towns followed by a shared unit noun, street
+names, negation and historical/quoted contexts still require manual review.
+Absence of a context hint does not establish that a mention is the event location.
+Six additional synthetic tests cover these distinctions; all 207 offline source
+tests pass. No HA entities, calendar behavior or stored user data are changed.
+
+### Coordinated responder names
+
+The offline matcher now marks `responder_list_reference` for two to eight known
+adjectival aliases separated by commas, `és` or `illetve`, followed directly by
+a supported firefighter/unit noun. Every member retains the complete list phrase
+and its exact offsets. Unknown aliases, intervening verbs, different nouns and
+sentence boundaries prevent propagation. A separate event-location mention of
+the same settlement remains independent. This is a lexical clue, never automatic
+exclusion or verification. Five additional tests bring the suite to 212 passing
+checks.
+
+A subsequent fetch of the official RSS returned one notice already present in
+the earlier sample, not a new independent event. The Vértesszőlős mention remained
+unclassified; Tatabánya received a responder clue and Komárom/Esztergom county
+clues. Therefore independent real-event accuracy validation remains outstanding.
+Raw RSS and user data are not committed. No production wiring is added.
+
+### Reproducible local sample review
+
+Run `python tools/source_research/bm_review_sample.py sample.json` from the repo
+root. Input is a JSON array (at most 100 reports / 1 MiB) with `title`,
+`description`, `source_url` strings and optional boolean `input_truncated`.
+Supply permitted plain-text RSS content, not linked-page HTML. The command reads
+the bundled database and emits JSON to stdout; it never fetches or modifies HA.
+Output includes original text and should stay local unless publication is intended.
+
+Sample/database hashes identify the evaluated inputs. Exact repeated content is
+flagged; revised content remains distinct but is not claimed to be a new incident.
+`accuracy_assessed` is always false: human-labelled independent events are still
+needed to measure performance. Unknown and truncated reports remain explicit.
+The output includes GeoNames and BM OKF attribution. Five sample-runner tests
+bring the local offline suite to 217 passing checks.
