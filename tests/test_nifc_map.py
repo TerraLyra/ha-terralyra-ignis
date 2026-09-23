@@ -1,6 +1,7 @@
 """Map lifecycle changes HA display state only, never the incident archive."""
 import asyncio
 import logging
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -19,7 +20,7 @@ async def test_map_enable_update_disable_does_not_delete_history(hass,hass_stora
     entry=MockConfigEntry(domain=DOMAIN);entry.add_to_hass(hass)
     entry.mock_state(hass,ConfigEntryState.LOADED)
     manager=get_nifc_map(hass,entry)
-    state=RefreshState(last_success=result(RECORD),status='retrieved')
+    state=RefreshState(last_success=result(RECORD),status='retrieved',received_at=datetime(2026,9,24,9,tzinfo=timezone.utc))
     manager.runtime.owner.coordinator._inner=SimpleNamespace(state=state)
     history=Store(hass,1,'synthetic_map_history');await history.async_save({'keep':['incident']})
     component=EntityComponent(logging.getLogger(__name__),'geo_location',hass)
@@ -33,6 +34,7 @@ async def test_map_enable_update_disable_does_not_delete_history(hass,hass_stora
         entity=next(iter(manager.entities.values()))
         assert hass.states.get(entity.entity_id).attributes['distance_reference_id']=='california'
         assert float(hass.states.get(entity.entity_id).state)==0
+        assert hass.states.get(entity.entity_id).attributes['last_success_at']=='2026-09-24T09:00:00+00:00'
         await manager.set_enabled(False)
         await hass.async_block_till_done()
         assert hass.states.get(entity.entity_id) is None

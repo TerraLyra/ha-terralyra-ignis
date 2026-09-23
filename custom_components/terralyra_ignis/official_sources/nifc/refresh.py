@@ -47,6 +47,7 @@ class RefreshState:
     next_attempt_at: float = 0
     status: str = 'never_fetched'
     resume_after_review_at: float | None = None
+    received_at: datetime | None = None
 
 
 def _clock(value):
@@ -61,12 +62,16 @@ def due(state: RefreshState, *, now: float, enabled: bool, in_flight: bool) -> b
     return enabled and not in_flight and now >= state.next_attempt_at
 
 
-def succeeded(state: RefreshState, result: FetchResult, *, now: float) -> RefreshState:
+def succeeded(state: RefreshState, result: FetchResult, *, now: float, received_at: datetime | None = None) -> RefreshState:
     _clock(now)
     if not isinstance(result, FetchResult) or result.outcome != 'terminal_reported':
         raise ValueError('Only validated terminal retrieval may update the snapshot')
     # Latest response cache only, never the incident history or proof of freshness.
-    return RefreshState(result, now, 0, now + 900, 'retrieved')
+    if received_at is not None:
+        if not isinstance(received_at, datetime) or received_at.tzinfo is None or received_at.utcoffset() is None:
+            raise ValueError('Aware receipt timestamp required')
+        received_at = received_at.astimezone(timezone.utc)
+    return RefreshState(result, now, 0, now + 900, 'retrieved', received_at=received_at)
 
 
 def failed(state: RefreshState, *, now: float, kind: str,

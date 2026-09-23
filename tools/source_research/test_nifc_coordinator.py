@@ -81,3 +81,26 @@ class CheckpointTests(unittest.TestCase):
                      {'version':1,'wait_seconds':-1,'failures':0},
                      {'version':1,'wait_seconds':0,'failures':True}):
             with self.assertRaises(ValueError): restore_checkpoint(data,now=0)
+
+class ReceiptTests(unittest.IsolatedAsyncioTestCase):
+    async def test_success_failure_and_restart_receipt_semantics(self):
+        now = [100]
+        wall = [datetime(2026, 9, 24, 9, tzinfo=timezone.utc)]
+        error = [False]
+        async def fetch():
+            if error[0]:
+                raise OSError('offline')
+            return FetchResult((), 1, 1, 'terminal_reported')
+        coordinator = ResearchCoordinator(fetcher=fetch, clock=lambda: now[0], utcnow=lambda: wall[0])
+        self.assertIsNone(coordinator.state.received_at)
+        await coordinator.refresh(enabled=True)
+        self.assertEqual(coordinator.state.received_at, wall[0])
+        original = wall[0]
+        now[0] = 1000
+        wall[0] = datetime(2026, 9, 23, 9, tzinfo=timezone.utc)
+        error[0] = True
+        await coordinator.refresh(enabled=True)
+        self.assertEqual(coordinator.state.received_at, original)
+        self.assertEqual(coordinator.state.last_success_at, 100)
+        restored = restore_checkpoint(checkpoint(coordinator.state, now=1000), now=2000)
+        self.assertIsNone(restored.received_at)
