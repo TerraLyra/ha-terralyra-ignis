@@ -209,3 +209,19 @@ the earlier sample, not a new independent event. The Vértesszőlős mention rem
 unclassified; Tatabánya received a responder clue and Komárom/Esztergom county
 clues. Therefore independent real-event accuracy validation remains outstanding.
 Raw RSS and user data are not committed. No production wiring is added.
+
+### Reproducible local sample review
+
+Run `python tools/source_research/bm_review_sample.py sample.json` from the repo
+root. Input is a JSON array (at most 100 reports / 1 MiB) with `title`,
+`description`, `source_url` strings and optional boolean `input_truncated`.
+Supply permitted plain-text RSS content, not linked-page HTML. The command reads
+the bundled database and emits JSON to stdout; it never fetches or modifies HA.
+Output includes original text and should stay local unless publication is intended.
+
+Sample/database hashes identify the evaluated inputs. Exact repeated content is
+flagged; revised content remains distinct but is not claimed to be a new incident.
+`accuracy_assessed` is always false: human-labelled independent events are still
+needed to measure performance. Unknown and truncated reports remain explicit.
+The output includes GeoNames and BM OKF attribution. Five sample-runner tests
+bring the local offline suite to 217 passing checks.
