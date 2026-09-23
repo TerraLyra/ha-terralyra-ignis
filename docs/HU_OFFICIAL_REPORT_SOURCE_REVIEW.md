@@ -163,7 +163,9 @@ and are not suitable as persistent HA entity identities. Coordinates are read
 only to distinguish source rows and are never exposed as incident locations.
 
 The previously downloaded two-item BM OKF RSS snapshot was evaluated locally:
-Vértesszőlős/Tatabánya and Nyíradony/Nyírbátor/Debrecen were found. Both require
+Vértesszőlős/Tatabánya plus Komárom/Esztergom (from the county name), and
+Nyíradony/Nyírbátor/Debrecen were found. County-name components are an additional
+false-location context that the current matcher does not exclude. Both require
 review: event locations and responding-unit locations coexist in the text.
 This small, vocabulary-informed sample is a smoke check, not an independent
 accuracy measurement. No raw notice text is committed. Five additional tests
