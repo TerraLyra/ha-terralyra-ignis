@@ -53,3 +53,12 @@ test('age filter hides only old official reports; unknown and satellite records 
   assert.deepEqual(Object.keys(filterMapStates(states,{terralyra_ignis_canada_reports:false},0,now)),['satellite']);
   assert.equal(states.old,old);
 });
+
+ test('NIFC title uses a supplied name and falls back for absent or invalid names',()=>{
+  const attributes={...state.attributes,source:'terralyra_ignis_nifc_reports'};
+  assert.equal(reportView({...state,attributes:{...attributes,incident_name:' SEVEN OAKS VMP RX '}}).title,'NIFC · SEVEN OAKS VMP RX');
+  for (const incident_name of [undefined,null,'','   ',42,{}]) {
+    assert.equal(reportView({...state,attributes:{...attributes,incident_name}}).title,state.attributes.friendly_name);
+  }
+  assert.equal(reportView({...state,attributes:{...state.attributes,incident_name:'Unrelated'}}).title,state.attributes.friendly_name);
+});
