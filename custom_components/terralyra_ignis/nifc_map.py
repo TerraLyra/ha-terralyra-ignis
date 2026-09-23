@@ -133,6 +133,7 @@ class NifcMapRecord(GeolocationEvent):
         state = self.manager.runtime.owner.state
         return {**record_attributes(self.item),
                 'response_status': state.status if state is not None else 'not_requested',
+                'last_success_at': state.received_at.isoformat() if state is not None and state.received_at is not None else None,
                 'retention': 'current_source_response_only'}
 
     async def async_added_to_hass(self):

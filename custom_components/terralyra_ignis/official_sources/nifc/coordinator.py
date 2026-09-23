@@ -68,7 +68,7 @@ class NifcCoordinator:
         async with self._lock:
             try:
                 result = await self._fetcher()
-                self.state = succeeded(self.state, result, now=self._clock())
+                self.state = succeeded(self.state, result, now=self._clock(), received_at=self._utcnow())
             except asyncio.CancelledError:
                 raise
             except SourceHTTPError as error:
