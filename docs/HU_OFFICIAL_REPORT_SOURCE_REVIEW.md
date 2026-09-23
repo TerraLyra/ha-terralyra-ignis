@@ -192,3 +192,20 @@ names, negation and historical/quoted contexts still require manual review.
 Absence of a context hint does not establish that a mention is the event location.
 Six additional synthetic tests cover these distinctions; all 207 offline source
 tests pass. No HA entities, calendar behavior or stored user data are changed.
+
+### Coordinated responder names
+
+The offline matcher now marks `responder_list_reference` for two to eight known
+adjectival aliases separated by commas, `és` or `illetve`, followed directly by
+a supported firefighter/unit noun. Every member retains the complete list phrase
+and its exact offsets. Unknown aliases, intervening verbs, different nouns and
+sentence boundaries prevent propagation. A separate event-location mention of
+the same settlement remains independent. This is a lexical clue, never automatic
+exclusion or verification. Five additional tests bring the suite to 212 passing
+checks.
+
+A subsequent fetch of the official RSS returned one notice already present in
+the earlier sample, not a new independent event. The Vértesszőlős mention remained
+unclassified; Tatabánya received a responder clue and Komárom/Esztergom county
+clues. Therefore independent real-event accuracy validation remains outstanding.
+Raw RSS and user data are not committed. No production wiring is added.

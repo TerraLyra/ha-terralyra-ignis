@@ -24,7 +24,7 @@ class ContextHint:
 
 # Narrow lexical clues only. Unknown context is never promoted to event location.
 _COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|éből|ének)(?!\w)", re.IGNORECASE)
-_RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók|tűzoltóság|egységek)(?!\w)", re.IGNORECASE)
+_RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)", re.IGNORECASE)
 
 
 def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
@@ -85,15 +85,30 @@ def review_locations(title: str, description: str, source_url: str,
         if len(aliases) > 32 or any(not a.strip() or len(a) > 160 for a in aliases):
             raise ValueError('Invalid settlement aliases')
         prepared.append((place, sorted(set(aliases), key=lambda a: (-len(a), a))))
+    # Use only known reviewed aliases, not arbitrary adjective-like words.
+    adjectives = sorted({a for _, aliases in prepared for a in aliases
+                         if a.casefold().endswith('i')}, key=lambda a: (-len(a), a))
+    list_pattern = None
+    if adjectives:
+        name = '(?:' + '|'.join(map(re.escape, adjectives)) + ')'
+        separator = r'(?:\s*,\s*(?:(?:és|illetve)\s+)?|\s+(?:és|illetve)\s+)'
+        list_pattern = re.compile(r'(?<!\w)' + name + '(?:' + separator + name
+                                  + r'){1,7}(?!\w)' + _RESPONDER.pattern, re.IGNORECASE)
     mentions = []
     if not input_truncated:
         for field, value in (('title', title), ('description', description)):
+            lists = list(list_pattern.finditer(value)) if list_pattern else []
             for place, aliases in prepared:
                 pattern = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, aliases)) + r')(?!\w)', re.IGNORECASE)
                 for match in pattern.finditer(value):
+                    contexts = _context(value, match.start(), match.end())
+                    for group in lists:
+                        if group.start() <= match.start() and match.end() <= group.end():
+                            contexts += (ContextHint('responder_list_reference', group.start(),
+                                                     group.end(), group.group()),)
                     mentions.append(Mention(place.identifier, place.name, field,
                                             match.start(), match.end(), match.group(),
-                                            _context(value, match.start(), match.end())))
+                                            contexts))
     mentions.sort(key=lambda m: (m.field, m.start, m.end, m.settlement_id))
     return LocationReview(title, description, source_url,
                           'requires_review' if mentions else 'unknown', tuple(mentions),

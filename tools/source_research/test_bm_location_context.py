@@ -44,3 +44,40 @@ class ContextTests(unittest.TestCase):
         result = self.result('Nem Esztergom a helyszín.')
         self.assertEqual(result.mentions[0].context_hints, ())
         self.assertEqual(result.status, 'requires_review')
+
+class ResponderListTests(unittest.TestCase):
+    places = (Settlement('n','Nyíradony',('nyíradonyi',)),
+              Settlement('b','Nyírbátor',('nyírbátori',)),
+              Settlement('d','Debrecen',('debreceni',)))
+
+    def review(self, value):
+        return review_locations('', value, '', self.places)
+
+    def test_all_members_keep_shared_evidence(self):
+        text = 'Nyíradonyi, nyírbátori és debreceni hivatásos egységeket riasztottak.'
+        result = self.review(text)
+        self.assertEqual(len(result.mentions), 3)
+        for mention in result.mentions:
+            hints = [h for h in mention.context_hints if h.kind == 'responder_list_reference']
+            self.assertEqual(len(hints), 1)
+            self.assertEqual(text[hints[0].start:hints[0].end], hints[0].evidence)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_conjunction_variants(self):
+        for join in (', ', ' és ', ', illetve ', ' illetve '):
+            result = self.review('Nyíradonyi' + join + 'debreceni tűzoltók érkeztek.')
+            self.assertTrue(all(any(h.kind == 'responder_list_reference' for h in m.context_hints) for m in result.mentions))
+
+    def test_unknown_member_blocks_propagation(self):
+        result = self.review('Nyíradonyi, ismeretleni és debreceni tűzoltók érkeztek.')
+        self.assertEqual(result.mentions[0].context_hints, ())
+
+    def test_sentence_boundary_and_other_noun_block_propagation(self):
+        for text in ('Nyíradonyi. Debreceni tűzoltók érkeztek.',
+                     'Nyíradonyi és debreceni házak égtek.'):
+            self.assertFalse(any(h.kind == 'responder_list_reference' for m in self.review(text).mentions for h in m.context_hints))
+
+    def test_standalone_event_mention_is_preserved(self):
+        result = self.review('Nyíradony határában ég. Nyíradonyi és debreceni tűzoltók érkeztek.')
+        self.assertEqual(result.mentions[0].evidence, 'Nyíradony')
+        self.assertEqual(result.mentions[0].context_hints, ())
