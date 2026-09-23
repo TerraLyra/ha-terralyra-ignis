@@ -176,3 +176,19 @@ Next: evaluate a separate sample and add contextual evidence for event versus
 responder mentions. No automatic geographic association or map publication is
 ready yet. The earlier proposal to select a new gazetteer is superseded by reuse
 of the existing bundle; additional data is only needed for demonstrated gaps.
+
+### Context clues, without automatic exclusion
+
+Mentions now carry optional `context_hints` with exact original evidence and
+field-relative offsets. Narrow lexical rules flag a name inside a county-name
+phrase (including compound names with hyphen/en dash), or an adjectival name
+immediately followed by a firefighter/unit expression. A clue describes wording,
+not a verified semantic role; none removes a candidate or sets an event location.
+A settlement mentioned independently remains separate from its occurrence in a
+county name. No cross-sentence responder association is attempted.
+
+Coordinated lists such as several towns followed by a shared unit noun, street
+names, negation and historical/quoted contexts still require manual review.
+Absence of a context hint does not establish that a mention is the event location.
+Six additional synthetic tests cover these distinctions; all 207 offline source
+tests pass. No HA entities, calendar behavior or stored user data are changed.

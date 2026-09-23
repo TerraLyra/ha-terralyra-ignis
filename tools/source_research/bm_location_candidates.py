@@ -15,6 +15,30 @@ class Settlement:
 
 
 @dataclass(frozen=True)
+class ContextHint:
+    kind: str
+    start: int
+    end: int
+    evidence: str
+
+
+# Narrow lexical clues only. Unknown context is never promoted to event location.
+_COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|éből|ének)(?!\w)", re.IGNORECASE)
+_RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók|tűzoltóság|egységek)(?!\w)", re.IGNORECASE)
+
+
+def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
+    hints = []
+    for county in _COUNTY.finditer(value):
+        if county.start() <= start and end <= county.end():
+            hints.append(ContextHint('county_name', county.start(), county.end(), county.group()))
+    responder = _RESPONDER.match(value, end)
+    if value[start:end].casefold().endswith('i') and responder:
+        hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))
+    return tuple(hints)
+
+
+@dataclass(frozen=True)
 class Mention:
     settlement_id: str
     settlement_name: str
@@ -22,6 +46,7 @@ class Mention:
     start: int
     end: int
     evidence: str
+    context_hints: tuple[ContextHint, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -67,7 +92,8 @@ def review_locations(title: str, description: str, source_url: str,
                 pattern = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, aliases)) + r')(?!\w)', re.IGNORECASE)
                 for match in pattern.finditer(value):
                     mentions.append(Mention(place.identifier, place.name, field,
-                                            match.start(), match.end(), match.group()))
+                                            match.start(), match.end(), match.group(),
+                                            _context(value, match.start(), match.end())))
     mentions.sort(key=lambda m: (m.field, m.start, m.end, m.settlement_id))
     return LocationReview(title, description, source_url,
                           'requires_review' if mentions else 'unknown', tuple(mentions),
