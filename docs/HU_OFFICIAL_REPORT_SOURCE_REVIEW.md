@@ -145,3 +145,32 @@ Before production use, select a redistributable, attributed settlement gazetteer
 review its Hungarian aliases and evaluate precision on permitted real RSS
 samples. No gazetteer or linked event-page data was acquired for this prototype.
 The existing event-page permission gate remains unchanged.
+
+### Reuse of the existing bundled database
+
+The research adapter `bm_bundled_places.py` reads the existing
+`data/geonames_cities500.sqlite3` in SQLite read-only mode, selecting Hungary.
+The inspected bundle contains 1,226 Hungarian records. No additional country
+extract, online geocoder or new database is needed for this prototype. Existing
+GeoNames CC BY 4.0 attribution in `data/README.txt` applies. The database is a
+reduced cities500 extract, not a complete Hungarian settlement register.
+
+Seven manually reviewed sets of Hungarian inflected aliases are included; all
+other places currently match their primary names only. Alternate names are not
+present in the bundled schema. No suffix is guessed automatically. Local
+content-derived IDs distinguish same-name records; these are not GeoNames IDs
+and are not suitable as persistent HA entity identities. Coordinates are read
+only to distinguish source rows and are never exposed as incident locations.
+
+The previously downloaded two-item BM OKF RSS snapshot was evaluated locally:
+Vértesszőlős/Tatabánya and Nyíradony/Nyírbátor/Debrecen were found. Both require
+review: event locations and responding-unit locations coexist in the text.
+This small, vocabulary-informed sample is a smoke check, not an independent
+accuracy measurement. No raw notice text is committed. Five additional tests
+check unchanged database bytes, missing-file handling, source validation,
+homonyms and reviewed inflections. All 201 offline source tests passed.
+
+Next: evaluate a separate sample and add contextual evidence for event versus
+responder mentions. No automatic geographic association or map publication is
+ready yet. The earlier proposal to select a new gazetteer is superseded by reuse
+of the existing bundle; additional data is only needed for demonstrated gaps.
