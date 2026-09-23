@@ -68,11 +68,12 @@ def test_duplicate_locations_and_naive_dates_rejected():
 def test_map_distance_and_source_do_not_claim_satellite_detection():
     item=project_nifc(result(RECORD),(HOME,LOC))[0]
     manager=SimpleNamespace(entry=SimpleNamespace(entry_id='ABC'),hass=SimpleNamespace(config=SimpleNamespace(language='hu')),
-                            runtime=SimpleNamespace(owner=SimpleNamespace(state=SimpleNamespace(status='retrieved'))))
+                            runtime=SimpleNamespace(owner=SimpleNamespace(state=SimpleNamespace(status='retrieved',received_at=None))))
     entity=NifcMapRecord(manager,item)
     assert entity.distance==0
     assert entity.source=='terralyra_ignis_nifc_reports'
     assert entity.extra_state_attributes['distance_reference_name']=='California'
     assert entity.extra_state_attributes['active_fire_status']=='not_established'
+    assert entity.extra_state_attributes['last_success_at'] is None
     assert entity.latitude==38 and entity.longitude==-122
     assert entity.entity_id==entity.entity_id.lower()
