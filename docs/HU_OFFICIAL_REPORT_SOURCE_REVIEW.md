@@ -121,3 +121,27 @@ empty feeds, malformed XML, duplicate updates and ambiguous incident matches.
 Keep satellite counts, notification eligibility and evidence strength unchanged
 by report association. Feed failures must not create a Repair requiring no
 action from the user.
+
+## Offline settlement-mention prototype (2026-09-23)
+
+`tools/source_research/bm_location_candidates.py` now provides a research-only
+`review_locations` helper. It takes already available RSS title/description text
+and a caller-supplied list of reviewed settlement names and explicit aliases.
+It performs no network requests and is not imported by the HA integration.
+
+The result preserves title, description, source URL and exact matched evidence
+with field-relative character offsets. Every match requires human review,
+including single-name results: responding fire stations, street names, negated
+locations and earlier incidents can all mention settlements. Multiple settlement
+IDs remain separate candidates, including names shared by several places.
+No fire classification, coordinates, map entities or satellite association are
+created. Truncated inputs produce no candidates. Unmatched names are unknown,
+not proof of absence. Only explicitly listed inflections match; this is not a
+complete Hungarian language parser.
+
+Seven synthetic tests cover evidence preservation, false-location contexts,
+word boundaries, alias ambiguity, truncation, bounds and lack of coordinates.
+Before production use, select a redistributable, attributed settlement gazetteer,
+review its Hungarian aliases and evaluate precision on permitted real RSS
+samples. No gazetteer or linked event-page data was acquired for this prototype.
+The existing event-page permission gate remains unchanged.
