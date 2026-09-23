@@ -1,4 +1,4 @@
-# Report details map — 0.29.0
+# Report details map — 0.29.1
 
 This optional dashboard resource wraps Home Assistant's existing map card. It
 intercepts report clicks only inside this card, for the Canada and NIFC sources.
@@ -18,11 +18,11 @@ remain the original source values. Text is rendered as text, never upstream HTML
 ## Installation and updates
 
 The JavaScript card is distributed separately from the HACS integration.
-Download it from the 0.29.0 release assets. It is not installed automatically.
+Download it from the 0.29.1 release assets. It is not installed automatically.
 Copy `frontend/ignis-report-map.js` to `/config/www/ignis-report-map.js` and register
 `/local/ignis-report-map.js` as a JavaScript module in Dashboard resources.
 For an update, replace the card file, change its resource URL query to
-`?v=0.29.0`, and reload the browser. Keep only one resource entry for this card.
+`?v=0.29.1`, and reload the browser. Keep only one resource entry for this card.
 If you already use a differently named card file, update that file or point the
 existing resource entry to the new one. A browser reload is required because
 an already registered custom element cannot be replaced in the current page.
@@ -44,7 +44,7 @@ English and Hungarian labels are provided; other languages use English.
 ## Validation and remaining work
 
 Run `node --test tests/frontend/report-map.test.mjs`.
-The six model checks pass. The isolated Playwright/Chrome test in
+The eight model checks pass. The isolated Playwright/Chrome test in
 `tests/frontend/report-map-browser.cjs` also passes: HTML is inert text, unsafe
 links are absent, supported report clicks are scoped to this card, ordinary
 entity clicks and the HA-details button propagate normally, the modal fits a
@@ -82,3 +82,12 @@ https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Inciden
 
 The new backend text fields require an integration update; copying only the JS
 file cannot make a 0.28.0 installation retrieve text. No webpage scraping added.
+
+## 0.29.1 update
+
+NIFC titles prefer the source incident name, falling back to the entity title.
+The integration now provides an actual UTC successful-retrieval timestamp to
+NIFC markers. A failed refresh retains that timestamp; restart leaves it unknown
+until another successful response. It is not incident start or source update time.
+Canada retrieval timestamps are not added by this change. Live NIFC name display
+was verified; nonempty incident description display still lacks a live sample.

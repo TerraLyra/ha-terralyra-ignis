@@ -42,6 +42,10 @@ are recorded in
 
 ## Product status
 
+Version 0.29.1 adds the actual successful NIFC retrieval timestamp to report
+markers and source-provided incident names to the optional report dialog title.
+See [release notes](docs/RELEASE_0_29_1.md).
+
 Version 0.29.0 adds an optional report map card with independent satellite, Canada
 and NIFC layers, report-update age filters, and readable report dialogs. NIFC
 records now include source-provided names and short descriptions when supplied.
