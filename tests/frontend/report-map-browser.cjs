@@ -53,12 +53,14 @@ const assert=require('node:assert/strict');
   await page.getByRole('combobox').selectOption('0');
   assert.equal(await page.evaluate(()=>Object.hasOwn(card.map.hass.states,'geo_location.report')),true);
   await page.evaluate(()=>{
-    report={...report,attributes:{...report.attributes,incident_text:'Official <script>alert(1)</script> description'}};
+    report={...report,attributes:{...report.attributes,source:'terralyra_ignis_nifc_reports',incident_name:'Named <img src=x onerror=alert(1)> fire',incident_text:'Official <script>alert(1)</script> description'}};
     card.hass={language:'hu',states:{[report.entity_id]:report}};
     card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true}));
   });
   assert.match(await page.locator('dialog').innerText(),/Official <script>alert\(1\)<\/script> description/);
   assert.equal(await page.locator('dialog script').count(),0);
+  assert.equal(await page.locator('dialog h2').innerText(),'NIFC · Named <img src=x onerror=alert(1)> fire');
+  assert.equal(await page.locator('dialog img').count(),0);
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

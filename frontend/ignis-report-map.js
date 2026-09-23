@@ -37,7 +37,9 @@ export function reportView(state, language = 'en') {
     return Number.isNaN(date.valueOf()) ? w.unknown : date.toLocaleString(lang) + ' (' + value + ')';
   };
   const distance = Number(state.state);
-  return {w, title:text(a.friendly_name), attribution:text(a.attribution),
+  const incidentName = a.source === 'terralyra_ignis_nifc_reports'
+    && typeof a.incident_name === 'string' ? a.incident_name.trim() : '';
+  return {w, title:incidentName ? `NIFC · ${text(incidentName)}` : text(a.friendly_name), attribution:text(a.attribution),
     unavailable: ['unavailable','unknown'].includes(state.state),
     source:safeLink(a.source_url),
     rows:[
