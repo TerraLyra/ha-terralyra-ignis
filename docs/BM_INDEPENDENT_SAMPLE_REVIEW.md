@@ -141,3 +141,17 @@ these effects and the count hint in the Debrecen title. These two reports are no
 development examples, not held-out validation. The original pre-change findings
 above remain unchanged. All 227 offline research tests pass, including separate
 count/town occurrences in one sentence and boundaries preventing clue propagation.
+
+### Shared responder nouns with mixed qualifiers
+
+The previously observed `ajkai hivatásos és a somlóvásárhelyi önkéntes
+tűzoltókat` construction now gives both known adjectives a shared
+`responder_list_reference` hint. Each list member may have its own explicit unit
+qualifier and a conjunction may be followed by an article. Unknown adjectives,
+other nouns, sentence boundaries and line breaks block this propagation.
+Original mentions and exact shared evidence remain intact. A separate primary
+Somlóvásárhely mention outside the list remains unmarked and unverified.
+
+Replaying retained notice 92248 confirms the shared responder hints. This is a
+regression replay of a development example, not new independent validation.
+All 230 offline research tests pass. No production provider or HA state changes.

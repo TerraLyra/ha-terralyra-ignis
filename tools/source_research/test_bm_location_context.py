@@ -112,3 +112,38 @@ class CommonWordTests(unittest.TestCase):
         self.assertEqual(len(result.mentions), 2)
         self.assertEqual(result.mentions[0].context_hints[0].kind, 'possible_vehicle_count')
         self.assertEqual(result.mentions[1].context_hints, ())
+
+
+class MixedResponderListTests(unittest.TestCase):
+    places = (Settlement('a', 'Ajka', ('ajkai',)),
+              Settlement('s', 'Somlóvásárhely', ('somlóvásárhelyi',)))
+
+    def review(self, text):
+        return review_locations('', text, '', self.places)
+
+    def test_shared_noun_with_individual_qualifiers(self):
+        for text in ('Az ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltókat riasztották.',
+                     'Ajkai önkormányzati, illetve somlóvásárhelyi önkéntes egységek érkeztek.'):
+            result = self.review(text)
+            self.assertEqual(len(result.mentions), 2)
+            for mention in result.mentions:
+                hints = [h for h in mention.context_hints if h.kind == 'responder_list_reference']
+                self.assertEqual(len(hints), 1)
+                self.assertEqual(text[hints[0].start:hints[0].end], hints[0].evidence)
+            self.assertFalse(result.incident_location_verified)
+
+    def test_boundaries_unknown_members_and_other_nouns(self):
+        for text in ('Ajkai hivatásos. Somlóvásárhelyi önkéntes tűzoltók.',
+                     'Ajkai hivatásos és\na somlóvásárhelyi önkéntes tűzoltók.',
+                     'Ajkai hivatásos és ismeretleni önkéntes tűzoltók.',
+                     'Ajkai hivatásos és somlóvásárhelyi önkéntes sportolók.',
+                     'Ajkai házak és somlóvásárhelyi önkéntes tűzoltók.'):
+            self.assertFalse(any(h.kind == 'responder_list_reference'
+                                 for m in self.review(text).mentions for h in m.context_hints))
+
+    def test_event_mention_outside_list_stays_unmarked(self):
+        result = self.review('Somlóvásárhely közelében dolgoznak az ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltók.')
+        self.assertEqual(result.mentions[0].evidence, 'Somlóvásárhely')
+        self.assertEqual(result.mentions[0].context_hints, ())
+        self.assertTrue(result.multiple_candidates)
+        self.assertFalse(result.incident_location_verified)

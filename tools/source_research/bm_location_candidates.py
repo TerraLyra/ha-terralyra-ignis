@@ -101,9 +101,15 @@ def review_locations(title: str, description: str, source_url: str,
     list_pattern = None
     if adjectives:
         name = '(?:' + '|'.join(map(re.escape, adjectives)) + ')'
-        separator = r'(?:\s*,\s*(?:(?:és|illetve)\s+)?|\s+(?:és|illetve)\s+)'
-        list_pattern = re.compile(r'(?<!\w)' + name + '(?:' + separator + name
-                                  + r'){1,7}(?!\w)' + _RESPONDER.pattern, re.IGNORECASE)
+        # A shared final noun may follow individually qualified units:
+        # 'ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltókat'.
+        # Horizontal whitespace only: do not propagate across lines/sentences.
+        modifier = r'(?:[ \t]+(?:hivatásos|önkéntes|önkormányzati))?'
+        member = name + r'(?!\w)' + modifier
+        separator = r'(?:[ \t]*,[ \t]*(?:(?:és|illetve)[ \t]+)?|[ \t]+(?:és|illetve)[ \t]+)(?:(?:a|az)[ \t]+)?'
+        noun = r'[ \t]+(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)'
+        list_pattern = re.compile(r'(?<!\w)' + member + '(?:' + separator + member
+                                  + r'){1,7}' + noun, re.IGNORECASE)
     mentions = []
     if not input_truncated:
         for field, value in (('title', title), ('description', description)):
