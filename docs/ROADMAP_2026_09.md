@@ -90,3 +90,11 @@ new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
 
 The Hungarian supplement is available to research tooling only. Production BM
 map wiring, release publication and HA installation remain separate steps.
+
+## BM fire scope (requested 2026-09-24)
+
+- [x] Add offline evidence-only vegetation/local-asset/mixed/unknown categorization.
+- [ ] Validate on independent vegetation-fire reports; distinguish burned area
+  from threatened/property area before setting any large-extent flag.
+- [ ] Prepare an optional landscape-fire-focused view retaining uncertain and
+  mixed reports for review. Do not discard source records or user history.

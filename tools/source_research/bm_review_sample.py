@@ -7,6 +7,7 @@ from pathlib import Path
 
 from bm_bundled_places import DATABASE, load_hungarian_places
 from bm_location_candidates import review_locations
+from bm_fire_scope import review_fire_scope
 
 MAX_BYTES = 1024 * 1024
 
@@ -34,7 +35,9 @@ def evaluate_sample(raw: bytes, places=None) -> dict:
         identity = hashlib.sha256(json.dumps([review.title, review.description,
                                              review.source_url], ensure_ascii=False).encode()).hexdigest()
         results.append({'content_sha256': identity, 'duplicate_in_sample': identity in seen,
-                        'review': asdict(review)})
+                        'review': asdict(review),
+                        'fire_scope': review_fire_scope(review.title, review.description,
+                                                       input_truncated=truncated)})
         seen.add(identity)
     return {'schema_version': 1, 'sample_sha256': hashlib.sha256(raw).hexdigest(),
             'report_count': len(results), 'distinct_content_count': len(seen),

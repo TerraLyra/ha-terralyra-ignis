@@ -171,3 +171,25 @@ transport parser. Multiword/hyphenated names and other route grammar remain open
 `between towns` alone does not imply transport. Sentence and line boundaries
 block these patterns. All 234 offline research tests pass, including event/route
 repetition, unknown origin, no-transport and truncated-input cases.
+
+### Fire-scope research requested by user
+
+The offline sample report now includes `fire_scope`: vegetation-fire candidate,
+local-asset-fire candidate, mixed-fire candidate or unknown. This supersedes the
+earlier statement that no category prototype exists, but does not establish a
+validated classifier. Narrow sentence-level vocabulary clues retain exact original
+field offsets; explicit uncertainty/negation forces unknown. All records remain
+in output, including local fires, accidents and uncertain cases.
+
+Area-unit mentions are extracted as evidence only. A hectare mention may describe
+a threatened area or property rather than burned land; `large_extent_verified`
+therefore remains false. A vegetation fire need not be large, and a burning house
+'in its entirety' is not evidence of a landscape-scale fire. No numeric area cutoff
+has been selected. No production filtering, entity/history removal, incident
+coordinates or active-fire assertion follows from these categories.
+
+238 offline tests pass. Synthetic coverage includes vegetation/local/mixed cases,
+negation, separate-sentence vegetation references, decimal area evidence and
+truncation. Vocabulary and context coverage remain limited. Next gates: independent
+real vegetation-fire samples, burned-versus-threatened area interpretation, and
+reviewed policy for including unknown/mixed reports in a user-selectable filter.
