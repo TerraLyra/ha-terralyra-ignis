@@ -23,3 +23,12 @@ Original RSS descriptions and attributed source links are displayed. No linked
 article is fetched. No guessed map coordinates are supplied. The publication
 calendar, report archive, satellite data and entity identities are unchanged.
 The optional card is a separate frontend asset; HACS does not copy it to www.
+
+## Accident wording refinement
+
+The next revision labels explicit collisions/accidents with a nonempty, complete
+body and no detected fire/smoke/extinguishing clues as “Baleseti jelentés · tűz
+nincs említve”. This does not prove the absence of fire. Such candidates are
+hidden in the focus view but retained under All reports. Missing/truncated text,
+uncertainty and possible fire language block this categorization. Responding
+firefighters alone are not a fire clue. No archive records are removed.

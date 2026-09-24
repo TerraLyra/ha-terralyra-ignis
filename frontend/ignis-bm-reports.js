@@ -2,9 +2,9 @@
 export function visibleNotices(notices, filter) {
   return notices.filter(n => filter === 'all' || (filter === 'veg'
     ? n.fire_scope?.category === 'vegetation_fire_candidate'
-    : n.fire_scope?.category !== 'local_asset_fire_candidate'));
+    : !['local_asset_fire_candidate', 'non_fire_report_candidate'].includes(n.fire_scope?.category)));
 }
-const labels = {vegetation_fire_candidate:'Növényzettűz-jelölt',local_asset_fire_candidate:'Helyi épület- vagy járműtűz-jelölt',mixed_fire_candidate:'Vegyes tűzeset-jelölt',unknown:'Bizonytalan besorolás'};
+const labels = {non_fire_report_candidate:'Baleseti jelentés · tűz nincs említve',vegetation_fire_candidate:'Növényzettűz-jelölt',local_asset_fire_candidate:'Helyi épület- vagy járműtűz-jelölt',mixed_fire_candidate:'Vegyes tűzeset-jelölt',unknown:'Bizonytalan besorolás'};
 class IgnisBmReports extends HTMLElement {
   setConfig(config) { this.config = config; this.filter = 'focus'; this.notices = []; this.attach(); this.render(); }
   set hass(value) { this._hass = value; }

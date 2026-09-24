@@ -37,3 +37,26 @@ class FireScopeTests(unittest.TestCase):
         self.assertEqual(result['category'], 'unknown')
         self.assertEqual(result['evidence'], [])
         self.assertEqual(review_fire_scope('Négyes karambol Debrecenben', '')['category'], 'unknown')
+
+
+class AccidentScopeTests(unittest.TestCase):
+    def test_accidents_with_body_and_responders(self):
+        for title in ('Szalagkorlátnak ütközött egy kisbusz az M1-esen',
+                      'Egymásnak ütközött két autó Debrecenben',
+                      'Parkoló autónak ütközött egy személygépkocsi Veresegyházán'):
+            result = review_fire_scope(title, 'A tűzoltók áramtalanították a járműveket.')
+            self.assertEqual(result['category'], 'non_fire_report_candidate')
+            self.assertFalse(result['automatically_excluded'])
+            self.assertTrue(any(e['kind'] == 'accident' for e in result['evidence']))
+
+    def test_fire_or_smoke_anywhere_vetoes_nonfire_label(self):
+        for body in ('Kigyulladt egy autó.', 'Füst szállt fel.', 'Eloltották a tüzet.',
+                     'Avartűz keletkezett.', 'Lángra kapott a rakomány.',
+                     'Nem keletkezett tűz.', 'Oltják a lángokat.', 'Tűzoltás zajlik.'):
+            self.assertNotEqual(review_fire_scope('Karambol az úton', body)['category'],
+                                'non_fire_report_candidate')
+
+    def test_incomplete_and_ambiguous_stay_unknown(self):
+        self.assertEqual(review_fire_scope('Karambol az úton', '')['category'], 'unknown')
+        self.assertEqual(review_fire_scope('Karambol az úton', 'Rövid hír', input_truncated=True)['category'], 'unknown')
+        self.assertEqual(review_fire_scope('Baleset lehetett', 'A vizsgálat folyik.')['category'], 'unknown')
