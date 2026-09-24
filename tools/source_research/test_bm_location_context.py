@@ -147,3 +147,49 @@ class MixedResponderListTests(unittest.TestCase):
         self.assertEqual(result.mentions[0].context_hints, ())
         self.assertTrue(result.multiple_candidates)
         self.assertFalse(result.incident_location_verified)
+
+
+class TransportRouteTests(unittest.TestCase):
+    places = (Settlement('b', 'Berettyóújfalu', ('Berettyóújfalun',)),
+              Settlement('k', 'Biharkeresztes'),
+              Settlement('p', 'Püspökladány', ('Püspökladányba',)))
+
+    def review(self, text):
+        return review_locations('', text, '', self.places)
+
+    def test_destination_context_with_unlisted_foreign_origin(self):
+        text = 'A Nagyváradról Püspökladányba tartó vonat Berettyóújfalun megállt.'
+        result = self.review(text)
+        destination = next(m for m in result.mentions if m.settlement_id == 'p')
+        hint, = destination.context_hints
+        self.assertEqual(hint.kind, 'transport_route_reference')
+        self.assertEqual(text[hint.start:hint.end], hint.evidence)
+        self.assertEqual(hint.evidence, 'Nagyváradról Püspökladányba tartó vonat')
+        self.assertEqual(next(m for m in result.mentions if m.settlement_id == 'b').context_hints, ())
+        self.assertEqual(len(result.mentions), 2)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_repeated_town_event_and_bus_route_are_distinct(self):
+        text = 'Berettyóújfalun történt. Berettyóújfalu és Biharkeresztes között pótlóbuszokkal közlekednek.'
+        result = self.review(text)
+        self.assertEqual(result.mentions[0].context_hints, ())
+        for mention in result.mentions[1:]:
+            hint, = mention.context_hints
+            self.assertEqual(hint.kind, 'transport_route_reference')
+            self.assertEqual(text[hint.start:hint.end], hint.evidence)
+        self.assertTrue(result.multiple_candidates)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_between_towns_without_transport_stays_unclassified(self):
+        for text in ('Berettyóújfalu és Biharkeresztes között tűz keletkezett.',
+                     'Berettyóújfalu és Biharkeresztes között. Pótlóbuszok járnak.',
+                     'Berettyóújfalu és Biharkeresztes között\npótlóbuszok járnak.',
+                     'Nagyváradról Püspökladányba tartó. Vonat érkezett.',
+                     'Nagyváradról Püspökladányba tartó vonatvezető.'):
+            self.assertFalse(any(h.kind == 'transport_route_reference'
+                                 for m in self.review(text).mentions for h in m.context_hints))
+
+    def test_truncation_never_extracts_route_candidates(self):
+        result = review_locations('', 'Berettyóújfalu és Biharkeresztes között pótlóbuszok',
+                                  '', self.places, input_truncated=True)
+        self.assertEqual(result.mentions, ())

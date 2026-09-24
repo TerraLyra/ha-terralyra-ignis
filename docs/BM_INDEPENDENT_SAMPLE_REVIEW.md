@@ -155,3 +155,19 @@ Somlóvásárhely mention outside the list remains unmarked and unverified.
 Replaying retained notice 92248 confirms the shared responder hints. This is a
 regression replay of a development example, not new independent validation.
 All 230 offline research tests pass. No production provider or HA state changes.
+
+### Transport-route context
+
+Explicit `…ról …ba tartó vonat` and `… és … között pótlóbuszokkal`
+constructions now attach `transport_route_reference` evidence to existing
+mentions inside the phrase. Unknown origin names provide context only: they do
+not become inferred settlements. A separate occurrence outside the phrase retains
+its own context. Replaying development notice 92247 marks Püspökladányba and the
+Berettyóújfalu/Biharkeresztes bus-route pair; Berettyóújfalun remains unmarked.
+Nothing is promoted to a verified incident location or removed from the text.
+
+These deliberately narrow single-word endpoint patterns do not constitute a
+transport parser. Multiword/hyphenated names and other route grammar remain open;
+`between towns` alone does not imply transport. Sentence and line boundaries
+block these patterns. All 234 offline research tests pass, including event/route
+repetition, unknown origin, no-transport and truncated-input cases.

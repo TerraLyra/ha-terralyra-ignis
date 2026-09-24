@@ -34,6 +34,15 @@ _RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?
 # Exact observed adjective/noun construction; never a global place blacklist.
 _COLLISION_COUNT = re.compile(r"(?<!\w)négyes[ \t]+karambol(?!\w)", re.IGNORECASE)
 
+
+# Narrow transport constructions. Unknown endpoint text can supply context for a
+# known mention, but never creates a new place or an inferred coordinate.
+_ROUTE_PATTERNS = (
+    re.compile(r"(?<!\w)\w+(?:ról|ről|ból|ből)[ \t]+\w+(?:ba|be|ra|re)[ \t]+tartó[ \t]+(?:vonat|busz|autóbusz)(?!\w)", re.IGNORECASE),
+    re.compile(r"(?<!\w)\w+[ \t]+és[ \t]+\w+[ \t]+között[ \t]+(?:pótlóbuszokkal|pótlóbuszok|pótlóbusz|vonattal|autóbusszal)(?!\w)", re.IGNORECASE),
+)
+
+
 def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     hints = []
     for county in _COUNTY.finditer(value):
@@ -42,6 +51,10 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     for phrase in _COLLISION_COUNT.finditer(value):
         if phrase.start() == start and value[start:end].casefold() == 'négyes':
             hints.append(ContextHint('possible_vehicle_count', phrase.start(), phrase.end(), phrase.group()))
+    for pattern in _ROUTE_PATTERNS:
+        for route in pattern.finditer(value):
+            if route.start() <= start and end <= route.end():
+                hints.append(ContextHint('transport_route_reference', route.start(), route.end(), route.group()))
     responder = _RESPONDER.match(value, end)
     if value[start:end].casefold().endswith('i') and responder:
         hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))
