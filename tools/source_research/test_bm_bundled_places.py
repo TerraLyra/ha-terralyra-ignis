@@ -51,3 +51,22 @@ class BundledTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_hungarian_places(path)
             c.close()
+
+class IndependentSampleRegressionTests(unittest.TestCase):
+    def test_inflected_railway_location_retains_route_ambiguity(self):
+        result = review_locations('Baleset Berettyóújfalun',
+            'Püspökladányba tartott. Berettyóújfalu és Biharkeresztes között busz jár.',
+            '', load_hungarian_places())
+        self.assertEqual({m.settlement_name for m in result.mentions},
+                         {'Berettyóújfalu', 'Biharkeresztes', 'Püspökladány'})
+        self.assertTrue(result.multiple_candidates)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_responders_do_not_fill_missing_event_location(self):
+        result = review_locations('Tűz Gersekaráton',
+            'Vasvári önkormányzati tűzoltók, körmendi és zalaegerszegi hivatásos tűzoltók érkeztek.',
+            '', load_hungarian_places())
+        self.assertEqual({m.settlement_name for m in result.mentions},
+                         {'Vasvár', 'Körmend', 'Zalaegerszeg'})
+        self.assertTrue(all(m.context_hints for m in result.mentions))
+        self.assertFalse(result.incident_location_verified)

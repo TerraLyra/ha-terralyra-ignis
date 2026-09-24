@@ -81,3 +81,115 @@ class ResponderListTests(unittest.TestCase):
         result = self.review('Nyíradony határában ég. Nyíradonyi és debreceni tűzoltók érkeztek.')
         self.assertEqual(result.mentions[0].evidence, 'Nyíradony')
         self.assertEqual(result.mentions[0].context_hints, ())
+
+
+class CommonWordTests(unittest.TestCase):
+    places = (Settlement('n', 'Négyes', ('Négyesen', 'négyesi')),
+              Settlement('d', 'Debrecen', ('Debrecenben',)))
+
+    def test_collision_count_is_flagged_without_deleting_evidence(self):
+        for text in ('Négyes karambol Debrecenben', 'NÉGYES KARAMBOL Debrecenben'):
+            result = review_locations(text, '', '', self.places)
+            mention = next(m for m in result.mentions if m.settlement_id == 'n')
+            hint, = mention.context_hints
+            self.assertEqual(hint.kind, 'possible_vehicle_count')
+            self.assertEqual(text[hint.start:hint.end], hint.evidence)
+            self.assertEqual(text[mention.start:mention.end], mention.evidence)
+            self.assertTrue(result.multiple_candidates)
+            self.assertFalse(result.incident_location_verified)
+
+    def test_real_settlement_occurrences_remain_candidates(self):
+        for text in ('Négyes közelében karambol történt.', 'Négyesen történt baleset.',
+                     'A négyesi úton történt karambol.', 'Négyes. Karambol Debrecenben.',
+                     'Négyes\nkarambol', 'Négyes karambolos'):
+            result = review_locations(text, '', '', self.places)
+            mention = next(m for m in result.mentions if m.settlement_id == 'n')
+            self.assertEqual(mention.context_hints, ())
+            self.assertFalse(result.incident_location_verified)
+
+    def test_count_and_town_in_one_report_keep_separate_context(self):
+        result = review_locations('Négyes karambol Négyesen', '', '', self.places)
+        self.assertEqual(len(result.mentions), 2)
+        self.assertEqual(result.mentions[0].context_hints[0].kind, 'possible_vehicle_count')
+        self.assertEqual(result.mentions[1].context_hints, ())
+
+
+class MixedResponderListTests(unittest.TestCase):
+    places = (Settlement('a', 'Ajka', ('ajkai',)),
+              Settlement('s', 'Somlóvásárhely', ('somlóvásárhelyi',)))
+
+    def review(self, text):
+        return review_locations('', text, '', self.places)
+
+    def test_shared_noun_with_individual_qualifiers(self):
+        for text in ('Az ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltókat riasztották.',
+                     'Ajkai önkormányzati, illetve somlóvásárhelyi önkéntes egységek érkeztek.'):
+            result = self.review(text)
+            self.assertEqual(len(result.mentions), 2)
+            for mention in result.mentions:
+                hints = [h for h in mention.context_hints if h.kind == 'responder_list_reference']
+                self.assertEqual(len(hints), 1)
+                self.assertEqual(text[hints[0].start:hints[0].end], hints[0].evidence)
+            self.assertFalse(result.incident_location_verified)
+
+    def test_boundaries_unknown_members_and_other_nouns(self):
+        for text in ('Ajkai hivatásos. Somlóvásárhelyi önkéntes tűzoltók.',
+                     'Ajkai hivatásos és\na somlóvásárhelyi önkéntes tűzoltók.',
+                     'Ajkai hivatásos és ismeretleni önkéntes tűzoltók.',
+                     'Ajkai hivatásos és somlóvásárhelyi önkéntes sportolók.',
+                     'Ajkai házak és somlóvásárhelyi önkéntes tűzoltók.'):
+            self.assertFalse(any(h.kind == 'responder_list_reference'
+                                 for m in self.review(text).mentions for h in m.context_hints))
+
+    def test_event_mention_outside_list_stays_unmarked(self):
+        result = self.review('Somlóvásárhely közelében dolgoznak az ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltók.')
+        self.assertEqual(result.mentions[0].evidence, 'Somlóvásárhely')
+        self.assertEqual(result.mentions[0].context_hints, ())
+        self.assertTrue(result.multiple_candidates)
+        self.assertFalse(result.incident_location_verified)
+
+
+class TransportRouteTests(unittest.TestCase):
+    places = (Settlement('b', 'Berettyóújfalu', ('Berettyóújfalun',)),
+              Settlement('k', 'Biharkeresztes'),
+              Settlement('p', 'Püspökladány', ('Püspökladányba',)))
+
+    def review(self, text):
+        return review_locations('', text, '', self.places)
+
+    def test_destination_context_with_unlisted_foreign_origin(self):
+        text = 'A Nagyváradról Püspökladányba tartó vonat Berettyóújfalun megállt.'
+        result = self.review(text)
+        destination = next(m for m in result.mentions if m.settlement_id == 'p')
+        hint, = destination.context_hints
+        self.assertEqual(hint.kind, 'transport_route_reference')
+        self.assertEqual(text[hint.start:hint.end], hint.evidence)
+        self.assertEqual(hint.evidence, 'Nagyváradról Püspökladányba tartó vonat')
+        self.assertEqual(next(m for m in result.mentions if m.settlement_id == 'b').context_hints, ())
+        self.assertEqual(len(result.mentions), 2)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_repeated_town_event_and_bus_route_are_distinct(self):
+        text = 'Berettyóújfalun történt. Berettyóújfalu és Biharkeresztes között pótlóbuszokkal közlekednek.'
+        result = self.review(text)
+        self.assertEqual(result.mentions[0].context_hints, ())
+        for mention in result.mentions[1:]:
+            hint, = mention.context_hints
+            self.assertEqual(hint.kind, 'transport_route_reference')
+            self.assertEqual(text[hint.start:hint.end], hint.evidence)
+        self.assertTrue(result.multiple_candidates)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_between_towns_without_transport_stays_unclassified(self):
+        for text in ('Berettyóújfalu és Biharkeresztes között tűz keletkezett.',
+                     'Berettyóújfalu és Biharkeresztes között. Pótlóbuszok járnak.',
+                     'Berettyóújfalu és Biharkeresztes között\npótlóbuszok járnak.',
+                     'Nagyváradról Püspökladányba tartó. Vonat érkezett.',
+                     'Nagyváradról Püspökladányba tartó vonatvezető.'):
+            self.assertFalse(any(h.kind == 'transport_route_reference'
+                                 for m in self.review(text).mentions for h in m.context_hints))
+
+    def test_truncation_never_extracts_route_candidates(self):
+        result = review_locations('', 'Berettyóújfalu és Biharkeresztes között pótlóbuszok',
+                                  '', self.places, input_truncated=True)
+        self.assertEqual(result.mentions, ())

@@ -7,6 +7,10 @@ from dataclasses import dataclass
 import re
 
 
+# Bounded country-level name research, including the full filtered HU extract.
+MAX_SETTLEMENTS = 20000
+
+
 @dataclass(frozen=True)
 class Settlement:
     identifier: str
@@ -27,11 +31,30 @@ _COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|
 _RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)", re.IGNORECASE)
 
 
+# Exact observed adjective/noun construction; never a global place blacklist.
+_COLLISION_COUNT = re.compile(r"(?<!\w)négyes[ \t]+karambol(?!\w)", re.IGNORECASE)
+
+
+# Narrow transport constructions. Unknown endpoint text can supply context for a
+# known mention, but never creates a new place or an inferred coordinate.
+_ROUTE_PATTERNS = (
+    re.compile(r"(?<!\w)\w+(?:ról|ről|ból|ből)[ \t]+\w+(?:ba|be|ra|re)[ \t]+tartó[ \t]+(?:vonat|busz|autóbusz)(?!\w)", re.IGNORECASE),
+    re.compile(r"(?<!\w)\w+[ \t]+és[ \t]+\w+[ \t]+között[ \t]+(?:pótlóbuszokkal|pótlóbuszok|pótlóbusz|vonattal|autóbusszal)(?!\w)", re.IGNORECASE),
+)
+
+
 def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     hints = []
     for county in _COUNTY.finditer(value):
         if county.start() <= start and end <= county.end():
             hints.append(ContextHint('county_name', county.start(), county.end(), county.group()))
+    for phrase in _COLLISION_COUNT.finditer(value):
+        if phrase.start() == start and value[start:end].casefold() == 'négyes':
+            hints.append(ContextHint('possible_vehicle_count', phrase.start(), phrase.end(), phrase.group()))
+    for pattern in _ROUTE_PATTERNS:
+        for route in pattern.finditer(value):
+            if route.start() <= start and end <= route.end():
+                hints.append(ContextHint('transport_route_reference', route.start(), route.end(), route.group()))
     responder = _RESPONDER.match(value, end)
     if value[start:end].casefold().endswith('i') and responder:
         hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))
@@ -73,7 +96,7 @@ def review_locations(title: str, description: str, source_url: str,
     """
     if any(not isinstance(v, str) for v in (title, description, source_url)):
         raise ValueError('Report fields must be strings')
-    if len(title) > 2000 or len(description) > 4000 or len(settlements) > 5000:
+    if len(title) > 2000 or len(description) > 4000 or len(settlements) > MAX_SETTLEMENTS:
         raise ValueError('Review input exceeds bounds')
     seen = set()
     prepared = []
@@ -91,9 +114,15 @@ def review_locations(title: str, description: str, source_url: str,
     list_pattern = None
     if adjectives:
         name = '(?:' + '|'.join(map(re.escape, adjectives)) + ')'
-        separator = r'(?:\s*,\s*(?:(?:és|illetve)\s+)?|\s+(?:és|illetve)\s+)'
-        list_pattern = re.compile(r'(?<!\w)' + name + '(?:' + separator + name
-                                  + r'){1,7}(?!\w)' + _RESPONDER.pattern, re.IGNORECASE)
+        # A shared final noun may follow individually qualified units:
+        # 'ajkai hivatásos és a somlóvásárhelyi önkéntes tűzoltókat'.
+        # Horizontal whitespace only: do not propagate across lines/sentences.
+        modifier = r'(?:[ \t]+(?:hivatásos|önkéntes|önkormányzati))?'
+        member = name + r'(?!\w)' + modifier
+        separator = r'(?:[ \t]*,[ \t]*(?:(?:és|illetve)[ \t]+)?|[ \t]+(?:és|illetve)[ \t]+)(?:(?:a|az)[ \t]+)?'
+        noun = r'[ \t]+(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)'
+        list_pattern = re.compile(r'(?<!\w)' + member + '(?:' + separator + member
+                                  + r'){1,7}' + noun, re.IGNORECASE)
     mentions = []
     if not input_truncated:
         for field, value in (('title', title), ('description', description)):

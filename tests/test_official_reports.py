@@ -181,4 +181,12 @@ async def test_action_returns_attributed_response(hass):
             "terralyra_ignis", "get_official_reports", {},
             blocking=True, return_response=True,
         )
-    assert result == response
+    assert result["status"] == response["status"]
+    enriched, = result["notices"]
+    assert {k: v for k, v in enriched.items() if k != "fire_scope"} == response["notices"][0]
+    assert "fire_scope" not in response["notices"][0]  # shared cache stays unchanged
+    assert enriched["fire_scope"] == {
+        "category": "unknown", "evidence": [], "requires_review": True,
+        "large_extent_verified": False, "automatically_excluded": False,
+        "input_truncated": False,
+    }

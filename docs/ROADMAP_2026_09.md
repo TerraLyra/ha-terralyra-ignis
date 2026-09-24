@@ -73,3 +73,28 @@ New releases and live deployment require their own validation and authorization.
 Source retrieval diagnostics for current counts and the partial-restart regression
 shipped in 0.27.1. Sampled live checks confirmed all three count types expose the
 new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
+
+## Country-level place-name coverage (approved 2026-09-24)
+
+- [x] Start with Hungary: filtered GeoNames country supplement, stable upstream
+  identifiers, attribution, reproducible build and offline BM name-review option.
+- [ ] Validate Hungary against new independent BM RSS notices, including inflected
+  names, homonyms, route references and responding-unit names. Name recognition
+  alone must not authorize an incident marker or a fire classification.
+- [ ] Extend other countries when a provider demonstrates missing place coverage.
+  Review source/license, feature selection, package size, language-specific aliases
+  and ambiguity per country. Reuse the existing GeoNames build approach; do not
+  load the full world extract by default.
+- [ ] Assess whether richer data should also serve nearest-settlement labels;
+  check label changes separately before changing that runtime behavior.
+
+The Hungarian supplement is available to research tooling only. Production BM
+map wiring, release publication and HA installation remain separate steps.
+
+## BM fire scope (requested 2026-09-24)
+
+- [x] Add offline evidence-only vegetation/local-asset/mixed/unknown categorization.
+- [ ] Validate on independent vegetation-fire reports; distinguish burned area
+  from threatened/property area before setting any large-extent flag.
+- [ ] Prepare an optional landscape-fire-focused view retaining uncertain and
+  mixed reports for review. Do not discard source records or user history.

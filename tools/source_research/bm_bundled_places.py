@@ -10,6 +10,13 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    'Vasvár': ('Vasváron', 'vasvári'),
+    'Körmend': ('Körmenden', 'körmendi'),
+    'Zalaegerszeg': ('Zalaegerszegen', 'zalaegerszegi'),
+    'Szombathely': ('Szombathelyen', 'szombathelyi'),
+    'Ajka': ('Ajkán', 'ajkai'),
+    'Berettyóújfalu': ('Berettyóújfalun', 'berettyóújfalui'),
+    'Püspökladány': ('Püspökladányba', 'Püspökladányban', 'püspökladányi'),
     'Szeged': ('Szegeden', 'szegedi'),
     'Vértesszőlős': ('Vértesszőlősön', 'vértesszőlősi'),
     'Tatabánya': ('Tatabányán', 'tatabányai'),
