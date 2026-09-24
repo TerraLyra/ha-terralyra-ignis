@@ -193,3 +193,16 @@ negation, separate-sentence vegetation references, decimal area evidence and
 truncation. Vocabulary and context coverage remain limited. Next gates: independent
 real vegetation-fire samples, burned-versus-threatened area interpretation, and
 reviewed policy for including unknown/mixed reports in a user-selectable filter.
+
+### Approved presentation implementation
+
+Following approval of the separate demonstration, an optional Hungarian BM card
+now consumes the existing get_official_reports action. The action enriches its
+response with shared experimental fire-scope evidence. The archive and calendar
+remain unchanged; name-to-coordinate research is not wired into production.
+The card offers explicit retrieval, three display filters, full available RSS
+text, attribution and validated original-event links. It introduces no background
+polling or marker creation. The classifier implementation is shared with the
+research tests rather than duplicated. See BM_REPORT_CARD.md for installation
+and limitations. This section supersedes earlier research-only scope statements
+for fire-scope display only, not for location inference.

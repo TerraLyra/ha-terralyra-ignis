@@ -113,7 +113,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     register_report_review(hass, official_reports, report_links)
 
     async def async_get_official_reports(call: ServiceCall) -> ServiceResponse:
-        return await official_reports.async_get_notices()
+        from .bm_fire_scope import review_fire_scope
+
+        result = await official_reports.async_get_notices()
+        return {**result, "notices": [
+            {**notice, "fire_scope": review_fire_scope(
+                notice["title"], notice.get("description", ""),
+                input_truncated=notice.get("description_status") == "truncated",
+            )} for notice in result["notices"]
+        ]}
 
     hass.services.async_register(
         DOMAIN,

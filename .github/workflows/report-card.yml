@@ -19,3 +19,5 @@ jobs:
           "$RUNNER_TEMP/ignis-ui/node_modules/.bin/playwright" install --with-deps chromium
       - name: Browser checks
         run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/report-map-browser.cjs
+      - name: BM report card browser checks
+        run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/bm-reports-browser.cjs
