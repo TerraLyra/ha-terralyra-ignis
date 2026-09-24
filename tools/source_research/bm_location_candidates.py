@@ -7,6 +7,10 @@ from dataclasses import dataclass
 import re
 
 
+# Bounded country-level name research, including the full filtered HU extract.
+MAX_SETTLEMENTS = 20000
+
+
 @dataclass(frozen=True)
 class Settlement:
     identifier: str
@@ -73,7 +77,7 @@ def review_locations(title: str, description: str, source_url: str,
     """
     if any(not isinstance(v, str) for v in (title, description, source_url)):
         raise ValueError('Report fields must be strings')
-    if len(title) > 2000 or len(description) > 4000 or len(settlements) > 5000:
+    if len(title) > 2000 or len(description) > 4000 or len(settlements) > MAX_SETTLEMENTS:
         raise ValueError('Review input exceeds bounds')
     seen = set()
     prepared = []

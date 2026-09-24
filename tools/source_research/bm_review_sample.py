@@ -44,12 +44,22 @@ def evaluate_sample(raw: bytes, places=None) -> dict:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('sample', type=Path)
+    parser.add_argument('--hungary-supplement', action='store_true',
+                        help='Use the expanded Hungarian research gazetteer')
     args = parser.parse_args()
     with args.sample.open('rb') as stream:
         raw = stream.read(MAX_BYTES + 1)
-    result = evaluate_sample(raw)
-    result['gazetteer_sha256'] = hashlib.sha256(DATABASE.read_bytes()).hexdigest()
-    result['gazetteer_attribution'] = 'GeoNames cities500, CC BY 4.0; https://www.geonames.org/'
+    database = DATABASE
+    places = None
+    source = 'GeoNames cities500'
+    if args.hungary_supplement:
+        from bm_hu_gazetteer import DATABASE as HU_DATABASE, load_review_places
+        database, places, source = HU_DATABASE, load_review_places(), 'GeoNames HU'
+    result = evaluate_sample(raw, places)
+    result['gazetteer_sha256'] = hashlib.sha256(database.read_bytes()).hexdigest()
+    result['gazetteer_attribution'] = source + ', CC BY 4.0; https://www.geonames.org/'
+    if args.hungary_supplement:
+        result['base_gazetteer_sha256'] = hashlib.sha256(DATABASE.read_bytes()).hexdigest()
     result['notice_attribution'] = 'BM OKF (for BM OKF notices supplied by the caller)'
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
