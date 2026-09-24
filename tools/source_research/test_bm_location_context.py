@@ -81,3 +81,34 @@ class ResponderListTests(unittest.TestCase):
         result = self.review('Nyíradony határában ég. Nyíradonyi és debreceni tűzoltók érkeztek.')
         self.assertEqual(result.mentions[0].evidence, 'Nyíradony')
         self.assertEqual(result.mentions[0].context_hints, ())
+
+
+class CommonWordTests(unittest.TestCase):
+    places = (Settlement('n', 'Négyes', ('Négyesen', 'négyesi')),
+              Settlement('d', 'Debrecen', ('Debrecenben',)))
+
+    def test_collision_count_is_flagged_without_deleting_evidence(self):
+        for text in ('Négyes karambol Debrecenben', 'NÉGYES KARAMBOL Debrecenben'):
+            result = review_locations(text, '', '', self.places)
+            mention = next(m for m in result.mentions if m.settlement_id == 'n')
+            hint, = mention.context_hints
+            self.assertEqual(hint.kind, 'possible_vehicle_count')
+            self.assertEqual(text[hint.start:hint.end], hint.evidence)
+            self.assertEqual(text[mention.start:mention.end], mention.evidence)
+            self.assertTrue(result.multiple_candidates)
+            self.assertFalse(result.incident_location_verified)
+
+    def test_real_settlement_occurrences_remain_candidates(self):
+        for text in ('Négyes közelében karambol történt.', 'Négyesen történt baleset.',
+                     'A négyesi úton történt karambol.', 'Négyes. Karambol Debrecenben.',
+                     'Négyes\nkarambol', 'Négyes karambolos'):
+            result = review_locations(text, '', '', self.places)
+            mention = next(m for m in result.mentions if m.settlement_id == 'n')
+            self.assertEqual(mention.context_hints, ())
+            self.assertFalse(result.incident_location_verified)
+
+    def test_count_and_town_in_one_report_keep_separate_context(self):
+        result = review_locations('Négyes karambol Négyesen', '', '', self.places)
+        self.assertEqual(len(result.mentions), 2)
+        self.assertEqual(result.mentions[0].context_hints[0].kind, 'possible_vehicle_count')
+        self.assertEqual(result.mentions[1].context_hints, ())

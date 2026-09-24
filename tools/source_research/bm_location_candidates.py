@@ -31,11 +31,17 @@ _COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|
 _RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)", re.IGNORECASE)
 
 
+# Exact observed adjective/noun construction; never a global place blacklist.
+_COLLISION_COUNT = re.compile(r"(?<!\w)négyes[ \t]+karambol(?!\w)", re.IGNORECASE)
+
 def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     hints = []
     for county in _COUNTY.finditer(value):
         if county.start() <= start and end <= county.end():
             hints.append(ContextHint('county_name', county.start(), county.end(), county.group()))
+    for phrase in _COLLISION_COUNT.finditer(value):
+        if phrase.start() == start and value[start:end].casefold() == 'négyes':
+            hints.append(ContextHint('possible_vehicle_count', phrase.start(), phrase.end(), phrase.group()))
     responder = _RESPONDER.match(value, end)
     if value[start:end].casefold().endswith('i') and responder:
         hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))

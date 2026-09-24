@@ -17,6 +17,9 @@ DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ig
 FEATURES = frozenset({'PPL', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'PPLA5', 'PPLC', 'PPLL'})
 MAX_PLACES = MAX_SETTLEMENTS
 ALIASES = {**REVIEWED_ALIASES,
+           'Komoró': ('Komorónál', 'Komorón', 'komorói'),
+           'Kisvárda': ('Kisvárdán', 'kisvárdai'),
+           'Négyes': ('Négyesen', 'négyesi'),
            'Gersekarát': ('Gersekaráton', 'gersekaráti'),
            'Somlóvásárhely': ('Somlóvásárhelyen', 'somlóvásárhelyi')}
 

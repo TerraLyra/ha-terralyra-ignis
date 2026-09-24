@@ -126,3 +126,18 @@ prototype still has no automatic fire classifier. Before production, resolve
 common-word/settlement ambiguity conservatively with contextual evidence. Do not
 blacklist the real settlement Négyes globally. Preserve this frozen outcome for
 subsequent comparisons and use fresh notices for future independent evaluation.
+
+### Context follow-up after the frozen 92252/92253 evaluation
+
+Added an evidence-preserving `possible_vehicle_count` hint for the exact adjacent
+`Négyes karambol` construction (case-insensitive, same line). It does not delete
+mentions, change the multiple-candidate flag, or verify a location. Other uses,
+including `Négyes közelében` and `Négyesen`, stay eligible candidates. This narrow
+clue does not solve general common-word disambiguation.
+
+Reviewed Komoró/Kisvárda forms now recognize `Komorónál` and attach the existing
+responder hint to `kisvárdai hivatásos tűzoltók`. The retained RSS sample confirms
+these effects and the count hint in the Debrecen title. These two reports are now
+development examples, not held-out validation. The original pre-change findings
+above remain unchanged. All 227 offline research tests pass, including separate
+count/town occurrences in one sentence and boundaries preventing clue propagation.
