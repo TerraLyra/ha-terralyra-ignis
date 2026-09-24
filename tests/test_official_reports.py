@@ -186,7 +186,9 @@ async def test_action_returns_attributed_response(hass):
     assert {k: v for k, v in enriched.items() if k != "fire_scope"} == response["notices"][0]
     assert "fire_scope" not in response["notices"][0]  # shared cache stays unchanged
     assert enriched["fire_scope"] == {
-        "category": "unknown", "evidence": [], "requires_review": True,
+        "category": "unknown", "evidence": [
+            {"kind": "accident", "field": "title", "start": 0, "end": 8, "evidence": "Karambol"}
+        ], "requires_review": True,
         "large_extent_verified": False, "automatically_excluded": False,
         "input_truncated": False,
     }
