@@ -106,3 +106,23 @@ supply exact-name matches and preserve their homonyms. Both database hashes are
 reported. This union avoids losing existing name coverage while excluding bulk
 import of additional sublocalities; it is not coordinate/identity reconciliation.
 The added coverage-preservation regression brings the suite to 224 passing tests.
+
+### Independent follow-up, 2026-09-24 09:36 UTC
+
+RSS notices 92253 (Komoró road collision, 10:57 +0200) and 92252 (Debrecen
+four-vehicle collision, 10:22 +0200) were evaluated without vocabulary changes.
+No linked pages were fetched; raw samples and outputs remain local.
+
+- Baseline: no mention for Komoró; Debrecen recognized in title and description.
+- Expanded: Komoró recognized in the description's primary-name occurrence;
+  title form `Komorónál` and responding-unit adjective `kisvárdai` remain unmatched.
+- Expanded: Debrecen recognized, but the title's `Négyes` also matches a real
+  settlement name. Human reading identifies it as the vehicle-count adjective,
+  not a second incident location. This is a concrete lexical false positive
+  introduced by broader coverage, not an upstream coordinate error.
+
+All results stay unverified. These notices describe accidents, not fires; the
+prototype still has no automatic fire classifier. Before production, resolve
+common-word/settlement ambiguity conservatively with contextual evidence. Do not
+blacklist the real settlement Négyes globally. Preserve this frozen outcome for
+subsequent comparisons and use fresh notices for future independent evaluation.
