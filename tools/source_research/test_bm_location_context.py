@@ -104,7 +104,10 @@ class CommonWordTests(unittest.TestCase):
                      'Négyes\nkarambol', 'Négyes karambolos'):
             result = review_locations(text, '', '', self.places)
             mention = next(m for m in result.mentions if m.settlement_id == 'n')
-            self.assertEqual(mention.context_hints, ())
+            if text == 'A négyesi úton történt karambol.':
+                self.assertEqual(mention.context_hints[0].kind, 'street_name_reference')
+            else:
+                self.assertEqual(mention.context_hints, ())
             self.assertFalse(result.incident_location_verified)
 
     def test_count_and_town_in_one_report_keep_separate_context(self):

@@ -85,7 +85,7 @@ new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
   Review source/license, feature selection, package size, language-specific aliases
   and ambiguity per country. Reuse the existing GeoNames build approach; do not
   load the full world extract by default.
-- [ ] Assess whether richer data should also serve nearest-settlement labels;
+- [x] Assess whether richer data should also serve nearest-settlement labels;
   check label changes separately before changing that runtime behavior.
 
 The Hungarian supplement is available to research tooling only. Production BM
@@ -98,3 +98,22 @@ map wiring, release publication and HA installation remain separate steps.
   from threatened/property area before setting any large-extent flag.
 - [ ] Prepare an optional landscape-fire-focused view retaining uncertain and
   mixed reports for review. Do not discard source records or user history.
+
+## Work ordering update — 2026-09-25
+
+At the user's request, further independent BM sample validation was deferred
+until the next development item completes. Existing Érd/Törökbálint alias changes
+remain offline research; they do not authorize production geolocation.
+
+The next item, nearest-settlement label impact assessment, is now complete.
+See [Hungarian label impact](HU_LABEL_IMPACT.md). Keep the runtime resolver
+unchanged: a denser gazetteer has not been shown to improve label usefulness.
+Return to BM independent samples after this item; there is no new release or
+production installation from this assessment.
+
+### 2026-09-25 follow-up
+
+The user deferred additional BM validation again after the initial return sample.
+Keep independent vegetation-fire validation open for a later session; do not
+promote the offline location candidates to production. The user confirms that
+no replies to the submitted provider enquiries have arrived yet.

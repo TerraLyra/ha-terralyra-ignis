@@ -206,3 +206,34 @@ polling or marker creation. The classifier implementation is shared with the
 research tests rather than duplicated. See BM_REPORT_CARD.md for installation
 and limitations. This section supersedes earlier research-only scope statements
 for fire-scope display only, not for location inference.
+
+## 2026-09-25 — Budapest and Érd RSS samples
+
+The official RSS returned independent notices 92281 (Budapest XI district apartment fire) and 92280 (Érd garage fire). Only RSS title and description were used; linked incident pages were not fetched. Both were classified as local_asset_fire_candidate, consistent with manual reading; neither text supports a vegetation fire.
+
+Before adjustment, Budapest was detected but Érden was missed although Érd exists in both packaged datasets. Added explicitly reviewed Érd and Törökbálint inflected aliases to the shared research vocabulary. Replaying the original RSS with the packaged HU supplement now finds Érden in title and description and marks törökbálinti hivatásos tűzoltók as a responder reference. Exact upstream text offsets are preserved; no mention becomes a verified incident location or map coordinate.
+
+These samples are now development/regression evidence, not a held-out accuracy estimate. All 244 offline research tests pass, including checks against both packaged databases, unrelated words (Érdemes/érdemben), and adjectival mentions without responder context. No production HA, history, database bytes, or runtime provider behavior changed.
+
+## 2026-09-25 — independent Nyírpazony collision, RSS 92282
+
+After the deferred validation resumed, the RSS supplied a new collision notice,
+92282. Manual reading identifies Nyírpazony as the town, Szabolcs as a street
+name, and Nyíregyháza as the responding fire brigade. The initial offline result
+correctly classified a non_fire_report_candidate, but missed both inflected
+city names and returned Szabolcs without a street context hint. This is evidence
+against promoting a lone unqualified gazetteer match to an incident marker.
+
+Added reviewed Nyírpazony/Nyíregyháza aliases and a narrow street_name_reference
+hint for explicit street/road/square suffixes. The hint preserves the original
+mention and offsets; it does not discard the candidate or confirm an address.
+Replaying the RSS now finds Nyírpazony twice, Szabolcs with street context and
+Nyíregyháza with responder context. No verified incident coordinate is produced.
+A direction-derived road name (e.g. négyesi úton) also gets this review hint;
+it remains ambiguous and is not treated as proof of a formally named street.
+
+All 252 offline research tests pass, including punctuation/line boundaries,
+partial-word negatives and repeated town/street mentions. This report is now
+regression material, not held-out validation. No independent vegetation-fire
+sample was present in this retrieval; that validation remains open. No linked
+incident pages were fetched and no HA/history changes were made.
