@@ -31,6 +31,10 @@ _COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|
 _RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)", re.IGNORECASE)
 
 
+# Explicit street suffix only; retain the mention and original evidence.
+_STREET = re.compile(r"[ \t]+(?:utca|utcában|utcán|utcai|utcába|utcából|út|úton|úti|útra|útról|útján|tér|téren|téri|térre|térről|köz|közben)(?!\w)", re.IGNORECASE)
+
+
 # Exact observed adjective/noun construction; never a global place blacklist.
 _COLLISION_COUNT = re.compile(r"(?<!\w)négyes[ \t]+karambol(?!\w)", re.IGNORECASE)
 
@@ -55,6 +59,9 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
         for route in pattern.finditer(value):
             if route.start() <= start and end <= route.end():
                 hints.append(ContextHint('transport_route_reference', route.start(), route.end(), route.group()))
+    street = _STREET.match(value, end)
+    if street:
+        hints.append(ContextHint('street_name_reference', start, street.end(), value[start:street.end()]))
     responder = _RESPONDER.match(value, end)
     if value[start:end].casefold().endswith('i') and responder:
         hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))

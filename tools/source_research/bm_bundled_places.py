@@ -10,6 +10,11 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # Reviewed from BM OKF RSS 92280/92282 (2026-09-25); no suffix guessing.
+    'Nyírpazony': ('Nyírpazonyban', 'nyírpazonyi'),
+    'Nyíregyháza': ('Nyíregyházán', 'nyíregyházi'),
+    'Érd': ('Érden', 'érdi'),
+    'Törökbálint': ('Törökbálinton', 'törökbálinti'),
     'Vasvár': ('Vasváron', 'vasvári'),
     'Körmend': ('Körmenden', 'körmendi'),
     'Zalaegerszeg': ('Zalaegerszegen', 'zalaegerszegi'),
