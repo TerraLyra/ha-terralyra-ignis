@@ -53,3 +53,19 @@ Official evidence:
 
 See [ready-to-send WA and Tasmania requests](PROVIDER_ACCESS_REQUEST_DRAFTS.md).
 No request has been sent by the assistant; no access approval is asserted here.
+
+## Portugal — checked 2026-09-25
+
+ANEPC's ProCiv catalogue explicitly lists CC BY 4.0, but the current viewer and
+legacy resource link differ. Verify the current supported endpoint and licence
+mapping before implementation; no individual permission requirement is asserted.
+Official evidence, open questions and an unsent enquiry draft are recorded in
+[Portugal preflight](PORTUGAL_ACCESS_PREFLIGHT.md).
+
+2026-09-25 update: the user confirmed sending the Portugal enquiry; response
+pending. [Brazil INPE preflight](BRAZIL_ACCESS_PREFLIGHT.md) identifies satellite
+product overlap and BIG commercial-authorization wording; product-specific
+applicability to Queimadas exports remains to be clarified before runtime work.
+
+2026-09-25: user confirmed sending the Brazil INPE enquiry as well. Both Portugal
+and Brazil now await replies; neither submission constitutes approval.
