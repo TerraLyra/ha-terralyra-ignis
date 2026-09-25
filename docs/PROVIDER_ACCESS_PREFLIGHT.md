@@ -69,3 +69,11 @@ applicability to Queimadas exports remains to be clarified before runtime work.
 
 2026-09-25: user confirmed sending the Brazil INPE enquiry as well. Both Portugal
 and Brazil now await replies; neither submission constitutes approval.
+
+## Spain — Castilla y León, checked 2026-09-25
+
+The official regional daily wildfire-report dataset explicitly specifies
+CC BY 4.0 and has a working anonymous API. Bounded offline research is complete;
+no general individual permission requirement was identified. Incident identity,
+coordinate meaning, timestamp semantics and stable snapshot retrieval remain
+open before runtime work. See [Spain research](SPAIN_ACCESS_PREFLIGHT.md).
