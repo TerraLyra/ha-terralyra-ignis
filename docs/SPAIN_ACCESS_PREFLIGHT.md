@@ -134,3 +134,42 @@ visible as a failed collection, not a successful empty result. Three pipeline
 regressions cover matching totals, older-row retention and failure propagation.
 The standalone preview uses Hungarian retrieval messages and all 18 sample rows.
 All 275 offline research tests pass; no HA changes or new release.
+
+## Original CSV cross-check — 2026-09-25
+
+Official original CSV:
+https://datosabiertos.jcyl.es/web/jcyl/risp/es/medio-ambiente/incendios_forestales/1284333417830.csv
+
+A download deliberately capped at 1 MiB stopped at the size limit. Only its
+complete header and first 18 CSV records were inspected; the truncated file is
+not a complete dataset or valid completeness proof. CSV parsing respected quoted
+semicolons. A separate single API query for fecha_del_parte=2026-09-25 returned
+18 of 18 rows. Comparing multisets across all 17 source columns found 18 matches,
+normalizing only empty/null values, province arrays and coordinate serialization.
+This corroborates transport consistency for this sample, not incident semantics.
+
+The CSV already contains Posición. It has two columns labelled CÓDIGO INE
+(positions 14 and 17, one-based), corresponding to codigo_ine and
+codigo_municipio_ine in the API. Any future CSV reader must preserve positions
+and reject unexpected headers rather than use a dictionary that silently loses
+a duplicate column. No CSV runtime fallback was added.
+
+The API-only orden field demonstrably repeats within the same bulletin:
+2026-09-25 10:00 LEÓN occurs six times, AVILA three times, SEGOVIA and
+VALLADOLID twice each. It is not a unique report or incident identifier.
+A content fingerprint could identify an exact row for offline comparison only;
+it would change on correction and must not be used as a stable incident ID.
+
+Fresh metadata still leaves descriptions null for posicion, orden and all six
+report/onset/extinction date/time fields. Europe/Madrid is dataset-level
+metadata, not documented field-level DST semantics. Coordinate provenance and
+precision are still unresolved; the original CSV does not resolve them merely
+by carrying the same point values.
+
+Next technical clarification: ask the publisher whether Posición denotes the
+fire origin, affected municipality or another reference point; whether a stable
+incident ID exists across bulletins/corrections; how ambiguous/nonexistent local
+times are encoded; and whether each bulletin is a complete replacement per
+province. Until answered, retain the offline report-list approach, no precise
+fire markers, event merging, UTC conversion or removal-as-extinction inference.
+This is a technical clarification, not a new blanket permission requirement.

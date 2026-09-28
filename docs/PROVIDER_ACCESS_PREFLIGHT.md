@@ -77,3 +77,123 @@ CC BY 4.0 and has a working anonymous API. Bounded offline research is complete;
 no general individual permission requirement was identified. Incident identity,
 coordinate meaning, timestamp semantics and stable snapshot retrieval remain
 open before runtime work. See [Spain research](SPAIN_ACCESS_PREFLIGHT.md).
+
+2026-09-25: user confirmed sending the Castilla y León technical enquiry via
+the official contact form. Reply pending; do not send a duplicate.
+
+## France and Germany — initial triage, 2026-09-25
+
+User authorized research of both countries. Separate incident reports, public
+warnings, historical statistics and forecast danger indices. No runtime work.
+
+France: BDIFF is the official national historical incident database. Current
+incident timeliness, machine access and product licence still need verification.
+https://bdiff.agriculture.gouv.fr/
+https://bdiff.agriculture.gouv.fr/aide/generalites
+Météo-France's Météo des Forêts API is a different product: departmental fire
+danger for J+1/J+2, with account-required access (catalogue: 100 requests/min).
+It is not an active-fire feed. Verify product terms and user-owned credentials
+before implementation; contact listed by publisher: contact.api@meteo.fr.
+https://www.data.gouv.fr/dataservices/api-meteo-des-forets
+
+Germany: BBK MoWaS/NINA is a candidate for official large-fire/smoke warnings,
+not a complete inventory of fires. BBK explicitly requires a multiplier agreement
+for direct MoWaS connection. Whether this applies to local consumption of public
+RSS/API must be established separately; do not infer either permission or a
+blanket prohibition from the direct-connection rule. No enquiry sent yet.
+https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warnung-in-Deutschland/Warnmultiplikatoren/warnmultiplikatoren_node.html
+https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warnung-in-Deutschland/MoWaS/mowas_node.html
+DWD WBI is a separate fire-danger forecast candidate, not incident evidence.
+Check the operational product, freshness, spatial scope and applicable terms;
+the CDC derived index archive alone does not establish a live forecast endpoint.
+https://opendata.dwd.de/climate_environment/CDC/derived_germany/fire_danger_index/woodland/
+
+Priority: inspect public-warning access terms for Germany and official incident
+publication options for France, then evaluate the two danger-index products
+as supplementary layers. A public catalogue listing alone is not evidence of
+official authorship or permission for every hosted dataset.
+
+## France/Germany follow-up — 2026-09-25
+
+BDIFF's official search help describes annual campaigns, partial/unvalidated
+records and retrospective corrections. Its detail map centres on the commune
+of fire origin and displays its boundary: do not mistake that map centre for
+an ignition point. CSV exports include legal and definitions PDFs. General help
+states end-of-season validation takes place December–April of the following year;
+this alone does not prove that no provisional current-year records exist.
+No live publication latency or supported incident API was established.
+https://bdiff.agriculture.gouv.fr/aide/recherche
+https://bdiff.agriculture.gouv.fr/aide/generalites
+
+The published BDIFF legal notice requires information integrity, explicit source
+attribution and restricted reproduction wording, and excludes commercial or
+advertising uses. Do not assign an open licence based solely on government
+ownership. Product-specific alternative terms would need evidence. Deprioritize
+BDIFF for the current live incident goal; retain as a historical research lead.
+https://bdiff.agriculture.gouv.fr/mentions-legales
+
+BBK's served NINA legal notice explicitly allows redistribution of federal
+official warnings unchanged with attribution under its cited UrhG provision.
+It separately addresses third-party warnings (Länder, municipalities, DWD etc.).
+This is positive evidence, but not a verified blanket grant for every payload,
+API polling or asset. Non-warning text/images remain permission-restricted.
+The served notice states 20 March 2020 and app release information from 2023;
+record that age instead of assuming a newly issued policy.
+https://warnung.bund.de/api/appdata/gsb/html/DE/app/impressum.html
+
+BBK publicly advertises per-location RSS warning subscriptions. Distinguish
+these warning feeds from BBK's institutional news RSS. Public feed consumption
+is not automatically the same as a direct MoWaS multiplier connection.
+Next: verify supported public RSS/API access, polling and regional warning reuse
+with the documented NINA contact nina@bbk.bund.de if not resolved in published
+terms. No German or French enquiry has been sent or confirmed by the user.
+https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warn-App-NINA/warn-app-nina_node.html
+
+Priority remains Germany official warning feeds; France needs an operational
+national or regional official incident source before an adapter is proposed.
+No production entities, credentials, data downloads or HA configuration changed
+in this documentation step (only public documentation was fetched).
+
+## FR-Alert candidate — 2026-09-25
+
+A better operational-warning lead than BDIFF is the official FR-Alert site:
+https://www.fr-alert.gouv.fr/les-alertes
+Its legal notice explicitly assigns Etalab 2.0 to site content except separately
+identified third-party intellectual property, requiring source, last-update date
+and no misleading presentation. A blanket permission request for covered content
+is therefore not justified. Technical access remains a separate question.
+https://fr-alert.gouv.fr/mentions-legales
+
+A bounded retrieval of the alert-list HTML exceeded both 1 MiB and a subsequent
+4 MiB cap. The saved prefix is incomplete and must never be ingested as a complete
+snapshot. It contains individual alert links, forest-fire and industrial-fire
+labels, and an exercise filter. This establishes useful candidate structure,
+not verified exercise flags on individual records, current active status, archive
+completeness, latency or a supported API. No detail timestamps are inferred from
+numeric URL components. Alert coverage is not a census of all forest fires.
+
+Next: find a supported bounded feed or pagination and validate individual alert
+status, updates/cancellations, exercise markers, dates with offsets and warning
+area geometry. A warning area must not be rendered as a precise ignition point.
+Avoid polling the full multi-megabyte archive in each user's installation.
+No FR-Alert enquiry sent; no provider enabled.
+
+Germany follow-up: official BBK pages continue to advertise per-location RSS,
+but no publisher API contract/polling policy was found in this bounded search.
+The community bundesAPI/bund.dev documentation is not itself BBK authorization.
+Public website entry and help route require JavaScript; this is not an access
+denial or evidence that API access is prohibited. Supported access and Länder/
+municipal warning reuse remain questions for nina@bbk.bund.de.
+
+2026-09-28: user confirmed submitting the FR-Alert technical enquiry via the
+official contact form. Await reply; do not duplicate the request. See
+[France research](FRANCE_ACCESS_PREFLIGHT.md).
+
+2026-09-28: Germany review identified existing core NINA integration and its
+detail action. Assess IGNIS-specific report presentation before duplicating
+retrieval. Publisher clarification remains unsent. See
+[Germany preflight](GERMANY_ACCESS_PREFLIGHT.md).
+
+2026-09-28: user confirmed the German BBK/NINA enquiry has been sent. No replies
+have arrived to any provider enquiries according to the user's latest update.
+All pending technical/access questions remain open; submission is not approval.
