@@ -1,5 +1,12 @@
 // Optional local dashboard resource. No external libraries or report-page requests.
 const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc_reports']);
+// Explicit map-switch entity associations; never infer opt-in from report count.
+export function visibleMapSources(states = {}, switches = {}) {
+  return {terralyra_ignis:true, ...Object.fromEntries([...SOURCES].map(source => {
+    const id = switches[source];
+    return [source, typeof id === 'string' && id.startsWith('switch.') && states[id]?.state === 'on'];
+  }))};
+}
 const WORDS = {
   en: {close:'Close', details:'Home Assistant details', source:'Source information',
     absent:'No incident text has been loaded for this report.',
@@ -134,11 +141,14 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     }
     renderControls() {
       const hu = this._hass?.language?.startsWith('hu');
-      if (this.controlsLanguage === hu) return;
-      this.controlsLanguage = hu;
+      const visibility = visibleMapSources(this._hass?.states, this.config?.report_switches);
+      const key = JSON.stringify([hu, visibility]);
+      if (this.controlsKey === key) return;
+      this.controlsKey = key;
       this.controls.replaceChildren();
       const labels = hu ? ['Műholdas észlelések','Kanadai jelentések','NIFC jelentések'] : ['Satellite detections','Canada reports','NIFC reports'];
       Object.keys(this.enabled).forEach((source,index)=>{
+        if (!visibility[source]) return;
         const label=document.createElement('label');
         const input=document.createElement('input');input.type='checkbox';input.checked=this.enabled[source];
         input.onchange=()=>{this.enabled[source]=input.checked;this.updateMap();};
@@ -160,7 +170,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.controls.append(note);
     }
     updateMap() {
-      if (this.map && this._hass) this.map.hass = {...this._hass,states:filterMapStates(this._hass.states,this.enabled,this.maxDays)};
+      if (this.map && this._hass) this.map.hass = {...this._hass,states:filterMapStates(this._hass.states,Object.fromEntries(Object.entries(this.enabled).map(([source, checked]) => [source, checked && visibleMapSources(this._hass.states,this.config?.report_switches)[source]])),this.maxDays)};
     }
     getCardSize() {return this.map?.getCardSize?.() ?? 7;}
     disconnectedCallback() {if(this.dialog.open) this.dialog.close();}

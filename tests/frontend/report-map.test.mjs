@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {reportView,safeLink} from '../../frontend/ignis-report-map.js';
+import {reportView,safeLink,visibleMapSources} from '../../frontend/ignis-report-map.js';
 
 const state = {entity_id:'geo_location.example',state:'12.3',attributes:{
   source:'terralyra_ignis_canada_reports',friendly_name:'Report <script>',
@@ -61,4 +61,14 @@ test('age filter hides only old official reports; unknown and satellite records 
     assert.equal(reportView({...state,attributes:{...attributes,incident_name}}).title,state.attributes.friendly_name);
   }
   assert.equal(reportView({...state,attributes:{...state.attributes,incident_name:'Unrelated'}}).title,state.attributes.friendly_name);
+});
+
+test('report controls follow explicit map switches, not marker availability',()=>{
+ const source='terralyra_ignis_canada_reports';
+ const mapping={[source]:'switch.canada'};
+ assert.equal(visibleMapSources({'switch.canada':{state:'on'}},mapping)[source],true);
+ for(const state of ['off','unknown','unavailable'])assert.equal(visibleMapSources({'switch.canada':{state}},mapping)[source],false);
+ assert.equal(visibleMapSources({},mapping)[source],false);
+ assert.equal(visibleMapSources({'geo_location.report':{attributes:{source}}})[source],false);
+ assert.equal(visibleMapSources().terralyra_ignis,true);
 });
