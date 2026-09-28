@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Model checks
-        run: node --test tests/frontend/report-map.test.mjs
+        run: node --test tests/frontend/*.test.mjs
       - name: Install isolated browser test runtime
         run: |
           npm install --prefix "$RUNNER_TEMP/ignis-ui" --ignore-scripts --no-audit --no-fund playwright@1.62.1
@@ -21,3 +21,5 @@ jobs:
         run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/report-map-browser.cjs
       - name: BM report card browser checks
         run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/bm-reports-browser.cjs
+      - name: Location summary browser checks
+        run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/location-summary-browser.cjs
