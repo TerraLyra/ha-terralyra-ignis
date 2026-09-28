@@ -37,7 +37,7 @@ def review_fire_scope(title: str, description: str, *, input_truncated: bool = F
                 for kind, pattern in PATTERNS.items():
                     matches = list(pattern.finditer(sentence.group()))
                     if kind == 'possible_fire':
-                        matches = [m for m in matches if not re.fullmatch(r'tűzoltó(?:k|kat|knak|khoz|kkal|ság|ságok|sági)?', m.group(), re.I)]
+                        matches = [m for m in matches if not re.fullmatch(r'tűzoltó(?:k|kat|knak|khoz|kkal|inak|ság|ságok|sági)?', m.group(), re.I)]
                     found[kind] = bool(matches)
                     for match in matches:
                         start, end = sentence.start()+match.start(), sentence.start()+match.end()
