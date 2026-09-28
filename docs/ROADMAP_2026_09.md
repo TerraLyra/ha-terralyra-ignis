@@ -1,8 +1,21 @@
 # IGNIS public development roadmap
 
-Status reviewed on 2026-09-21 against stable 0.27.1.
+Status reconciled on 2026-09-29: stable integration 0.30.1, plus separately
+installed dashboard changes from PRs #75 and #76. Main-branch frontend changes
+are not a new HACS release.
 
 ## Delivered
+
+- Optional BM report card shipped in 0.30.0, with clearer accident labels in
+  0.30.1. Display filtering preserves original reports and history. See
+  [BM card](BM_REPORT_CARD.md) and [0.30.1 notes](RELEASE_0_30_1.md).
+- Optional per-location summary card (#75) is merged and separately installed
+  on the user's HA dashboard. It shows existing satellite counts and source
+  health; forecast, restrictions and nearest distance are not connected yet.
+- Report-map source visibility (#76) is merged and separately installed:
+  Canada/NIFC controls follow explicit map-switch associations. Disabled or
+  unavailable sources are hidden; enabled sources with no reports remain
+  selectable. See [map configuration](REPORT_DETAILS_CARD.md).
 
 - Optional NIFC / WFIGS source status, timed calendar and location-aware report map
   shipped in 0.27.0. Administrator first-use initialization, bounded shared retrieval,
@@ -20,7 +33,8 @@ Status reviewed on 2026-09-21 against stable 0.27.1.
 ## Open work and limitations
 
 - [Historical counter discontinuity](https://github.com/TerraLyra/ha-terralyra-ignis/issues/41):
-  the original historical cause remains unproven. Investigate available evidence;
+  the original historical cause remains unproven. Investigation is deferred at
+  the user's request; resume only when useful evidence is available;
   do not delete or rewrite user history, or assume access to an old machine/backup.
 - Live smoke checks do not prove full history equivalence, restart/outage recovery
   or uninterrupted operation. Those scenarios have automated coverage but are not
@@ -88,15 +102,16 @@ new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
 - [x] Assess whether richer data should also serve nearest-settlement labels;
   check label changes separately before changing that runtime behavior.
 
-The Hungarian supplement is available to research tooling only. Production BM
-map wiring, release publication and HA installation remain separate steps.
+The Hungarian supplement serves offline research. It shipped with 0.30.0,
+but production BM map geolocation and runtime nearest-settlement changes
+remain outside the delivered scope.
 
 ## BM fire scope (requested 2026-09-24)
 
 - [x] Add offline evidence-only vegetation/local-asset/mixed/unknown categorization.
 - [ ] Validate on independent vegetation-fire reports; distinguish burned area
   from threatened/property area before setting any large-extent flag.
-- [ ] Prepare an optional landscape-fire-focused view retaining uncertain and
+- [x] Deliver an optional landscape-fire-focused view retaining uncertain and
   mixed reports for review. Do not discard source records or user history.
 
 ## Work ordering update — 2026-09-25
@@ -117,3 +132,18 @@ The user deferred additional BM validation again after the initial return sample
 Keep independent vegetation-fire validation open for a later session; do not
 promote the offline location candidates to production. The user confirms that
 no replies to the submitted provider enquiries have arrived yet.
+
+## Next eligible work — 2026-09-29
+
+1. Extend the location summary only after checking explicit existing per-location
+   entity associations: first forecast validity/freshness, then nearest distance.
+   Do not infer safety, restrictions, or a location from entity-name suffixes.
+2. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
+   be reviewed offline without downloading linked articles or changing live HA.
+3. Review provider replies when received. France/Germany enquiries were confirmed
+   sent by the user; no reply or permission has been reported. Existing offline
+   research is not production approval.
+
+Do not restart the paused optimization work or historical-counter investigation
+merely to fill the waiting period. The summary-card extension is a development
+candidate, not a claim that forecast/distance wiring is already implemented.
