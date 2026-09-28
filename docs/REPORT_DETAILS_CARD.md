@@ -91,3 +91,23 @@ NIFC markers. A failed refresh retains that timestamp; restart leaves it unknown
 until another successful response. It is not incident start or source update time.
 Canada retrieval timestamps are not added by this change. Live NIFC name display
 was verified; nonempty incident description display still lacks a live sample.
+
+## Report-source visibility
+
+Configure the actual IGNIS map-control switches explicitly (copy their entity IDs
+from HA; the example IDs below are placeholders):
+
+```yaml
+report_switches:
+  terralyra_ignis_canada_reports: switch.REPLACE_WITH_CANADA_MAP_SWITCH
+  terralyra_ignis_nifc_reports: switch.REPLACE_WITH_NIFC_MAP_SWITCH
+```
+
+Only an associated switch in state `on` exposes that report-source checkbox.
+No report entities are needed: an enabled source with zero matching reports
+remains selectable. Off, unknown, unavailable or missing switches hide that
+source and suppress its markers. The satellite checkbox remains available.
+Checkboxes only filter display and never turn on a provider or call a service.
+This binding is required when upgrading older dashboard configurations; without
+it report-source controls are hidden. Bind the intended integration's switches
+explicitly rather than guessing by translated names or marker availability.
