@@ -1,6 +1,6 @@
 # UI follow-ups — 2026-09-11
 
-## Location summary card
+## Location summary card — first increment delivered
 
 User-approved backlog item inspired by the review of
 https://github.com/vwylaw/nsw_fire_danger at commit 926f7d4
@@ -37,4 +37,8 @@ See [delivery roadmap](ROADMAP_2026_09.md) and
 [official-source register](OFFICIAL_SOURCE_REGISTER.md).
 The local map-only Location matches correction is documented in
 [the attribute contract](LOCATION_MATCH_DISPLAY.md); release and HA validation are pending.
-The next-update timestamp issue and location summary card remain open.
+This paragraph records the 2026-09-14 state, not current release readiness.
+The first location-summary increment is now merged and separately installed;
+see [current scope](LOCATION_SUMMARY_CARD.md). Forecast, restrictions and nearest
+distance are still unconnected. Report-map source visibility is delivered in #76.
+The next-update timestamp issue is not closed by these UI changes.

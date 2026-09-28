@@ -8,5 +8,12 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.evaluate(()=>{entity={...entity,state:'unavailable'};card.hass={states:{'sensor.place':entity}}});assert.equal(await page.locator('.number').first().textContent(),'—');
  await page.evaluate(()=>card.setConfig({entity:'sensor.place',location_id:'home'}));assert.equal(await page.locator('.number').count(),0);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.evaluate(()=>{card.setConfig({entity:'sensor.place',location_id:'ca',forecast:{entity:'sensor.forecast',location_id:'ca',latitude:47,longitude:19}});entity.state='available';window.forecast={state:'high',attributes:{scope:'near_home',sample_latitude:47,sample_longitude:19,generated_at:new Date().toISOString(),forecast:[{date:new Date().toISOString().slice(0,10),risk:'high'}],attribution:'<img src=x onerror=alert(1)>'}};card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}};});
+ assert.match(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
+ assert.equal(await page.locator('img').count(),0);
+ await page.evaluate(()=>{forecast.state='unavailable';card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}};});
+ assert.match(await page.locator('ha-card').innerText(),/előrejelzés jelenleg nem érhető el/);
+ assert.doesNotMatch(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  console.log('Location summary browser checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
