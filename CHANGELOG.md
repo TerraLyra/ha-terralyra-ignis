@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.31.0
+
+- Add an optional location summary card with satellite incident counts, source health, explicitly bound near-home forecast and current per-location nearest incident distance.
+- Hide Canada/NIFC map controls unless their explicitly associated map switches are on; enabled empty sources remain selectable.
+- Improve offline Hungarian place-context research; no automatic BM geolocation or newly enabled official provider.
+- Preserve entity identities and user history. Dashboard JavaScript resources require a separate update.
+
+See [release notes](docs/RELEASE_0_31_0.md).
+
 ## 0.28.0
 
 - Add optional Canadian official fire reports from CWFIF: source status, location-aware map and timed calendar, separate from satellite observations.
