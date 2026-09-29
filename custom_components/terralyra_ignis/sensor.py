@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from math import isfinite
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -549,6 +550,9 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
             **_location_health_summary(assignments),
             **_location_source_timestamps(assignments),
             **incidents,
+            "nearest_incident_distance_km": _location_nearest_distance(
+                self._plan.location_id, self.coordinator.data
+            ),
         }
 
 
@@ -900,6 +904,23 @@ def _location_incident_summary(location_id: str, data: Any) -> dict[str, int]:
             cluster.confirmation_level.value == "multi_source" for cluster in incidents
         ),
     }
+
+
+def _location_nearest_distance(location_id: str, data: Any) -> float | None:
+    """Current matched distance only, never a global/Home or historical distance."""
+    if data is None:
+        return None
+    distances = []
+    for cluster in data.tracked_fires:
+        if cluster.lifecycle not in (FireLifecycle.NEW, FireLifecycle.CONTINUING):
+            continue
+        for match in cluster.location_matches:
+            if match.location_id != location_id or not match.inside_radius:
+                continue
+            value = getattr(match, "distance_km", None)
+            if type(value) in (int, float) and isfinite(value) and value >= 0:
+                distances.append(value)
+    return min(distances) if distances else None
 
 
 def _location_observation_state(status: str, active_incidents: int) -> str:

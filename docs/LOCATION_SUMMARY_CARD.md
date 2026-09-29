@@ -32,8 +32,15 @@ only one source; it is not evidence that all sources are fresh, nor an ignition
 or acquisition time. Missing timestamps remain missing.
 
 The restriction panel explicitly reports no linked data. It does not infer no
-restriction or low danger. Nearest distance is
-omitted until a verified per-location distance association is available.
+restriction or low danger. The optional nearest-distance line uses nearest_incident_distance_km on the
+same explicitly associated location-status entity. Older integration versions
+without this attribute show no verifiable distance. The backend selects the
+minimum current distance among NEW/CONTINUING incidents whose exact location
+match is inside that location's radius; it never uses global Home distance or
+historical minimum distance. Partial retrieval retains snapshot semantics and
+the source-status warning. No candidate means missing distance, not zero.
+This backend addition requires an integration update and HA restart as well as
+the separate frontend update; it is not installed by changing the card alone.
 
 Validation: model checks cover wrong-location association, partial zero,
 initialization/unavailability and invalid counts. Browser checks exercise HA
