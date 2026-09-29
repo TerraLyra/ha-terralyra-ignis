@@ -59,6 +59,10 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
         for route in pattern.finditer(value):
             if route.start() <= start and end <= route.end():
                 hints.append(ContextHint('transport_route_reference', route.start(), route.end(), route.group()))
+    direction = re.match(r'\s+felé(?!\w)', value[end:], re.IGNORECASE)
+    if direction:
+        stop = end + direction.end()
+        hints.append(ContextHint('direction_reference', start, stop, value[start:stop]))
     street = _STREET.match(value, end)
     if street:
         hints.append(ContextHint('street_name_reference', start, street.end(), value[start:street.end()]))

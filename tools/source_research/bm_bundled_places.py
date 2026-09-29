@@ -16,6 +16,7 @@ REVIEWED_ALIASES = {
     # Reviewed from BM OKF RSS 92280/92282 (2026-09-25); no suffix guessing.
     'Nyírpazony': ('Nyírpazonyban', 'nyírpazonyi'),
     'Nyíregyháza': ('Nyíregyházán', 'nyíregyházi'),
+    'Makó': ('Makón', 'makói'),
     'Érd': ('Érden', 'érdi'),
     'Törökbálint': ('Törökbálinton', 'törökbálinti'),
     'Vasvár': ('Vasváron', 'vasvári'),
