@@ -46,3 +46,11 @@ test('UTC product day is independent of local DST date; offsetless receipt stays
  for(const generated_at of ['2026-09-29T06:00:00','garbage','2026-09-30T06:00:00Z'])assert.equal(review({...forecast,attributes:{...forecast.attributes,generated_at}}).received,null);
  assert.match(review({...forecast,attributes:{...forecast.attributes,generated_at:'2026-09-28T06:00:00Z'}}).freshness,/12 órás/);
 });
+
+test('nearest distance is exact-location, finite and suppressed for unavailable data',()=>{
+ const located={...entity,attributes:{...entity.attributes,nearest_incident_distance_km:0}};
+ assert.equal(summarizeLocation(located,'ca').nearest,0);
+ assert.equal(summarizeLocation({...located,state:'unavailable'},'ca').nearest,null);
+ assert.ok(summarizeLocation(located,'home').error);
+ for(const v of [undefined,null,-1,Infinity,'2',true])assert.equal(summarizeLocation({...entity,attributes:{...entity.attributes,nearest_incident_distance_km:v}},'ca').nearest,null);
+});

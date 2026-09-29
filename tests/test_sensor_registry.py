@@ -453,3 +453,22 @@ def test_initializing_source_does_not_claim_success_or_fresh_data() -> None:
     assert status == "initializing"
     assert rows[0]["retrieval_status"] == "unknown"
     assert rows[0]["data_freshness"] == "unknown"
+
+
+def test_nearest_distance_uses_current_exact_location_match() -> None:
+    def cluster(location, distance, *, inside=True, lifecycle=FireLifecycle.NEW):
+        return SimpleNamespace(lifecycle=lifecycle, distance_km=0.01,
+            location_matches=(SimpleNamespace(location_id=location,
+                inside_radius=inside, distance_km=distance, minimum_distance_km=0),))
+    data = SimpleNamespace(tracked_fires=[
+        cluster("home", 1), cluster("remote", 23.456), cluster("remote", 40),
+        cluster("remote", 2, inside=False),
+        cluster("remote", 3, lifecycle=FireLifecycle.INACTIVE),
+        cluster("remote", float("nan")), cluster("remote", -1),
+    ])
+    assert sensor._location_nearest_distance("remote", data) == 23.456
+    assert sensor._location_nearest_distance("home", data) == 1
+    assert sensor._location_nearest_distance("absent", data) is None
+    assert sensor._location_nearest_distance("remote", None) is None
+    assert sensor._location_nearest_distance("remote", SimpleNamespace(
+        tracked_fires=[cluster("remote", 0)])) == 0
