@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, replace
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 from aiohttp import ClientSession
 from homeassistant.config_entries import ConfigEntry
@@ -80,6 +80,8 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
         try:
             forecast = await self.client.async_forecast(
                 context.latitude, context.longitude, context.radius_km)
+            if not forecast.days or forecast.days[0].valid_date != datetime.now(UTC).date():
+                raise FireRiskError("Location forecast is not for the current UTC day")
         except ForecastRequestDeferred as err:
             self._defer(err)
             raise UpdateFailed("Location forecast is waiting for provider cooldown") from err
@@ -110,4 +112,8 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
                     await self._map_store.async_save(context.wrap_map_cache(cache))
                 except OSError:
                     _LOGGER.warning("Could not persist location forecast map cache")
+        # Map retrieval/analysis can straddle UTC midnight after point retrieval.
+        if forecast.days[0].valid_date != datetime.now(UTC).date():
+            self.update_interval = _retry_interval(1)
+            raise UpdateFailed("Location forecast expired during retrieval")
         return LocationFireRiskForecast(context, forecast)

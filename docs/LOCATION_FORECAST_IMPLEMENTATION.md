@@ -141,3 +141,8 @@ Local deferrals schedule a bounded retry without increasing provider failure
 counts. An optional map failure preserves valid point data; a forecast failure
 does not overwrite a peer's data. Cache write failure does not erase a received
 forecast. Legacy Home storage and entity identities remain unchanged.
+
+The coordinator rejects missing/old UTC product days before map retrieval and
+checks again after map processing to cover midnight rollover. A received result
+is not a permanent freshness guarantee: future entities/cards must also check
+its product day when rendering retained coordinator data.

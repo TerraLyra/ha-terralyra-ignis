@@ -125,3 +125,27 @@ async def test_successful_map_keeps_scope_even_when_cache_write_fails(hass, monk
 def test_requires_persistent_shared_gate(hass):
     with pytest.raises(FireRiskError):
         LocationFireRiskCoordinator(hass, Mock(entry_id='entry-a'), Mock(), CONTEXT, None)
+
+
+@pytest.mark.parametrize('days', [(), (FireRiskDay(datetime.now(UTC).date() - timedelta(days=1), 1),)])
+async def test_missing_or_old_product_day_is_not_current(hass, days):
+    coordinator = make(hass)
+    coordinator.client.async_forecast = AsyncMock(return_value=replace(forecast(), days=days))
+    coordinator.client.async_map = AsyncMock()
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+    coordinator.client.async_map.assert_not_awaited()
+    assert coordinator._consecutive_failures == 1
+
+
+async def test_midnight_during_map_retrieval_does_not_publish_old_day(hass, monkeypatch):
+    coordinator = make(hass)
+    value = forecast()
+    coordinator.client.async_forecast = AsyncMock(return_value=value)
+    coordinator.client.async_map = AsyncMock(side_effect=FireRiskError('map unavailable'))
+    clock = Mock()
+    clock.now.side_effect = [value.generated_at, value.generated_at + timedelta(days=1)]
+    monkeypatch.setattr('custom_components.terralyra_ignis.location_fire_risk_coordinator.datetime', clock)
+    with pytest.raises(UpdateFailed, match='expired'):
+        await coordinator._async_update_data()
+    assert coordinator.update_interval == timedelta(minutes=15)
