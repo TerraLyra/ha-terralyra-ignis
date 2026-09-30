@@ -1,18 +1,22 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-09-29: stable integration 0.30.1, plus separately
-installed dashboard changes from PRs #75 and #76. Main-branch frontend changes
-are not a new HACS release.
+Status reconciled on 2026-09-30: stable integration 0.31.0, with separately
+updated optional dashboard resources. Main-branch changes after the release
+are not automatically part of a HACS installation.
 
 ## Delivered
 
 - Optional BM report card shipped in 0.30.0, with clearer accident labels in
   0.30.1. Display filtering preserves original reports and history. See
   [BM card](BM_REPORT_CARD.md) and [0.30.1 notes](RELEASE_0_30_1.md).
-- Optional per-location summary card (#75) is merged and separately installed
-  on the user's HA dashboard. It shows existing satellite counts and source
-  health; forecast, restrictions and nearest distance are not connected yet.
-- Report-map source visibility (#76) is merged and separately installed:
+- Optional per-location summary card (#75, #77, #80) shipped in 0.31.0. It shows
+  satellite counts, source health and the nearest active tracked incident inside
+  the selected location's radius. An explicitly verified near-home FRMv3 binding
+  shows forecast validity and receipt freshness; other locations do not gain a
+  forecast automatically. Official restrictions remain unconnected.
+- Sampled post-installation validation on 2026-09-30 confirmed the summary distance
+  matches its location sensor attribute. See [0.31.0 notes](RELEASE_0_31_0.md).
+- Report-map source visibility (#76) shipped in 0.31.0 and is separately installed:
   Canada/NIFC controls follow explicit map-switch associations. Disabled or
   unavailable sources are hidden; enabled sources with no reports remain
   selectable. See [map configuration](REPORT_DETAILS_CARD.md).
@@ -52,22 +56,19 @@ are not a new HACS release.
 | Source | Current position | Next gate |
 | --- | --- | --- |
 | NSW RFS / Queensland QFD | Existing optional report calendars | Maintain compatibility and source-specific semantics |
-| Victoria | Offline inspectors complete; user submitted access request on 2026-09-20 | Await developer terms and resolve remaining time/schema evidence before runtime work |
+| Victoria | Offline inspectors complete; product-specific terms unresolved | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
-| Tasmania TasALERT | User confirmed access request sent on 2026-09-21 | Await response, then review granted endpoints and terms |
-| Western Australia DFES | User confirmed access request sent on 2026-09-21 | Clarify dataset approval and distributed local authentication |
-| South Australia CFS | User confirmed clarification request sent on 2026-09-21 | Resolve product-specific reuse terms |
-| Northern Territory | Access preflight and enquiry draft ready | Confirm supported feed and reuse scope |
+| Tasmania TasALERT | Product-specific access unresolved | Verify supported endpoints and terms |
+| Western Australia DFES | Product-specific access unresolved | Clarify dataset approval and distributed local authentication |
+| South Australia CFS | Product-specific reuse unresolved | Resolve product-specific reuse terms |
+| Northern Territory | Access preflight complete | Confirm supported feed and reuse scope |
 
-Victoria, Tasmania, Western Australia and South Australia submissions are confirmed
-by the user; Northern Territory remains a draft. No approval is inferred from a publicly reachable endpoint.
-See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) and
-[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). The submitted requests can progress through external review in parallel;
-this is not a promised implementation order.
+See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) for product-specific technical
+and licensing gates. A publicly reachable endpoint alone does not establish reuse rights.
 
 ## Development sequence
 
-1. Start outstanding access requests early while maintaining the released integration.
+1. Resolve product-specific access gates before implementing new adapters.
 2. Investigate reproducible defects and dependency maintenance independently of
    external permissions; retain focused identity/history regression checks.
 3. After access is settled, implement the next eligible provider with verified
@@ -130,20 +131,23 @@ production installation from this assessment.
 
 The user deferred additional BM validation again after the initial return sample.
 Keep independent vegetation-fire validation open for a later session; do not
-promote the offline location candidates to production. The user confirms that
-no replies to the submitted provider enquiries have arrived yet.
+promote the offline location candidates to production. Unresolved provider access gates remain open.
 
-## Next eligible work — 2026-09-29
+## Next eligible work — 2026-09-30
 
-1. Extend the location summary only after checking explicit existing per-location
-   entity associations: first forecast validity/freshness, then nearest distance.
-   Do not infer safety, restrictions, or a location from entity-name suffixes.
-2. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
+1. The summary forecast and nearest-distance extension is complete in 0.31.0.
+   Keep its explicit location association and missing-data behavior when extending it.
+2. BM fixes from #82 are on main but are **not included in 0.31.0**: reviewed Makó
+   forms and Budapest direction context are offline location-research changes;
+   the bounded outbuilding vocabulary also changes the shared fire-scope classifier.
+   Validate and describe these separately before proposing a maintenance release.
+3. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
    be reviewed offline without downloading linked articles or changing live HA.
-3. Review provider replies when received. France/Germany enquiries were confirmed
-   sent by the user; no reply or permission has been reported. Existing offline
-   research is not production approval.
+4. Resolve the France/Germany product access and technical gates before runtime
+   integration. Existing offline research is not production approval.
+5. Per-location fire-risk provider work remains planned, not delivered by the
+   summary card. Reconcile the older [research record](FIRE_RISK_PROVIDER_RESEARCH.md)
+   and its access gates before proposing runtime changes or new provider requests.
 
 Do not restart the paused optimization work or historical-counter investigation
-merely to fill the waiting period. The summary-card extension is a development
-candidate, not a claim that forecast/distance wiring is already implemented.
+merely to fill the waiting period. Preserve user history.

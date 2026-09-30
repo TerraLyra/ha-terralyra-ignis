@@ -1,6 +1,8 @@
 # 0.31.0 — Location summary and source-aware map controls
 
-Release candidate; publication and installation are not yet complete.
+Published as stable [v0.31.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.31.0)
+on 2026-09-29 from commit `066f38264f5093e33d6a71182ee93ca88c03c905`.
+All 27 release PR checks passed before publication.
 
 ## User-visible changes
 
@@ -49,6 +51,8 @@ Feature PRs #75–77 and #80 passed their CI checks. Local frontend model and is
 Chrome tests cover identity mismatch, current versus stale values, safe text,
 unavailability and mobile layout. PR #80's HA regression verifies exact-location
 nearest-distance selection, lifecycle/radius exclusions and zero versus missing.
-Live summary/forecast/map smoke checks were performed separately; the new backend
-distance attribute still needs a post-installation check. No continuous uptime or
-complete historical equivalence is claimed. Candidate CI must pass before release.
+Live summary/forecast/map smoke checks were performed separately. On 2026-09-30,
+after HACS installation and HA restart, the summary's nearest-distance value
+matched the selected location sensor's new attribute. Source health and tracked
+incident counts were also visible. This is a sampled post-installation check,
+not evidence of continuous uptime or complete historical equivalence.

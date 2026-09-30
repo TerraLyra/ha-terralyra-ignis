@@ -1,7 +1,7 @@
 # Provider access preflight
 
-Workflow adopted at the user's request on 2026-09-18. Apply before starting a new
-provider or adding a materially different product to an existing provider.
+Apply before starting a new provider or adding a materially different product
+to an existing provider.
 
 1. Identify the exact product, operator and official access documentation. Separate
    incident points, warning areas, forecasts, imagery and derived fire detections.
@@ -12,25 +12,27 @@ provider or adding a materially different product to an existing provider.
    unknowns. A public endpoint is not a licence; unknown terms are not proof that
    permission is required. A clear applicable open licence does not need a redundant
    individual permission request.
-4. Tell the user immediately if registration, approval, advance notification or
-   clarification is needed. Include the verified contact route and prepare a request
-   before substantial adapter work. Do not send it without explicit authorization.
+4. Resolve product-specific access uncertainties before substantial adapter work.
+   Keep correspondence and outreach tracking outside the public repository.
 5. Continue independent work while external answers are pending: synthetic tests,
    offline validation and other providers with established access. Keep provider
    research separate from enabled runtime. Do not invent source semantics.
 6. Before activation, verify that the returned terms cover the intended implementation.
    No shared developer credentials in a public integration. Update this record when
    the product, licence, endpoint or intended usage changes. Never store credentials
-   or private correspondence in the public repository.
+   or private correspondence in the public repository. Outreach drafts, submission
+   dates, reply tracking and personal operational instructions belong outside
+   repository documentation; retain only implementation-relevant requirements
+   and authoritative technical/licensing evidence.
 
 ## Ahead-of-development queue — checked 2026-09-18
 
-| Product | Access / permission status | User action or next check |
+| Product | Access / permission status | Technical gate |
 | --- | --- | --- |
-| Victoria CFA-listed developer JSON | Product-specific developer conditions unresolved; offline research complete, runtime absent | [VicEmergency form](https://support.emergency.vic.gov.au/hc/en-gb/requests/new). The user confirmed submission on 2026-09-20; response and approval are pending. |
-| WA DFES-066 Incident Points | Explicit SLIP registration and dataset approval; catalogue lists CC BY 4.0 plus EmergencyWA terms | User confirmed submission on 2026-09-21; response and approval pending. Contact **statepublicinfo@dfes.wa.gov.au**. Confirm public HACS/per-user authentication eligibility, including resource-level Government Use Only labels. |
-| Tasmania TasALERT feeds | Explicit permission required; do not inherit legacy TFS feed terms | User confirmed sending the access request on 2026-09-21; response and approval pending. Contact: **info@alert.tas.gov.au**. |
-| SA CFS / ESO feeds | Original SA CKAN package reports CC BY-NC-ND 4.0; the national mirror omits the licence | User confirmed submission on 2026-09-21; response and approval pending. Clarify local HACS use and current terms before implementation; commercial use needs separate permission. See [SA review](SOUTH_AUSTRALIA_ADAPTER_READINESS.md). |
+| Victoria CFA-listed developer JSON | Product-specific developer conditions unresolved; offline research complete, runtime absent | Verify product-specific developer terms. |
+| WA DFES-066 Incident Points | Explicit SLIP registration and dataset approval; catalogue lists CC BY 4.0 plus EmergencyWA terms | Confirm public HACS/per-user authentication eligibility, including resource-level Government Use Only labels. |
+| Tasmania TasALERT feeds | Explicit permission required; do not inherit legacy TFS feed terms | Verify product-specific developer access before runtime implementation. |
+| SA CFS / ESO feeds | Original SA CKAN package reports CC BY-NC-ND 4.0; the national mirror omits the licence | Clarify local HACS use and current terms before implementation; commercial use needs separate permission. See [SA review](SOUTH_AUSTRALIA_ADAPTER_READINESS.md). |
 | NT Fire Incident Map | Website reuse conditions do not establish a product-specific developer grant | Clarify supported feed and local HACS reuse before adapter work; see [NT review](NORTHERN_TERRITORY_ADAPTER_READINESS.md). |
 | ACT Current Incidents | Explicit CC BY 4.0; no additional individual permission requirement found for that feed | Keep experimental pending timestamp evidence. CAP is a separate product. |
 | JAXA Himawari WLF | Registration; current FAQ lists qualifying data from 2026-02-01 as commercially usable; research-data policy requires advance commercial-use notification | Product/date-specific clarification with JAXA; distinguish notification from permission and older data restrictions. |
@@ -51,24 +53,19 @@ Official evidence:
   resolve the exact product/date/use before activation.
 - [NOAA/AWS Himawari registry](https://registry.opendata.aws/noaa-himawari/).
 
-See [ready-to-send WA and Tasmania requests](PROVIDER_ACCESS_REQUEST_DRAFTS.md).
-No request has been sent by the assistant; no access approval is asserted here.
 
 ## Portugal — checked 2026-09-25
 
 ANEPC's ProCiv catalogue explicitly lists CC BY 4.0, but the current viewer and
 legacy resource link differ. Verify the current supported endpoint and licence
 mapping before implementation; no individual permission requirement is asserted.
-Official evidence, open questions and an unsent enquiry draft are recorded in
+Official evidence and open technical questions are recorded in
 [Portugal preflight](PORTUGAL_ACCESS_PREFLIGHT.md).
 
-2026-09-25 update: the user confirmed sending the Portugal enquiry; response
-pending. [Brazil INPE preflight](BRAZIL_ACCESS_PREFLIGHT.md) identifies satellite
+[Brazil INPE preflight](BRAZIL_ACCESS_PREFLIGHT.md) identifies satellite
 product overlap and BIG commercial-authorization wording; product-specific
 applicability to Queimadas exports remains to be clarified before runtime work.
 
-2026-09-25: user confirmed sending the Brazil INPE enquiry as well. Both Portugal
-and Brazil now await replies; neither submission constitutes approval.
 
 ## Spain — Castilla y León, checked 2026-09-25
 
@@ -78,12 +75,10 @@ no general individual permission requirement was identified. Incident identity,
 coordinate meaning, timestamp semantics and stable snapshot retrieval remain
 open before runtime work. See [Spain research](SPAIN_ACCESS_PREFLIGHT.md).
 
-2026-09-25: user confirmed sending the Castilla y León technical enquiry via
-the official contact form. Reply pending; do not send a duplicate.
 
 ## France and Germany — initial triage, 2026-09-25
 
-User authorized research of both countries. Separate incident reports, public
+Separate incident reports, public
 warnings, historical statistics and forecast danger indices. No runtime work.
 
 France: BDIFF is the official national historical incident database. Current
@@ -100,7 +95,7 @@ Germany: BBK MoWaS/NINA is a candidate for official large-fire/smoke warnings,
 not a complete inventory of fires. BBK explicitly requires a multiplier agreement
 for direct MoWaS connection. Whether this applies to local consumption of public
 RSS/API must be established separately; do not infer either permission or a
-blanket prohibition from the direct-connection rule. No enquiry sent yet.
+blanket prohibition from the direct-connection rule.
 https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warnung-in-Deutschland/Warnmultiplikatoren/warnmultiplikatoren_node.html
 https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warnung-in-Deutschland/MoWaS/mowas_node.html
 DWD WBI is a separate fire-danger forecast candidate, not incident evidence.
@@ -146,7 +141,7 @@ these warning feeds from BBK's institutional news RSS. Public feed consumption
 is not automatically the same as a direct MoWaS multiplier connection.
 Next: verify supported public RSS/API access, polling and regional warning reuse
 with the documented NINA contact nina@bbk.bund.de if not resolved in published
-terms. No German or French enquiry has been sent or confirmed by the user.
+terms.
 https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warn-App-NINA/warn-app-nina_node.html
 
 Priority remains Germany official warning feeds; France needs an operational
@@ -176,7 +171,7 @@ Next: find a supported bounded feed or pagination and validate individual alert
 status, updates/cancellations, exercise markers, dates with offsets and warning
 area geometry. A warning area must not be rendered as a precise ignition point.
 Avoid polling the full multi-megabyte archive in each user's installation.
-No FR-Alert enquiry sent; no provider enabled.
+No FR-Alert provider is enabled.
 
 Germany follow-up: official BBK pages continue to advertise per-location RSS,
 but no publisher API contract/polling policy was found in this bounded search.
@@ -185,15 +180,7 @@ Public website entry and help route require JavaScript; this is not an access
 denial or evidence that API access is prohibited. Supported access and Länder/
 municipal warning reuse remain questions for nina@bbk.bund.de.
 
-2026-09-28: user confirmed submitting the FR-Alert technical enquiry via the
-official contact form. Await reply; do not duplicate the request. See
-[France research](FRANCE_ACCESS_PREFLIGHT.md).
-
 2026-09-28: Germany review identified existing core NINA integration and its
 detail action. Assess IGNIS-specific report presentation before duplicating
-retrieval. Publisher clarification remains unsent. See
+retrieval. Supported access remains unverified. See
 [Germany preflight](GERMANY_ACCESS_PREFLIGHT.md).
-
-2026-09-28: user confirmed the German BBK/NINA enquiry has been sent. No replies
-have arrived to any provider enquiries according to the user's latest update.
-All pending technical/access questions remain open; submission is not approval.

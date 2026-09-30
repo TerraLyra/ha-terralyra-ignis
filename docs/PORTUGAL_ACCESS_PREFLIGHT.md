@@ -1,6 +1,6 @@
 # Portugal ANEPC access preflight — 2026-09-25
 
-Status: research only; no runtime provider or HA change. No enquiry sent.
+Status: research only; no runtime provider or HA change.
 
 ## Verified official evidence
 
@@ -37,32 +37,6 @@ and precision, timestamp meanings and explicit timezone/DST semantics, paging
 or truncation indicators, and disappearance/closure rules. Keep update times
 separate from incident onset and do not infer burned area from point geometry.
 
-## Draft enquiry (not sent)
-
-Subject: ANEPC incident data — supported endpoint and reuse documentation
-
-Hello ANEPC team,
-
-We are developing TerraLyra IGNIS, an open-source Home Assistant integration.
-The official dados.gov.pt catalogue lists “ProCiv - Ocorrências em aberto” under
-CC BY 4.0, while your current website links to a newer incident map.
-
-Could you direct us to the supported machine-readable endpoint for this product
-and confirm whether the catalogue licence applies to its current data? Our
-proposed use is local retrieval on users' Home Assistant installations, filtering
-rural/vegetation fire reports around selected locations and displaying attributed
-reports separately from satellite detections. We would not imply endorsement
-or replace official warnings.
-
-Please provide any access/registration requirements, polling limits, caching and
-retention guidance, and the recommended attribution. A data dictionary covering
-incident identifiers, category codes, coordinates, timestamps/timezones, coverage
-and the meaning of removal from the feed would also help us avoid incorrect
-interpretation. Please forward this enquiry to the appropriate data team if needed.
-
-Thank you,
-Janos Bali
-TerraLyra
 
 ## Deeper licence verification — 2026-09-25
 
@@ -100,7 +74,7 @@ permission requirement was found for material actually covered by that grant.
 An empty current-item licence neither revokes the catalogue grant nor proves
 that it covers a different current service. The unresolved question is the
 licence/product linkage and supported access, not a proven requirement to ask
-permission for all ANEPC data. Limit the draft enquiry to those concrete gaps.
+permission for all ANEPC data. These concrete gaps remain implementation gates.
 
 ## Further provenance tracing — 2026-09-25
 
@@ -126,8 +100,8 @@ returned thread. User comments are not authoritative licence evidence. No
 migration statement was found there linking the two old APIs to the current
 ArcGIS service.
 
-The draft enquiry can now identify Ocorrencias_Base precisely and ask whether
-it is the supported successor covered by the catalogue CC BY 4.0 licence, or
+The remaining scope check must establish whether Ocorrencias_Base
+is the supported successor covered by the catalogue CC BY 4.0 licence, or
 whether ANEPC recommends another endpoint. This narrows the unresolved question;
 it is not evidence of a general individual-permission requirement.
 
@@ -148,11 +122,6 @@ https://mosaico.gov.pt/areas-tecnicas/dados-abertos independently presents the
 ANEPC incident dashboard as an open-data reuse example. This supports official
 open-data intent but is not a service-specific licence or API contract.
 
-The enquiry should explicitly ask how the dataset's CC BY 4.0 grant relates to
+The unresolved scope question is how the dataset's CC BY 4.0 grant relates to
 the website's non-profit-purpose wording for the current Ocorrencias_Base data.
 Keep local HACS use and any future commercial Cloud use separate in the answer.
-
-## Submission status
-
-2026-09-25: user confirmed sending the ANEPC clarification enquiry. Awaiting
-response; no approval or supported endpoint is inferred from submission.

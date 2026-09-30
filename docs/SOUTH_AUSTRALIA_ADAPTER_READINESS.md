@@ -39,21 +39,10 @@ with CFS and request a separate grant for any commercial service or other use be
 the licence. Open-source code does not automatically make every downstream use
 non-commercial.
 
-Notify the user before substantial adapter work; this was done on 2026-09-18. No
-credentials, registration or approval were obtained. No provider-specific runtime,
-raw feed fixture, event transformation or polling was added. The existing HA and
-history are unaffected. A clarification request is prepared in
-[provider request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md).
+No provider-specific runtime adapter is implemented.
 
-## Contact and questions
+## Remaining implementation gates
 
-Use the official national dataset page's **Ask a question about this dataset** form,
-which states it sends the question to the publisher. The older catalogue also names
-an individual contact, but the form is preferable to assuming that person's current
-role. No form was submitted by the assistant.
-
-Ask whether CC BY-NC-ND 4.0 is current for each RSS/JSON/CAP product; whether local
-attributed HACS filtering/display/caching is covered; applicable request limits,
-retention and disclaimers; permitted commercial use; and which CAP endpoint is the
-supported product. After terms are settled, obtain schema, IDs, source-time semantics,
-planned-burn distinctions and completeness/geometry evidence before implementation.
+Verify current product-specific reuse scope, request limits, retention and the
+supported CAP endpoint. Then validate schema, IDs, source-time semantics,
+planned-burn distinctions and completeness/geometry before implementation.
