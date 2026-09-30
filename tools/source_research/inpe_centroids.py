@@ -9,6 +9,7 @@ import math
 
 MAX_BYTES = 8 * 1024 * 1024
 MAX_RECORDS = 20_000
+STATES = frozenset("AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split())
 
 
 class InvalidCentroids(ValueError):
@@ -26,6 +27,7 @@ class Centroid:
     duration_days: float | None
     state: str
     municipality: str
+    states: tuple[str, ...] = ()
     observed_at: None = None
     provisional: bool = True
 
@@ -70,7 +72,9 @@ def _string(value):
     return value
 
 
-def parse_centroids(payload: bytes) -> tuple[Centroid, ...]:
+def parse_centroids(payload: bytes, *, requested_state=None) -> tuple[Centroid, ...]:
+    if requested_state is not None and (not isinstance(requested_state, str) or requested_state not in STATES):
+        raise InvalidCentroids("Invalid requested state")
     if not isinstance(payload, bytes) or not 0 < len(payload) <= MAX_BYTES:
         raise InvalidCentroids('Payload size/type')
     try:
@@ -103,11 +107,19 @@ def parse_centroids(payload: bytes) -> tuple[Centroid, ...]:
         if type(identifier) is not int or not 0 < identifier < 2**63 or identifier in ids:
             raise InvalidCentroids('Invalid or duplicate event ID')
         ids.add(identifier)
+        states = props.get('estados', [])
+        if (not isinstance(states, list) or len(states) > len(STATES)
+                or any(not isinstance(v, str) or v not in STATES for v in states)
+                or len(set(states)) != len(states)):
+            raise InvalidCentroids('Invalid state membership')
+        if requested_state is not None and requested_state not in states:
+            raise InvalidCentroids('Response does not confirm requested state')
         records.append(Centroid(identifier, lon, lat,
                                 _string(props.get('tipo')), _string(props.get('status')),
                                 _optional_positive(props.get('area_ha')),
                                 _optional_positive(props.get('duracao_dias')),
-                                _string(props.get('estado')), _string(props.get('municipio'))))
+                                _string(props.get('estado')), _string(props.get('municipio')),
+                                tuple(sorted(states))))
     return tuple(records)
 
 

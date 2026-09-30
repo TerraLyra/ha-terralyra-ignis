@@ -111,3 +111,37 @@ Before production, establish list selection/completeness, pagination or record
 caps, update/publication metadata, exact timestamp timezone, ID reuse/merge
 semantics and suitable external-client request frequency. These are technical
 source-contract requirements, independent of the confirmed data reuse licence.
+
+## State-scoped follow-up
+
+Further inspection resolves the sampled KML discrepancy: the full
+`/queimadas/portal/api/eventos/mapa/eventos` response contained 17,102 unique
+records, with exactly the same 3,732 active/new-front IDs as the active KML.
+The remaining 13,370 were labelled Observação. The smaller national centroid
+list is therefore not interchangeable with the full event inventory.
+
+The official `pages/evento-fogo/js/centroides.js` uses `?uf=AC`-style requests.
+Two state-scoped samples matched the full map's `estados` membership exactly:
+Acre 1,694 records (763,043 bytes), Minas Gerais 1,560 (677,271 bytes).
+For both states, the intersection with the smaller national centroid list was
+exactly the subset with nonempty `regioes`. All 6,411 national centroid records
+had this regional association. This strongly supports a scope filter, not random
+loss; it does not prove server implementation or future completeness.
+
+`inpe_snapshot.py` collects up to three explicitly selected states in a research
+cycle, requiring returned `estados` membership. Identical cross-state duplicates
+are retained once; conflicting duplicates or a failed request abort the cycle.
+This research bound is not an INPE quota. The cycle has no scheduled polling,
+persistence or HA activation. A parsed response never becomes a completeness
+claim. Retrieval time is kept separate from unknown observation time.
+
+The plain-data report includes INPE attribution, the product source link,
+CC BY-SA 4.0, transformations and provisional status. It preserves raw categories
+and statuses; Observação is not relabelled controlled/extinguished. Coordinates
+remain representative points, and areas remain provider estimates.
+
+The [methodological paper](https://doi.org/10.3390/rs18040606) establishes UTC
+processing days, event date spans and a distinct fusion lifecycle. The exact
+unqualified API timestamp representation, public successor linkage and external
+client frequency remain unverified. No merge lineage is invented and no history
+is deleted. Future display may omit unresolved clock times and preserve dates.
