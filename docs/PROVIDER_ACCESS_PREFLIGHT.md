@@ -63,8 +63,9 @@ Official evidence and open technical questions are recorded in
 [Portugal preflight](PORTUGAL_ACCESS_PREFLIGHT.md).
 
 [Brazil INPE preflight](BRAZIL_ACCESS_PREFLIGHT.md) identifies satellite
-product overlap and BIG commercial-authorization wording; product-specific
-applicability to Queimadas exports remains to be clarified before runtime work.
+product overlap and Queimadas-specific CC BY-SA 4.0 requirements. Offline event
+inspection is implemented; time semantics, identity and retrieval limits remain
+runtime gates. This licence does not extend to every dataset hosted by INPE.
 
 
 ## Spain — Castilla y León, checked 2026-09-25

@@ -1,6 +1,6 @@
-# Brazil INPE Queimadas preflight — 2026-09-25
+# Brazil INPE Queimadas preflight — 2026-09-30
 
-Research only. No data adapter, account, download polling or production change.
+Offline event inspection implemented. No HA provider, account or scheduled polling.
 
 ## Product distinction
 
@@ -17,27 +17,26 @@ observations and preserve provenance; a second distributor does not constitute
 independent confirmation of a fire. Derived event area and spread estimates
 must remain provider estimates, not verified boundaries.
 
-## Access and reuse gates
+## Product licence and implementation requirements
 
-https://data.inpe.br/queimadas/faq/ describes free access and citation guidance.
-Free access alone does not establish unrestricted commercial reuse.
-https://data.inpe.br/dados/termo-de-uso-e-politica-de-privacidade/
-(BIG terms, updated 2025-08-29) requires registration for its services and
-prior express INPE authorization for commercial/economic platform use. It
-requires source citation and identifies data.suporte@inpe.br as support.
-The exact application of BIG registration and terms to anonymously published
-Queimadas CSV/KML and event exports remains unverified; do not impose it as
-an established product-specific requirement or infer an exemption.
+Queimadas program data are subject to **CC BY-SA 4.0**. This scope is specific
+to Queimadas; it is not a licence for all material hosted by BIG/INPE, Copernicus
+imagery or Brazil Data Cube products. Do not transfer TerraBrasilis AMS's
+separate CC BY-NC-SA wording to this product.
 
-The TerraBrasilis AMS page has its own CC BY-NC-SA 4.0 wording; that separate
-product licence must not be transferred to all INPE Queimadas products.
+Implementation must retain INPE / Programa Queimadas attribution, a source link,
+the [licence link](https://creativecommons.org/licenses/by-sa/4.0/) and notices
+of transformations. Publicly shared adaptations must satisfy ShareAlike,
+including applicable database rights. Processing software does not automatically
+inherit the data licence. Keep original provenance when combining observations
+from other distributors. A public data licence does not establish request quotas
+or guarantee availability of an endpoint.
 
-## Next step
+## Remaining runtime requirements
 
-Clarify the precise Queimadas product terms and supported distribution route
-with BIG support before substantial adapter work. Separate local public HACS
-retrieval from future commercial Cloud use. Obtain polling guidance, permitted
-caching/redistribution and attribution.
+Verify the exact export scope, stable event identity across snapshots, source
+timezone, collection transitions and supported polling/caching behaviour.
+Do not infer extinguishment from disappearance or from the observation collection.
 
 ## Scope decision — 2026-09-25
 
@@ -47,6 +46,28 @@ value: provider-estimated area, event duration and active-front context. This is
 a design assessment, not measured improvement. The provisional maturity and
 mixed publication/observation time semantics must remain visible to users.
 
-No product-specific licence resolving the BIG terms was identified in the
-Queimadas FAQ/download documentation reviewed. Papers' CC BY licences do not
-license their underlying datasets. Do not transfer another INPE product's terms.
+
+## Offline KML event inspection
+
+`tools/source_research/inpe_events.py` reads supplied UTF-8 KML with byte, node,
+depth and event limits. It rejects entity declarations, network-linked feeds,
+duplicate event identifiers, malformed coordinates and unsupported empty feeds.
+It follows no embedded image/style links and renders no upstream HTML.
+
+One record is emitted per event folder using its direct representative point.
+Nested front/detection points are not additional events. Polygon presence is
+recorded only; the inspector neither validates polygon boundaries nor treats the
+representative point as a measured fire perimeter. Descriptions and provider
+categories are retained verbatim; timestamps remain unresolved, with no invented
+UTC conversion. Cross-snapshot ID stability is not established.
+
+A 2026-09-30 sample from the official download page's active-event endpoint
+contained 27,703,171 bytes and 3,732 unique event folders, each with a representative
+point and polygon. Categories: 1,613 Nova Queima Isolada, 735 Possível início de
+incêndio, 1,065 Incêndio, 319 Atividades Antrópicas. These are sampled provider
+classifications, not field-confirmed incident status or current counts.
+
+The observation directory advertised a 43 MB KML, exceeding the initial 32 MiB
+inspection limit. It was not downloaded. An efficient distribution strategy and
+measured resource limits are needed before enabling periodic HA retrieval.
+No source snapshots are bundled in the repository; tests use synthetic records.
