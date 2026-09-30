@@ -71,3 +71,43 @@ The observation directory advertised a 43 MB KML, exceeding the initial 32 MiB
 inspection limit. It was not downloaded. An efficient distribution strategy and
 measured resource limits are needed before enabling periodic HA retrieval.
 No source snapshots are bundled in the repository; tests use synthetic records.
+
+## Viewer JSON route and unresolved completeness
+
+The official event page imports `pages/evento-fogo/js/config.js` under
+`/queimadas/evento-fogo/`. It identifies
+`https://data.inpe.br/queimadas/portal/api/eventos/centroides` as the representative
+point endpoint; `mapa-eventos.js` loads details through `eventos/{id}` below the
+same API base. Discovery in viewer code is not a third-party stability guarantee.
+
+`inpe_centroids.py` validates the bounded GeoJSON envelope, unique integer IDs,
+finite point coordinates and optional nonnegative area/duration fields. It
+retains original category/status labels and unknown future labels, rejects
+unsupported paging/CRS and empty inventories, and does not infer observation
+or publication times. `inpe_fetch.py` is a one-shot explicit research request:
+fixed HTTPS endpoint, no custom coordinates, redirects or retries, 8 MiB bound,
+30-second socket timeout (not an absolute wall-clock deadline). No scheduler,
+cache replacement, history reconciliation or HA entity activation is provided.
+
+A 2026-09-30 sample contained 6,411 records in 2,925,140 bytes. Provider status
+counts were 5,120 Observação, 555 Ativo and 736 Nova frente isolada. The official
+formatter displays Nova frente isolada as Ativo; the inspector preserves the raw
+label. Observação must not be translated as extinguished or controlled.
+
+Comparison with the earlier KML sample found 1,291 shared IDs, no category
+mismatches among them, 2,441 KML-only IDs and 5,120 API-only IDs (all Observação).
+Different retrieval/publication times mean this is not proof of an upstream
+bug. However, a sampled KML-only record remained directly queryable through the
+detail endpoint with Nova frente isolada status. Thus the smaller list cannot
+yet be assumed to be a complete replacement for the active KML export.
+
+Detail date fields `data_min` and `data_max` are calendar-date strings;
+`data_ultimo_foco` is a timestamp without an explicit offset. The methodological
+paper discusses UTC processing days, but this does not alone establish the
+serialization contract of these specific API fields. HTTP Date is a response
+time, not observation time. Do not infer extinction from `data_max`.
+
+Before production, establish list selection/completeness, pagination or record
+caps, update/publication metadata, exact timestamp timezone, ID reuse/merge
+semantics and suitable external-client request frequency. These are technical
+source-contract requirements, independent of the confirmed data reuse licence.
