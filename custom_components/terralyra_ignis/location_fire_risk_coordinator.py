@@ -17,7 +17,7 @@ from .fire_risk_cache import import_scoped_map_cache
 from .fire_risk_context import FireRiskRequestContext
 from .fire_risk_coordinator import _retry_interval, _staggered_interval
 from .fire_risk_coverage import FIRE_RISK_PROVIDER_LSA_SAF
-from .fire_risk_request_state import PersistentForecastRequestGate
+from .fire_risk_request_state import ForecastStateError, PersistentForecastRequestGate
 from .fire_risk_requests import ForecastRequestDeferred
 from .products.fire_risk import (
     EUROPE_BOUNDS, PRODUCT_ID, FireRiskClient, FireRiskError, FireRiskForecast,
@@ -114,6 +114,9 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
         except ForecastRequestDeferred as err:
             self._defer(err)
             raise UpdateFailed("Location forecast is waiting for provider cooldown") from err
+        except ForecastStateError as err:
+            self.update_interval = _retry_interval(1)
+            raise UpdateFailed("Forecast request state is unavailable") from err
         except FireRiskError as err:
             self._consecutive_failures += 1
             self.update_interval = _retry_interval(self._consecutive_failures, error=err)

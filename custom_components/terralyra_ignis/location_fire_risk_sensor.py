@@ -21,7 +21,7 @@ class LocationFireRiskSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, entry, coordinator, location_name):
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_location_fire_risk_{coordinator.context.location_id}"
-        self._attr_translation_placeholders = {"location": location_name}
+        self._attr_translation_placeholders = {"location_name": location_name}
         self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})
         self._cancel_midnight = None
 

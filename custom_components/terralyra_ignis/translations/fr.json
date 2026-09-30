@@ -132,7 +132,7 @@
           "edit_location": "Modifier un lieu",
           "toggle_location": "Activer ou désactiver un lieu",
           "delete_location": "Supprimer un lieu",
-          "location_forecast": "Location fire-risk forecast"
+          "location_forecast": "Prévision du risque d’incendie par lieu"
         }
       },
       "add_location": {
@@ -169,12 +169,12 @@
         }
       },
       "location_forecast": {
-        "title": "Location fire-risk forecast",
-        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "title": "Prévision du risque d’incendie par lieu",
+        "description": "Choisissez un lieu, activez la prévision et indiquez un rayon indépendant de la surveillance satellite. Seuls les lieux activés dans la couverture européenne FRMv3 sont disponibles.",
         "data": {
-          "location_id": "Location",
-          "enabled": "Enable forecast",
-          "radius_km": "Forecast radius (km)"
+          "location_id": "Lieu",
+          "enabled": "Activer la prévision",
+          "radius_km": "Rayon de prévision (km)"
         }
       }
     },
@@ -186,8 +186,8 @@
       "invalid_monitored_location": "Saisissez un nom, des coordonnées et un rayon valides",
       "one_location_required": "Au moins un lieu surveillé doit rester activé",
       "too_many_locations": "Un maximum de 10 lieux surveillés est pris en charge",
-      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
-      "invalid_forecast_settings": "Invalid forecast settings."
+      "forecast_not_eligible": "Le lieu est désactivé ou hors de la couverture FRMv3.",
+      "invalid_forecast_settings": "Paramètres de prévision non valides."
     }
   },
   "issues": {
@@ -416,7 +416,7 @@
         }
       },
       "location_fire_risk": {
-        "name": "{location} fire-risk forecast",
+        "name": "Lieu : {location_name} — prévision du risque d’incendie",
         "state": {
           "low": "Faible",
           "moderate": "Modéré",

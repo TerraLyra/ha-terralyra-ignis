@@ -132,7 +132,7 @@
           "edit_location": "Ort bearbeiten",
           "toggle_location": "Ort aktivieren oder deaktivieren",
           "delete_location": "Ort löschen",
-          "location_forecast": "Location fire-risk forecast"
+          "location_forecast": "Waldbrandrisikoprognose für einen Standort"
         }
       },
       "add_location": {
@@ -169,12 +169,12 @@
         }
       },
       "location_forecast": {
-        "title": "Location fire-risk forecast",
-        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "title": "Waldbrandrisikoprognose für einen Standort",
+        "description": "Standort auswählen, die Prognose ausdrücklich aktivieren und einen eigenen Prognoseradius angeben. Nur aktivierte Standorte innerhalb der europäischen FRMv3-Abdeckung sind verfügbar.",
         "data": {
-          "location_id": "Location",
-          "enabled": "Enable forecast",
-          "radius_km": "Forecast radius (km)"
+          "location_id": "Standort",
+          "enabled": "Prognose aktivieren",
+          "radius_km": "Prognoseradius (km)"
         }
       }
     },
@@ -186,8 +186,8 @@
       "invalid_monitored_location": "Gültigen Namen, Koordinaten und Radius eingeben",
       "one_location_required": "Mindestens ein überwachter Ort muss aktiviert bleiben",
       "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt",
-      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
-      "invalid_forecast_settings": "Invalid forecast settings."
+      "forecast_not_eligible": "Der Standort ist deaktiviert oder liegt außerhalb der FRMv3-Abdeckung.",
+      "invalid_forecast_settings": "Ungültige Prognoseeinstellungen."
     }
   },
   "issues": {
@@ -416,7 +416,7 @@
         }
       },
       "location_fire_risk": {
-        "name": "{location} fire-risk forecast",
+        "name": "Ort: {location_name} — Brandrisikoprognose",
         "state": {
           "low": "Niedrig",
           "moderate": "Mäßig",

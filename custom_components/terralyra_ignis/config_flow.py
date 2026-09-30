@@ -684,7 +684,9 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     vol.Required(CONF_LOCATION_ID): SelectSelector(
                         SelectSelectorConfig(
                             options=[
-                                {"value": item.id, "label": item.name}
+                                {"value": item.id, "label": item.name if sum(
+                                    other.name == item.name for other in locations) == 1
+                                    else f"{item.name} ({item.id[-6:]})"}
                                 for item in locations
                             ]
                         )

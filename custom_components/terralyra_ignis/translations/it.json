@@ -132,7 +132,7 @@
           "edit_location": "Modifica località",
           "toggle_location": "Attiva o disattiva località",
           "delete_location": "Elimina località",
-          "location_forecast": "Location fire-risk forecast"
+          "location_forecast": "Previsione del rischio incendio per località"
         }
       },
       "add_location": {
@@ -169,12 +169,12 @@
         }
       },
       "location_forecast": {
-        "title": "Location fire-risk forecast",
-        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "title": "Previsione del rischio incendio per località",
+        "description": "Seleziona una località, attiva la previsione e inserisci un raggio indipendente dal monitoraggio satellitare. Sono disponibili solo località abilitate nella copertura europea FRMv3.",
         "data": {
-          "location_id": "Location",
-          "enabled": "Enable forecast",
-          "radius_km": "Forecast radius (km)"
+          "location_id": "Località",
+          "enabled": "Abilita previsione",
+          "radius_km": "Raggio della previsione (km)"
         }
       }
     },
@@ -186,8 +186,8 @@
       "invalid_monitored_location": "Inserisci nome, coordinate e raggio validi",
       "one_location_required": "Almeno una località monitorata deve rimanere attiva",
       "too_many_locations": "Sono supportate al massimo 10 località monitorate",
-      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
-      "invalid_forecast_settings": "Invalid forecast settings."
+      "forecast_not_eligible": "La località è disabilitata o fuori dalla copertura FRMv3.",
+      "invalid_forecast_settings": "Impostazioni della previsione non valide."
     }
   },
   "issues": {
@@ -416,7 +416,7 @@
         }
       },
       "location_fire_risk": {
-        "name": "{location} fire-risk forecast",
+        "name": "Località: {location_name} — previsione del rischio incendio",
         "state": {
           "low": "Basso",
           "moderate": "Moderato",

@@ -42,6 +42,7 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
     def __init__(
         self, hass: HomeAssistant, entry: ConfigEntry, client: FireRiskClient
     ) -> None:
+        self._cache_restored = False
         self.entry = entry
         self.client = client
         self._map_store = Store(
@@ -61,9 +62,12 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
 
     async def _async_setup(self) -> None:
         """Restore a recent bounded map for outage fallback after HA restart."""
+        if self._cache_restored:
+            return
         importer = getattr(self.client, "import_map_cache", None)
         if importer is not None:
             importer(await self._map_store.async_load())
+        self._cache_restored = True
 
     def _home_request_context(self) -> FireRiskRequestContext:
         """Snapshot the legacy Home inputs on each refresh, preserving fallback."""
@@ -84,6 +88,11 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
 
     async def _async_update_data(self) -> FireRiskForecast:
         try:
+            try:
+                await self._async_setup()
+            except OSError as err:
+                self.update_interval = FIRE_RISK_RETRY_BASE
+                raise UpdateFailed("Home forecast cache could not be restored") from err
             context = self._home_request_context()
             latitude, longitude, radius = (
                 context.latitude, context.longitude, context.radius_km

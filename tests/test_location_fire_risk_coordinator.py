@@ -202,3 +202,13 @@ async def test_shutdown_cancels_ongoing_request(hass):
     assert not coordinator._active_updates
     await coordinator.async_refresh()
     coordinator.client.async_forecast.assert_awaited_once()
+
+
+async def test_local_storage_failure_does_not_count_as_upstream_failure(hass):
+    from custom_components.terralyra_ignis.fire_risk_request_state import ForecastStateError
+    coordinator = make(hass)
+    coordinator.client.async_forecast = AsyncMock(side_effect=ForecastStateError('storage'))
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+    assert coordinator._consecutive_failures == 0
+    assert coordinator.update_interval == timedelta(minutes=15)

@@ -416,7 +416,7 @@
         }
       },
       "location_fire_risk": {
-        "name": "{location} fire-risk forecast",
+        "name": "Location: {location_name} — fire-risk forecast",
         "state": {
           "low": "Low",
           "moderate": "Moderate",

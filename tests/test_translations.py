@@ -47,6 +47,7 @@ LOCATION_ENTITY_PREFIXES = {
     "it": "Località: {location_name} — ",
 }
 LOCATION_ENTITY_KEYS = {
+    "location_fire_risk",
     "monitored_location_sources",
     "monitored_location_status",
     "monitored_location_observation",

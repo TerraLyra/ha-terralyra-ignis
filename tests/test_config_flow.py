@@ -1232,6 +1232,7 @@ async def _start_location_forecast(hass, entry):
 
 
 async def test_location_forecast_opt_in_and_existing_radius(hass):
+    hass.config.latitude, hass.config.longitude = 47.5, 19.0
     from custom_components.terralyra_ignis.fire_risk_planning import CONF_LOCATION_FORECASTS
     entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
         options={CONF_MONITORED_LOCATIONS: [_stored_location()], CONF_FIRE_RISK_RADIUS_KM: 100})
@@ -1274,3 +1275,15 @@ async def test_deleting_location_removes_only_its_forecast_options(hass):
     result = await hass.config_entries.options.async_configure(result['flow_id'], {'next_step_id': 'delete_location'})
     result = await hass.config_entries.options.async_configure(result['flow_id'], {'location_id': 'cabin'})
     assert [item['location_id'] for item in result['data'][CONF_LOCATION_FORECASTS]] == ['home']
+
+
+async def test_main_options_preserve_location_forecasts(hass):
+    from custom_components.terralyra_ignis.fire_risk_planning import CONF_LOCATION_FORECASTS
+    settings = [{'location_id': 'home', 'enabled': True, 'radius_km': 45}]
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location()], CONF_LOCATION_FORECASTS: settings})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], _default_options_input())
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data'][CONF_LOCATION_FORECASTS] == settings
