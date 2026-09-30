@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.32.0
+
+- Add explicitly enabled per-location FRMv3 forecasts with independent radii and current-day sensors.
+- Support verified location, coordinate and radius bindings in the optional summary card.
+- Share persistent request pacing across Home and location forecasts; stagger startup and cancel work on unload.
+- Restore legacy Home map cache before background retrieval. Preserve existing Home IDs, normal polling interval and user history.
+- Improve offline BM settlement/responder recognition for Söjtör, Pacsa, Tiszaföldvár and Kunszentmárton.
+
+See [release notes](docs/RELEASE_0_32_0.md).
+
 ## 0.31.0
 
 - Add an optional location summary card with satellite incident counts, source health, explicitly bound near-home forecast and current per-location nearest incident distance.
