@@ -95,3 +95,11 @@ Ten additional locations plus legacy Home could therefore produce 209 requests
 in one uncached successful refresh cycle. Runtime expansion must introduce shared
 bounded scheduling/backoff and explicit opt-in before creating those coordinators.
 No additional polling is enabled by the pure planner or these tests.
+
+A shared opt-in request gate now serializes operations and spaces them by at least
+one second after completion. Rate-limit or transient service errors pause peers
+for the bounded 15–60 minute retry period without retrying the failed operation
+inside the gate. This is a local policy, not an upstream quota. It is not wired
+into existing Home retrieval. Runtime orchestration must accommodate waiting
+outside coordinator update timeouts and preserve cooldown state over restarts
+before this gate is used for additional locations.
