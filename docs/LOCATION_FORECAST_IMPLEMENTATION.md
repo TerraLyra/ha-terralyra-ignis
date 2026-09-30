@@ -124,3 +124,25 @@ The runtime owner must create exactly one gate and installation-wide FRMv3 store
 share it across entries and clients, and schedule local deferrals appropriately.
 That owner, config flow and additional coordinators are still pending. These
 classes alone neither create storage nor increase live request volume.
+
+### Isolated location coordinator
+
+`LocationFireRiskCoordinator` now owns an immutable FRMv3 context and a separate
+client/map cache. Its storage key includes config entry and exact context hash;
+changing coordinates/radius cannot import old geometry. Its returned value keeps
+the requested context separate from the sampled forecast pixel. It never reads
+HA Home coordinates and never raises the legacy Home repair issue.
+
+Construction requires a persistent shared gate and supported FRMv3 centre. The
+runtime owner must still supply an explicitly enabled plan, share the gate,
+stagger startup, and unload/replace coordinators when location settings change.
+No coordinator is constructed by integration setup yet; no new entity exists.
+Local deferrals schedule a bounded retry without increasing provider failure
+counts. An optional map failure preserves valid point data; a forecast failure
+does not overwrite a peer's data. Cache write failure does not erase a received
+forecast. Legacy Home storage and entity identities remain unchanged.
+
+The coordinator rejects missing/old UTC product days before map retrieval and
+checks again after map processing to cover midnight rollover. A received result
+is not a permanent freshness guarantee: future entities/cards must also check
+its product day when rendering retained coordinator data.
