@@ -10,6 +10,11 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # Reviewed RSS 92424/92425; event and responder inflections.
+    'Söjtör': ('Söjtörön', 'söjtöri'),
+    'Pacsa': ('pacsai',),
+    'Tiszaföldvár': ('Tiszaföldváron', 'tiszaföldvári'),
+    'Kunszentmárton': ('kunszentmártoni',),
     # Reviewed RSS 92320 and 92341; exact observed inflections only.
     'Dunaújváros': ('Dunaújvárosban',),
     'Pálfa': ('Pálfán',),
