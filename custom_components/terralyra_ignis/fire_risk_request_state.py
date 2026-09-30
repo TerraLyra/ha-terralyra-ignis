@@ -30,8 +30,8 @@ class ForecastStateError(FireRiskError):
 class PersistentForecastRequestGate(ForecastRequestGate):
     """Recover once and durably save cooldown before releasing queued peers.
 
-    Share one instance and store across entries/locations for FRMv3. This class
-    is not instantiated by integration setup yet. It never deletes storage.
+    Share one instance and store across entries/locations for FRMv3.
+    It never deletes storage.
     Failed writes remain dirty and must succeed before further network traffic.
     """
 
@@ -95,3 +95,15 @@ class PersistentForecastRequestGate(ForecastRequestGate):
                 if self._cooldown_until != self._saved_deadline:
                     self._dirty = True
                     await self._save()
+
+
+def get_forecast_request_gate(hass) -> PersistentForecastRequestGate:
+    """One provider-wide gate/store, shared by Home and all location clients."""
+    from homeassistant.helpers.storage import Store
+    from .const import DOMAIN
+
+    owners = hass.data.setdefault(DOMAIN, {})
+    if "frmv3_request_gate" not in owners:
+        owners["frmv3_request_gate"] = PersistentForecastRequestGate(
+            Store(hass, 1, f"{DOMAIN}.frmv3_request_cooldown"))
+    return owners["frmv3_request_gate"]

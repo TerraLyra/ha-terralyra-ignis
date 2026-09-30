@@ -20,6 +20,12 @@ from homeassistant.helpers.selector import (
     TextSelectorType,
 )
 
+from .fire_risk_planning import (
+    CONF_LOCATION_FORECASTS, LocationForecastSettings, decode_forecast_settings,
+    plan_location_forecasts,
+)
+from .products.fire_risk import FireRiskError
+
 from .api import LsaSafAuthError, LsaSafError
 from .const import (
     CONF_DEDUP_HOURS,
@@ -303,7 +309,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
-            options = dict(user_input)
+            options = dict(self.config_entry.options) | dict(user_input)
             if options.pop(CONF_MANAGE_MONITORED_LOCATIONS, False):
                 return await self.async_step_monitored_locations()
             try:
@@ -501,8 +507,47 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                 "edit_location",
                 "toggle_location",
                 "delete_location",
+                "location_forecast",
             ],
         )
+
+    async def async_step_location_forecast(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Explicit per-location opt-in and independent forecast radius."""
+        locations = list(resolve_monitored_locations(self.hass, self.config_entry))
+        if self._selected_location_id is None:
+            if user_input is not None:
+                self._selected_location_id = str(user_input[CONF_LOCATION_ID])
+                return await self.async_step_location_forecast()
+            return self._location_selector_form("location_forecast", locations)
+        settings = decode_forecast_settings(self.config_entry.options.get(CONF_LOCATION_FORECASTS, []))
+        existing = next((item for item in settings if item.location_id == self._selected_location_id), None)
+        errors = {}
+        if user_input is not None:
+            try:
+                selected = LocationForecastSettings(self._selected_location_id,
+                    user_input["enabled"], user_input["radius_km"])
+                replacement = tuple(item for item in settings if item.location_id != selected.location_id) + (selected,)
+                decisions = plan_location_forecasts(tuple(locations), replacement)
+                if selected.enabled and next(item for item in decisions if item.location_id == selected.location_id).reason != "eligible":
+                    errors["base"] = "forecast_not_eligible"
+            except (KeyError, TypeError, ValueError, FireRiskError):
+                errors["base"] = "invalid_forecast_settings"
+            else:
+                if not errors:
+                    options = dict(self.config_entry.options)
+                    options[CONF_LOCATION_FORECASTS] = [item.as_dict() for item in replacement]
+                    return self.async_create_entry(data=options)
+        suggestions = {"enabled": existing.enabled if existing else False}
+        if existing:
+            suggestions["radius_km"] = existing.radius_km
+        return self.async_show_form(step_id="location_forecast", errors=errors,
+            data_schema=self.add_suggested_values_to_schema(vol.Schema({
+                vol.Required("enabled"): bool,
+                vol.Required("radius_km"): NumberSelector(NumberSelectorConfig(
+                    min=1, max=500, step=1, unit_of_measurement="km", mode=NumberSelectorMode.BOX)),
+            }), suggestions))
 
     async def async_step_add_location(
         self, user_input: dict[str, Any] | None = None
@@ -639,7 +684,9 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     vol.Required(CONF_LOCATION_ID): SelectSelector(
                         SelectSelectorConfig(
                             options=[
-                                {"value": item.id, "label": item.name}
+                                {"value": item.id, "label": item.name if sum(
+                                    other.name == item.name for other in locations) == 1
+                                    else f"{item.name} ({item.id[-6:]})"}
                                 for item in locations
                             ]
                         )
@@ -654,6 +701,11 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
         options[CONF_MONITORED_LOCATIONS] = [
             location.as_dict() for location in locations
         ]
+        if CONF_LOCATION_FORECASTS in options:
+            remaining_ids = {location.id for location in locations}
+            options[CONF_LOCATION_FORECASTS] = [item.as_dict()
+                for item in decode_forecast_settings(options[CONF_LOCATION_FORECASTS])
+                if item.location_id in remaining_ids]
         primary = next(location for location in locations if location.enabled)
         options[CONF_RADIUS_KM] = primary.radius_km
         return self.async_create_entry(data=options)

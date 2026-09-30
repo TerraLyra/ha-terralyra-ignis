@@ -15,5 +15,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(await page.locator('ha-card').innerText(),/előrejelzés jelenleg nem érhető el/);
  assert.doesNotMatch(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.evaluate(()=>{
+   card.setConfig({entity:'sensor.place',location_id:'ca',forecast:{entity:'sensor.forecast',location_id:'ca',latitude:47,longitude:19,radius_km:50}});
+   forecast.state='high';Object.assign(forecast.attributes,{scope:'monitored_location',location_id:'ca',latitude:47,longitude:19,forecast_radius_km:50,provider:'eumetsat_lsa_saf_frmv3',product:'FRMv3',sample_latitude:47.05});
+   card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}};
+ });
+ assert.match(await page.locator('ha-card').innerText(),/kijelölt helyszín közelére/);
+ assert.match(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
+ await page.evaluate(()=>{forecast.attributes.forecast_radius_km=100;card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}}});
+ assert.doesNotMatch(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
  console.log('Location summary browser checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

@@ -131,7 +131,8 @@
           "add_location": "Add a location",
           "edit_location": "Edit a location",
           "toggle_location": "Enable or disable a location",
-          "delete_location": "Delete a location"
+          "delete_location": "Delete a location",
+          "location_forecast": "Location fire-risk forecast"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Location"
         }
+      },
+      "location_forecast": {
+        "title": "Location fire-risk forecast",
+        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "data": {
+          "location_id": "Location",
+          "enabled": "Enable forecast",
+          "radius_km": "Forecast radius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Enter a valid monitoring-center name and coordinates",
       "invalid_monitored_location": "Enter a valid name, coordinates and radius",
       "one_location_required": "At least one monitored location must remain enabled",
-      "too_many_locations": "A maximum of 10 monitored locations is supported"
+      "too_many_locations": "A maximum of 10 monitored locations is supported",
+      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
+      "invalid_forecast_settings": "Invalid forecast settings."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "Waiting",
           "retained_response": "Retained response",
           "review_required": "Review required"
+        }
+      },
+      "location_fire_risk": {
+        "name": "Location: {location_name} — fire-risk forecast",
+        "state": {
+          "low": "Low",
+          "moderate": "Moderate",
+          "high": "High",
+          "very_high": "Very high",
+          "extreme": "Extreme",
+          "unknown": "Unknown"
         }
       }
     },

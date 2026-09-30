@@ -13,6 +13,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import CONF_FIRE_RISK_RADIUS_KM, CONF_RADIUS_KM, DEFAULT_RADIUS_KM, DOMAIN
 from .fire_risk_context import FireRiskRequestContext
+from .fire_risk_requests import ForecastRequestDeferred
+from .fire_risk_request_state import ForecastStateError
 from .products.fire_risk import (
     PRODUCT_ID,
     FireRiskClient,
@@ -40,6 +42,7 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
     def __init__(
         self, hass: HomeAssistant, entry: ConfigEntry, client: FireRiskClient
     ) -> None:
+        self._cache_restored = False
         self.entry = entry
         self.client = client
         self._map_store = Store(
@@ -59,9 +62,12 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
 
     async def _async_setup(self) -> None:
         """Restore a recent bounded map for outage fallback after HA restart."""
+        if self._cache_restored:
+            return
         importer = getattr(self.client, "import_map_cache", None)
         if importer is not None:
             importer(await self._map_store.async_load())
+        self._cache_restored = True
 
     def _home_request_context(self) -> FireRiskRequestContext:
         """Snapshot the legacy Home inputs on each refresh, preserving fallback."""
@@ -82,6 +88,11 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
 
     async def _async_update_data(self) -> FireRiskForecast:
         try:
+            try:
+                await self._async_setup()
+            except OSError as err:
+                self.update_interval = FIRE_RISK_RETRY_BASE
+                raise UpdateFailed("Home forecast cache could not be restored") from err
             context = self._home_request_context()
             latitude, longitude, radius = (
                 context.latitude, context.longitude, context.radius_km
@@ -111,6 +122,12 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
                 self.hass, self.entry, consecutive_failures=0, reason=None
             )
             return result
+        except ForecastRequestDeferred as err:
+            self.update_interval = min(FIRE_RISK_RETRY_MAX, max(timedelta(seconds=1), err.retry_after))
+            raise UpdateFailed("Forecast is waiting for provider cooldown") from err
+        except ForecastStateError as err:
+            self.update_interval = FIRE_RISK_RETRY_BASE
+            raise UpdateFailed("Forecast request state is unavailable") from err
         except FireRiskError as err:
             self._consecutive_failures += 1
             self.update_interval = _retry_interval(

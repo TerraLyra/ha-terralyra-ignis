@@ -131,7 +131,8 @@
           "add_location": "Ort hinzufügen",
           "edit_location": "Ort bearbeiten",
           "toggle_location": "Ort aktivieren oder deaktivieren",
-          "delete_location": "Ort löschen"
+          "delete_location": "Ort löschen",
+          "location_forecast": "Waldbrandrisikoprognose für einen Standort"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Ort"
         }
+      },
+      "location_forecast": {
+        "title": "Waldbrandrisikoprognose für einen Standort",
+        "description": "Standort auswählen, die Prognose ausdrücklich aktivieren und einen eigenen Prognoseradius angeben. Nur aktivierte Standorte innerhalb der europäischen FRMv3-Abdeckung sind verfügbar.",
+        "data": {
+          "location_id": "Standort",
+          "enabled": "Prognose aktivieren",
+          "radius_km": "Prognoseradius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Gültigen Namen und gültige Koordinaten für das Überwachungszentrum eingeben",
       "invalid_monitored_location": "Gültigen Namen, Koordinaten und Radius eingeben",
       "one_location_required": "Mindestens ein überwachter Ort muss aktiviert bleiben",
-      "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt"
+      "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt",
+      "forecast_not_eligible": "Der Standort ist deaktiviert oder liegt außerhalb der FRMv3-Abdeckung.",
+      "invalid_forecast_settings": "Ungültige Prognoseeinstellungen."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "Warten",
           "retained_response": "Beibehaltene Antwort",
           "review_required": "Prüfung erforderlich"
+        }
+      },
+      "location_fire_risk": {
+        "name": "Ort: {location_name} — Brandrisikoprognose",
+        "state": {
+          "low": "Niedrig",
+          "moderate": "Mäßig",
+          "high": "Hoch",
+          "very_high": "Sehr hoch",
+          "extreme": "Extrem",
+          "unknown": "Unbekannt"
         }
       }
     },

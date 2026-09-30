@@ -47,6 +47,7 @@ from .canada_sensor import CanadaDiagnosticSensor
 from .official_sources.canada.owner import get_canada_owner
 from .official_sources.nifc.owner import get_nifc_owner
 from .situation import MAX_PRODUCT_AGE
+from .location_fire_risk_sensor import LocationFireRiskSensor
 
 
 async def async_setup_entry(
@@ -97,6 +98,12 @@ async def async_setup_entry(
         DEFAULT_ENABLE_LAND_SURFACE_TEMPERATURE,
     ):
         entities.append(LandSurfaceTemperatureSensor(entry))
+    if (forecasts := getattr(entry.runtime_data, "location_forecasts", None)) is not None:
+        for location_id, coordinator in forecasts.coordinators.items():
+            location = locations_by_id[location_id]
+            duplicates = sum(item.name == location.name for item in locations_by_id.values())
+            label = location.name if duplicates == 1 else f"{location.name} ({location.id[-6:]})"
+            entities.append(LocationFireRiskSensor(entry, coordinator, label))
     async_add_entities(entities)
 
 

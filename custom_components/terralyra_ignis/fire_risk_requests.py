@@ -29,7 +29,7 @@ class ForecastRequestGate:
 
     This is an internal conservative pacing policy, not a publisher rate limit.
     Share one instance across all clients for that provider. The gate does not
-    retry failed operations and is not yet connected to runtime retrieval.
+    retry failed operations and is shared by runtime retrieval clients.
     """
 
     def __init__(

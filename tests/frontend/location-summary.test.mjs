@@ -54,3 +54,11 @@ test('nearest distance is exact-location, finite and suppressed for unavailable 
  assert.ok(summarizeLocation(located,'home').error);
  for(const v of [undefined,null,-1,Infinity,'2',true])assert.equal(summarizeLocation({...entity,attributes:{...entity.attributes,nearest_incident_distance_km:v}},'ca').nearest,null);
 });
+
+test('location forecast binds requested geometry independently of sampled pixel',()=>{
+ const b={...binding,radius_km:50};
+ const e={...forecast,attributes:{...forecast.attributes,scope:'monitored_location',location_id:'home',latitude:47,longitude:19,forecast_radius_km:50,provider:'eumetsat_lsa_saf_frmv3',product:'FRMv3',sample_latitude:47.05,sample_longitude:19.05}};
+ assert.equal(review(e,b).risk,'Alacsony');
+ for(const changes of [{location_id:'other'},{latitude:47.000001},{longitude:20},{forecast_radius_km:51},{provider:'other'},{product:'other'}])assert.ok(review({...e,attributes:{...e.attributes,...changes}},b).message);
+ for(const radius_km of [undefined,0,501,'50',true])assert.ok(review(e,{...b,radius_km}).message);
+});

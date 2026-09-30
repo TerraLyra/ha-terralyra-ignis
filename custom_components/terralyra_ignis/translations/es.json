@@ -131,7 +131,8 @@
           "add_location": "Añadir ubicación",
           "edit_location": "Editar ubicación",
           "toggle_location": "Activar o desactivar ubicación",
-          "delete_location": "Eliminar ubicación"
+          "delete_location": "Eliminar ubicación",
+          "location_forecast": "Previsión del riesgo de incendio por ubicación"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Ubicación"
         }
+      },
+      "location_forecast": {
+        "title": "Previsión del riesgo de incendio por ubicación",
+        "description": "Selecciona una ubicación, activa la previsión e introduce un radio independiente del seguimiento por satélite. Solo se admiten ubicaciones activadas dentro de la cobertura europea FRMv3.",
+        "data": {
+          "location_id": "Ubicación",
+          "enabled": "Activar previsión",
+          "radius_km": "Radio de previsión (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Introduce un nombre y unas coordenadas válidos para el centro de vigilancia",
       "invalid_monitored_location": "Introduce un nombre, coordenadas y radio válidos",
       "one_location_required": "Debe quedar activa al menos una ubicación vigilada",
-      "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas"
+      "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas",
+      "forecast_not_eligible": "La ubicación está desactivada o fuera de la cobertura FRMv3.",
+      "invalid_forecast_settings": "Configuración de previsión no válida."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "En espera",
           "retained_response": "Respuesta conservada",
           "review_required": "Revisión necesaria"
+        }
+      },
+      "location_fire_risk": {
+        "name": "Ubicación: {location_name} — previsión del riesgo de incendio",
+        "state": {
+          "low": "Bajo",
+          "moderate": "Moderado",
+          "high": "Alto",
+          "very_high": "Muy alto",
+          "extreme": "Extremo",
+          "unknown": "Desconocido"
         }
       }
     },

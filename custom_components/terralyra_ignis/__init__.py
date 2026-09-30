@@ -12,7 +12,7 @@ from homeassistant.core import (
     ServiceResponse,
     SupportsResponse,
 )
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import ConfigEntryError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
@@ -45,6 +45,9 @@ from .const import (
 )
 from .coordinator import IgnisCoordinator
 from .fire_risk_coordinator import FireRiskCoordinator
+from .fire_risk_planning import CONF_LOCATION_FORECASTS, decode_forecast_settings
+from .fire_risk_request_state import get_forecast_request_gate
+from .location_fire_risk_runtime import LocationForecastRuntime
 from .geocoding import PlaceNameResolver
 from .lst_coordinator import LandSurfaceTemperatureCoordinator
 from .monitoring import (
@@ -58,7 +61,7 @@ from .gdacs_client import GdacsClient
 from .nsw_rfs import NswRfsClient
 from .official_sources.qld_client import QfdClient
 from .official_sources.nifc.owner import get_nifc_owner
-from .products.fire_risk import FireRiskClient
+from .products.fire_risk import FireRiskClient, FireRiskError
 from .products.lst import LandSurfaceTemperatureClient
 from .products.msg_iodc import (
     MsgIodcAuthenticationError,
@@ -83,6 +86,7 @@ class IgnisRuntimeData:
     fire_risk_client: FireRiskClient
     place_name_resolver: PlaceNameResolver | None
     lst_coordinator: LandSurfaceTemperatureCoordinator
+    location_forecasts: LocationForecastRuntime | None = None
 
 
 type IgnisConfigEntry = ConfigEntry[IgnisRuntimeData]
@@ -230,6 +234,10 @@ async def async_migrate_entry(
 
 async def async_setup_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> bool:
     """Set up TerraLyra IGNIS from a config entry."""
+    try:
+        forecast_settings = decode_forecast_settings(entry.options.get(CONF_LOCATION_FORECASTS, []))
+    except FireRiskError as err:
+        raise ConfigEntryError("Invalid location forecast settings") from err
     session = async_get_clientsession(hass)
     monitored_locations = resolve_monitored_locations(hass, entry)
     monitoring_center = resolve_monitoring_center(hass, entry)
@@ -260,7 +268,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> boo
         monitored_locations=monitored_locations,
     )
     await coordinator.async_config_entry_first_refresh()
-    fire_risk_client = FireRiskClient(session)
+    forecast_gate = get_forecast_request_gate(hass)
+    location_forecasts = LocationForecastRuntime(
+        hass, entry, session, monitored_locations, forecast_settings, forecast_gate)
+    entry.async_on_unload(location_forecasts.close)
+    fire_risk_client = FireRiskClient(session, request_gate=forecast_gate)
     fire_risk_coordinator = FireRiskCoordinator(hass, entry, fire_risk_client)
     lst_coordinator = LandSurfaceTemperatureCoordinator(
         hass, entry, LandSurfaceTemperatureClient(session)
@@ -271,8 +283,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> boo
         fire_risk_client=fire_risk_client,
         place_name_resolver=resolver,
         lst_coordinator=lst_coordinator,
+        location_forecasts=location_forecasts,
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    location_forecasts.start()
     entry.async_create_background_task(
         hass,
         fire_risk_coordinator.async_refresh(),

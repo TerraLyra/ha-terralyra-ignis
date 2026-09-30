@@ -732,3 +732,32 @@ def test_map_annotation_rejects_invalid_bounds() -> None:
             (),
             "en",
         )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('local_error', ['deferred', 'storage'])
+async def test_home_local_request_state_does_not_raise_provider_repair(hass, monkeypatch, local_error):
+    from unittest.mock import AsyncMock
+    from custom_components.terralyra_ignis.fire_risk_requests import ForecastRequestDeferred
+    from custom_components.terralyra_ignis.fire_risk_request_state import ForecastStateError
+    error = ForecastRequestDeferred(timedelta(minutes=40)) if local_error == 'deferred' else ForecastStateError('disk')
+    client = Mock(async_forecast=AsyncMock(side_effect=error))
+    coordinator = FireRiskCoordinator(hass, Mock(entry_id='entry', options={}), client)
+    repair = Mock()
+    monkeypatch.setattr('custom_components.terralyra_ignis.fire_risk_coordinator.async_set_fire_risk_outage_issue', repair)
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+    assert coordinator._consecutive_failures == 0
+    assert coordinator.update_interval == timedelta(minutes=40 if local_error == 'deferred' else 15)
+    repair.assert_not_called()
+
+
+async def test_home_background_refresh_restores_legacy_map_once(hass):
+    from unittest.mock import AsyncMock
+    client = Mock(async_forecast=AsyncMock(side_effect=FireRiskError('no data')))
+    coordinator = FireRiskCoordinator(hass, Mock(entry_id='entry', options={}), client)
+    coordinator._map_store = Mock(async_load=AsyncMock(return_value={'legacy': 'cache'}))
+    await coordinator.async_refresh()
+    await coordinator.async_refresh()
+    client.import_map_cache.assert_called_once_with({'legacy': 'cache'})
+    await coordinator.async_shutdown()

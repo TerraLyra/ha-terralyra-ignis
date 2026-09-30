@@ -93,3 +93,16 @@ async def test_frmv3_point_request_budget():
     result = await client.async_forecast(47.5, 19.0, 25)
     assert len(result.days) == 10
     assert client._async_point.await_count == 18
+
+
+@pytest.mark.parametrize('value', [None, {}, [dict(location_id='one', enabled=True, radius_km=5)] * 2,
+    [dict(location_id=f'p{i}', enabled=True, radius_km=5) for i in range(11)]])
+def test_decode_rejects_invalid_stored_lists(value):
+    from custom_components.terralyra_ignis.fire_risk_planning import decode_forecast_settings
+    with pytest.raises(FireRiskError):
+        decode_forecast_settings(value)
+
+
+def test_decode_empty_is_inert():
+    from custom_components.terralyra_ignis.fire_risk_planning import decode_forecast_settings
+    assert decode_forecast_settings([]) == ()

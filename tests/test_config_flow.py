@@ -1223,3 +1223,67 @@ async def test_options_reject_unknown_location_id(hass, step_id: str) -> None:
         await hass.config_entries.options.async_configure(
             result["flow_id"], {CONF_LOCATION_ID: "unknown"}
         )
+
+
+async def _start_location_forecast(hass, entry):
+    result = await _start_location_management(hass, entry)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'next_step_id': 'location_forecast'})
+    return await hass.config_entries.options.async_configure(result['flow_id'], {'location_id': 'home'})
+
+
+async def test_location_forecast_opt_in_and_existing_radius(hass):
+    hass.config.latitude, hass.config.longitude = 47.5, 19.0
+    from custom_components.terralyra_ignis.fire_risk_planning import CONF_LOCATION_FORECASTS
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location()], CONF_FIRE_RISK_RADIUS_KM: 100})
+    entry.add_to_hass(hass)
+    result = await _start_location_forecast(hass, entry)
+    assert result['step_id'] == 'location_forecast'
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'enabled': True, 'radius_km': 45})
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data'][CONF_LOCATION_FORECASTS] == [{'location_id': 'home', 'enabled': True, 'radius_km': 45}]
+    assert result['data'][CONF_FIRE_RISK_RADIUS_KM] == 100
+    hass.config_entries.async_update_entry(entry, options=result['data'])
+    result = await _start_location_forecast(hass, entry)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'enabled': False, 'radius_km': 45})
+    assert result['data'][CONF_LOCATION_FORECASTS][0]['enabled'] is False
+
+
+async def test_location_forecast_rejects_uncovered_and_invalid_plan(hass):
+    from custom_components.terralyra_ignis.products.fire_risk import FireRiskError
+    stored = _stored_location()
+    stored.update(latitude=-30, longitude=150, source='manual')
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [stored]})
+    entry.add_to_hass(hass)
+    result = await _start_location_forecast(hass, entry)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'enabled': True, 'radius_km': 45})
+    assert result['errors']['base'] == 'forecast_not_eligible'
+    with patch('custom_components.terralyra_ignis.config_flow.plan_location_forecasts', side_effect=FireRiskError('invalid')):
+        result = await hass.config_entries.options.async_configure(result['flow_id'], {'enabled': True, 'radius_km': 45})
+    assert result['errors']['base'] == 'invalid_forecast_settings'
+
+
+async def test_deleting_location_removes_only_its_forecast_options(hass):
+    from custom_components.terralyra_ignis.fire_risk_planning import CONF_LOCATION_FORECASTS
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location(), _stored_location('cabin')],
+                 CONF_LOCATION_FORECASTS: [{'location_id': 'home', 'enabled': True, 'radius_km': 40},
+                                          {'location_id': 'cabin', 'enabled': True, 'radius_km': 20}]})
+    entry.add_to_hass(hass)
+    result = await _start_location_management(hass, entry)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'next_step_id': 'delete_location'})
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'location_id': 'cabin'})
+    assert [item['location_id'] for item in result['data'][CONF_LOCATION_FORECASTS]] == ['home']
+
+
+async def test_main_options_preserve_location_forecasts(hass):
+    from custom_components.terralyra_ignis.fire_risk_planning import CONF_LOCATION_FORECASTS
+    settings = [{'location_id': 'home', 'enabled': True, 'radius_km': 45}]
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location()], CONF_LOCATION_FORECASTS: settings})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], _default_options_input())
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data'][CONF_LOCATION_FORECASTS] == settings
