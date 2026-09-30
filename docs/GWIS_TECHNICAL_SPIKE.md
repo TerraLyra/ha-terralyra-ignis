@@ -76,7 +76,7 @@ excessive depth/nodes and duplicate target layers/time dimensions. It preserves
 advertised evidence and always reports `production_ready: false`. It neither
 fetches data nor follows metadata links. Synthetic tests run in source-research CI.
 
-## Remaining gates
+## Initial gates (updated by the point-query findings below)
 
 1. Establish a supported numerical query/download route, or a documented stable
    class palette and nodata semantics. Do not infer a numerical FWI from colour.
@@ -90,3 +90,49 @@ fetches data nor follows metadata links. Synthetic tests run in source-research 
    values also need precise machine-readable semantics before classification.
 5. Check product-specific notices, attribution and operational stability before
    proposing an opt-in runtime adapter. No HA location data is used by this spike.
+
+## Follow-up: dedicated point-query layer
+
+The official viewer's linked `static/js/app.bundle-2.11.5.js` maps `ecmwf.fwi`
+to the **separate** `ecmwf.query` information layer on the same HTTPS endpoint.
+Capabilities explicitly mark that layer queryable. Thus the earlier observation
+about `ecmwf.fwi` does not rule out supported point access.
+
+WMS 1.1.1 GetFeatureInfo, EPSG:4326, `INFO_FORMAT=text/html` returns a small
+`Fire Danger` table with numeric FWI and seven companion indices. GML/text/plain
+responses tested did not contain the numeric attributes. Use the dedicated HTML
+schema defensively; do not scrape arbitrary viewer text or execute HTML.
+
+Observed 2026-10-01 requests using public, impersonal test points:
+
+| Longitude, latitude | FWI |
+| --- | --- |
+| 15, 45 (Europe) | 17.294014 |
+| -120, 38 (California) | 52.370739 |
+| 139.7, 35.7 (Japan) | 0.23292935 |
+| 149, -33 (Australia) | 20.311758 |
+| 25, -25 (southern Africa) | 5.4818907 |
+| -140, 0 (ocean control) | -9999 (nodata) |
+
+A 2099-12-31 point request returned an empty body, unlike the ambiguous zero-filled
+TIFF. These routes are not interchangeable. A ten-request cycle for 2026-09-30
+through 2026-10-09 returned numeric evidence at the European test point; no
+user-configured HA coordinates were involved. This is sampled coverage, not a
+global completeness or service-availability guarantee.
+
+`gwis_point.py` validates the exact bounded table, preserves raw numeric strings,
+keeps genuine zero, distinguishes empty/no-feature and -9999/nodata, and rejects
+malformed/error/duplicate tables, unexpected markup and non-finite values.
+`gwis_fetch.py` performs an explicit research cycle of at most ten requests,
+spaced by one second, without redirects, retries, persistence or HA activation.
+It aborts on transport/schema errors and rejects a cycle crossing UTC midnight.
+The socket timeout is not a guaranteed total wall-clock deadline.
+
+Remaining **time-contract gate**: the response contains neither model issuance
+nor a returned valid date. Store `requested_date` separately from `retrieved_at`;
+leave `model_issued_at` and `returned_valid_date` unknown. The viewer constructs
+its own dates and does not independently validate them. The separate query layer
+resolves the tested zero/nodata ambiguity but does not establish model freshness,
+update schedule or date-selection guarantees. No forecast is marked production
+ready. A current supported product time contract or independent dated metadata,
+plus repeated operational validation, is still required for runtime activation.
