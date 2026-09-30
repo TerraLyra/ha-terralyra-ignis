@@ -17,7 +17,12 @@ export function summarizeForecast(entity, binding, locationId, now=new Date()) {
   if(binding.location_id!==locationId || !number(binding.latitude) || !number(binding.longitude) || Math.abs(binding.latitude)>90 || Math.abs(binding.longitude)>180)
     return {message:'Az előrejelzés helyszín-hozzárendelése hiányos vagy eltérő.'};
   if(!a || ['unknown','unavailable'].includes(entity.state))return {message:'Az előrejelzés jelenleg nem érhető el.'};
-  if(a.scope!=='near_home'||!number(a.sample_latitude)||!number(a.sample_longitude)||Math.abs(a.sample_latitude-binding.latitude)>0.000001||Math.abs(a.sample_longitude-binding.longitude)>0.000001)
+  if(a.scope==='monitored_location') {
+    if(a.location_id!==locationId || a.provider!=='eumetsat_lsa_saf_frmv3' || a.product!=='FRMv3' ||
+       !number(a.latitude)||!number(a.longitude)||a.latitude!==binding.latitude||a.longitude!==binding.longitude||
+       !number(binding.radius_km)||binding.radius_km<1||binding.radius_km>500||a.forecast_radius_km!==binding.radius_km)
+      return {message:'Az előrejelzés helyszíne vagy sugara nem egyezik a hozzárendeléssel.'};
+  } else if(a.scope!=='near_home'||!number(a.sample_latitude)||!number(a.sample_longitude)||Math.abs(a.sample_latitude-binding.latitude)>0.000001||Math.abs(a.sample_longitude-binding.longitude)>0.000001)
     return {message:'Az előrejelzés mintavételi pontja nem egyezik a hozzárendelt helyszínnel.'};
   if(!Array.isArray(a.forecast)||!Number.isFinite(now.getTime()))return {message:'Az előrejelzés érvényessége nem ellenőrizhető.'};
   const today=now.toISOString().slice(0,10);
@@ -28,7 +33,7 @@ export function summarizeForecast(entity, binding, locationId, now=new Date()) {
   if(!Object.hasOwn(riskLabels,day.risk))return {message:'A mai kockázati kategória ismeretlen.'};
   const stamp=typeof a.generated_at==='string'&&/(Z|[+-]\d{2}:\d{2})$/.test(a.generated_at)?Date.parse(a.generated_at):NaN;
   const age=now.getTime()-stamp;
-  return {risk:riskLabels[day.risk],validDate:day.date,received:Number.isFinite(stamp)&&age>=0?new Date(stamp).toISOString():null,
+  return {scope:a.scope,risk:riskLabels[day.risk],validDate:day.date,received:Number.isFinite(stamp)&&age>=0?new Date(stamp).toISOString():null,
     freshness:!Number.isFinite(stamp)||age<0?'Az adatátvétel ideje nem ellenőrizhető.':age>12*3600000?'Az adatátvétel több mint 12 órás; a frissítés késhet.':'Az adatátvétel 12 órán belüli.',
     attribution:typeof a.attribution==='string'?a.attribution:'EUMETSAT / LSA SAF'};
 }
@@ -65,7 +70,7 @@ class IgnisLocationSummary extends HTMLElement {
       card.append(this.node('p',`${forecast.risk} · Érvényesség: ${forecast.validDate} (UTC terméknap)`));
       card.append(this.node('p',forecast.freshness));
       if(forecast.received)card.append(this.node('p',`Sikeres lekérés: ${new Date(forecast.received).toLocaleString(this._hass?.locale?.language||'hu',{timeZone:this._hass?.config?.time_zone||'UTC'})}`));
-      card.append(this.node('p',forecast.attribution),this.node('p','Modell-előrejelzés az otthonpont közelére; nem hatósági riasztás. A lekérés ideje nem a modell kiadási ideje.'));
+      card.append(this.node('p',forecast.attribution),this.node('p',forecast.scope==='monitored_location'?'Modell-előrejelzés a kijelölt helyszín közelére; nem hatósági riasztás. A lekérés ideje nem a modell kiadási ideje.':'Modell-előrejelzés az otthonpont közelére; nem hatósági riasztás. A lekérés ideje nem a modell kiadási ideje.'));
     }
     card.append(this.node('h3','Hivatalos tűzgyújtási korlátozás'),this.node('p','Nincs kapcsolt adat; ebből a tilalom fennállása nem állapítható meg.'));
     const note=this.node('p','Az észlelések hiánya nem jelent tűzmentességet. A legutóbbi adatátvétel nem minden forrás frissessége és nem az esemény kezdete. A műholdas események nem hatóságilag igazolt tűzesetek.');note.className='muted';card.append(note);

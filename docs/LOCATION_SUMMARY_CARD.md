@@ -78,3 +78,30 @@ A browser/HA state refresh updates the view; the card makes no provider requests
 The binding is optional and existing unbound cards continue to work. Replace the
 existing JS resource and change its version query after review, without adding a
 duplicate resource. No backend or Recorder migration is required.
+
+## Per-location forecast binding (development version)
+
+In integration options, open monitored-location management, select **Location
+fire-risk forecast**, choose an enabled covered location and enter its independent
+forecast radius. A new location forecast sensor is created after options reload;
+the initial request is deliberately delayed by roughly 30 seconds to five minutes.
+The existing Home forecast sensors are preserved.
+
+Use the new sensor's actual entity ID and copy its requested `location_id`,
+`latitude`, `longitude` and `forecast_radius_km` attributes into the binding:
+
+```yaml
+forecast:
+  entity: sensor.your_location_fire_risk_forecast
+  location_id: your-stable-location-id
+  latitude: 47.5
+  longitude: 19.0
+  radius_km: 50
+```
+
+The location ID must also match the card's top-level `location_id`. These are
+requested coordinates, not `sample_latitude`/`sample_longitude`, which can point
+to a nearby valid forecast pixel. The radius is the forecast radius, not the
+satellite-monitoring radius. After moving/resizing a location, update the binding;
+a mismatch deliberately hides the risk. Nothing here enables additional providers
+or automatically edits a dashboard.

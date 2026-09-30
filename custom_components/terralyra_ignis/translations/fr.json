@@ -131,7 +131,8 @@
           "add_location": "Ajouter un lieu",
           "edit_location": "Modifier un lieu",
           "toggle_location": "Activer ou désactiver un lieu",
-          "delete_location": "Supprimer un lieu"
+          "delete_location": "Supprimer un lieu",
+          "location_forecast": "Location fire-risk forecast"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Lieu"
         }
+      },
+      "location_forecast": {
+        "title": "Location fire-risk forecast",
+        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "data": {
+          "location_id": "Location",
+          "enabled": "Enable forecast",
+          "radius_km": "Forecast radius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Saisissez un nom et des coordonnées valides pour le centre de surveillance",
       "invalid_monitored_location": "Saisissez un nom, des coordonnées et un rayon valides",
       "one_location_required": "Au moins un lieu surveillé doit rester activé",
-      "too_many_locations": "Un maximum de 10 lieux surveillés est pris en charge"
+      "too_many_locations": "Un maximum de 10 lieux surveillés est pris en charge",
+      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
+      "invalid_forecast_settings": "Invalid forecast settings."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "En attente",
           "retained_response": "Réponse conservée",
           "review_required": "Vérification nécessaire"
+        }
+      },
+      "location_fire_risk": {
+        "name": "{location} fire-risk forecast",
+        "state": {
+          "low": "Faible",
+          "moderate": "Modéré",
+          "high": "Élevé",
+          "very_high": "Très élevé",
+          "extreme": "Extrême",
+          "unknown": "Inconnu"
         }
       }
     },

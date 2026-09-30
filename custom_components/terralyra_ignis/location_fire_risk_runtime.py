@@ -21,8 +21,7 @@ from .location_fire_risk_coordinator import LocationFireRiskCoordinator
 class LocationForecastRuntime:
     """Own delayed startup, periodic listeners and shutdown for one entry.
 
-    Integration setup does not instantiate this yet. The caller must supply the
-    installation-wide shared provider gate. Reconfiguration closes this owner
+    Integration setup supplies the installation-wide shared provider gate. Reconfiguration closes this owner
     before constructing a replacement; no history or storage is removed.
     """
 

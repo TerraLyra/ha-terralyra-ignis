@@ -131,7 +131,8 @@
           "add_location": "Ort hinzufügen",
           "edit_location": "Ort bearbeiten",
           "toggle_location": "Ort aktivieren oder deaktivieren",
-          "delete_location": "Ort löschen"
+          "delete_location": "Ort löschen",
+          "location_forecast": "Location fire-risk forecast"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Ort"
         }
+      },
+      "location_forecast": {
+        "title": "Location fire-risk forecast",
+        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "data": {
+          "location_id": "Location",
+          "enabled": "Enable forecast",
+          "radius_km": "Forecast radius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Gültigen Namen und gültige Koordinaten für das Überwachungszentrum eingeben",
       "invalid_monitored_location": "Gültigen Namen, Koordinaten und Radius eingeben",
       "one_location_required": "Mindestens ein überwachter Ort muss aktiviert bleiben",
-      "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt"
+      "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt",
+      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
+      "invalid_forecast_settings": "Invalid forecast settings."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "Warten",
           "retained_response": "Beibehaltene Antwort",
           "review_required": "Prüfung erforderlich"
+        }
+      },
+      "location_fire_risk": {
+        "name": "{location} fire-risk forecast",
+        "state": {
+          "low": "Niedrig",
+          "moderate": "Mäßig",
+          "high": "Hoch",
+          "very_high": "Sehr hoch",
+          "extreme": "Extrem",
+          "unknown": "Unbekannt"
         }
       }
     },

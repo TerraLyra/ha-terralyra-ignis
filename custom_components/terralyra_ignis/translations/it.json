@@ -131,7 +131,8 @@
           "add_location": "Aggiungi località",
           "edit_location": "Modifica località",
           "toggle_location": "Attiva o disattiva località",
-          "delete_location": "Elimina località"
+          "delete_location": "Elimina località",
+          "location_forecast": "Location fire-risk forecast"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Località"
         }
+      },
+      "location_forecast": {
+        "title": "Location fire-risk forecast",
+        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "data": {
+          "location_id": "Location",
+          "enabled": "Enable forecast",
+          "radius_km": "Forecast radius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Inserisci un nome e coordinate validi per il centro di monitoraggio",
       "invalid_monitored_location": "Inserisci nome, coordinate e raggio validi",
       "one_location_required": "Almeno una località monitorata deve rimanere attiva",
-      "too_many_locations": "Sono supportate al massimo 10 località monitorate"
+      "too_many_locations": "Sono supportate al massimo 10 località monitorate",
+      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
+      "invalid_forecast_settings": "Invalid forecast settings."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "In attesa",
           "retained_response": "Risposta conservata",
           "review_required": "Verifica necessaria"
+        }
+      },
+      "location_fire_risk": {
+        "name": "{location} fire-risk forecast",
+        "state": {
+          "low": "Basso",
+          "moderate": "Moderato",
+          "high": "Alto",
+          "very_high": "Molto alto",
+          "extreme": "Estremo",
+          "unknown": "Sconosciuto"
         }
       }
     },

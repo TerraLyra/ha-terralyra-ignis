@@ -131,7 +131,8 @@
           "add_location": "Añadir ubicación",
           "edit_location": "Editar ubicación",
           "toggle_location": "Activar o desactivar ubicación",
-          "delete_location": "Eliminar ubicación"
+          "delete_location": "Eliminar ubicación",
+          "location_forecast": "Location fire-risk forecast"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Ubicación"
         }
+      },
+      "location_forecast": {
+        "title": "Location fire-risk forecast",
+        "description": "Select a location, then explicitly enable its forecast and enter a forecast radius independent of satellite monitoring. Only enabled locations within European FRMv3 coverage can be activated.",
+        "data": {
+          "location_id": "Location",
+          "enabled": "Enable forecast",
+          "radius_km": "Forecast radius (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Introduce un nombre y unas coordenadas válidos para el centro de vigilancia",
       "invalid_monitored_location": "Introduce un nombre, coordenadas y radio válidos",
       "one_location_required": "Debe quedar activa al menos una ubicación vigilada",
-      "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas"
+      "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas",
+      "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
+      "invalid_forecast_settings": "Invalid forecast settings."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "En espera",
           "retained_response": "Respuesta conservada",
           "review_required": "Revisión necesaria"
+        }
+      },
+      "location_fire_risk": {
+        "name": "{location} fire-risk forecast",
+        "state": {
+          "low": "Bajo",
+          "moderate": "Moderado",
+          "high": "Alto",
+          "very_high": "Muy alto",
+          "extreme": "Extremo",
+          "unknown": "Desconocido"
         }
       }
     },

@@ -131,7 +131,8 @@
           "add_location": "Hely hozzáadása",
           "edit_location": "Hely szerkesztése",
           "toggle_location": "Hely be- vagy kikapcsolása",
-          "delete_location": "Hely törlése"
+          "delete_location": "Hely törlése",
+          "location_forecast": "Helyszín tűzveszély-előrejelzése"
         }
       },
       "add_location": {
@@ -166,6 +167,15 @@
         "data": {
           "location_id": "Hely"
         }
+      },
+      "location_forecast": {
+        "title": "Helyszín tűzveszély-előrejelzése",
+        "description": "Válassz helyszínt, majd külön engedélyezd az előrejelzést és add meg annak sugarát. A sugár független a műholdas megfigyelési sugártól. Csak engedélyezett, európai FRMv3-lefedettségű helyszín kapcsolható be.",
+        "data": {
+          "location_id": "Helyszín",
+          "enabled": "Előrejelzés engedélyezése",
+          "radius_km": "Előrejelzési sugár (km)"
+        }
       }
     },
     "error": {
@@ -175,7 +185,9 @@
       "invalid_monitoring_center": "Adj meg érvényes figyelőközpont-nevet és koordinátákat",
       "invalid_monitored_location": "Adj meg érvényes nevet, koordinátákat és sugarat",
       "one_location_required": "Legalább egy figyelt helynek bekapcsolva kell maradnia",
-      "too_many_locations": "Legfeljebb 10 figyelt hely használható"
+      "too_many_locations": "Legfeljebb 10 figyelt hely használható",
+      "forecast_not_eligible": "A helyszín nincs engedélyezve vagy nincs FRMv3-lefedettsége.",
+      "invalid_forecast_settings": "Érvénytelen előrejelzési beállítások."
     }
   },
   "issues": {
@@ -401,6 +413,17 @@
           "waiting": "Várakozás",
           "retained_response": "Megőrzött válasz",
           "review_required": "Ellenőrzés szükséges"
+        }
+      },
+      "location_fire_risk": {
+        "name": "{location} tűzveszély-előrejelzése",
+        "state": {
+          "low": "Alacsony",
+          "moderate": "Mérsékelt",
+          "high": "Magas",
+          "very_high": "Nagyon magas",
+          "extreme": "Szélsőséges",
+          "unknown": "Ismeretlen"
         }
       }
     },

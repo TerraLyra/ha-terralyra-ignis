@@ -93,3 +93,16 @@ def plan_location_forecasts(
             continue
         decisions.append(LocationForecastDecision(item.location_id, reason))
     return tuple(decisions)
+
+
+CONF_LOCATION_FORECASTS = "location_forecasts"
+
+
+def decode_forecast_settings(value: object) -> tuple[LocationForecastSettings, ...]:
+    """Read bounded explicit options; never infer defaults from other radii."""
+    if not isinstance(value, list) or len(value) > MAX_MONITORED_LOCATIONS:
+        raise FireRiskError("Invalid location forecast settings list")
+    settings = tuple(LocationForecastSettings.from_dict(item) for item in value)
+    if len({item.location_id for item in settings}) != len(settings):
+        raise FireRiskError("Duplicate location forecast settings")
+    return settings

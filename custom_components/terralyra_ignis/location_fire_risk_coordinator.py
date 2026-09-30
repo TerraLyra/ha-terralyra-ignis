@@ -1,4 +1,4 @@
-"""Explicit-context FRMv3 coordinator; not activated by integration setup yet."""
+"""Explicit-context FRMv3 coordinator for opted-in covered locations."""
 from __future__ import annotations
 
 import asyncio

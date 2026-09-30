@@ -13,6 +13,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import CONF_FIRE_RISK_RADIUS_KM, CONF_RADIUS_KM, DEFAULT_RADIUS_KM, DOMAIN
 from .fire_risk_context import FireRiskRequestContext
+from .fire_risk_requests import ForecastRequestDeferred
+from .fire_risk_request_state import ForecastStateError
 from .products.fire_risk import (
     PRODUCT_ID,
     FireRiskClient,
@@ -111,6 +113,12 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
                 self.hass, self.entry, consecutive_failures=0, reason=None
             )
             return result
+        except ForecastRequestDeferred as err:
+            self.update_interval = min(FIRE_RISK_RETRY_MAX, max(timedelta(seconds=1), err.retry_after))
+            raise UpdateFailed("Forecast is waiting for provider cooldown") from err
+        except ForecastStateError as err:
+            self.update_interval = FIRE_RISK_RETRY_BASE
+            raise UpdateFailed("Forecast request state is unavailable") from err
         except FireRiskError as err:
             self._consecutive_failures += 1
             self.update_interval = _retry_interval(
