@@ -173,3 +173,30 @@ times are encoded; and whether each bulletin is a complete replacement per
 province. Until answered, retain the offline report-list approach, no precise
 fire markers, event merging, UTC conversion or removal-as-extinction inference.
 This is a technical clarification, not a new blanket permission requirement.
+
+
+## Date-scoped research transport (2026-09-30)
+
+`tools/source_research/spain_cyl_fetch.py` fetches one explicitly selected
+bulletin date from the fixed JCyL records endpoint. The API 2.1 filter uses
+`fecha_del_parte=date'2026-09-29'`, following its documented date-literal syntax:
+https://help.opendatasoft.com/apis/ods-explore-v2/explore_v2.1.html
+
+A live check for 2026-09-29 returned 39 of 39 rows in one response: 21 at
+10:00 and 18 at 19:00, across nine provinces. Seven rows were SIN INCIDENCIAS.
+These are bulletin rows, not 39 distinct fires. Count agreement does not
+establish a complete, current incident snapshot.
+
+The research client makes one request only, capped at 100 rows and 1 MiB;
+there are no redirects, retries or automatic pagination. The 30-second timeout
+is a socket timeout, not an overall deadline. These are local research bounds,
+not publisher-approved polling limits. It rejects unexpected response types,
+compression, oversized bodies and rows from another date. Failed requests remain
+errors; empty results never imply all clear. Partial responses retain their
+incomplete status, and all results retain `snapshot_verified=False`.
+
+Synthetic tests cover query construction, invalid input, partial and empty
+responses, date mismatches, HTTP failure, representation and size boundaries.
+The client is not imported by the integration and adds no HA entity, calendar,
+map marker, scheduled polling or release. The coordinate, identity, bulletin
+completeness and field-level timezone questions above remain unresolved.
