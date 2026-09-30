@@ -1,4 +1,5 @@
 """Location forecasts preserve identity and isolate geometry, cache and failures."""
+import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock
@@ -110,7 +111,7 @@ async def test_successful_map_keeps_scope_even_when_cache_write_fails(hass, monk
     coordinator.client.async_forecast = AsyncMock(return_value=forecast())
     coordinator.client.async_map = AsyncMock(return_value=b'image')
     coordinator.client.export_map_cache = Mock(return_value={'provider': 'cache'})
-    coordinator._map_store = Mock(async_save=AsyncMock(side_effect=save_error))
+    coordinator._map_store = Mock(async_load=AsyncMock(return_value=None), async_save=AsyncMock(side_effect=save_error))
     monkeypatch.setattr('custom_components.terralyra_ignis.location_fire_risk_coordinator.analyze_risk_map',
                         Mock(return_value=(4, 47.6, 19.1)))
     result = await coordinator._async_update_data()
@@ -149,3 +150,55 @@ async def test_midnight_during_map_retrieval_does_not_publish_old_day(hass, monk
     with pytest.raises(UpdateFailed, match='expired'):
         await coordinator._async_update_data()
     assert coordinator.update_interval == timedelta(minutes=15)
+
+
+async def test_background_refresh_restores_cache_once_before_fetch(hass):
+    coordinator = make(hass)
+    calls = []
+
+    async def load():
+        calls.append('restore')
+        return None
+
+    async def fetch(*args):
+        calls.append('fetch')
+        return forecast()
+
+    coordinator._map_store = Mock(async_load=AsyncMock(side_effect=load))
+    coordinator.client.async_forecast = AsyncMock(side_effect=fetch)
+    coordinator.client.async_map = AsyncMock(side_effect=FireRiskError('missing'))
+    await coordinator.async_refresh()
+    await coordinator.async_refresh()
+    assert calls == ['restore', 'fetch', 'fetch']
+    await coordinator.async_shutdown()
+
+
+async def test_failed_restore_blocks_network_then_retries(hass):
+    coordinator = make(hass)
+    coordinator._map_store = Mock(async_load=AsyncMock(side_effect=[OSError(), None]))
+    coordinator.client.async_forecast = AsyncMock(return_value=forecast())
+    coordinator.client.async_map = AsyncMock(side_effect=FireRiskError('missing'))
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+    coordinator.client.async_forecast.assert_not_awaited()
+    await coordinator._async_update_data()
+    assert coordinator._map_store.async_load.await_count == 2
+    coordinator.client.async_forecast.assert_awaited_once()
+
+
+async def test_shutdown_cancels_ongoing_request(hass):
+    coordinator = make(hass)
+    started = asyncio.Event()
+
+    async def fetch(*args):
+        started.set()
+        await asyncio.Event().wait()
+
+    coordinator.client.async_forecast = AsyncMock(side_effect=fetch)
+    task = asyncio.create_task(coordinator.async_refresh())
+    await started.wait()
+    await coordinator.async_shutdown()
+    assert task.cancelled()
+    assert not coordinator._active_updates
+    await coordinator.async_refresh()
+    coordinator.client.async_forecast.assert_awaited_once()

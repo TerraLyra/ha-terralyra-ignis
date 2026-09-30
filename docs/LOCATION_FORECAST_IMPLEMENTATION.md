@@ -146,3 +146,21 @@ The coordinator rejects missing/old UTC product days before map retrieval and
 checks again after map processing to cover midnight rollover. A received result
 is not a permanent freshness guarantee: future entities/cards must also check
 its product day when rendering retained coordinator data.
+
+### Lifecycle foundation
+
+`LocationForecastRuntime` builds coordinators only from explicit eligible plans.
+Construction performs no storage/network I/O. `start()` is idempotent and staggers
+initial refreshes into deterministic slots 30–314 seconds after startup (at most
+ten locations); periodic updates remain coordinator-owned. HA's disabled-polling
+preference also suppresses startup. The caller supplies one shared provider gate.
+
+`close()` cancels delayed callbacks, owned listeners and ongoing requests, awaits
+cancellation, and leaves all stores/history intact. A closed owner cannot restart;
+configuration changes must close it before creating its replacement. Coordinators
+now restore cache lazily before their first background refresh, retry failed
+restores before network access, and cancel in-flight updates on shutdown.
+
+Integration setup, explicit settings UI, installation-wide gate sharing with
+legacy Home and public entities are still pending. The lifecycle class is not
+instantiated by setup yet and does not activate additional polling by itself.
