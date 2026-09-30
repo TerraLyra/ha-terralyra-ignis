@@ -3,12 +3,11 @@
 ## Current decision — 2026-09-28
 
 Offline research only. No production provider, scheduled retrieval, HA entities
-or release changes. The technical enquiry was submitted on September 28; reply
-is pending. A supported retrieval contract, lifecycle relationships and reliable
+or release changes. A supported retrieval contract, lifecycle relationships and reliable
 timestamp/geometry semantics remain unresolved. Explicit exercises are marked
 but retained; other records are not automatically classified as active fires.
 The entries below are chronological research notes; later findings supersede
-earlier implementation descriptions and enquiry status.
+earlier implementation descriptions.
 
 Official terms: https://fr-alert.gouv.fr/mentions-legales
 Site content is under Etalab 2.0 except explicitly identified third-party rights.
@@ -45,7 +44,7 @@ Tests cover size, malformed/missing/duplicate blocks, timestamps and preservatio
 Next evidence: an explicit exercise record, update/cancellation relationships,
 a winter or overseas example, and a supported incremental/list endpoint. Full
 archive HTML exceeded 4 MiB during earlier bounded inspection and is not a
-suitable per-installation polling design. No request has been sent to FR-Alert.
+suitable per-installation polling design.
 
 ## Explicit exercise evidence
 
@@ -143,7 +142,7 @@ cancellation or extinction follows from disappearance. Failed input raises an
 error rather than becoming an empty snapshot. Six regressions pass; the full
 suite passes 300 tests. No scheduled fetch or runtime entity was added.
 
-## Fresh comparison and technical enquiry route — 2026-09-28
+## Fresh comparison and remaining technical gates — 2026-09-28
 
 One new homepage retrieval stayed below 1 MiB. Comparison against the saved
 September 25 sample yielded 126 unchanged source records. This verifies the
@@ -153,16 +152,7 @@ covered synthetically. It does not prove freshness or completeness.
 Official contact route verified through the FR-Alert FAQ and contact page:
 https://www.fr-alert.gouv.fr/nous-contacter
 https://fr-alert.gouv.fr/foire-aux-questions
-No enquiry sent. Ask for supported machine access and publication latency,
+Remaining evidence needed: supported machine access and publication latency,
 coverage/retention of homepage versus archive, update/cancellation references,
 and recommended per-installation polling. Existing Etalab terms are not being
 replaced with an unnecessary blanket permission request.
-
-## Enquiry submitted — 2026-09-28
-
-The user confirmed submitting the prepared technical enquiry through the official
-FR-Alert contact form using the in-app browser. Response pending. This supersedes
-earlier unsent-status notes; do not send a duplicate. Questions cover supported
-machine access, homepage completeness/publication delay, update/cancellation
-relationships and recommended per-installation polling. Submission is not a
-technical confirmation or approval. Offline research remains separate from HA.

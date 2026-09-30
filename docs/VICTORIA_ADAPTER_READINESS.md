@@ -29,9 +29,8 @@ government open-data licensing must not be substituted for this product's terms.
 Needed evidence: an EMV developer agreement or official product-specific licence
 covering fetching, filtering and display in a distributed Home Assistant integration,
 with attribution, polling limits and retention conditions. Commercial Cloud reuse
-requires its own scope check. The user confirmed submitting the VicEmergency
-support form on 2026-09-20. A response and developer permission remain pending;
-no agreement has been accepted. Earlier entries below describe historical checks.
+requires its own scope check. Product-specific developer terms remain unresolved.
+Earlier entries below describe historical technical checks.
 
 ## Adapter acceptance criteria once access is resolved
 
@@ -92,10 +91,9 @@ still lists developer XML/JSON links. These conflicting/dated descriptions leave
 product-specific permission unresolved, rather than proving access is prohibited.
 
 Next evidence needed: current EMV developer conditions covering local fetching,
-filtering/display, attribution, polling and retention. A request could reference the
-exact CFA-listed getIncidentJSON endpoint and distinguish public local HACS use from
-any future commercial Cloud product. No enquiry was sent, agreement accepted, live
-HA entity created or release published. ACT remains experimental and unchanged.
+filtering/display, attribution, polling and retention. The exact CFA-listed getIncidentJSON endpoint requires a separate scope check
+for public local HACS use and any future commercial Cloud product. No runtime
+HA entity is implemented. ACT remains experimental and unchanged.
 
 ## Identity and update-time research — 2026-09-17
 

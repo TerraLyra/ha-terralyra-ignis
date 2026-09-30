@@ -28,17 +28,10 @@ Direct MoWaS multiplier connection requires an agreement; this does not itself
 establish whether public local RSS/API consumption needs the same agreement.
 
 Verified contact: nina@bbk.bund.de (official NINA legal notice).
-No German enquiry has been sent or confirmed. Proposed questions: supported
+Remaining technical gates: supported
 public RSS/API access for user-local Home Assistant installations, whether
 regional warning redistribution is covered, attribution/original-text retention,
-polling/cache guidance, and update/cancellation/expiry identifiers. Explain
-that IGNIS separates official reports from satellites and does not replace NINA.
+polling/cache guidance, and update/cancellation/expiry identifiers. IGNIS must separate official reports from satellite observations.
 
 Decision: continue bounded offline design; no duplicated runtime poller until
 access and added value are settled. Existing HA support is not source permission.
-
-## Enquiry submitted — 2026-09-28
-
-The user confirmed sending the prepared German enquiry. Reply pending; this
-supersedes the earlier unsent status. Do not send a duplicate. The user also
-confirmed that no replies have yet arrived to any provider enquiries.

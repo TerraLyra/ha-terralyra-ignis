@@ -45,5 +45,5 @@ to the incident map. This product cannot fill the active-incident coverage gap.
    from jurisdiction. Establish any provider-specific interpretation explicitly.
 4. Only then develop the bounded adapter with synthetic tests and opt-in behavior.
 
-A request draft is in [provider requests](PROVIDER_ACCESS_REQUEST_DRAFTS.md).
+
 No request was sent by the assistant. Victoria remains pending; ACT stays experimental.

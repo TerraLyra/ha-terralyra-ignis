@@ -56,22 +56,19 @@ are not automatically part of a HACS installation.
 | Source | Current position | Next gate |
 | --- | --- | --- |
 | NSW RFS / Queensland QFD | Existing optional report calendars | Maintain compatibility and source-specific semantics |
-| Victoria | Offline inspectors complete; user submitted access request on 2026-09-20 | Await developer terms and resolve remaining time/schema evidence before runtime work |
+| Victoria | Offline inspectors complete; product-specific terms unresolved | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
-| Tasmania TasALERT | User confirmed access request sent on 2026-09-21 | Await response, then review granted endpoints and terms |
-| Western Australia DFES | User confirmed access request sent on 2026-09-21 | Clarify dataset approval and distributed local authentication |
-| South Australia CFS | User confirmed clarification request sent on 2026-09-21 | Resolve product-specific reuse terms |
-| Northern Territory | Access preflight and enquiry draft ready | Confirm supported feed and reuse scope |
+| Tasmania TasALERT | Product-specific access unresolved | Verify supported endpoints and terms |
+| Western Australia DFES | Product-specific access unresolved | Clarify dataset approval and distributed local authentication |
+| South Australia CFS | Product-specific reuse unresolved | Resolve product-specific reuse terms |
+| Northern Territory | Access preflight complete | Confirm supported feed and reuse scope |
 
-Victoria, Tasmania, Western Australia and South Australia submissions are confirmed
-by the user; Northern Territory remains a draft. No approval is inferred from a publicly reachable endpoint.
-See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) and
-[request drafts](PROVIDER_ACCESS_REQUEST_DRAFTS.md). The submitted requests can progress through external review in parallel;
-this is not a promised implementation order.
+See [access preflight](PROVIDER_ACCESS_PREFLIGHT.md) for product-specific technical
+and licensing gates. A publicly reachable endpoint alone does not establish reuse rights.
 
 ## Development sequence
 
-1. Start outstanding access requests early while maintaining the released integration.
+1. Resolve product-specific access gates before implementing new adapters.
 2. Investigate reproducible defects and dependency maintenance independently of
    external permissions; retain focused identity/history regression checks.
 3. After access is settled, implement the next eligible provider with verified
@@ -134,8 +131,7 @@ production installation from this assessment.
 
 The user deferred additional BM validation again after the initial return sample.
 Keep independent vegetation-fire validation open for a later session; do not
-promote the offline location candidates to production. The user confirms that
-no replies to the submitted provider enquiries have arrived yet.
+promote the offline location candidates to production. Unresolved provider access gates remain open.
 
 ## Next eligible work — 2026-09-30
 
@@ -147,13 +143,11 @@ no replies to the submitted provider enquiries have arrived yet.
    Validate and describe these separately before proposing a maintenance release.
 3. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
    be reviewed offline without downloading linked articles or changing live HA.
-4. Review provider replies when received. France/Germany enquiries were confirmed
-   sent by the user; no reply or permission has been reported. Existing offline
-   research is not production approval.
+4. Resolve the France/Germany product access and technical gates before runtime
+   integration. Existing offline research is not production approval.
 5. Per-location fire-risk provider work remains planned, not delivered by the
    summary card. Reconcile the older [research record](FIRE_RISK_PROVIDER_RESEARCH.md)
    and its access gates before proposing runtime changes or new provider requests.
 
 Do not restart the paused optimization work or historical-counter investigation
-merely to fill the waiting period. Future live updates must leave HA restart to
-the user, as requested on 2026-09-30. Preserve user history.
+merely to fill the waiting period. Preserve user history.
