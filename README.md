@@ -42,6 +42,18 @@ are recorded in
 
 ## Product status
 
+Stable **0.31.0** adds an optional location summary with source health, current
+location-relative nearest-incident distance and an explicitly verified near-home
+fire-risk forecast binding. Canada/NIFC map controls follow their configured map
+switches and stay hidden when disabled or unavailable. Dashboard JavaScript files
+require a separate update; HACS updates the integration only. See
+[0.31.0 release notes](docs/RELEASE_0_31_0.md) and
+[summary setup](docs/LOCATION_SUMMARY_CARD.md).
+
+Versions 0.30.0–0.30.1 added the optional BM OKF report card and clearer accident
+labels. Display filters retain uncertain reports and do not delete source records
+or history. See [BM card setup](docs/BM_REPORT_CARD.md).
+
 Version 0.29.1 adds the actual successful NIFC retrieval timestamp to report
 markers and source-provided incident names to the optional report dialog title.
 See [release notes](docs/RELEASE_0_29_1.md).

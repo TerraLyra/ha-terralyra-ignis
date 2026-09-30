@@ -1,18 +1,22 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-09-29: stable integration 0.30.1, plus separately
-installed dashboard changes from PRs #75 and #76. Main-branch frontend changes
-are not a new HACS release.
+Status reconciled on 2026-09-30: stable integration 0.31.0, with separately
+updated optional dashboard resources. Main-branch changes after the release
+are not automatically part of a HACS installation.
 
 ## Delivered
 
 - Optional BM report card shipped in 0.30.0, with clearer accident labels in
   0.30.1. Display filtering preserves original reports and history. See
   [BM card](BM_REPORT_CARD.md) and [0.30.1 notes](RELEASE_0_30_1.md).
-- Optional per-location summary card (#75) is merged and separately installed
-  on the user's HA dashboard. It shows existing satellite counts and source
-  health; forecast, restrictions and nearest distance are not connected yet.
-- Report-map source visibility (#76) is merged and separately installed:
+- Optional per-location summary card (#75, #77, #80) shipped in 0.31.0. It shows
+  satellite counts, source health and the nearest active tracked incident inside
+  the selected location's radius. An explicitly verified near-home FRMv3 binding
+  shows forecast validity and receipt freshness; other locations do not gain a
+  forecast automatically. Official restrictions remain unconnected.
+- Sampled post-installation validation on 2026-09-30 confirmed the summary distance
+  matches its location sensor attribute. See [0.31.0 notes](RELEASE_0_31_0.md).
+- Report-map source visibility (#76) shipped in 0.31.0 and is separately installed:
   Canada/NIFC controls follow explicit map-switch associations. Disabled or
   unavailable sources are hidden; enabled sources with no reports remain
   selectable. See [map configuration](REPORT_DETAILS_CARD.md).
@@ -133,17 +137,23 @@ Keep independent vegetation-fire validation open for a later session; do not
 promote the offline location candidates to production. The user confirms that
 no replies to the submitted provider enquiries have arrived yet.
 
-## Next eligible work — 2026-09-29
+## Next eligible work — 2026-09-30
 
-1. Extend the location summary only after checking explicit existing per-location
-   entity associations: first forecast validity/freshness, then nearest distance.
-   Do not infer safety, restrictions, or a location from entity-name suffixes.
-2. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
+1. The summary forecast and nearest-distance extension is complete in 0.31.0.
+   Keep its explicit location association and missing-data behavior when extending it.
+2. BM fixes from #82 are on main but are **not included in 0.31.0**: reviewed Makó
+   forms and Budapest direction context are offline location-research changes;
+   the bounded outbuilding vocabulary also changes the shared fire-scope classifier.
+   Validate and describe these separately before proposing a maintenance release.
+3. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
    be reviewed offline without downloading linked articles or changing live HA.
-3. Review provider replies when received. France/Germany enquiries were confirmed
+4. Review provider replies when received. France/Germany enquiries were confirmed
    sent by the user; no reply or permission has been reported. Existing offline
    research is not production approval.
+5. Per-location fire-risk provider work remains planned, not delivered by the
+   summary card. Reconcile the older [research record](FIRE_RISK_PROVIDER_RESEARCH.md)
+   and its access gates before proposing runtime changes or new provider requests.
 
 Do not restart the paused optimization work or historical-counter investigation
-merely to fill the waiting period. The summary-card extension is a development
-candidate, not a claim that forecast/distance wiring is already implemented.
+merely to fill the waiting period. Future live updates must leave HA restart to
+the user, as requested on 2026-09-30. Preserve user history.
