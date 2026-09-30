@@ -12,7 +12,9 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import CONF_FIRE_RISK_RADIUS_KM, CONF_RADIUS_KM, DEFAULT_RADIUS_KM, DOMAIN
+from .fire_risk_context import FireRiskRequestContext
 from .products.fire_risk import (
+    PRODUCT_ID,
     FireRiskClient,
     FireRiskDateUnavailableError,
     FireRiskError,
@@ -61,15 +63,28 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
         if importer is not None:
             importer(await self._map_store.async_load())
 
-    async def _async_update_data(self) -> FireRiskForecast:
+    def _home_request_context(self) -> FireRiskRequestContext:
+        """Snapshot the legacy Home inputs on each refresh, preserving fallback."""
         try:
-            latitude = float(self.hass.config.latitude)
-            longitude = float(self.hass.config.longitude)
-            radius = float(
-                self.entry.options.get(
+            return FireRiskRequestContext(
+                location_id="ha-home",
+                provider="eumetsat_lsa_saf_frmv3",
+                product=PRODUCT_ID,
+                latitude=float(self.hass.config.latitude),
+                longitude=float(self.hass.config.longitude),
+                radius_km=float(self.entry.options.get(
                     CONF_FIRE_RISK_RADIUS_KM,
                     self.entry.options.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM),
-                )
+                )),
+            )
+        except (TypeError, ValueError) as err:
+            raise FireRiskError("Invalid Home forecast configuration") from err
+
+    async def _async_update_data(self) -> FireRiskForecast:
+        try:
+            context = self._home_request_context()
+            latitude, longitude, radius = (
+                context.latitude, context.longitude, context.radius_km
             )
             forecast = await self.client.async_forecast(latitude, longitude, radius)
             bbox = map_bounds(latitude, longitude, radius)
