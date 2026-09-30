@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from io import BytesIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from defusedxml import ElementTree as ET
@@ -18,6 +18,9 @@ from defusedxml.common import DefusedXmlException
 from PIL import Image, UnidentifiedImageError
 
 from .http import parse_retry_after
+
+if TYPE_CHECKING:
+    from ..fire_risk_requests import ForecastRequestGate
 
 PRODUCT_ID = "FRMv3"
 LSA_ID = "LSA-504.3"
@@ -128,8 +131,11 @@ class FireRiskForecast:
 class FireRiskClient:
     """Read bounded FRMv3 values and map images from the official WMS host."""
 
-    def __init__(self, session: ClientSession) -> None:
+    def __init__(
+        self, session: ClientSession, *, request_gate: ForecastRequestGate | None = None
+    ) -> None:
         self._session = session
+        self._request_gate = request_gate
         self._map_cache_key: tuple[tuple[float, float, float, float], date] | None = None
         self._map_cache_value: bytes | None = None
         self._map_cache_time: datetime | None = None
@@ -312,6 +318,12 @@ class FireRiskClient:
         return image
 
     async def _async_get(self, params: dict[str, str], limit: int) -> bytes:
+        """Gate every HTTP operation when explicitly supplied by the owner."""
+        if self._request_gate is not None:
+            return await self._request_gate.run(lambda: self._async_get_direct(params, limit))
+        return await self._async_get_direct(params, limit)
+
+    async def _async_get_direct(self, params: dict[str, str], limit: int) -> bytes:
         try:
             async with self._session.get(
                 WMS_URL, params=params, headers={"User-Agent": USER_AGENT},

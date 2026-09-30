@@ -1,7 +1,8 @@
 # Per-location forecast implementation plan
 
-Status: design only, based on the 0.31.1 code. No new requests, entities or
-provider activation are introduced by this plan.
+Status: foundations implemented; per-location runtime activation remains pending.
+The existing Home forecast remains operational. No additional location requests
+or public entities have been enabled.
 
 ## Existing behavior
 
@@ -104,3 +105,22 @@ into existing Home retrieval. During a shared cooldown, peers receive a local sc
 a network call or a long sleep inside the coordinator timeout. Bounded UTC
 deadline import/export supports restart recovery; runtime orchestration must
 still persist/restore that state and schedule deferred updates before activation.
+
+### Durable request-gate foundation
+
+`FireRiskClient` accepts an optional shared request gate. When supplied, it gates
+every actual HTTP operation (point, capabilities and map), including errors,
+while map cache hits require no request. Existing setup supplies no gate and
+retains its current behavior.
+
+`PersistentForecastRequestGate` restores a provider-labelled cooldown before its
+first request and saves a new cooldown before releasing queued peers. A failed
+load prevents traffic and can be retried; a failed/cancelled save remains dirty
+and must succeed before another request. Malformed, wrong-provider or unsafe
+future state fails closed; a valid expired deadline permits retrieval. No state
+file is deleted, and legacy Home map storage is untouched.
+
+The runtime owner must create exactly one gate and installation-wide FRMv3 store,
+share it across entries and clients, and schedule local deferrals appropriately.
+That owner, config flow and additional coordinators are still pending. These
+classes alone neither create storage nor increase live request volume.
