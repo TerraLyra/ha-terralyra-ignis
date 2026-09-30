@@ -67,3 +67,40 @@ current licence clearance or a commitment to activate a provider.
 
 Implementation, focused tests and candidate CI precede any release. Live deployment
 must be validated separately; this plan makes no live acceptance claim.
+
+## Foundation progress
+
+The Home request context is implemented and retains legacy radius fallback,
+cache identity and cadence. Pure per-location settings/planning and scoped cache
+envelopes are now implemented separately. They are not wired into config flow,
+coordinator creation or public entities: an eligible plan is not a live forecast.
+Missing, disabled and uncovered locations receive no request context. No settings
+are inferred from a location name or its active-fire radius.
+
+A scoped cache envelope checks exact context identity first; provider cache import
+must still enforce payload bounds, validity date and age. These envelopes must not
+replace the legacy Home cache format during migration.
+
+### Retrieval cost before runtime expansion
+
+The current client needs at most nine point samples to find today's valid pixel,
+then nine future-day point requests: at most 18 point requests per successful
+forecast plus one coordinator map request (19 total without a map cache hit).
+An all-nodata result uses nine point requests. A current-day 404 can add one
+capabilities request before aborting the refresh; future-day 404 is missing data.
+These figures bound one coordinator refresh, not user-triggered camera requests,
+retries, total hourly traffic or a provider-authorized polling allowance.
+
+Ten additional locations plus legacy Home could therefore produce 209 requests
+in one uncached successful refresh cycle. Runtime expansion must introduce shared
+bounded scheduling/backoff and explicit opt-in before creating those coordinators.
+No additional polling is enabled by the pure planner or these tests.
+
+A shared opt-in request gate now serializes operations and spaces them by at least
+one second after completion. Rate-limit or transient service errors pause peers
+for the bounded 15–60 minute retry period without retrying the failed operation
+inside the gate. This is a local policy, not an upstream quota. It is not wired
+into existing Home retrieval. During a shared cooldown, peers receive a local scheduling deferral without
+a network call or a long sleep inside the coordinator timeout. Bounded UTC
+deadline import/export supports restart recovery; runtime orchestration must
+still persist/restore that state and schedule deferred updates before activation.

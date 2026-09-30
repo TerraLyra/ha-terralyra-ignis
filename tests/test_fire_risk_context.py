@@ -76,3 +76,25 @@ async def test_refresh_uses_one_home_context(hass, monkeypatch):
     client.async_forecast.assert_awaited_once_with(47.5, 19.0, 25.0)
     client.async_map.assert_awaited_once()
     assert coordinator.update_interval == interval
+
+
+@pytest.mark.parametrize("changes", [
+    {"location_id": "other"}, {"latitude": 47.50000001}, {"longitude": 19.00000001},
+    {"radius_km": 101}, {"provider": "other"}, {"product": "other"},
+])
+def test_cache_cannot_cross_contexts(changes):
+    saved = context().wrap_map_cache({"png": "placeholder"})
+    assert context(**changes).unwrap_map_cache(saved) is None
+    assert context().unwrap_map_cache(saved) == {"png": "placeholder"}
+
+
+def test_cache_identity_normalizes_numbers_without_rounding():
+    assert context(radius_km=100).cache_identity == context(radius_km=100.0).cache_identity
+    assert context(latitude=-0.0).cache_identity == context(latitude=0).cache_identity
+
+
+@pytest.mark.parametrize("payload", [None, {}, {"png": "legacy"},
+    {"context_schema": True}, {"context_schema": 2},
+])
+def test_scoped_cache_rejects_unknown_envelopes(payload):
+    assert context().unwrap_map_cache(payload) is None
