@@ -1,11 +1,12 @@
 # Fire-risk provider research
 
-Status: September 2026 technical decision record for the location-aware
-fire-risk work planned for IGNIS 0.16.
+Status: historical September 2026 provider research. Per-location runtime
+forecasting remains unimplemented in 0.31.1. See the current
+[implementation plan](LOCATION_FORECAST_IMPLEMENTATION.md).
 
 ## Decision
 
-Build the 0.16 runtime around a provider-neutral, per-location fire-risk
+The proposed runtime uses a provider-neutral, per-location fire-risk
 interface. Keep LSA SAF FRMv3 as the first production provider and run a
 bounded technical spike against the European Commission Joint Research
 Centre's Global Wildfire Information System (GWIS) before enabling it.
@@ -52,7 +53,7 @@ operational FWI product. A self-calculated provider therefore requires:
 This is feasible, and Open-Meteo makes the weather input easy to obtain, but it
 is more scientific and maintenance risk than consuming GWIS's operational FWI.
 
-## 0.16 provider contract
+## Proposed provider contract
 
 Every fire-risk provider must expose, without assuming Home:
 
