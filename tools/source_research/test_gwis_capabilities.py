@@ -27,6 +27,16 @@ class GwisCapabilitiesTests(unittest.TestCase):
         self.assertTrue(result['queryable_explicit'])
         self.assertFalse(result['production_ready'])
 
+    def test_service_formats_do_not_override_layer_queryability(self):
+        raw = document(layer()).replace(b'<Capability>', b'<Capability><Request>'
+            b'<GetMap><Format>image/tiff</Format></GetMap>'
+            b'<GetFeatureInfo><Format>text/plain</Format></GetFeatureInfo></Request>')
+        result = inspect_capabilities(raw)
+        self.assertEqual(result['map_formats'], ['image/tiff'])
+        self.assertEqual(result['feature_info_formats'], ['text/plain'])
+        self.assertFalse(result['queryable_explicit'])
+        self.assertFalse(result['production_ready'])
+
     def test_missing_attributes_remain_unknown(self):
         result = inspect_capabilities(document('<Layer><Name>ecmwf.fwi</Name></Layer>'))
         self.assertIsNone(result['queryable_explicit'])

@@ -55,6 +55,7 @@ def inspect_capabilities(payload: bytes) -> dict:
         'time_expression': dimension.text.strip() if dimension is not None and dimension.text else None,
         'time_default': dimension.get('default') if dimension is not None else None,
         'abstract': layer.findtext(NS + 'Abstract'),
+        'map_formats': [e.text for e in root.findall('.//' + NS + 'GetMap/' + NS + 'Format')],
         'feature_info_formats': [e.text for e in root.findall('.//' + NS + 'GetFeatureInfo/' + NS + 'Format')],
         'production_ready': False,
         'unresolved': ['actual_product_dates', 'model_issuance', 'numeric_or_class_semantics',

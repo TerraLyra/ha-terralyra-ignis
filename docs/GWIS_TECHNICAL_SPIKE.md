@@ -48,6 +48,26 @@ response demonstrates that HTTP success and a valid image do not establish a
 valid forecast. An empty image must never become low danger. These are isolated
 samples, not a soak test or proof that current and future dates are authoritative.
 
+## Numerical TIFF control
+
+The advertised `image/tiff` format was also tested with the same parameters.
+Unlike the download page's PNG, this returned a single 32-bit IEEE floating-point
+band with georeferencing, so a numerical route is a viable candidate:
+
+| TIME | Bytes | Observed values | SHA-256 |
+| --- | --- | --- | --- |
+| 2026-10-01 | 16810 | 0 to 56.51939010620117 | `78b944a7430868c13562c6f65ca7596971b223a2010366cfbe6fe11bf1407d02` |
+| 2099-12-31 | 16810 | All 4096 pixels equal 0 | `ca03e40b7acada95fcc781b0724d7f9efd2a0226736b4c0de7bdc7ecfd2926b6` |
+
+Both samples have one uncompressed band, sample-format tag 339 = 3, and no
+GDAL_NODATA tag (42113). Thus an absent product can look like a legitimate zero-FWI
+raster. Do not turn these responses into low-risk sensors. A nonzero raster alone
+also does not establish issuance or the semantics of the requested date.
+A production decoder needs independent product availability and a supported
+nodata/mask convention before it can distinguish valid zero from missing data.
+Do not solve this by declaring every zero invalid: genuine zero FWI is possible.
+The original numerical values remain unclassified research evidence.
+
 ## Offline tool
 
 Run `python tools/source_research/gwis_capabilities.py saved-capabilities.xml`.
