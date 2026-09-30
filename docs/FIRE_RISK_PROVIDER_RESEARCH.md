@@ -1,7 +1,8 @@
 # Fire-risk provider research
 
-Status: historical September 2026 provider research. Per-location runtime
-forecasting remains unimplemented in 0.31.1. See the current
+Status: historical September 2026 provider research. Per-location FRMv3 runtime
+forecasting shipped in 0.32.0. GWIS remains research only; see the
+[current service spike](GWIS_TECHNICAL_SPIKE.md). See the current
 [implementation plan](LOCATION_FORECAST_IMPLEMENTATION.md).
 
 ## Decision

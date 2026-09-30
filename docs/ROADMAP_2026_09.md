@@ -1,6 +1,6 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-09-30: stable integration 0.31.0, with separately
+Status reconciled on 2026-09-30: stable integration 0.32.0, with separately
 updated optional dashboard resources. Main-branch changes after the release
 are not automatically part of a HACS installation.
 
@@ -137,17 +137,18 @@ promote the offline location candidates to production. Unresolved provider acces
 
 1. The summary forecast and nearest-distance extension is complete in 0.31.0.
    Keep its explicit location association and missing-data behavior when extending it.
-2. BM fixes from #82 are on main but are **not included in 0.31.0**: reviewed Makó
-   forms and Budapest direction context are offline location-research changes;
-   the bounded outbuilding vocabulary also changes the shared fire-scope classifier.
-   Validate and describe these separately before proposing a maintenance release.
-3. Keep independent BM vegetation-fire validation deferred; a new RSS sample can
-   be reviewed offline without downloading linked articles or changing live HA.
-4. Resolve the France/Germany product access and technical gates before runtime
+2. Per-location FRMv3 forecasts and explicit summary bindings shipped in 0.32.0.
+   Complete installation-specific dashboard bindings and acceptance separately.
+   See [implementation](LOCATION_FORECAST_IMPLEMENTATION.md).
+3. BM fixes from #82 and subsequent reviewed name forms have shipped. Keep
+   independent vegetation-fire validation deferred; offline location candidates
+   do not enable automatic production geolocation.
+4. Resolve France/Germany product access and technical gates before runtime
    integration. Existing offline research is not production approval.
-5. Per-location fire-risk provider work remains planned, not delivered by the
-   summary card. Reconcile the older [research record](FIRE_RISK_PROVIDER_RESEARCH.md)
-   and its access gates before proposing runtime changes or new provider requests.
+5. GWIS is the next worldwide forecast candidate, not an active provider. The
+   [service spike](GWIS_TECHNICAL_SPIKE.md) found a non-queryable FWI layer and a
+   time range that does not establish actual forecast availability. Resolve these
+   gates before a runtime adapter.
 
 Do not restart the paused optimization work or historical-counter investigation
 merely to fill the waiting period. Preserve user history.
