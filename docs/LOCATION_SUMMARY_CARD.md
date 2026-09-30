@@ -1,8 +1,7 @@
 # Optional location summary card
 
-Merged in PR #75 and separately installed on the user's HA dashboard. Not yet
-bundled into a new HACS release. This Hungarian
-card reads existing per-location operational-status entities only. It never
+This optional Hungarian card reads per-location operational-status entities and
+explicitly bound forecast sensors. It never
 calls a service, fetches a provider, or changes HA state/history.
 
 When installing a reviewed version, copy frontend/ignis-location-summary.js to
@@ -49,9 +48,9 @@ updates, literal untrusted text, exact details routing and mobile width.
 
 ## Optional near-home forecast binding
 
-The new main-branch candidate accepts an explicit binding after the installer
-verifies that the monitored location is the HA home point. The existing FRMv3
-coordinator fetches only for HA home, not for every monitored location.
+The legacy near-home binding remains supported after verifying that the
+monitored location is the HA home point. The legacy FRMv3 coordinator fetches
+for HA home; separately enabled location forecasts use the binding below.
 
 ```yaml
 forecast:
