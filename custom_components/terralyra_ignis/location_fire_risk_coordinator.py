@@ -1,6 +1,7 @@
 """Explicit-context FRMv3 coordinator; not activated by integration setup yet."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -52,6 +53,8 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
                 or not south <= context.latitude <= north
                 or not isinstance(request_gate, PersistentForecastRequestGate)):
             raise FireRiskError("Unsupported location forecast context or request gate")
+        self._cache_restored = False
+        self._active_updates: set[asyncio.Task] = set()
         self._context = context
         self.client = FireRiskClient(session, request_gate=request_gate)
         self._map_store = Store(hass, 1,
@@ -67,7 +70,9 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
         return self._context
 
     async def _async_setup(self) -> None:
-        import_scoped_map_cache(self.client, self.context, await self._map_store.async_load())
+        if not self._cache_restored:
+            import_scoped_map_cache(self.client, self.context, await self._map_store.async_load())
+            self._cache_restored = True
 
     def _defer(self, error: ForecastRequestDeferred) -> None:
         # Local waiting does not increment an upstream failure counter or issue
@@ -75,7 +80,31 @@ class LocationFireRiskCoordinator(DataUpdateCoordinator[LocationFireRiskForecast
         self.update_interval = min(timedelta(hours=1),
             max(timedelta(seconds=1), error.retry_after))
 
+    async def async_shutdown(self) -> None:
+        """Stop timers and wait until ongoing location requests are cancelled."""
+        await super().async_shutdown()
+        tasks = tuple(task for task in self._active_updates if task is not asyncio.current_task())
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
     async def _async_update_data(self) -> LocationFireRiskForecast:
+        task = asyncio.current_task()
+        self._active_updates.add(task)
+        try:
+            # async_refresh does not call _async_setup; support delayed startup
+            # and retry failed restores before allowing any provider request.
+            try:
+                await self._async_setup()
+            except OSError as err:
+                self.update_interval = _retry_interval(1)
+                raise UpdateFailed("Location forecast cache could not be restored") from err
+            return await self._async_fetch()
+        finally:
+            self._active_updates.discard(task)
+
+    async def _async_fetch(self) -> LocationFireRiskForecast:
         context = self.context
         try:
             forecast = await self.client.async_forecast(
