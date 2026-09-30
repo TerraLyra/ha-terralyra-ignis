@@ -1,11 +1,11 @@
 """Shared pacing without real network traffic or wall-clock sleeps."""
 import asyncio
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.terralyra_ignis.fire_risk_requests import ForecastRequestGate
+from custom_components.terralyra_ignis.fire_risk_requests import ForecastRequestDeferred, ForecastRequestGate
 from custom_components.terralyra_ignis.products.fire_risk import FireRiskRateLimitError
 
 
@@ -48,8 +48,14 @@ async def test_rate_limit_pauses_peers_without_retrying(retry, expected):
         await gate.run(failing)
     assert exc.value is error
     failing.assert_awaited_once()
-    assert await gate.run(AsyncMock(return_value=42)) == 42
-    assert clock.waits == [expected]
+    peer = AsyncMock(return_value=42)
+    with pytest.raises(ForecastRequestDeferred) as deferred:
+        await gate.run(peer)
+    assert deferred.value.retry_after.total_seconds() == expected
+    peer.assert_not_awaited()
+    assert clock.waits == []
+    clock.now += expected
+    assert await gate.run(peer) == 42
 
 
 async def test_concurrent_requests_are_serialized():
@@ -84,3 +90,25 @@ async def test_cancellation_releases_gate_and_preserves_pause():
         await gate.run(operation)
     assert await gate.run(AsyncMock(return_value="next")) == "next"
     assert clock.waits == [1.0]
+
+
+async def test_cooldown_round_trip_across_monotonic_clock_reset():
+    clock = Clock()
+    now = datetime(2026, 9, 30, tzinfo=UTC)
+    gate = ForecastRequestGate(clock=clock.read, sleep=clock.sleep, utcnow=lambda: now)
+    with pytest.raises(FireRiskRateLimitError):
+        await gate.run(AsyncMock(side_effect=FireRiskRateLimitError("limit", 429)))
+    saved = gate.export_cooldown()
+    restarted = ForecastRequestGate(clock=lambda: 100.0, utcnow=lambda: now + timedelta(seconds=100))
+    assert restarted.import_cooldown(saved)
+    with pytest.raises(ForecastRequestDeferred) as exc:
+        await restarted.run(AsyncMock())
+    assert exc.value.retry_after.total_seconds() == 800
+
+
+@pytest.mark.parametrize("until", ["invalid", "2026-09-30T00:10:00",
+    "2026-09-29T00:10:00+00:00", "2026-10-30T00:10:00+00:00"])
+def test_cooldown_restore_rejects_unsafe_deadlines(until):
+    gate = ForecastRequestGate(utcnow=lambda: datetime(2026, 9, 30, tzinfo=UTC))
+    assert not gate.import_cooldown({"schema": 1, "until": until})
+    assert gate.export_cooldown() is None

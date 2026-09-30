@@ -100,6 +100,7 @@ A shared opt-in request gate now serializes operations and spaces them by at lea
 one second after completion. Rate-limit or transient service errors pause peers
 for the bounded 15–60 minute retry period without retrying the failed operation
 inside the gate. This is a local policy, not an upstream quota. It is not wired
-into existing Home retrieval. Runtime orchestration must accommodate waiting
-outside coordinator update timeouts and preserve cooldown state over restarts
-before this gate is used for additional locations.
+into existing Home retrieval. During a shared cooldown, peers receive a local scheduling deferral without
+a network call or a long sleep inside the coordinator timeout. Bounded UTC
+deadline import/export supports restart recovery; runtime orchestration must
+still persist/restore that state and schedule deferred updates before activation.
