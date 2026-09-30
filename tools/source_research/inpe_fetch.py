@@ -1,6 +1,6 @@
 """Explicit research fetch of INPE's viewer endpoint; no timer or persistence."""
 from urllib.request import HTTPRedirectHandler, Request, build_opener
-from inpe_centroids import MAX_BYTES, parse_centroids
+from inpe_centroids import MAX_BYTES, STATES, parse_centroids
 
 ENDPOINT = 'https://data.inpe.br/queimadas/portal/api/eventos/centroides'
 
@@ -10,13 +10,16 @@ class _NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def fetch_centroids():
+def fetch_centroids(*, state=None):
     """One request, 30s socket timeout, 8 MiB cap, no redirects or retries.
 
     This timeout is not an absolute wall-clock deadline. HTTP Date is not a
     source observation/publication timestamp. No custom coordinates are sent.
     """
-    request = Request(ENDPOINT, headers={'Accept': 'application/json',
+    if state is not None and (not isinstance(state, str) or state not in STATES):
+        raise ValueError('Invalid state')
+    url = ENDPOINT if state is None else ENDPOINT + '?uf=' + state
+    request = Request(url, headers={'Accept': 'application/json',
                                         'Accept-Encoding': 'identity'})
     with build_opener(_NoRedirect()).open(request, timeout=30) as response:
         if (response.status != 200 or response.headers.get_content_type() != 'application/json'
@@ -29,4 +32,4 @@ def fetch_centroids():
         payload = response.read(MAX_BYTES + 1)
         if length is not None and len(payload) != int(length):
             raise ValueError('Response length mismatch')
-    return parse_centroids(payload)
+    return parse_centroids(payload, requested_state=state)
