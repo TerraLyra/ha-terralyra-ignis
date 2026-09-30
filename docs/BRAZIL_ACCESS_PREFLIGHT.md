@@ -145,3 +145,18 @@ processing days, event date spans and a distinct fusion lifecycle. The exact
 unqualified API timestamp representation, public successor linkage and external
 client frequency remain unverified. No merge lineage is invented and no history
 is deleted. Future display may omit unresolved clock times and preserve dates.
+
+## Offline location view
+
+`inpe_location_view.py` builds a location-specific report and an escaped,
+self-contained Hungarian HTML preview. Its explicit reference coordinates have
+no Home fallback. Great-circle selection uses representative points only, not
+polygon intersection or distance to the fire perimeter. Selected states remain
+visible; the view does not claim that they cover the entire radius.
+
+Unknown categories/statuses retain source labels. Missing area stays unavailable,
+not zero. The view displays provisional provenance, retrieval time separately
+from unknown observation time, attribution, CC BY-SA 4.0 and transformation
+notices. Empty results explicitly do not establish absence of fire. This remains
+an offline research view, with no HA card registration, scheduled requests or
+production activation.
