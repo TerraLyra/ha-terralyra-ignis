@@ -1,8 +1,8 @@
 # Per-location FRMv3 forecasts
 
-Status: implemented on the development branch; candidate validation precedes
-release. Live deployment has not been validated. Other forecast providers are
-not activated by this feature.
+Status: shipped in 0.32.0. Automated checks cover the contracts below;
+installation-specific live acceptance is a separate step. Other forecast
+providers are not activated by this feature.
 
 ## Explicit settings and identity
 

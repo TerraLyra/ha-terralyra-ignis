@@ -78,7 +78,7 @@ The binding is optional and existing unbound cards continue to work. Replace the
 existing JS resource and change its version query after review, without adding a
 duplicate resource. No backend or Recorder migration is required.
 
-## Per-location forecast binding (development version)
+## Per-location forecast binding (0.32.0+)
 
 In integration options, open monitored-location management, select **Location
 fire-risk forecast**, choose an enabled covered location and enter its independent
