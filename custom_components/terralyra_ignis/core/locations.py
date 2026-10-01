@@ -13,6 +13,7 @@ LOCATION_NAME = "name"
 LOCATION_LATITUDE = "latitude"
 LOCATION_LONGITUDE = "longitude"
 LOCATION_RADIUS_KM = "radius_km"
+LOCATION_ALERT_RADIUS_KM = "alert_radius_km"
 LOCATION_ENABLED = "enabled"
 LOCATION_SOURCE = "source"
 LOCATION_SOURCE_HOME_ASSISTANT = "home_assistant"
@@ -32,10 +33,16 @@ class MonitoredLocation:
     radius_km: float
     enabled: bool
     source: str
+    alert_radius_km: float | None = None
+
+    @property
+    def effective_alert_radius_km(self) -> float:
+        """Legacy records retain their observation radius until explicitly edited."""
+        return self.radius_km if self.alert_radius_km is None else self.alert_radius_km
 
     def as_dict(self) -> dict[str, str | float | bool]:
         """Return the stable config-entry representation."""
-        return {
+        result = {
             LOCATION_ID: self.id,
             LOCATION_NAME: self.name,
             LOCATION_LATITUDE: self.latitude,
@@ -44,6 +51,9 @@ class MonitoredLocation:
             LOCATION_ENABLED: self.enabled,
             LOCATION_SOURCE: self.source,
         }
+        if self.alert_radius_km is not None:
+            result[LOCATION_ALERT_RADIUS_KM] = self.alert_radius_km
+        return result
 
 
 def validate_monitored_location(location: MonitoredLocation) -> None:
@@ -55,6 +65,9 @@ def validate_monitored_location(location: MonitoredLocation) -> None:
         MIN_RADIUS_KM <= location.radius_km <= MAX_RADIUS_KM
     ):
         raise ValueError("Monitored-location radius is out of range")
+    alert = location.effective_alert_radius_km
+    if isinstance(alert, bool) or not math.isfinite(alert) or not 0 < alert <= location.radius_km:
+        raise ValueError("Alert radius must be positive and no larger than monitoring radius")
     if location.source not in {
         LOCATION_SOURCE_HOME_ASSISTANT,
         LOCATION_SOURCE_MANUAL,
@@ -66,12 +79,16 @@ def monitored_location_from_dict(values: dict[str, object]) -> MonitoredLocation
     """Validate and deserialize one config-entry location record."""
     if type(values[LOCATION_ENABLED]) is not bool:
         raise ValueError("Monitored-location enabled state must be boolean")
+    if isinstance(values.get(LOCATION_ALERT_RADIUS_KM), bool):
+        raise ValueError("Alert radius must be numeric")
     location = MonitoredLocation(
         id=str(values[LOCATION_ID]).strip(),
         name=str(values[LOCATION_NAME]).strip(),
         latitude=float(values[LOCATION_LATITUDE]),
         longitude=float(values[LOCATION_LONGITUDE]),
         radius_km=float(values[LOCATION_RADIUS_KM]),
+        alert_radius_km=(float(values[LOCATION_ALERT_RADIUS_KM])
+                         if LOCATION_ALERT_RADIUS_KM in values else None),
         enabled=values[LOCATION_ENABLED],
         source=str(values[LOCATION_SOURCE]),
     )

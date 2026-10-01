@@ -6,7 +6,7 @@ export function summarizeLocation(entity, locationId) {
   const status=['unknown','unavailable'].includes(entity.state)?'unavailable':a.operational_status;
   const usable=['available','degraded','partial'].includes(status);
   const count=v=>usable && Number.isSafeInteger(v) && v>=0?v:null;
-  return {name:a.location_name||locationId,status:statusLabels[status]||'Ismeretlen adatellátás',active:count(a.active_incidents),multi:count(a.multi_source_incidents),nearest:usable&&Number.isFinite(a.nearest_incident_distance_km)&&a.nearest_incident_distance_km>=0?a.nearest_incident_distance_km:null,sources:a.source_health,received:a.last_received_at};
+  return {name:a.location_name||locationId,status:statusLabels[status]||'Ismeretlen adatellátás',active:count(a.active_incidents),multi:count(a.multi_source_incidents),nearest:usable&&Number.isFinite(a.nearest_incident_distance_km)&&a.nearest_incident_distance_km>=0?a.nearest_incident_distance_km:null,sources:a.source_health,received:a.last_received_at,monitoringRadius:a.monitoring_radius_km,alertRadius:a.alert_radius_km};
 }
 // FRMv3 validity dates are UTC product dates; generated_at is retrieval time.
 const riskLabels={low:'Alacsony',moderate:'Mérsékelt',high:'Magas',very_high:'Nagyon magas',extreme:'Szélsőséges'};
@@ -59,6 +59,8 @@ class IgnisLocationSummary extends HTMLElement {
     for(const [n,label] of [[model.active,'aktívként követett műholdas esemény'],[model.multi,'több forrás által észlelt esemény']]){const p=this.node('p'),number=this.node('span',n??'—');number.className='number';p.append(number,this.node('span',label));counts.append(p);}card.append(counts);
     if(model.active===null)card.append(this.node('p','A jelenlegi eseményszám nem állapítható meg.'));
     card.append(this.node('p',model.nearest===null?'Nincs ellenőrizhető távolságadat ehhez a helyszínhez.':`Legközelebbi követett műholdas esemény a helyszín sugarán belül: ${model.nearest.toLocaleString(this._hass?.locale?.language||'hu',{maximumFractionDigits:2})} km`));
+    if(Number.isFinite(model.monitoringRadius)&&Number.isFinite(model.alertRadius)&&model.alertRadius>0&&model.alertRadius<=model.monitoringRadius)
+      card.append(this.node('p',`Megfigyelés: ${model.monitoringRadius} km · Riasztás: ${model.alertRadius} km`));
     card.append(this.node('h3','Adatforrások'));
     const list=this.node('ul');for(const source of model.sources){if(!source||typeof source!=='object')continue;list.append(this.node('li',`${source.name||source.provider||'Ismeretlen forrás'}${source.satellite?' · '+source.satellite:''}: ${statusLabels[source.status]||({delayed:'Késleltetett',outage:'Forráskiesés',auth_error:'Hozzáférési hiba',no_product:'Nincs termék'}[source.status])||'Ismeretlen állapot'}`));}card.append(list);
     const date=typeof model.received==='string'?new Date(model.received):null;

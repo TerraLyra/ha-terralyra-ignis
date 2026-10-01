@@ -122,6 +122,8 @@ def test_matches_are_exposed_as_bounded_cluster_attributes() -> None:
             "location_name": "Home",
             "distance_km": 0.0,
             "location_radius_km": 10,
+            "alert_radius_km": 10,
+            "inside_alert_radius": True,
             "direction": "HERE",
             "inside_radius": True,
             "distance_trend": "unknown",

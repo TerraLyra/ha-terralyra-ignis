@@ -150,7 +150,9 @@
         "location_radius_km": 50,
         "direction": "W",
         "inside_radius": false,
-        "distance_trend": "unknown"
+        "distance_trend": "unknown",
+        "alert_radius_km": 50,
+        "inside_alert_radius": false
       },
       {
         "incident_id": "family",
@@ -160,14 +162,18 @@
         "location_radius_km": 250,
         "direction": "N",
         "inside_radius": true,
-        "distance_trend": "approaching"
+        "distance_trend": "approaching",
+        "alert_radius_km": 250,
+        "inside_alert_radius": true
       }
     ],
     "location_id": "remote",
     "location_name": "Remote",
     "location_radius_km": 250,
     "direction": "N",
-    "inside_radius": true
+    "inside_radius": true,
+    "alert_radius_km": 250,
+    "inside_alert_radius": true
   },
   "outside_only": {
     "latitude": 38.123457,
@@ -224,7 +230,9 @@
         "location_radius_km": 50,
         "direction": "W",
         "inside_radius": false,
-        "distance_trend": "unknown"
+        "distance_trend": "unknown",
+        "alert_radius_km": 50,
+        "inside_alert_radius": false
       }
     ]
   },
@@ -311,6 +319,8 @@
     "location_radius_km": 250,
     "direction": "N",
     "inside_radius": true,
-    "distance_trend": "approaching"
+    "distance_trend": "approaching",
+    "alert_radius_km": 250,
+    "inside_alert_radius": true
   }
 }

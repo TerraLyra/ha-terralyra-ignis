@@ -79,6 +79,11 @@ async def async_setup_entry(
         f"{entry.entry_id}_monitoring_area_{location_id}"
         for location_id in monitored_locations
     }
+    active_alert_ids = {
+        f"{entry.entry_id}_alert_area_{loc.id}"
+        for loc in monitored_locations.values()
+        if loc.effective_alert_radius_km < loc.radius_km
+    }
     prefix = f"{entry.entry_id}_fire_"
     area_prefix = f"{entry.entry_id}_monitoring_area_"
     for registry_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
@@ -89,6 +94,8 @@ async def async_setup_entry(
             continue
         if registry_entry.unique_id.startswith(prefix):
             current_unique_ids = active_unique_ids
+        elif registry_entry.unique_id.startswith(f"{entry.entry_id}_alert_area_"):
+            current_unique_ids = active_alert_ids
         elif registry_entry.unique_id.startswith(area_prefix):
             current_unique_ids = active_area_unique_ids
         else:
@@ -107,6 +114,13 @@ async def async_setup_entry(
         )
         for location in monitored_locations.values()
     ]
+    area_entities.extend(
+        IgnisAlertArea(entry, location,
+                       home_latitude=float(hass.config.latitude),
+                       home_longitude=float(hass.config.longitude))
+        for location in monitored_locations.values()
+        if location.effective_alert_radius_km < location.radius_km
+    )
     if area_entities:
         async_add_entities(area_entities)
 
@@ -196,7 +210,27 @@ class IgnisMonitoringArea(IgnisEntity, GeolocationEvent):
             ATTR_GPS_ACCURACY: self._location.radius_km * 1000.0,
             "monitoring_location_id": self._location.id,
             "monitoring_radius_km": self._location.radius_km,
+            "alert_radius_km": self._location.effective_alert_radius_km,
             "map_circle_meaning": "active_fire_monitoring_area",
+        }
+
+
+class IgnisAlertArea(IgnisMonitoringArea):
+    """Inner alert circle; omitted when the two radii are equal."""
+
+    _attr_icon = "mdi:bell-alert-outline"
+    _attr_translation_key = "alert_area"
+
+    def __init__(self, entry, location, **kwargs):
+        super().__init__(entry, location, **kwargs)
+        self._attr_unique_id = f"{entry.entry_id}_alert_area_{location.id}"
+        self._attr_suggested_object_id = f"{DOMAIN}_alert_area_{location.id}"
+
+    @property
+    def extra_state_attributes(self):
+        return super().extra_state_attributes | {
+            ATTR_GPS_ACCURACY: self._location.effective_alert_radius_km * 1000.0,
+            "map_circle_meaning": "satellite_fire_alert_area",
         }
 
 

@@ -141,8 +141,12 @@
           "name": "Name",
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "radius_km": "Monitoring radius",
-          "enabled": "Enabled"
+          "radius_km": "Monitoring radius (km)",
+          "enabled": "Enabled",
+          "alert_radius_km": "Alert radius (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "The alert radius must be positive and no larger than the monitoring radius."
         }
       },
       "edit_location": {
@@ -152,8 +156,12 @@
           "name": "Name",
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "radius_km": "Monitoring radius",
-          "enabled": "Enabled"
+          "radius_km": "Monitoring radius (km)",
+          "enabled": "Enabled",
+          "alert_radius_km": "Alert radius (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "The alert radius must be positive and no larger than the monitoring radius."
         }
       },
       "toggle_location": {
@@ -252,6 +260,9 @@
     "geo_location": {
       "monitoring_area": {
         "name": "Location: {location_name} — Active-fire monitoring area"
+      },
+      "alert_area": {
+        "name": "Alert area: {location_name}"
       }
     },
     "sensor": {
