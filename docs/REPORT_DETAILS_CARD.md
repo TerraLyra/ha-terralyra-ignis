@@ -132,3 +132,12 @@ unknown; a success label is accepted only for the corresponding provider.
 This does not translate or replace the incident's source status, infer incident
 freshness from retrieval success, or infer all-clear from an empty response.
 No source retry, persistence, entity identity or history changes are involved.
+
+
+### Canada receipt timestamp
+
+Canada map records expose the existing coordinator `last_success_at` separately
+from source timestamps, matching the dialog's receipt-time field. A failed refresh
+retains the previous successful receipt time; an absent receipt remains unknown.
+No current clock or source status date is substituted. This attribute requires
+an integration update when released, unlike the separately installed card.
