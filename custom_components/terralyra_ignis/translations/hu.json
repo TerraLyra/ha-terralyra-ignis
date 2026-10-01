@@ -141,8 +141,12 @@
           "name": "Név",
           "latitude": "Szélesség",
           "longitude": "Hosszúság",
-          "radius_km": "Figyelési sugár",
-          "enabled": "Bekapcsolva"
+          "radius_km": "Megfigyelési sugár (km)",
+          "enabled": "Bekapcsolva",
+          "alert_radius_km": "Riasztási sugár (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "A riasztási sugár legyen pozitív, és ne legyen nagyobb a megfigyelési sugárnál."
         }
       },
       "edit_location": {
@@ -152,8 +156,12 @@
           "name": "Név",
           "latitude": "Szélesség",
           "longitude": "Hosszúság",
-          "radius_km": "Figyelési sugár",
-          "enabled": "Bekapcsolva"
+          "radius_km": "Megfigyelési sugár (km)",
+          "enabled": "Bekapcsolva",
+          "alert_radius_km": "Riasztási sugár (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "A riasztási sugár legyen pozitív, és ne legyen nagyobb a megfigyelési sugárnál."
         }
       },
       "toggle_location": {
@@ -252,6 +260,9 @@
     "geo_location": {
       "monitoring_area": {
         "name": "Hely: {location_name} — Aktívtűz-megfigyelési terület"
+      },
+      "alert_area": {
+        "name": "Riasztási kör: {location_name}"
       }
     },
     "sensor": {

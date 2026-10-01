@@ -60,6 +60,7 @@ class IncidentLocationMatch:
     inside_radius: bool
     distance_trend: DistanceTrend = DistanceTrend.UNKNOWN
     minimum_distance_km: float | None = None
+    alert_radius_km: float | None = None
 
     def attrs(self) -> dict[str, str | float | bool]:
         """Compatibility adapter for the existing HA attribute contract."""

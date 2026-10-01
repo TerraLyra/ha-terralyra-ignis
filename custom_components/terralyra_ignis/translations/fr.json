@@ -141,8 +141,12 @@
           "name": "Nom",
           "latitude": "Latitude géographique",
           "longitude": "Longitude géographique",
-          "radius_km": "Rayon de surveillance",
-          "enabled": "Activé"
+          "radius_km": "Rayon de surveillance (km)",
+          "enabled": "Activé",
+          "alert_radius_km": "Rayon d’alerte (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "Le rayon d’alerte doit être positif et ne pas dépasser le rayon de surveillance."
         }
       },
       "edit_location": {
@@ -152,8 +156,12 @@
           "name": "Nom",
           "latitude": "Latitude géographique",
           "longitude": "Longitude géographique",
-          "radius_km": "Rayon de surveillance",
-          "enabled": "Activé"
+          "radius_km": "Rayon de surveillance (km)",
+          "enabled": "Activé",
+          "alert_radius_km": "Rayon d’alerte (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "Le rayon d’alerte doit être positif et ne pas dépasser le rayon de surveillance."
         }
       },
       "toggle_location": {
@@ -252,6 +260,9 @@
     "geo_location": {
       "monitoring_area": {
         "name": "Lieu : {location_name} — Zone de surveillance des feux actifs"
+      },
+      "alert_area": {
+        "name": "Alert area: {location_name}"
       }
     },
     "sensor": {

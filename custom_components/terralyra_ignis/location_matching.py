@@ -43,6 +43,7 @@ def match_incident_to_locations(
                 location_name=location.name,
                 distance_km=distance_km,
                 radius_km=location.radius_km,
+                alert_radius_km=location.effective_alert_radius_km,
                 direction=_cardinal_direction(
                     location.latitude, location.longitude, latitude, longitude
                 ),

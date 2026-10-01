@@ -60,6 +60,10 @@ def location_attributes(self: IncidentLocationMatch) -> dict[str, str | float | 
         ATTR_LOCATION_NAME: self.location_name,
         ATTR_DISTANCE_KM: round(self.distance_km, 2),
         ATTR_LOCATION_RADIUS_KM: round(self.radius_km, 2),
+        "alert_radius_km": self.alert_radius_km if self.alert_radius_km is not None else self.radius_km,
+        "inside_alert_radius": self.distance_km <= (
+            self.alert_radius_km if self.alert_radius_km is not None else self.radius_km
+        ),
         ATTR_DIRECTION: self.direction,
         ATTR_INSIDE_RADIUS: self.inside_radius,
         ATTR_DISTANCE_TREND: self.distance_trend.value,

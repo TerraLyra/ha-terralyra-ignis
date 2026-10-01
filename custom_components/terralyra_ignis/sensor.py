@@ -551,7 +551,11 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
         incidents = _location_incident_summary(
             self._plan.location_id, self.coordinator.data
         )
+        location = next((loc for loc in getattr(self.coordinator, "monitored_locations", ())
+                         if loc.id == self._plan.location_id), None)
         return self._plan.attrs() | {
+            "monitoring_radius_km": location.radius_km if location else None,
+            "alert_radius_km": location.effective_alert_radius_km if location else None,
             "operational_status": status,
             "source_health": assignments,
             **_location_health_summary(assignments),

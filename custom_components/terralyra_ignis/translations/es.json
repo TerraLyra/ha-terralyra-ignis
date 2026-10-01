@@ -141,8 +141,12 @@
           "name": "Nombre",
           "latitude": "Latitud",
           "longitude": "Longitud",
-          "radius_km": "Radio de vigilancia",
-          "enabled": "Activada"
+          "radius_km": "Radio de seguimiento (km)",
+          "enabled": "Activada",
+          "alert_radius_km": "Radio de alerta (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "El radio de alerta debe ser positivo y no superar el radio de seguimiento."
         }
       },
       "edit_location": {
@@ -152,8 +156,12 @@
           "name": "Nombre",
           "latitude": "Latitud",
           "longitude": "Longitud",
-          "radius_km": "Radio de vigilancia",
-          "enabled": "Activada"
+          "radius_km": "Radio de seguimiento (km)",
+          "enabled": "Activada",
+          "alert_radius_km": "Radio de alerta (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "El radio de alerta debe ser positivo y no superar el radio de seguimiento."
         }
       },
       "toggle_location": {
@@ -252,6 +260,9 @@
     "geo_location": {
       "monitoring_area": {
         "name": "Ubicación: {location_name} — Área de vigilancia de incendios activos"
+      },
+      "alert_area": {
+        "name": "Alert area: {location_name}"
       }
     },
     "sensor": {

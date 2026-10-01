@@ -33,6 +33,7 @@ from .const import (
     LOCATION_LONGITUDE,
     LOCATION_NAME,
     LOCATION_RADIUS_KM,
+    LOCATION_ALERT_RADIUS_KM,
     LOCATION_SOURCE,
     LOCATION_SOURCE_HOME_ASSISTANT,
     LOCATION_SOURCE_MANUAL,
@@ -105,6 +106,7 @@ def update_primary_location_radius(
     if not isinstance(updated[index], dict):
         raise ValueError("Monitored-location list contains an invalid record")
     updated[index][LOCATION_RADIUS_KM] = float(radius_km)
+    monitored_location_from_dict(updated[index])
     options[CONF_MONITORED_LOCATIONS] = updated
 
 
@@ -124,6 +126,7 @@ def resolve_monitored_locations(
                 latitude=float(hass.config.latitude),
                 longitude=float(hass.config.longitude),
                 radius_km=location.radius_km,
+                alert_radius_km=location.alert_radius_km,
                 enabled=location.enabled,
                 source=location.source,
             )

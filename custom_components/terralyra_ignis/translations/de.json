@@ -141,8 +141,12 @@
           "name": "Bezeichnung",
           "latitude": "Breitengrad",
           "longitude": "Längengrad",
-          "radius_km": "Überwachungsradius",
-          "enabled": "Aktiviert"
+          "radius_km": "Beobachtungsradius (km)",
+          "enabled": "Aktiviert",
+          "alert_radius_km": "Alarmradius (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "Der Alarmradius muss positiv sein und darf den Beobachtungsradius nicht überschreiten."
         }
       },
       "edit_location": {
@@ -152,8 +156,12 @@
           "name": "Bezeichnung",
           "latitude": "Breitengrad",
           "longitude": "Längengrad",
-          "radius_km": "Überwachungsradius",
-          "enabled": "Aktiviert"
+          "radius_km": "Beobachtungsradius (km)",
+          "enabled": "Aktiviert",
+          "alert_radius_km": "Alarmradius (km)"
+        },
+        "data_description": {
+          "alert_radius_km": "Der Alarmradius muss positiv sein und darf den Beobachtungsradius nicht überschreiten."
         }
       },
       "toggle_location": {
@@ -252,6 +260,9 @@
     "geo_location": {
       "monitoring_area": {
         "name": "Ort: {location_name} — Aktivbrand-Überwachungsbereich"
+      },
+      "alert_area": {
+        "name": "Alert area: {location_name}"
       }
     },
     "sensor": {

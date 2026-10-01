@@ -175,6 +175,7 @@ def test_monitoring_area_uses_location_radius_as_map_decoration() -> None:
         "gps_accuracy": 25000.0,
         "monitoring_location_id": "home",
         "monitoring_radius_km": 25.0,
+        "alert_radius_km": 25.0,
         "map_circle_meaning": "active_fire_monitoring_area",
     }
 

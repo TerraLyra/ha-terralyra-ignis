@@ -1287,3 +1287,19 @@ async def test_main_options_preserve_location_forecasts(hass):
     result = await hass.config_entries.options.async_configure(result['flow_id'], _default_options_input())
     assert result['type'] is FlowResultType.CREATE_ENTRY
     assert result['data'][CONF_LOCATION_FORECASTS] == settings
+
+
+async def test_location_alert_radius_validation_and_persistence(hass):
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location() | {'alert_radius_km': 10}]})
+    entry.add_to_hass(hass)
+    result = await _start_location_management(hass, entry)
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {'next_step_id': 'edit_location'})
+    result = await hass.config_entries.options.async_configure(result['flow_id'], {CONF_LOCATION_ID: 'home'})
+    values = {LOCATION_NAME:'Home', LOCATION_LATITUDE:47.5, LOCATION_LONGITUDE:19.1,
+              LOCATION_RADIUS_KM:30, LOCATION_ENABLED:True, 'alert_radius_km':31}
+    result = await hass.config_entries.options.async_configure(result['flow_id'], values)
+    assert result['errors'] == {'base':'invalid_monitored_location'}
+    result = await hass.config_entries.options.async_configure(result['flow_id'], values | {'alert_radius_km': 10})
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data'][CONF_MONITORED_LOCATIONS][0]['alert_radius_km'] == 10
