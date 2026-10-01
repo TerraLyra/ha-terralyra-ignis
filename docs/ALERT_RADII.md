@@ -35,6 +35,44 @@ their previous behavior until explicitly migrated.
 
 ## Notification automation
 
+### Ready-to-use phone blueprint
+
+The [satellite notification blueprint](../blueprints/automation/terralyra_ignis/satellite_alert.yaml)
+lets you select an IGNIS installation, a Companion App phone and Hungarian or
+English message text. Requires IGNIS 0.33.0+ and Home Assistant 2026.9+.
+
+1. Under **Settings → Automations & scenes → Blueprints → Import blueprint**,
+   paste the GitHub URL of the blueprint YAML file from the version you use.
+2. Create an automation from it, select the IGNIS installation and phone, then
+   choose the notification language and save.
+3. If replacing an existing notification automation, disable that automation
+   yourself to avoid duplicate messages. Keep its previous thresholds in the
+   locations' alert-radius settings.
+
+The blueprint is imported separately; a HACS integration update does not install
+or update it. Your existing automations are not changed. Phone notification
+permissions must be enabled in the Companion App and phone settings.
+
+Example Hungarian notification:
+
+> **Tűz észlelés Home közelében**
+>
+> Tűz észlelve 42,5km-re a Home ponttól északkeletre
+
+English: **Fire detected near Home** / **Fire detected 42.5 km northeast of Home**.
+Each affected location uses its own distance and direction. Multiple affected
+locations share one notification, which can be longer. Unknown directions are
+omitted. The blueprint supports these two notification languages; it does not
+automatically follow the Home Assistant interface language.
+
+Manual **Run actions** without an event does not send anything. Template tests
+use fictional events offline and do not send push notifications. After startup,
+wait for a genuinely new qualifying satellite observation: existing incidents
+form the quiet baseline described above. This is a satellite observation notice,
+not an official emergency warning.
+
+### Custom automation
+
 Use the new event rather than a generic geolocation state-change trigger. Replace
 the notification action with your device's action. If several IGNIS installations
 are configured, add a `config_entry_id` event-data filter.
