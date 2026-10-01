@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.33.0
+
+- Add per-location satellite alert radii, constrained to the monitoring radius.
+- Emit a dedicated location-aware alert event with quiet startup/configuration baselines and repeated-alert suppression. Existing observation events retain their behavior.
+- Show concentric monitoring/alert map circles and both radii in the optional location summary. Equal radii use one circle.
+- Preserve existing location records and user history. Existing notification automations require explicit migration to adopt the new alert event.
+
+See [release notes](docs/RELEASE_0_33_0.md) and [alert setup](docs/ALERT_RADII.md).
+
 ## 0.32.0
 
 - Add explicitly enabled per-location FRMv3 forecasts with independent radii and current-day sensors.
