@@ -24,5 +24,46 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
  await page.evaluate(()=>{forecast.attributes.forecast_radius_km=100;card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}}});
  assert.doesNotMatch(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
+ // Editor requires an explicit selection and preserves advanced configuration.
+ await page.evaluate(()=>{
+   document.querySelector('main').replaceChildren();
+   const Card=customElements.get('ignis-location-summary');
+   window.editor=Card.getConfigElement();window.changes=[];
+   editor.addEventListener('config-changed',event=>changes.push(event.detail.config));
+   editor.setConfig(Card.getStubConfig());editor.hass={states:{}};
+   document.querySelector('main').append(editor);
+   const preview=new Card();preview.setConfig(Card.getStubConfig());document.querySelector('main').append(preview);
+ });
+ assert.match(await page.locator('ha-card').innerText(),/Válassz egy megfigyelt helyszínt/);
+ assert.match(await page.getByRole('status').innerText(),/Még nincs választható/);
+ assert.equal(await page.evaluate(()=>changes.length),0);
+ await page.evaluate(()=>{
+   window.editorStates={'sensor.place':entity,'sensor.forecast':forecast,
+    'sensor.other':{...entity,attributes:{...entity.attributes,location_id:'other',location_name:'Other'}}};
+   editor.hass={states:editorStates};
+ });
+ assert.equal(await page.getByRole('combobox').inputValue(),'');
+ assert.equal(await page.locator('option').count(),3);
+ assert.equal(await page.locator('img').count(),0);
+ await page.getByRole('combobox').selectOption('sensor.place');
+ assert.deepEqual(await page.evaluate(()=>changes.at(-1)),{type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});
+ await page.evaluate(()=>editor.setConfig({...changes.at(-1),forecast:{entity:'sensor.forecast',location_id:'ca',latitude:47,longitude:19},custom_option:true}));
+ await page.getByRole('textbox').fill('My place');
+ // A HA state update must not discard a title currently being typed.
+ await page.evaluate(()=>editor.hass={states:editorStates});
+ assert.equal(await page.getByRole('textbox').inputValue(),'My place');
+ await page.getByRole('textbox').press('Tab');
+ assert.equal(await page.evaluate(()=>changes.at(-1).title),'My place');
+ assert.equal(await page.evaluate(()=>changes.at(-1).custom_option),true);
+ await page.getByRole('combobox').selectOption('sensor.other');
+ assert.equal(await page.evaluate(()=>changes.at(-1).location_id),'other');
+ assert.equal(await page.evaluate(()=>changes.at(-1).forecast.location_id),'ca');
+ // The existing card rejects that old forecast association; editor never rewrites it.
+ await page.evaluate(()=>{card.setConfig(changes.at(-1));card.hass={states:editorStates};document.querySelector('main').append(card)});
+ assert.match(await page.locator('ha-card').last().innerText(),/helyszín-hozzárendelése hiányos vagy eltérő/);
+ await page.evaluate(()=>{editor.setConfig(changes.at(-1));editor.hass={states:{}}});
+ assert.equal(await page.getByRole('combobox').inputValue(),'sensor.other');
+ assert.equal(await page.evaluate(()=>changes.at(-1).entity),'sensor.other');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  console.log('Location summary browser checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
