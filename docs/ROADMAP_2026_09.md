@@ -1,6 +1,6 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-09-30: stable integration 0.32.0, with separately
+Status reconciled on 2026-10-01: stable integration 0.32.0, with separately
 updated optional dashboard resources. Main-branch changes after the release
 are not automatically part of a HACS installation.
 
@@ -145,10 +145,35 @@ promote the offline location candidates to production. Unresolved provider acces
    do not enable automatic production geolocation.
 4. Resolve France/Germany product access and technical gates before runtime
    integration. Existing offline research is not production approval.
-5. GWIS is the next worldwide forecast candidate, not an active provider. The
-   [service spike](GWIS_TECHNICAL_SPIKE.md) found a non-queryable FWI layer and a
-   time range that does not establish actual forecast availability. Resolve these
-   gates before a runtime adapter.
+5. GWIS remains a worldwide forecast candidate, not an active provider. The
+   [service spike](GWIS_TECHNICAL_SPIKE.md) now includes a working query-layer
+   research client with bounded requests and explicit zero/nodata handling.
+   The remaining gate is the time contract: responses do not return model issuance
+   or a valid date. Requested dates and retrieval times must remain distinct from
+   verified forecast validity. Establish dated evidence and operational validation
+   before a runtime adapter.
+6. Brazil INPE Eventos de Fogo has offline KML/centroid inspection, bounded
+   state-scoped snapshots and an explicit-location preview (#96–#99). Resolve
+   stable identity, collection transitions, unqualified timestamps and supported
+   polling/caching before runtime activation. Preserve representative-point and
+   estimated-area semantics; do not import derived events into satellite counters.
+   See [Brazil requirements](BRAZIL_ACCESS_PREFLIGHT.md).
+7. Castilla y León has a bounded explicit-date research client (#101), tested
+   against a live daily bulletin response. Resolve coordinate provenance, stable
+   incident identity, bulletin completeness and field-level timezone semantics
+   before map/calendar integration. Bulletin rows are not distinct incident counts.
+   See [Spain requirements](SPAIN_ACCESS_PREFLIGHT.md).
+8. Himawari JAXA WLF and CAMS FRP remain separate inactive candidates. Establish
+   each exact product's access, licence mapping and current endpoint before its
+   decoder/runtime work. See [product terms](HIMAWARI_PRODUCT_TERMS.md).
+
+CodeQL maintenance is complete in #100: init/analyze use the same pinned release,
+and future CodeQL updates are grouped. The superseded separate updates #78/#79
+are closed. This maintenance and the offline research do not require a HA update.
+
+The remaining provider work above depends on source evidence, not merely parser
+implementation. Keep technical limitations in this roadmap; correspondence and
+outreach tracking are not repository documentation.
 
 Do not restart the paused optimization work or historical-counter investigation
 merely to fill the waiting period. Preserve user history.
