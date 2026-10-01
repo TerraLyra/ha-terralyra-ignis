@@ -49,6 +49,14 @@ Older reports remain possible. A missing region, zero records or a removed recor
 never establishes an all-clear. Unknown control/category values and containment -1
 remain unknown. Official reports do not become satellite incident history or alerts.
 
+The status sensor exposes `last_http_error` (numeric HTTP failure code) and
+`last_attempt_at` (completion time of the most recent request attempt). Skipped
+requests leave these unchanged; a subsequent success or non-HTTP failure clears
+the HTTP code. These diagnostics survive restarts without storing response bodies,
+headers or URLs. Older stored states have no such evidence: an unknown code does
+not establish the reason for an existing review hold. The diagnostics do not reset
+that hold or change request intervals.
+
 ## Recovery and data preservation
 
 Resolve the source/storage problem, then an administrator may run

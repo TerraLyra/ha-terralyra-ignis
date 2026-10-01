@@ -61,3 +61,35 @@ class StorageTests(unittest.TestCase):
         with patch('storage.save',side_effect=OSError('disk')),self.assertRaises(OSError):
             refresh_persisted(self.path,fetch,NOW)
         fetch.assert_not_called()
+
+    def test_legacy_review_hold_loads_without_inventing_http_evidence(self):
+        state = RefreshState(last_success=(EMPTY, {}), last_success_at=NOW,
+                             review_required=True, status='review_required', next_attempt=NOW)
+        save(self.path, state)
+        data = json.loads(self.path.read_text())
+        for key in ('last_http_error', 'last_attempt_at'):
+            del data['state'][key]
+        self.path.write_text(json.dumps(data))
+        restored = load(self.path)
+        self.assertTrue(restored.review_required)
+        self.assertEqual(restored.last_success[0], EMPTY)
+        self.assertIsNone(restored.last_http_error)
+        self.assertIsNone(restored.last_attempt_at)
+
+    def test_http_evidence_persists_and_invalid_values_fail_closed(self):
+        state = RefreshState(review_required=True, status='review_required', next_attempt=NOW,
+                             last_http_error=403, last_attempt_at=NOW)
+        save(self.path, state)
+        restored = load(self.path)
+        self.assertEqual(restored.last_http_error, 403)
+        self.assertEqual(restored.last_attempt_at, NOW)
+        data = json.loads(self.path.read_text())
+        for invalid in (True, '403', 403.0, 99, 600, {'code': 403}):
+            with self.subTest(invalid=invalid):
+                data['state']['last_http_error'] = invalid
+                self.path.write_text(json.dumps(data))
+                self.assertEqual(load(self.path).status, 'storage_error')
+        data['state']['last_http_error'] = 403
+        data['state']['last_attempt_at'] = '2026-10-01T12:00:00'
+        self.path.write_text(json.dumps(data))
+        self.assertEqual(load(self.path).status, 'storage_error')
