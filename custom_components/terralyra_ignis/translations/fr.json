@@ -262,7 +262,7 @@
         "name": "Lieu : {location_name} — Zone de surveillance des feux actifs"
       },
       "alert_area": {
-        "name": "Alert area: {location_name}"
+        "name": "Zone d’alerte : {location_name}"
       }
     },
     "sensor": {

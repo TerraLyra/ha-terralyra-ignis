@@ -62,3 +62,10 @@ test('location forecast binds requested geometry independently of sampled pixel'
  for(const changes of [{location_id:'other'},{latitude:47.000001},{longitude:20},{forecast_radius_km:51},{provider:'other'},{product:'other'}])assert.ok(review({...e,attributes:{...e.attributes,...changes}},b).message);
  for(const radius_km of [undefined,0,501,'50',true])assert.ok(review(e,{...b,radius_km}).message);
 });
+
+test('summary exposes both radii belonging to the selected location',()=>{
+ const e={...entity,attributes:{...entity.attributes,monitoring_radius_km:100,alert_radius_km:25}};
+ const m=summarizeLocation(e,'ca');
+ assert.equal(m.monitoringRadius,100);assert.equal(m.alertRadius,25);
+ assert.ok(summarizeLocation(e,'other').error);
+});

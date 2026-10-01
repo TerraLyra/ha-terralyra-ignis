@@ -262,7 +262,7 @@
         "name": "Ort: {location_name} — Aktivbrand-Überwachungsbereich"
       },
       "alert_area": {
-        "name": "Alert area: {location_name}"
+        "name": "Alarmbereich: {location_name}"
       }
     },
     "sensor": {

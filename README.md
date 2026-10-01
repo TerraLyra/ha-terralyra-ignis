@@ -669,9 +669,11 @@ content: >-
   {% endfor %}
 ```
 
-The active-fire radius and fire-risk radius are deliberately independent. The
-first controls detections and alerts; the second controls the static FRMv3 map
-extent and regional maximum-risk sampling.
+Each location has a monitoring radius and an equal or smaller satellite alert
+radius. Monitoring controls observation coverage; alerting uses the separate
+`terralyra_ignis_fire_alert` event. See [alert radii](docs/ALERT_RADII.md) for
+configuration and automation migration. The fire-risk radius remains independent
+and controls the static FRMv3 map extent and regional maximum-risk sampling.
 
 ## Architecture
 

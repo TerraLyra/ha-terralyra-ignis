@@ -105,3 +105,29 @@ def test_inner_circle_uses_alert_metres_and_preserves_observation_radius():
     assert entity.extra_state_attributes['gps_accuracy'] == 25000
     assert entity.extra_state_attributes['monitoring_radius_km'] == 100
     assert entity.extra_state_attributes['alert_radius_km'] == 25
+
+
+def test_missing_and_inactive_snapshots_do_not_repeat_returning_alert():
+    tracker = AlertTracker()
+    tracker.update([], (LOC,))
+    fire = incident()
+    assert tracker.update([fire], (LOC,))
+    assert tracker.update([], (LOC,)) == []
+    assert tracker.update([replace(fire, lifecycle=FireLifecycle.INACTIVE)], (LOC,)) == []
+    assert tracker.update([fire], (LOC,)) == []
+    assert tracker.update([replace(fire, acquired=NOW+timedelta(minutes=5))], (LOC,)) == []
+
+
+def test_older_outside_observation_cannot_reset_inside_state():
+    tracker = AlertTracker()
+    tracker.update([incident()], (LOC,))
+    tracker.update([incident(30, stamp=NOW-timedelta(minutes=5))], (LOC,))
+    assert tracker.update([incident(stamp=NOW+timedelta(minutes=5))], (LOC,)) == []
+
+
+def test_real_exit_then_reentry_alerts_again():
+    tracker = AlertTracker()
+    tracker.update([incident()], (LOC,))
+    assert tracker.update([incident(30, stamp=NOW+timedelta(minutes=5))], (LOC,)) == []
+    inside = incident(stamp=NOW+timedelta(minutes=10))
+    assert tracker.update([inside], (LOC,)) == [(inside, inside.location_matches)]

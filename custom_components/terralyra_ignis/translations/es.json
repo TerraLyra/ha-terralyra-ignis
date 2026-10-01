@@ -262,7 +262,7 @@
         "name": "Ubicación: {location_name} — Área de vigilancia de incendios activos"
       },
       "alert_area": {
-        "name": "Alert area: {location_name}"
+        "name": "Zona de alerta: {location_name}"
       }
     },
     "sensor": {
