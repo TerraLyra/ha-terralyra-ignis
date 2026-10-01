@@ -59,6 +59,13 @@ const assert=require('node:assert/strict');
   });
   assert.match(await page.locator('dialog').innerText(),/Official <script>alert\(1\)<\/script> description/);
   assert.equal(await page.locator('dialog script').count(),0);
+  assert.equal(await page.locator('dialog h3').innerText(),'Forrás szerinti leírás');
+  await page.evaluate(()=>{
+    report={...report,attributes:{...report.attributes,incident_text:null,incident_text_status:'not_requested'}};
+    card.hass={language:'hu',states:{'switch.nifc':{state:'on'},[report.entity_id]:report}};
+  });
+  assert.match(await page.locator('dialog').innerText(),/nem tartalmaz lekért leírásmezőt/);
+
   assert.equal(await page.locator('dialog h2').innerText(),'NIFC · Named <img src=x onerror=alert(1)> fire');
   assert.equal(await page.locator('dialog img').count(),0);
   await page.evaluate(()=>{card.hass={language:'hu',states:{'switch.canada':{state:'on'}}};});

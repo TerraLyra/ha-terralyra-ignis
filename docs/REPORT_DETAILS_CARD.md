@@ -44,7 +44,7 @@ English and Hungarian labels are provided; other languages use English.
 ## Validation and remaining work
 
 Run `node --test tests/frontend/report-map.test.mjs`.
-The eight model checks pass. The isolated Playwright/Chrome test in
+The model checks cover supported sources, missing descriptions and safe display. The isolated Playwright/Chrome test in
 `tests/frontend/report-map-browser.cjs` also passes: HTML is inert text, unsafe
 links are absent, supported report clicks are scoped to this card, ordinary
 entity clicks and the HA-details button propagate normally, the modal fits a
@@ -111,3 +111,14 @@ Checkboxes only filter display and never turn on a provider or call a service.
 This binding is required when upgrading older dashboard configurations; without
 it report-source controls are hidden. Bind the intended integration's switches
 explicitly rather than guessing by translated names or marker availability.
+
+
+### Description feedback (main branch)
+
+The dialog labels source descriptions explicitly. It distinguishes feeds without
+narrative fields, descriptions omitted by the source, fields not requested in a
+stored report, and unknown availability. Supplied text remains authoritative even
+if an accompanying status is stale. Display truncation at 4,000 characters is
+visible; source records are unchanged. No incident-page request is added.
+This frontend-only change requires replacing the separately installed card file
+and reloading the browser when deployed; it does not require restarting HA.

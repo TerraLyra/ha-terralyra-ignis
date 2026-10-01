@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {reportView,safeLink,visibleMapSources} from '../../frontend/ignis-report-map.js';
+import {reportView,safeLink,visibleMapSources,reportDescription} from '../../frontend/ignis-report-map.js';
 
 const state = {entity_id:'geo_location.example',state:'12.3',attributes:{
   source:'terralyra_ignis_canada_reports',friendly_name:'Report <script>',
@@ -71,4 +71,24 @@ test('report controls follow explicit map switches, not marker availability',()=
  assert.equal(visibleMapSources({},mapping)[source],false);
  assert.equal(visibleMapSources({'geo_location.report':{attributes:{source}}})[source],false);
  assert.equal(visibleMapSources().terralyra_ignis,true);
+});
+
+
+test('description absence distinguishes schema, empty source and unrequested field',()=>{
+  assert.match(reportDescription({incident_text_status:'not_in_feed'},'hu').content,/nem tartalmaz/);
+  assert.match(reportDescription({incident_text:'  ',incident_text_status:'not_provided'}).content,/did not provide/);
+  assert.match(reportDescription({incident_text_status:'not_requested'}).content,/does not establish/);
+  for(const status of [undefined,'available','unrecognised','toString']) {
+    assert.match(reportDescription({incident_text_status:status}).content,/unknown/);
+  }
+});
+test('supplied source text wins over stale status and truncation is disclosed',()=>{
+  const text='Original <b>text</b>\nsecond line';
+  const view=reportDescription({incident_text:text,incident_text_status:'not_provided'});
+  assert.equal(view.content,text);
+  assert.equal(view.notice,null);
+  const long=reportDescription({incident_text:'x'.repeat(4001)},'hu');
+  assert.equal(long.content.length,4000);
+  assert.match(long.notice,/rövidítve/);
+  assert.equal(reportDescription({incident_text:'x'.repeat(4000)}).notice,null);
 });
