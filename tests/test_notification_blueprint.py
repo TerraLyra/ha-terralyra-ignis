@@ -9,6 +9,24 @@ import yaml
 BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprints/automation/terralyra_ignis/satellite_alert.yaml"
 
 
+EXAMPLES = {
+    "hu": ("Tűz észlelés Home közelében", "Tűz észlelve 42,5km-re a Home ponttól északkeletre"),
+    "en": ("Fire detected near Home", "Fire detected 42.5 km northeast of Home"),
+    "de": ("Feuer nahe Home erkannt", "Feuer erkannt: 42,5 km nordöstlich von Home"),
+    "es": ("Incendio detectado cerca de Home", "Incendio detectado a 42,5 km al noreste de Home"),
+    "fr": ("Incendie détecté près de Home", "Incendie détecté à 42,5 km au nord-est de Home"),
+    "it": ("Incendio rilevato vicino a Home", "Incendio rilevato a 42,5 km a nord-est di Home"),
+}
+UNKNOWN_DIRECTION = {
+    "hu": "Tűz észlelve 0,0km-re a Home ponttól",
+    "en": "Fire detected 0.0 km from Home",
+    "de": "Feuer erkannt: 0,0 km von Home",
+    "es": "Incendio detectado a 0,0 km de Home",
+    "fr": "Incendie détecté à 0,0 km de Home",
+    "it": "Incendio rilevato a 0,0 km da Home",
+}
+
+
 class BlueprintLoader(yaml.SafeLoader):
     """Keep input references readable for offline template tests."""
 
@@ -29,14 +47,27 @@ class NotificationTextTests(unittest.TestCase):
         return tuple(self.env.from_string(self.config["actions"][1][key]).render(context)
                      for key in ("title", "message"))
 
-    def test_hungarian_phone_copy(self):
-        self.assertEqual(self.render(), (
-            "Tűz észlelés Home közelében",
-            "Tűz észlelve 42,5km-re a Home ponttól északkeletre"))
+    def test_localized_phone_copy(self):
+        for language, expected in EXAMPLES.items():
+            with self.subTest(language=language):
+                self.assertEqual(self.render(language), expected)
 
-    def test_english_phone_copy(self):
-        self.assertEqual(self.render("en"), (
-            "Fire detected near Home", "Fire detected 42.5 km northeast of Home"))
+    def test_supported_languages_match_integration(self):
+        translations = BLUEPRINT.parents[3] / "custom_components/terralyra_ignis/translations"
+        options = self.config["blueprint"]["input"]["language"]["selector"]["select"]["options"]
+        self.assertEqual({option["value"] for option in options}, set(EXAMPLES))
+        self.assertEqual({path.stem for path in translations.glob("*.json")}, set(EXAMPLES))
+
+    def test_unknown_language_falls_back_to_english(self):
+        self.assertEqual(self.render("unsupported"), EXAMPLES["en"])
+
+    def test_french_direction_prepositions(self):
+        for direction, phrase in (("E", "à l'est"), ("W", "à l'ouest"),
+                                  ("ENE", "à l'est-nord-est"), ("S", "au sud")):
+            with self.subTest(direction=direction):
+                self.assertEqual(self.render("fr", [{"location_name": "Home",
+                    "distance_km": 42.5, "direction": direction}])[1],
+                    f"Incendie détecté à 42,5 km {phrase} de Home")
 
     def test_each_location_uses_its_own_distance_and_direction(self):
         title, message = self.render(places=[
@@ -49,8 +80,7 @@ class NotificationTextTests(unittest.TestCase):
 
     def test_no_invented_direction(self):
         for direction in (None, "HERE", "unknown"):
-            for lang, expected in (("hu", "Tűz észlelve 0,0km-re a Home ponttól"),
-                                   ("en", "Fire detected 0.0 km from Home")):
+            for lang, expected in UNKNOWN_DIRECTION.items():
                 with self.subTest(direction=direction, lang=lang):
                     place = {"location_name": "Home", "distance_km": 0}
                     if direction is not None:
@@ -59,13 +89,27 @@ class NotificationTextTests(unittest.TestCase):
 
     def test_all_compass_points_are_translated(self):
         for direction in "N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW".split():
-            for lang in ("hu", "en"):
+            for lang in EXAMPLES:
                 with self.subTest(direction=direction, lang=lang):
                     text = self.render(lang, [{"location_name": "X", "distance_km": 1,
                                                "direction": direction}])[1]
                     self.assertNotIn(direction, text)
-                    self.assertNotEqual(text, "Tűz észlelve 1,0km-re a X ponttól")
-                    self.assertNotIn("from X", text)
+                    without_direction = self.render(lang, [{"location_name": "X",
+                                                           "distance_km": 1}])[1]
+                    self.assertNotEqual(text, without_direction)
+
+    def test_multiple_locations_and_user_names_in_all_languages(self):
+        places = [
+            {"location_name": "Árvíz 100%", "distance_km": 42.5, "direction": "NE"},
+            {"location_name": "L'été", "distance_km": 3.14, "direction": "W"},
+        ]
+        for language in EXAMPLES:
+            with self.subTest(language=language):
+                title, message = self.render(language, places)
+                self.assertIn("Árvíz 100%, L'été", title)
+                self.assertEqual(message, ". ".join(self.render(language, [place])[1]
+                                                   for place in places))
+                self.assertIn("3.1" if language == "en" else "3,1", message)
 
     def test_manual_run_and_empty_event_do_not_notify(self):
         guard = self.env.from_string(self.config["actions"][0]["value_template"])
@@ -89,7 +133,7 @@ async def test_home_assistant_blueprint_schema_and_rendering(hass):
         load_yaml_dict(str(BLUEPRINT)), expected_domain="automation",
         schema=AUTOMATION_BLUEPRINT_SCHEMA,
     )
-    for language in ("hu", "en"):
+    for language, (expected_title, expected) in EXAMPLES.items():
         inputs = BlueprintInputs(blueprint, {"use_blueprint": {"input": {
             "ignis_entry": "test_entry", "phone": "a" * 32,
             "language": language,
@@ -102,8 +146,8 @@ async def test_home_assistant_blueprint_schema_and_rendering(hass):
             "platform": "event", "event": {"data": {"alert_locations": [
                 {"location_name": "Home", "distance_km": 42.5, "direction": "NE"}
             ]}}}}
-        expected = ("Tűz észlelve 42,5km-re a Home ponttól északkeletre"
-                    if language == "hu" else "Fire detected 42.5 km northeast of Home")
+        title = Template(notification["title"], hass)
+        assert title.async_render(context) == expected_title
         message = Template(notification["message"], hass)
         assert message.async_render(context) == expected
         guard = config["actions"][0]["value_template"]
