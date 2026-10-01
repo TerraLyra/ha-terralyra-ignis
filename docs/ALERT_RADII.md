@@ -38,8 +38,9 @@ their previous behavior until explicitly migrated.
 ### Ready-to-use phone blueprint
 
 The [satellite notification blueprint](../blueprints/automation/terralyra_ignis/satellite_alert.yaml)
-lets you select an IGNIS installation, a Companion App phone and Hungarian or
-English message text. Requires IGNIS 0.33.0+ and Home Assistant 2026.9+.
+lets you select an IGNIS installation, a Companion App phone and Hungarian,
+English, German, Spanish, French or Italian message text. Requires IGNIS 0.33.0+
+and Home Assistant 2026.9+.
 
 1. Under **Settings → Automations & scenes → Blueprints → Import blueprint**,
    paste the GitHub URL of the blueprint YAML file from the version you use.
@@ -62,8 +63,11 @@ Example Hungarian notification:
 English: **Fire detected near Home** / **Fire detected 42.5 km northeast of Home**.
 Each affected location uses its own distance and direction. Multiple affected
 locations share one notification, which can be longer. Unknown directions are
-omitted. The blueprint supports these two notification languages; it does not
-automatically follow the Home Assistant interface language.
+omitted. The blueprint supports all six current IGNIS languages for notification
+text; it does not automatically follow the Home Assistant interface language.
+The blueprint setup labels remain English/Hungarian. English uses a decimal
+point; the other five message languages use a decimal comma. Location names
+remain exactly as entered by the user.
 
 Manual **Run actions** without an event does not send anything. Template tests
 use fictional events offline and do not send push notifications. After startup,
