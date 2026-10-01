@@ -61,10 +61,12 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('dialog script').count(),0);
   assert.equal(await page.locator('dialog h3').innerText(),'Forrás szerinti leírás');
   await page.evaluate(()=>{
-    report={...report,attributes:{...report.attributes,incident_text:null,incident_text_status:'not_requested'}};
+    report={...report,attributes:{...report.attributes,incident_text:null,incident_text_status:'not_requested',response_status:'refresh_failed_invalid_data'}};
     card.hass={language:'hu',states:{'switch.nifc':{state:'on'},[report.entity_id]:report}};
   });
   assert.match(await page.locator('dialog').innerText(),/nem tartalmaz lekért leírásmezőt/);
+  assert.match(await page.locator('dialog').innerText(),/Megőrzött korábbi jelentés/);
+  assert.match(await page.locator('dialog').innerText(),/Érvénytelen forrásválasz/);
 
   assert.equal(await page.locator('dialog h2').innerText(),'NIFC · Named <img src=x onerror=alert(1)> fire');
   assert.equal(await page.locator('dialog img').count(),0);
