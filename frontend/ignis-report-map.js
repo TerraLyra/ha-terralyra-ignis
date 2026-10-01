@@ -31,6 +31,30 @@ export function safeLink(value) {
   } catch { return null; }
 }
 
+// Original source text only; absence must not promise a later article download.
+export function reportDescription(attributes = {}, language = 'en') {
+  const hu = language.startsWith('hu');
+  const body = attributes.incident_text;
+  const supplied = typeof body === 'string' && body.trim().length > 0;
+  const messages = hu ? {
+    not_in_feed:'Ez az adatfolyam eseményadatokat ad, szöveges leírásmezőt nem tartalmaz.',
+    not_provided:'A forrás ennél az eseménynél nem adott meg leírást.',
+    not_requested:'A tárolt jelentés nem tartalmaz lekért leírásmezőt. Ez nem jelenti azt, hogy a forrásnál nincs leírás.'
+  } : {
+    not_in_feed:'This feed supplies incident data without a narrative description field.',
+    not_provided:'The source did not provide a description for this incident.',
+    not_requested:'The stored report has no requested description field. This does not establish whether the source has a description.'
+  };
+  return {
+    heading:hu ? 'Forrás szerinti leírás' : 'Source description',
+    content:supplied ? body.slice(0,4000) :
+      (Object.hasOwn(messages, attributes.incident_text_status) ? messages[attributes.incident_text_status] :
+        (hu ? 'A leírás elérhetősége ennél a tárolt jelentésnél nem ismert.' : 'Description availability is unknown for this stored report.')),
+    notice:supplied && body.length > 4000 ?
+      (hu ? 'A megjelenített leírás rövidítve van.' : 'The displayed description has been shortened.') : null
+  };
+}
+
 export function reportView(state, language = 'en') {
   const a = state?.attributes;
   if (!state?.entity_id?.startsWith('geo_location.') || !SOURCES.has(a?.source)) return null;
@@ -188,14 +212,10 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       heading.id='report-title';
       this.dialog.replaceChildren(close,heading);
       if (!view || view.unavailable) {this.dialog.append(element('p',w.unavailable));return;}
-      const body = state.attributes.incident_text;
-      const content = typeof body === 'string' && body.trim() ? body.slice(0,4000) :
-        state.attributes.incident_text_status === 'not_in_feed'
-          ? (this._hass.language?.startsWith('hu') ? 'Ez az adatfolyam eseményadatokat ad, szöveges leírásmezőt nem tartalmaz.' : 'This feed supplies incident data without a narrative description field.') :
-        state.attributes.incident_text_status === 'not_provided'
-          ? (this._hass.language?.startsWith('hu') ? 'A forrás ennél az eseménynél nem adott meg leírást.' : 'The source did not provide a description for this incident.') : w.absent;
-      const paragraph=element('p',content);paragraph.style.whiteSpace='pre-wrap';
-      this.dialog.append(element('p',view.attribution),paragraph);
+      const description = reportDescription(state.attributes,this._hass.language || 'en');
+      const paragraph=element('p',description.content);paragraph.style.whiteSpace='pre-wrap';
+      this.dialog.append(element('p',view.attribution),element('h3',description.heading),paragraph);
+      if(description.notice) this.dialog.append(element('p',description.notice));
       const age=reportAge(state);
       this.dialog.append(element('p',this._hass.language?.startsWith('hu')
         ? (age === null ? 'Jelentés kora: ismeretlen vagy jövőbeli időpont' : `Jelentés kora: ${Math.floor(age)} nap (forrás szerinti frissítés)`)
