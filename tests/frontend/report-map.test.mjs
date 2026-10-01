@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {reportView,safeLink,visibleMapSources,reportDescription} from '../../frontend/ignis-report-map.js';
+import {reportView,safeLink,visibleMapSources,reportDescription,retrievalView} from '../../frontend/ignis-report-map.js';
 
 const state = {entity_id:'geo_location.example',state:'12.3',attributes:{
   source:'terralyra_ignis_canada_reports',friendly_name:'Report <script>',
@@ -91,4 +91,34 @@ test('supplied source text wins over stale status and truncation is disclosed',(
   assert.equal(long.content.length,4000);
   assert.match(long.notice,/rövidítve/);
   assert.equal(reportDescription({incident_text:'x'.repeat(4000)}).notice,null);
+});
+
+
+test('retrieval errors explain retained reports without changing source status',()=>{
+  for(const [source,status] of [
+    ['terralyra_ignis_canada_reports','review_required'],
+    ['terralyra_ignis_canada_reports','rate_limited'],
+    ['terralyra_ignis_nifc_reports','refresh_failed_invalid_data'],
+    ['terralyra_ignis_nifc_reports','restored_cooldown']]) {
+    const attributes={...state.attributes,source,response_status:status};
+    const view=reportView({...state,attributes},'hu');
+    assert.match(view.retrievalNotice,/Megőrzött korábbi jelentés/);
+    assert.ok(view.rows[7][1].includes(status));
+    assert.equal(view.rows[2][1],'UC');
+    assert.equal(attributes.response_status,status);
+  }
+});
+test('success and unknown retrieval states never invent retention or freshness',()=>{
+  for(const [source,status] of [
+    ['terralyra_ignis_canada_reports','available'],
+    ['terralyra_ignis_nifc_reports','retrieved']]) {
+    const view=retrievalView({source,response_status:status});
+    assert.match(view.label,/Successful retrieval/);
+    assert.equal(view.notice,null);
+  }
+  for(const status of ['retrieved','future_status','toString',undefined]) {
+    const view=retrievalView({source:'terralyra_ignis_canada_reports',response_status:status});
+    assert.equal(view.notice,null);
+    assert.doesNotMatch(view.label,/Successful/);
+  }
 });

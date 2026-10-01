@@ -122,3 +122,13 @@ if an accompanying status is stale. Display truncation at 4,000 characters is
 visible; source records are unchanged. No incident-page request is added.
 This frontend-only change requires replacing the separately installed card file
 and reloading the browser when deployed; it does not require restarting HA.
+
+### Retrieval feedback (main-branch candidate)
+
+Report dialogs translate known Canada and NIFC retrieval states into Hungarian
+or English while retaining the original diagnostic code. Known failures and
+restored cooldowns show an earlier-report notice. Unknown states stay explicitly
+unknown; a success label is accepted only for the corresponding provider.
+This does not translate or replace the incident's source status, infer incident
+freshness from retrieval success, or infer all-clear from an empty response.
+No source retry, persistence, entity identity or history changes are involved.

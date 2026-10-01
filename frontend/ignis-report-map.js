@@ -55,6 +55,43 @@ export function reportDescription(attributes = {}, language = 'en') {
   };
 }
 
+// Retrieval state is not a statement about the fire's activity or freshness.
+export function retrievalView(attributes = {}, language = 'en') {
+  const hu = language.startsWith('hu');
+  const status = attributes.response_status;
+  const source = attributes.source;
+  const canada = source === 'terralyra_ignis_canada_reports';
+  const nifc = source === 'terralyra_ignis_nifc_reports';
+  const labels = {
+    not_requested:['Még nincs lekérés','Not yet requested'],
+    initializing:['Inicializálás','Initializing'],
+    never_fetched:['Még nincs sikeres lekérés','Not yet retrieved'],
+    available:['Sikeres adatátvétel','Successful retrieval'],
+    retrieved:['Sikeres adatátvétel','Successful retrieval'],
+    rate_limited:['Lekérési korlátozás','Request rate limited'],
+    unavailable:['Sikertelen lekérés','Retrieval failed'],
+    invalid_response:['Érvénytelen forrásválasz','Invalid source response'],
+    review_required:['Ellenőrzést igényel','Review required'],
+    storage_error:['Tárolási hiba','Storage error'],
+    restored_cooldown:['Visszaállított várakozási idő','Restored request cooldown'],
+    persistence_review_required:['A tárolás ellenőrzést igényel','Storage review required'],
+    refresh_failed_transient:['Átmeneti lekérési hiba','Temporary retrieval failure'],
+    refresh_failed_rate_limited:['Lekérési korlátozás','Request rate limited'],
+    refresh_failed_invalid_data:['Érvénytelen forrásválasz','Invalid source response'],
+    refresh_failed_access_denied:['Hozzáférési hiba','Access denied']
+  };
+  const valid = canada ? ['not_requested','initializing','available','rate_limited','unavailable','invalid_response','review_required','storage_error'] :
+    nifc ? ['not_requested','never_fetched','retrieved','restored_cooldown','persistence_review_required','refresh_failed_transient','refresh_failed_rate_limited','refresh_failed_invalid_data','refresh_failed_access_denied'] : [];
+  const known = valid.includes(status);
+  const success = (canada && status === 'available') || (nifc && status === 'retrieved');
+  const retained = known && !success && !['not_requested','initializing','never_fetched'].includes(status);
+  return {
+    label:known ? `${labels[status][hu ? 0 : 1]} (${status})` :
+      (typeof status === 'string' && status.trim() ? `${hu ? 'Ismeretlen lekérési állapot' : 'Unknown retrieval status'} (${status.slice(0,200)})` : (hu ? 'Nincs megadva' : 'Not provided')),
+    notice:retained ? (hu ? 'Megőrzött korábbi jelentés látható. A legutóbbi lekérési állapot nem igazolja az adat frissességét.' : 'A retained earlier report is displayed. The latest retrieval status does not establish its freshness.') : null
+  };
+}
+
 export function reportView(state, language = 'en') {
   const a = state?.attributes;
   if (!state?.entity_id?.startsWith('geo_location.') || !SOURCES.has(a?.source)) return null;
@@ -73,6 +110,7 @@ export function reportView(state, language = 'en') {
   return {w, title:incidentName ? `NIFC · ${text(incidentName)}` : text(a.friendly_name), attribution:text(a.attribution),
     unavailable: ['unavailable','unknown'].includes(state.state),
     source:safeLink(a.source_url),
+    retrievalNotice:retrievalView(a,language).notice,
     rows:[
       [w.location,text(a.distance_reference_name)],
       [w.distance,Number.isFinite(distance) && state.state.trim() !== '' ? `${distance} ${text(a.unit_of_measurement)}` : w.unknown],
@@ -81,7 +119,7 @@ export function reportView(state, language = 'en') {
       [w.updated,time(a.source_times?.status_date || a.source_modified_at)],
       [w.discovered,time(a.source_discovered_at)],
       [w.received,time(a.last_success_at)],
-      [w.response,text(a.response_status)]
+      [w.response,retrievalView(a,language).label]
     ]};
 }
 
@@ -216,6 +254,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const paragraph=element('p',description.content);paragraph.style.whiteSpace='pre-wrap';
       this.dialog.append(element('p',view.attribution),element('h3',description.heading),paragraph);
       if(description.notice) this.dialog.append(element('p',description.notice));
+      if(view.retrievalNotice) this.dialog.append(element('p',view.retrievalNotice));
       const age=reportAge(state);
       this.dialog.append(element('p',this._hass.language?.startsWith('hu')
         ? (age === null ? 'Jelentés kora: ismeretlen vagy jövőbeli időpont' : `Jelentés kora: ${Math.floor(age)} nap (forrás szerinti frissítés)`)
