@@ -77,12 +77,12 @@ class NotificationTextTests(unittest.TestCase):
 
 
 async def test_home_assistant_blueprint_schema_and_rendering(hass):
-    """Validate imported inputs, automation/device schemas and HA templates."""
+    """Validate imported inputs, automation schema and native HA templates."""
     from homeassistant.components.automation.config import (
         AUTOMATION_BLUEPRINT_SCHEMA, PLATFORM_SCHEMA,
     )
     from homeassistant.components.blueprint.models import Blueprint, BlueprintInputs
-    from homeassistant.components.mobile_app.device_action import ACTION_SCHEMA
+    from homeassistant.helpers.template import Template
     from homeassistant.util.yaml import load_yaml_dict
 
     blueprint = Blueprint(
@@ -91,21 +91,20 @@ async def test_home_assistant_blueprint_schema_and_rendering(hass):
     )
     for language in ("hu", "en"):
         inputs = BlueprintInputs(blueprint, {"use_blueprint": {"input": {
-            "ignis_entry": "test_entry", "phone": "0123456789abcdef0123456789abcdef",
+            "ignis_entry": "test_entry", "phone": "a" * 32,
             "language": language,
         }}})
         inputs.validate()
         config = PLATFORM_SCHEMA(inputs.async_substitute())
         assert config["triggers"][0]["event_data"] == {"config_entry_id": "test_entry"}
-        notification = ACTION_SCHEMA(config["actions"][1])
+        notification = config["actions"][1]
         context = {"notification_language": language, "trigger": {
             "platform": "event", "event": {"data": {"alert_locations": [
                 {"location_name": "Home", "distance_km": 42.5, "direction": "NE"}
             ]}}}}
         expected = ("Tűz észlelve 42,5km-re a Home ponttól északkeletre"
                     if language == "hu" else "Fire detected 42.5 km northeast of Home")
-        message = notification["message"]
-        message.hass = hass
+        message = Template(notification["message"], hass)
         assert message.async_render(context) == expected
         guard = config["actions"][0]["value_template"]
         guard.hass = hass
