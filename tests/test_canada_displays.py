@@ -76,3 +76,30 @@ async def test_calendar_default_and_map_disable_preserve_source(hass):
         assert manager.runtime.owner.state.last_success is source
         assert manager.status == 'disabled'
     await manager.runtime.async_stop()
+
+
+def test_map_receipt_time_survives_failed_refresh_without_replacing_source_time(hass):
+    item, = project_canada(sample(), places())
+    receipt = datetime(2026, 9, 22, 8, tzinfo=UTC)
+    state = RefreshState(last_success=sample(), last_success_at=receipt, status='available')
+    owner = SimpleNamespace(state=state)
+    manager = SimpleNamespace(entry=SimpleNamespace(entry_id='entry'), hass=hass,
+                              runtime=SimpleNamespace(owner=owner))
+    marker = CanadaMapRecord(manager, item)
+    identity = marker.entity_id
+    source_times = marker.extra_state_attributes['source_times'].copy()
+    assert marker.extra_state_attributes['last_success_at'] == receipt.isoformat()
+
+    def failure():
+        raise OSError('offline')
+
+    assert state.refresh(failure, datetime(2026, 9, 22, 10, tzinfo=UTC)) is False
+    attrs = marker.extra_state_attributes
+    assert attrs['response_status'] == 'unavailable'
+    assert attrs['last_success_at'] == receipt.isoformat()
+    assert attrs['source_times'] == source_times
+    assert marker.entity_id == identity
+    owner.state = RefreshState(last_success=sample())
+    assert marker.extra_state_attributes['last_success_at'] is None
+    owner.state = None
+    assert marker.extra_state_attributes['last_success_at'] is None
