@@ -180,9 +180,10 @@ def test_monitoring_area_uses_location_radius_as_map_decoration() -> None:
     }
 
 
-async def test_map_adds_one_area_per_enabled_monitored_location() -> None:
+@pytest.mark.parametrize("alert_radius,count", [(None, 1), (25, 1), (10, 2)])
+async def test_map_adds_one_area_per_enabled_monitored_location(alert_radius, count) -> None:
     enabled = MonitoredLocation(
-        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant"
+        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant", alert_radius
     )
     disabled = MonitoredLocation(
         "tokyo", "Tokyo", 35.68, 139.76, 50.0, False, "manual"
@@ -211,6 +212,12 @@ async def test_map_adds_one_area_per_enabled_monitored_location() -> None:
     assert isinstance(area, IgnisMonitoringArea)
     assert area.extra_state_attributes["monitoring_location_id"] == "home"
     assert len(add_entities.call_args_list) == 1
+    areas = add_entities.call_args_list[0].args[0]
+    assert len(areas) == count
+    if count == 2:
+        assert areas[1].extra_state_attributes["gps_accuracy"] == alert_radius * 1000
+        assert areas[1].latitude == area.latitude
+        assert areas[1].longitude == area.longitude
 
 
 async def test_map_removes_area_for_deleted_or_disabled_location() -> None:
