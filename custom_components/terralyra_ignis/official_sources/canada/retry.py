@@ -30,18 +30,24 @@ class RefreshState:
     failures: int = 0
     status: str = 'initializing'
     review_required: bool = False
+    last_http_error: int | None = None
+    last_attempt_at: datetime | None = None
 
     def refresh(self, fetcher, now):
         if now.utcoffset() is None:
             raise ValueError('Aware clock required')
         if self.review_required or (self.next_attempt and now < self.next_attempt):
             return False
+        # Record completed attempts only; skipped retries retain their evidence.
+        self.last_attempt_at = now
+        self.last_http_error = None
         server_retry = None
         try:
             result = fetcher()
         except HTTPError as error:
             server_retry = retry_after(error.headers.get('Retry-After') if error.headers else None, now)
             code = error.code
+            self.last_http_error = code
             error.close()
             if code in (401, 403) or (400 <= code < 500 and code not in (408, 429)):
                 self.review_required = True

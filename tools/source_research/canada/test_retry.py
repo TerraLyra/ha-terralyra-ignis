@@ -59,3 +59,23 @@ class RetryTests(unittest.TestCase):
             state.refresh(Mock(side_effect=TimeoutError()),now)
             self.assertEqual(state.next_attempt-now,timedelta(minutes=minutes))
             now=state.next_attempt
+
+    def test_http_evidence_survives_skipped_retry(self):
+        state = RefreshState(last_success='retained', last_success_at=NOW)
+        fetch = Mock(side_effect=self.error(403))
+        state.refresh(fetch, NOW)
+        state.refresh(fetch, NOW + timedelta(days=2))
+        self.assertEqual(state.last_http_error, 403)
+        self.assertEqual(state.last_attempt_at, NOW)
+        self.assertEqual(state.last_success, 'retained')
+        fetch.assert_called_once()
+
+    def test_later_attempt_replaces_old_http_evidence(self):
+        for outcome in (TimeoutError(), ValueError('invalid'), None):
+            with self.subTest(outcome=outcome):
+                state = RefreshState()
+                state.refresh(Mock(side_effect=self.error(503)), NOW)
+                later = state.next_attempt
+                state.refresh(Mock(side_effect=outcome, return_value=('ok', {})), later)
+                self.assertIsNone(state.last_http_error)
+                self.assertEqual(state.last_attempt_at, later)
