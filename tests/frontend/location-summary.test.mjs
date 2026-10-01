@@ -69,3 +69,17 @@ test('summary exposes both radii belonging to the selected location',()=>{
  assert.equal(m.monitoringRadius,100);assert.equal(m.alertRadius,25);
  assert.ok(summarizeLocation(e,'other').error);
 });
+
+const {locationChoices}=await import('../../frontend/ignis-location-summary.js');
+test('editor lists explicit location-status sensors only, including unavailable existing locations',()=>{
+ const states={
+  'sensor.place':entity,
+  'sensor.unavailable':{...entity,state:'unavailable',attributes:{...entity.attributes,location_id:'other',location_name:'Other'}},
+  'sensor.forecast':{attributes:{location_id:'ca',scope:'monitored_location'}},
+  'sensor.global':{attributes:{operational_status:'available',source_health:[]}},
+  'binary_sensor.place':entity,
+  'sensor.blank':{attributes:{...entity.attributes,location_id:' '}},
+ };
+ assert.deepEqual(locationChoices(states).map(c=>[c.entity,c.location_id]),[['sensor.place','ca'],['sensor.unavailable','other']]);
+ assert.deepEqual(locationChoices(),[]);
+});
