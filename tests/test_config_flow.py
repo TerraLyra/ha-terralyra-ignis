@@ -1299,7 +1299,41 @@ async def test_location_alert_radius_validation_and_persistence(hass):
     values = {LOCATION_NAME:'Home', LOCATION_LATITUDE:47.5, LOCATION_LONGITUDE:19.1,
               LOCATION_RADIUS_KM:30, LOCATION_ENABLED:True, 'alert_radius_km':31}
     result = await hass.config_entries.options.async_configure(result['flow_id'], values)
-    assert result['errors'] == {'base':'invalid_monitored_location'}
+    assert result['errors'] == {'alert_radius_km':'alert_radius_exceeds_monitoring'}
+    suggestions = {key.schema: key.description.get('suggested_value') for key in result['data_schema'].schema}
+    assert all(suggestions[key] == value for key, value in values.items())
     result = await hass.config_entries.options.async_configure(result['flow_id'], values | {'alert_radius_km': 10})
     assert result['type'] is FlowResultType.CREATE_ENTRY
     assert result['data'][CONF_MONITORED_LOCATIONS][0]['alert_radius_km'] == 10
+
+
+async def test_add_location_radius_error_retains_submitted_values(hass):
+    entry = MockConfigEntry(domain=DOMAIN, data={},
+        options={CONF_MONITORED_LOCATIONS: [_stored_location()]})
+    entry.add_to_hass(hass)
+    result = await _start_location_management(hass, entry)
+    result = await hass.config_entries.options.async_configure(
+        result['flow_id'], {'next_step_id': 'add_location'})
+    values = {LOCATION_NAME:'Cabin', LOCATION_LATITUDE:46.5, LOCATION_LONGITUDE:18.1,
+              LOCATION_RADIUS_KM:30, LOCATION_ENABLED:True, 'alert_radius_km':31}
+    result = await hass.config_entries.options.async_configure(result['flow_id'], values)
+    assert result['errors'] == {'alert_radius_km':'alert_radius_exceeds_monitoring'}
+    suggestions = {key.schema: key.description.get('suggested_value') for key in result['data_schema'].schema}
+    assert all(suggestions[key] == value for key, value in values.items())
+    assert len(entry.options[CONF_MONITORED_LOCATIONS]) == 1
+    result = await hass.config_entries.options.async_configure(
+        result['flow_id'], values | {'alert_radius_km':30})
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data'][CONF_MONITORED_LOCATIONS][-1]['alert_radius_km'] == 30
+
+
+def test_edit_rejects_retained_alert_radius_above_reduced_monitoring():
+    from custom_components.terralyra_ignis.config_flow import (
+        AlertRadiusTooLarge, _location_from_edit_input,
+    )
+    from custom_components.terralyra_ignis.core.locations import monitored_location_from_dict
+    existing = monitored_location_from_dict(_stored_location() | {'alert_radius_km':10})
+    values = {LOCATION_NAME:'Home', LOCATION_LATITUDE:47.5, LOCATION_LONGITUDE:19.1,
+              LOCATION_RADIUS_KM:5, LOCATION_ENABLED:True}
+    with pytest.raises(AlertRadiusTooLarge):
+        _location_from_edit_input(values, existing)

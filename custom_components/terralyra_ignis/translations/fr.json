@@ -146,7 +146,8 @@
           "alert_radius_km": "Rayon d’alerte (km)"
         },
         "data_description": {
-          "alert_radius_km": "Le rayon d’alerte doit être positif et ne pas dépasser le rayon de surveillance."
+          "alert_radius_km": "Les nouvelles observations satellitaires répondant aux critères dans ce rayon peuvent déclencher votre automatisation de notification. Il ne doit pas dépasser le rayon de surveillance ; ils peuvent être égaux.",
+          "radius_km": "Les observations sont suivies dans cette distance autour du lieu sélectionné."
         }
       },
       "edit_location": {
@@ -161,7 +162,8 @@
           "alert_radius_km": "Rayon d’alerte (km)"
         },
         "data_description": {
-          "alert_radius_km": "Le rayon d’alerte doit être positif et ne pas dépasser le rayon de surveillance."
+          "alert_radius_km": "Les nouvelles observations satellitaires répondant aux critères dans ce rayon peuvent déclencher votre automatisation de notification. Il ne doit pas dépasser le rayon de surveillance ; ils peuvent être égaux.",
+          "radius_km": "Les observations sont suivies dans cette distance autour du lieu sélectionné."
         }
       },
       "toggle_location": {
@@ -195,7 +197,8 @@
       "one_location_required": "Au moins un lieu surveillé doit rester activé",
       "too_many_locations": "Un maximum de 10 lieux surveillés est pris en charge",
       "forecast_not_eligible": "Le lieu est désactivé ou hors de la couverture FRMv3.",
-      "invalid_forecast_settings": "Paramètres de prévision non valides."
+      "invalid_forecast_settings": "Paramètres de prévision non valides.",
+      "alert_radius_exceeds_monitoring": "Réduisez le rayon d’alerte ou augmentez le rayon de surveillance. Le rayon d’alerte ne peut pas être plus grand."
     }
   },
   "issues": {

@@ -146,7 +146,8 @@
           "alert_radius_km": "Radio de alerta (km)"
         },
         "data_description": {
-          "alert_radius_km": "El radio de alerta debe ser positivo y no superar el radio de seguimiento."
+          "alert_radius_km": "Las nuevas observaciones satelitales que cumplan los criterios dentro de este radio pueden activar tu automatización de notificaciones. No debe superar el radio de vigilancia; pueden ser iguales.",
+          "radius_km": "Las observaciones se siguen dentro de esta distancia del lugar seleccionado."
         }
       },
       "edit_location": {
@@ -161,7 +162,8 @@
           "alert_radius_km": "Radio de alerta (km)"
         },
         "data_description": {
-          "alert_radius_km": "El radio de alerta debe ser positivo y no superar el radio de seguimiento."
+          "alert_radius_km": "Las nuevas observaciones satelitales que cumplan los criterios dentro de este radio pueden activar tu automatización de notificaciones. No debe superar el radio de vigilancia; pueden ser iguales.",
+          "radius_km": "Las observaciones se siguen dentro de esta distancia del lugar seleccionado."
         }
       },
       "toggle_location": {
@@ -195,7 +197,8 @@
       "one_location_required": "Debe quedar activa al menos una ubicación vigilada",
       "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas",
       "forecast_not_eligible": "La ubicación está desactivada o fuera de la cobertura FRMv3.",
-      "invalid_forecast_settings": "Configuración de previsión no válida."
+      "invalid_forecast_settings": "Configuración de previsión no válida.",
+      "alert_radius_exceeds_monitoring": "Reduce el radio de alerta o aumenta el de vigilancia. El radio de alerta no puede ser mayor."
     }
   },
   "issues": {

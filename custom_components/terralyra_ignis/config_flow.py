@@ -566,6 +566,8 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                 validate_monitored_locations((*locations, location))
             except OverflowError:
                 errors["base"] = "too_many_locations"
+            except AlertRadiusTooLarge:
+                errors[LOCATION_ALERT_RADIUS_KM] = "alert_radius_exceeds_monitoring"
             except (KeyError, TypeError, ValueError):
                 errors["base"] = "invalid_monitored_location"
             else:
@@ -581,7 +583,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     LOCATION_RADIUS_KM: DEFAULT_RADIUS_KM,
                     LOCATION_ALERT_RADIUS_KM: DEFAULT_RADIUS_KM,
                     LOCATION_ENABLED: True,
-                },
+                } | (user_input or {}),
             ),
             errors=errors,
         )
@@ -607,6 +609,8 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                 validate_monitored_locations(tuple(replacement))
                 if not any(item.enabled for item in replacement):
                     raise ValueError
+            except AlertRadiusTooLarge:
+                errors[LOCATION_ALERT_RADIUS_KM] = "alert_radius_exceeds_monitoring"
             except (KeyError, TypeError, ValueError):
                 errors["base"] = "invalid_monitored_location"
             else:
@@ -622,7 +626,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     LOCATION_RADIUS_KM: location.radius_km,
                     LOCATION_ALERT_RADIUS_KM: location.effective_alert_radius_km,
                     LOCATION_ENABLED: location.enabled,
-                },
+                } | (user_input or {}),
             ),
             errors=errors,
         )
@@ -764,6 +768,10 @@ def _location_schema() -> vol.Schema:
     )
 
 
+class AlertRadiusTooLarge(ValueError):
+    """The location alert radius exceeds its monitoring radius."""
+
+
 def _manual_location_from_input(
     values: dict[str, Any], location_id: str
 ) -> MonitoredLocation:
@@ -779,6 +787,8 @@ def _manual_location_from_input(
         enabled=bool(values[LOCATION_ENABLED]),
         source=LOCATION_SOURCE_MANUAL,
     )
+    if location.effective_alert_radius_km > location.radius_km:
+        raise AlertRadiusTooLarge
     validate_monitored_locations((location,))
     return location
 
@@ -798,6 +808,8 @@ def _location_from_edit_input(
         enabled=updated.enabled,
         source=existing.source,
     )
+    if result.effective_alert_radius_km > result.radius_km:
+        raise AlertRadiusTooLarge
     validate_monitored_locations((result,))
     return result
 
