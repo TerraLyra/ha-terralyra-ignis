@@ -130,9 +130,9 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
         patch("custom_components.terralyra_ignis.geo_location.IgnisFireLocation") as entity_class,
         patch("custom_components.terralyra_ignis.geo_location._async_remove_expired_entity") as remove,
     ):
-        await async_setup_entry(Mock(), entry, add_entities)
+        await async_setup_entry(Mock(config=SimpleNamespace(language="hu")), entry, add_entities)
         registry.async_remove.assert_called_once_with("geo_location.inactive")
-        entity_class.assert_called_once_with(entry, active, disambiguate=False)
+        entity_class.assert_called_once_with(entry, active, disambiguate=False, language="hu")
         add_entities.assert_called_once_with([entity_class.return_value])
 
         active.lifecycle = FireLifecycle.INACTIVE
