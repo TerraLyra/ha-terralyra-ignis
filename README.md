@@ -42,7 +42,15 @@ are recorded in
 
 ## Product status
 
-Stable **0.31.0** adds an optional location summary with source health, current
+Latest stable release: **0.33.0**, with separate per-location monitoring and
+satellite alert radii. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
+and [0.33.0 release notes](docs/RELEASE_0_33_0.md).
+
+Newer main-branch additions include the separately imported six-language
+notification blueprint and the optional summary card's visual editor. The editor
+is not in the 0.33.0 card asset; HACS does not update these separate resources.
+
+Version **0.31.0** adds an optional location summary with source health, current
 location-relative nearest-incident distance and an explicitly verified near-home
 fire-risk forecast binding. Canada/NIFC map controls follow their configured map
 switches and stay hidden when disabled or unavailable. Dashboard JavaScript files
