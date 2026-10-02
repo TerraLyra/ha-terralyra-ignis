@@ -134,6 +134,7 @@ def test_map_distance_survives_family_consolidation(name, latitude, longitude) -
 
     family = _consolidate([cluster])[0]
     entity = _entity(family)
+    entity.set_cluster(family)
     assert entity.distance == pytest.approx(expected)
     assert entity.extra_state_attributes["location_name"] == name
     assert entity.extra_state_attributes["distance_km"] == round(entity.distance, 2)
@@ -316,6 +317,7 @@ def test_map_source_provenance_preserves_historical_observation():
     fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
     family = _consolidate([old, fresh])[0]
     entity = _entity(family)
+    entity.set_cluster(family)
     assert "Possible shared fire" in entity.name
     assert "NASA FIRMS" in entity.name
     assert "LSA SAF" in entity.name
