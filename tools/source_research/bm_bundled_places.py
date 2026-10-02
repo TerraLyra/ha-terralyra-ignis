@@ -10,6 +10,8 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # BM OKF RSS 92474: observed title form, not a general suffix rule.
+    'Gyöngyöshalász': ('Gyöngyöshalásznál',),
     # BM OKF RSS 92462: explicit event/responder inflections.
     'Tiszadob': ('Tiszadobon', 'tiszadobi'),
     'Tiszaújváros': ('tiszaújvárosi',),
