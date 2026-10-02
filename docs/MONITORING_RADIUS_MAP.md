@@ -1,7 +1,8 @@
 # Active-fire monitoring-radius map overlay
 
-TerraLyra IGNIS exposes one native Home Assistant geolocation entity for every
-enabled monitored location. These entities use the separate
+TerraLyra IGNIS exposes an outer monitoring circle for every enabled monitored
+location. Since 0.33.0, a smaller alert radius also creates an inner alert circle;
+equal radii use one circle. These native Home Assistant geolocation entities use the separate
 `terralyra_ignis_monitoring_areas` source so the overlay is optional and existing
 fire-map cards are not changed by an integration update.
 
@@ -30,7 +31,8 @@ Assistant map. It is also exposed as `monitoring_radius_km`, together with
 
 ## Limits
 
-- The circle is the user-configured active-fire monitoring boundary.
+- The outer circle is the user-configured active-fire monitoring boundary; the
+  inner circle, when present, is the satellite alert boundary.
 - It is not a measured fire perimeter, satellite footprint, uncertainty radius,
   evacuation area, or safety zone.
 - It provides no guarantee that every fire inside it will be detected.
