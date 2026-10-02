@@ -359,10 +359,10 @@ def test_multi_source_map_entity_has_explicit_provider_name() -> None:
     entity = _entity(cluster)
     entity.set_cluster(cluster)
 
-    assert entity.name == "Multiple sources · Trebišov közelében észlelt tűz"
+    assert entity.name == "LSA SAF + NASA FIRMS · Trebišov közelében észlelt tűz"
     assert (
         entity.extra_state_attributes[ATTR_PROVIDER_ATTRIBUTION]
-        == "Multiple sources"
+        == "LSA SAF + NASA FIRMS"
     )
 
 
