@@ -66,6 +66,11 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     street = _STREET.match(value, end)
     if street:
         hints.append(ContextHint('street_name_reference', start, street.end(), value[start:street.end()]))
+    # RSS 92453: retain Zsámbok as evidence, but flag its observed street context.
+    compound_street = re.match(r'[-–]Réti[ \t]+sor(?:on|ról|ra)?(?!\w)', value[end:], re.IGNORECASE)
+    if compound_street:
+        stop = end + compound_street.end()
+        hints.append(ContextHint('street_name_reference', start, stop, value[start:stop]))
     responder = _RESPONDER.match(value, end)
     if value[start:end].casefold().endswith('i') and responder:
         hints.append(ContextHint('responder_reference', start, responder.end(), value[start:responder.end()]))
@@ -130,7 +135,7 @@ def review_locations(title: str, description: str, source_url: str,
         # Horizontal whitespace only: do not propagate across lines/sentences.
         modifier = r'(?:[ \t]+(?:hivatásos|önkéntes|önkormányzati))?'
         member = name + r'(?!\w)' + modifier
-        separator = r'(?:[ \t]*,[ \t]*(?:(?:és|illetve)[ \t]+)?|[ \t]+(?:és|illetve)[ \t]+)(?:(?:a|az)[ \t]+)?'
+        separator = r'(?:[ \t]*,[ \t]*(?:(?:és|illetve|valamint)[ \t]+)?|[ \t]+(?:és|illetve|valamint)[ \t]+)(?:(?:a|az)[ \t]+)?'
         noun = r'[ \t]+(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)'
         list_pattern = re.compile(r'(?<!\w)' + member + '(?:' + separator + member
                                   + r'){1,7}' + noun, re.IGNORECASE)
