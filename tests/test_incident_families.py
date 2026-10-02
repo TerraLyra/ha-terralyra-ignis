@@ -331,3 +331,29 @@ def test_map_source_provenance_preserves_historical_observation():
     assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE
     assert family.providers == ("nasa_firms",)
     assert family.track_id in {"old", "fresh"}
+
+
+@pytest.mark.parametrize(("language", "label"), [
+    ("en", "Possible shared fire"),
+    ("hu-HU", "Valószínűleg ugyanaz a tűzeset"),
+    ("de", "Wahrscheinlich derselbe Brand"),
+    ("es", "Posiblemente el mismo incendio"),
+    ("fr", "Probablement le même incendie"),
+    ("it", "Probabilmente lo stesso incendio"),
+    ("unknown", "Possible shared fire"),
+    (None, "Possible shared fire"),
+])
+def test_shared_fire_label_language_and_evidence_reference(language, label):
+    from tests.test_geo_location import _entity
+
+    old = _cluster("old", minutes=-120)
+    fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
+    family = _consolidate([old, fresh])[0]
+    entity = _entity(family)
+    entity.set_cluster(family, language=language)
+    assert label in entity.name
+    assert "NASA FIRMS" in entity.name
+    attrs = entity.extra_state_attributes
+    assert attrs["source_evidence_reference_time"] == fresh.acquired.isoformat()
+    assert attrs["source_evidence_window_minutes"] == 30
+    assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE
