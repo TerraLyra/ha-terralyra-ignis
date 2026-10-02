@@ -307,3 +307,25 @@ def test_duplicate_tracks_do_not_multiply_source_count_or_corroboration():
     assert result.corroborating_detections == 2
     assert len(inputs) == 5
     assert result.frp_mw == b.frp_mw
+
+
+def test_map_source_provenance_preserves_historical_observation():
+    from tests.test_geo_location import _entity
+
+    old = _cluster("old", minutes=-120)
+    fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
+    family = _consolidate([old, fresh])[0]
+    entity = _entity(family)
+    assert "Possible shared fire" in entity.name
+    assert "NASA FIRMS" in entity.name
+    assert "LSA SAF" in entity.name
+    attrs = entity.extra_state_attributes
+    assert attrs["association_status"] == "probable_same_incident"
+    observations = {item["track_id"]: item for item in attrs["source_observations"]}
+    assert observations["old"]["acquired"] == old.acquired.isoformat()
+    assert observations["old"]["evidence_role"] == "historical"
+    assert observations["fresh"]["evidence_role"] == "current"
+    assert observations["old"]["latitude"] == old.latitude
+    assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE
+    assert family.providers == ("nasa_firms",)
+    assert family.track_id in {"old", "fresh"}

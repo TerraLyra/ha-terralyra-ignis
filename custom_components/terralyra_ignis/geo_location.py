@@ -300,6 +300,25 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
                 if match.inside_radius
             ]
         attrs["source_selection"] = "automatic_equal_peers"
+        observations = self._cluster.source_observations
+        if observations:
+            attrs["source_observations"] = [
+                {
+                    "track_id": item.track_id,
+                    "providers": list(item.providers),
+                    "provider_attribution": _provider_attribution(item.providers),
+                    "acquired": item.acquired.isoformat(),
+                    "latitude": item.latitude,
+                    "longitude": item.longitude,
+                    "evidence_role": "current" if item.current_evidence else "historical",
+                }
+                for item in observations
+            ]
+            attrs["association_status"] = (
+                "probable_same_incident" if len(observations) > 1 else "single_track"
+            )
+            attrs["association_basis"] = "spatial_temporal_track_matching"
+
         attrs[ATTR_PROVIDER_ATTRIBUTION] = _provider_attribution(
             self._cluster.providers
         )
@@ -313,6 +332,11 @@ def _base_display_name(cluster: FireCluster) -> str:
     """Return a map label that makes the actual observation source explicit."""
     track_id = cluster.track_id or "unknown"
     name = cluster.location_description or f"Fire detection {_short_id(track_id)}"
+    observed_providers = tuple(sorted({
+        provider for item in cluster.source_observations for provider in item.providers
+    }))
+    if len(observed_providers) > 1:
+        return f"{_provider_attribution(observed_providers)} · Possible shared fire · {name}"
     return f"{_provider_attribution(cluster.providers)} · {name}"
 
 
@@ -345,7 +369,7 @@ def _provider_attribution(providers: tuple[str, ...]) -> str:
     }
     unique = tuple(dict.fromkeys(providers))
     if len(unique) > 1:
-        return "Multiple sources"
+        return " + ".join(labels.get(provider, provider) for provider in unique)
     if unique:
         return labels.get(unique[0], unique[0])
     return "Unknown source"

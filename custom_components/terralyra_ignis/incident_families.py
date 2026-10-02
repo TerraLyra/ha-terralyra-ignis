@@ -13,6 +13,7 @@ from .models import (
     FireLifecycle,
     IncidentLocationMatch,
     MetricTrend,
+    SourceTrackObservation,
 )
 
 MIN_CROSS_SOURCE_LINK_KM = 8.0
@@ -319,6 +320,17 @@ def _family_cluster(
         track_id=family_id,
         family_id=family_id,
         source_track_ids=source_track_ids,
+        source_observations=tuple(
+            SourceTrackObservation(
+                track_id=item.track_id or "unknown",
+                providers=item.providers,
+                acquired=item.acquired,
+                latitude=item.latitude,
+                longitude=item.longitude,
+                current_evidence=newest - item.acquired <= timedelta(minutes=30),
+            )
+            for item in sorted(history, key=lambda item: item.track_id or "")
+        ),
         incident_extent_km=extent,
         peak_frp_mw=max(item.peak_frp_mw or item.frp_mw for item in history),
         place_name=representative.place_name,
