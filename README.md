@@ -42,13 +42,14 @@ are recorded in
 
 ## Product status
 
-Latest stable release: **0.33.0**, with separate per-location monitoring and
-satellite alert radii. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
-and [0.33.0 release notes](docs/RELEASE_0_33_0.md).
+Latest stable release: **0.34.0**, with a six-language notification blueprint,
+a visual location selector for the optional summary card and clearer shared-fire
+source details. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
+and [0.34.0 release notes](docs/RELEASE_0_34_0.md).
 
-Newer main-branch additions include the separately imported six-language
-notification blueprint and the optional summary card's visual editor. The editor
-is not in the 0.33.0 card asset; HACS does not update these separate resources.
+Import the blueprint and update the optional card resource separately. A HACS
+integration update does not replace dashboard JavaScript or existing automations.
+The visual selector is included in the 0.34.0 card asset.
 
 Version **0.31.0** adds an optional location summary with source health, current
 location-relative nearest-incident distance and an explicitly verified near-home
