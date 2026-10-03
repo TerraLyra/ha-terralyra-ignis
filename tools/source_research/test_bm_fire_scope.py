@@ -60,3 +60,24 @@ class AccidentScopeTests(unittest.TestCase):
         self.assertEqual(review_fire_scope('Karambol az úton', '')['category'], 'unknown')
         self.assertEqual(review_fire_scope('Karambol az úton', 'Rövid hír', input_truncated=True)['category'], 'unknown')
         self.assertEqual(review_fire_scope('Baleset lehetett', 'A vizsgálat folyik.')['category'], 'unknown')
+
+
+class SpreadingFireTests(unittest.TestCase):
+    def test_vehicle_fire_spreading_to_brush_is_mixed(self):
+        title = 'Tűz volt Sámsonházán'
+        text = 'Kigyulladt egy lakókocsi. A tűz a bozótosra is átterjedt.'
+        result = review_fire_scope(title, text)
+        self.assertEqual(result['category'], 'mixed_fire_candidate')
+        self.assertFalse(result['large_extent_verified'])
+        self.assertFalse(result['automatically_excluded'])
+        for item in result['evidence']:
+            original = title if item['field'] == 'title' else text
+            self.assertEqual(original[item['start']:item['end']], item['evidence'])
+
+    def test_negated_spread_is_not_promoted(self):
+        result = review_fire_scope('', 'Kigyulladt egy lakókocsi. A tűz nem terjedt át a bozótosra.')
+        self.assertEqual(result['category'], 'unknown')
+
+    def test_unrelated_vegetation_sentence_is_not_spread(self):
+        result = review_fire_scope('', 'Kigyulladt egy lakókocsi. A bozótosra rálátni.')
+        self.assertEqual(result['category'], 'local_asset_fire_candidate')

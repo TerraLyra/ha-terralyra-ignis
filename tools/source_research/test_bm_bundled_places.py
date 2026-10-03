@@ -70,3 +70,23 @@ class IndependentSampleRegressionTests(unittest.TestCase):
                          {'Vasvár', 'Körmend', 'Zalaegerszeg'})
         self.assertTrue(all(m.context_hints for m in result.mentions))
         self.assertFalse(result.incident_location_verified)
+
+
+class OctoberPlaceTests(unittest.TestCase):
+    def test_reviewed_small_settlements_and_responder_lists(self):
+        from bm_hu_gazetteer import load_review_places
+        places = load_review_places()
+        for title, description, location, responders in [
+            ('Tűz volt Sámsonházán', 'A pásztói hivatásos tűzoltók eloltották a lángokat.',
+             'Sámsonháza', {'Pásztó'}),
+            ('Családi ház égett Misefán', 'A pacsai, a zalaegerszegi és a keszthelyi hivatásos tűzoltók dolgoznak.',
+             'Misefa', {'Pacsa', 'Zalaegerszeg', 'Keszthely'}),
+        ]:
+            with self.subTest(location=location):
+                result = review_locations(title, description, '', places)
+                self.assertIn(location, {m.settlement_name for m in result.mentions if m.field == 'title'})
+                marked = {m.settlement_name for m in result.mentions
+                          if any(h.kind in ('responder_reference', 'responder_list_reference')
+                                 for h in m.context_hints)}
+                self.assertEqual(marked, responders)
+                self.assertFalse(result.incident_location_verified)
