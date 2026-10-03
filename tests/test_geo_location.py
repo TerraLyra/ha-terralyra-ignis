@@ -543,3 +543,11 @@ def isolate_nifc_display_binding():
     with (patch('custom_components.terralyra_ignis.geo_location.get_nifc_map'),
           patch('custom_components.terralyra_ignis.geo_location.get_canada_map')):
         yield
+
+
+def test_sentinel_provider_names_are_readable_on_map():
+    from custom_components.terralyra_ignis.geo_location import _provider_attribution
+
+    assert _provider_attribution(("eumetsat_sentinel3a",)) == "Sentinel-3A"
+    assert _provider_attribution(("eumetsat_sentinel3b",)) == "Sentinel-3B"
+    assert _provider_attribution(("eumetsat_sentinel3a", "nasa_firms")) == "Sentinel-3A + NASA FIRMS"
