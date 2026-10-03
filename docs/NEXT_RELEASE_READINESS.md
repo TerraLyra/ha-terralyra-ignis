@@ -1,44 +1,40 @@
-# 0.27.1 release validation and remaining work
+# Release validation and remaining work
 
-Stable [v0.27.1](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.27.1)
-was published on 2026-09-21 from commit
-`364d9ecb16acb58cb4d818a1e0e3e85cc54add37`. All 12 checks on this exact commit
-completed successfully before publication.
+## Published 0.34.0
 
-## Delivered
+Stable [v0.34.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.34.0)
+was published from `adffc819cb44cfdb37ac70d2395720933128daec`.
+The merged tree matched the candidate that passed all 27 checks.
+See [release notes](RELEASE_0_34_0.md) for changes and upgrade instructions.
 
-- #48–49: current roadmap, scoped live NIFC evidence and HA camera test dependency.
-- #50: full → partial → recovered retrieval after restart preserves incident history.
-- #51: active/combined counts, FIRMS counts and raw pixels expose source retrieval
-  status without changing numeric semantics. FIRMS diagnostics are source-scoped.
-- #53: aligned 0.27.1 manifest and release notes; candidate CI also passed.
+## Sampled live validation on 2026-10-03
 
-No new provider, storage migration, entity renaming, optimization or SDK publication
-is included. Victoria, ACT and other pending providers remain outside production.
+After user-confirmed update and restart, the integration page reported 0.34.0
+without a visible setup error. The dashboard displayed shared-fire markers with
+explicit provider names and a possible-association label. Location summaries
+rendered both radii, source health and explicitly bound forecasts.
 
-## Sampled live validation
+The optional summary resource was still the 0.33.0 JavaScript file. Its existing
+summary rendered, but this does not validate the 0.34.0 visual editor in production.
+That file requires a separate resource update and browser reload. No live
+configuration, automation or history was modified during these checks.
 
-Following user-confirmed installation/restart, the HA integration page reported
-0.27.1. Read-only checks on 2026-09-21 confirmed:
+These observations are a limited smoke check, not proof of continuous uptime,
+full history equivalence or correct association of every physical fire. Notification
+delivery and every language were not exercised live. No test push was sent.
 
-- Combined cluster count exposes degraded retrieval with a delayed source.
-- FIRMS cluster count exposes available retrieval and only FIRMS source health.
-- Raw pixel count exposes degraded retrieval; its attributes updated after the
-  numeric state last changed, with additional source delay visible.
-- All three expose observation completeness as not established; no unavailable
-  sources were listed at the sampled times.
+## Merged after 0.34.0, not yet released
 
-Samples were taken at different times and are not synchronized snapshots. No
-production source was deliberately interrupted and no configuration or history
-was changed during validation. Full history equivalence, live outage/recovery
-and continuous uptime have not been established.
+- #121: recognize brush-spread wording as a mixed fire candidate; add reviewed
+  Hungarian place/responder forms to offline research lookup. No automatic BM
+  incident coordinates or active-fire status inference.
+- #122: readable Sentinel-3A and Sentinel-3B map labels instead of internal IDs.
 
-## Remaining work
+## Open work
 
-Issue #41 remains open: reproduced failure modes and clearer diagnostics do not
-prove the original September 10 cause. Further attribution needs contemporaneous
-logs/raw source evidence if available; it must not require deleting user history.
+- #117: clearer location-radius validation and retained form input; not merged.
+- #107: retained Canada HTTP diagnostics; not merged.
+- #110: remaining usability work before wider HACS distribution.
+- #41: historical counter investigation remains paused; no history deletion.
 
-Provider requests remain pending review. Implement a further provider only after
-its product-specific access terms and required timestamp/schema evidence are
-settled. No follow-up version is promised or authorized by this document.
+No further release or HA restart is implied by this document.

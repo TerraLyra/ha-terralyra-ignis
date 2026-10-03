@@ -1,6 +1,8 @@
 # 0.34.0 — Easier setup and clearer satellite source details
 
-Release candidate: publication and live acceptance are pending.
+Published as a stable release. All 27 candidate checks passed; the merged tree
+matched the tested candidate. See [validation status](NEXT_RELEASE_READINESS.md)
+for the scope of subsequent live checks.
 
 ## Notification blueprint and setup
 
@@ -53,6 +55,5 @@ automation is silently rewritten. No new official source is enabled.
 Offline BM review gains explicitly reviewed Hungarian settlement/responder forms;
 this is research tooling, not automatic production BM geolocation.
 
-All included feature PRs passed their checks. Candidate checks must pass before
-publication; live acceptance follows installation. This candidate excludes the
+All included feature PRs and all 27 candidate checks passed. This release excludes the
 still-open location-form guidance (#117) and Canada HTTP diagnostics (#107).
