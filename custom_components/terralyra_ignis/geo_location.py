@@ -380,6 +380,8 @@ def _provider_attribution(providers: tuple[str, ...]) -> str:
         "eumetsat_lsa_saf": "LSA SAF",
         "eumetsat_lsa_saf_iodc": "LSA SAF IODC",
         "noaa_goes": "NOAA GOES",
+        "eumetsat_sentinel3a": "Sentinel-3A",
+        "eumetsat_sentinel3b": "Sentinel-3B",
         "nasa_firms": "NASA FIRMS",
     }
     unique = tuple(dict.fromkeys(providers))
