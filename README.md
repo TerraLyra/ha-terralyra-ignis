@@ -42,7 +42,16 @@ are recorded in
 
 ## Product status
 
-Stable **0.31.0** adds an optional location summary with source health, current
+Latest stable release: **0.34.0**, with a six-language notification blueprint,
+a visual location selector for the optional summary card and clearer shared-fire
+source details. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
+and [0.34.0 release notes](docs/RELEASE_0_34_0.md).
+
+Import the blueprint and update the optional card resource separately. A HACS
+integration update does not replace dashboard JavaScript or existing automations.
+The visual selector is included in the 0.34.0 card asset.
+
+Version **0.31.0** adds an optional location summary with source health, current
 location-relative nearest-incident distance and an explicitly verified near-home
 fire-risk forecast binding. Canada/NIFC map controls follow their configured map
 switches and stay hidden when disabled or unavailable. Dashboard JavaScript files
@@ -669,9 +678,12 @@ content: >-
   {% endfor %}
 ```
 
-The active-fire radius and fire-risk radius are deliberately independent. The
-first controls detections and alerts; the second controls the static FRMv3 map
-extent and regional maximum-risk sampling.
+Each location has a monitoring radius and an equal or smaller satellite alert
+radius. Monitoring controls observation coverage; alerting uses the separate
+`terralyra_ignis_fire_alert` event. See [alert radii](docs/ALERT_RADII.md) for
+configuration, a ready-to-use multilingual phone notification blueprint,
+and automation migration. The fire-risk radius remains independent
+and controls the static FRMv3 map extent and regional maximum-risk sampling.
 
 ## Architecture
 

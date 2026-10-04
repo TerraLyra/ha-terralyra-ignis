@@ -6,7 +6,23 @@ calls a service, fetches a provider, or changes HA state/history.
 
 When installing a reviewed version, copy frontend/ignis-location-summary.js to
 /config/www/ignis-location-summary.js, register it as a JavaScript module resource
-at /local/ignis-location-summary.js, then add a manual dashboard card:
+at /local/ignis-location-summary.js. In dashboard edit mode, add
+**IGNIS helyszínösszefoglaló**, then select the monitored location's status sensor
+from the visual editor. It copies the exact location ID from that sensor; no
+entity-name guessing or location-ID copying is needed. You can also enter a custom
+title. No location is selected automatically, even if only one is available.
+
+The editor lists sensors with the location operational-status attributes. If
+none are available, it explains how to enable a monitored location and wait for
+its sensor. A temporarily missing configured sensor is retained rather than
+silently replaced. The editor and card currently use Hungarian labels.
+
+The optional forecast binding below still uses the code editor. Existing forecast
+and advanced configuration fields are preserved when editing the title or
+location. After changing location, review the forecast binding too: a mismatched
+binding stays hidden with an explanation, never showing another place's risk.
+
+Existing manual YAML remains supported:
 
 ```yaml
 type: custom:ignis-location-summary

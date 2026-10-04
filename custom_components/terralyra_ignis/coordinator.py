@@ -20,6 +20,7 @@ from .activity import ActivitySummary, summarize_activity, update_activity_histo
 from .observation_counts import summarize_counts, update_counts
 from .trends import add_observation_and_update_trends
 from .clustering import cluster_detections, haversine_km
+from .alerting import AlertTracker
 from .const import (
     ATTR_AFFECTED_LOCATIONS,
     ATTR_NOTIFICATION_MESSAGE,
@@ -28,6 +29,7 @@ from .const import (
     ATTR_SOURCE_URL,
     BUS_EVENT_FIRE_TREND,
     BUS_EVENT_NEW_FIRE,
+    BUS_EVENT_FIRE_ALERT,
     CONF_DEDUP_HOURS,
     CONF_DEDUP_RADIUS_KM,
     CONF_FIRE_HISTORY_HOURS,
@@ -154,6 +156,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self.corroboration_satellite: str | None = None
         self.corroboration_product_timestamp: datetime | None = None
         self._store = Store(hass, STORE_VERSION, f"{DOMAIN}.{entry.entry_id}.tracks")
+        self._alert_tracker = AlertTracker()
         self._tracks: list[dict[str, Any]] = []
         self._firms_tracks: list[dict[str, Any]] = []
         self._activity_history: list[dict[str, Any]] = []
@@ -581,6 +584,14 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 attrs["incident_id"] = incident.track_id
             trend_events.append(attrs)
             self.hass.bus.async_fire(BUS_EVENT_FIRE_TREND, attrs)
+
+        for incident, matches in self._alert_tracker.update(tracked_fires, self.monitored_locations):
+            attrs = incident.attrs() | {
+                "config_entry_id": self.entry.entry_id,
+                "alert_locations": [match.attrs() for match in matches],
+                "alert_reason": "entered_alert_radius",
+            }
+            self.hass.bus.async_fire(BUS_EVENT_FIRE_ALERT, attrs)
 
         checkpoint("events")
         updated_incident_history = update_incident_history(

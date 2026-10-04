@@ -60,12 +60,25 @@ class IncidentLocationMatch:
     inside_radius: bool
     distance_trend: DistanceTrend = DistanceTrend.UNKNOWN
     minimum_distance_km: float | None = None
+    alert_radius_km: float | None = None
 
     def attrs(self) -> dict[str, str | float | bool]:
         """Compatibility adapter for the existing HA attribute contract."""
         from .ha.attributes import location_attributes
 
         return location_attributes(self)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceTrackObservation:
+    """Latest observation of an original track, retained for map provenance."""
+
+    track_id: str
+    providers: tuple[str, ...]
+    acquired: datetime
+    latitude: float
+    longitude: float
+    current_evidence: bool
 
 
 @dataclass(slots=True)
@@ -82,6 +95,7 @@ class FireCluster:
     track_id: str | None = None
     family_id: str | None = None
     source_track_ids: tuple[str, ...] = ()
+    source_observations: tuple[SourceTrackObservation, ...] = ()
     incident_extent_km: float | None = None
     peak_frp_mw: float | None = None
     place_name: str | None = None

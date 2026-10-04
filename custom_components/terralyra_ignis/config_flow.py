@@ -67,6 +67,7 @@ from .const import (
     LOCATION_LONGITUDE,
     LOCATION_NAME,
     LOCATION_RADIUS_KM,
+    LOCATION_ALERT_RADIUS_KM,
     LOCATION_SOURCE_MANUAL,
     MAX_MONITORED_LOCATIONS,
     MAX_RADIUS_KM,
@@ -578,6 +579,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     LOCATION_LATITUDE: float(self.hass.config.latitude),
                     LOCATION_LONGITUDE: float(self.hass.config.longitude),
                     LOCATION_RADIUS_KM: DEFAULT_RADIUS_KM,
+                    LOCATION_ALERT_RADIUS_KM: DEFAULT_RADIUS_KM,
                     LOCATION_ENABLED: True,
                 },
             ),
@@ -618,6 +620,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     LOCATION_LATITUDE: location.latitude,
                     LOCATION_LONGITUDE: location.longitude,
                     LOCATION_RADIUS_KM: location.radius_km,
+                    LOCATION_ALERT_RADIUS_KM: location.effective_alert_radius_km,
                     LOCATION_ENABLED: location.enabled,
                 },
             ),
@@ -639,6 +642,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     latitude=item.latitude,
                     longitude=item.longitude,
                     radius_km=item.radius_km,
+                    alert_radius_km=item.alert_radius_km,
                     enabled=not item.enabled,
                     source=item.source,
                 )
@@ -751,6 +755,10 @@ def _location_schema() -> vol.Schema:
                     mode=NumberSelectorMode.BOX,
                 )
             ),
+            vol.Optional(LOCATION_ALERT_RADIUS_KM): NumberSelector(
+                NumberSelectorConfig(min=0.1, max=MAX_RADIUS_KM, step="any",
+                                     unit_of_measurement="km", mode=NumberSelectorMode.BOX)
+            ),
             vol.Required(LOCATION_ENABLED): bool,
         }
     )
@@ -766,6 +774,8 @@ def _manual_location_from_input(
         latitude=float(values[LOCATION_LATITUDE]),
         longitude=float(values[LOCATION_LONGITUDE]),
         radius_km=float(values[LOCATION_RADIUS_KM]),
+        alert_radius_km=(float(values[LOCATION_ALERT_RADIUS_KM])
+                         if LOCATION_ALERT_RADIUS_KM in values else None),
         enabled=bool(values[LOCATION_ENABLED]),
         source=LOCATION_SOURCE_MANUAL,
     )
@@ -778,15 +788,18 @@ def _location_from_edit_input(
 ) -> MonitoredLocation:
     """Preserve stable identity and source while editing a location."""
     updated = _manual_location_from_input(values, existing.id)
-    return MonitoredLocation(
+    result = MonitoredLocation(
         id=updated.id,
         name=updated.name,
         latitude=updated.latitude,
         longitude=updated.longitude,
         radius_km=updated.radius_km,
+        alert_radius_km=updated.alert_radius_km if LOCATION_ALERT_RADIUS_KM in values else existing.alert_radius_km,
         enabled=updated.enabled,
         source=existing.source,
     )
+    validate_monitored_locations((result,))
+    return result
 
 
 def _find_location(

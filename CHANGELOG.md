@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.34.0
+
+- Add an optional phone notification blueprint with concise messages in English, Hungarian, German, Spanish, French and Italian.
+- Add a visual location selector to the optional location summary card and bilingual first-setup guidance.
+- List providers on probable shared-fire map markers and expose original track observation times and coordinates, distinguishing historical evidence from the latest observation window. Shared-fire labels follow the HA system language.
+- Improve offline Hungarian place-context review for several explicitly reviewed settlement and responder forms; this does not enable automatic BM geolocation.
+- Preserve existing incident identities, history, source opt-ins and alert rules.
+
+See [release notes](docs/RELEASE_0_34_0.md).
+
+## 0.33.0
+
+- Add per-location satellite alert radii, constrained to the monitoring radius.
+- Emit a dedicated location-aware alert event with quiet startup/configuration baselines and repeated-alert suppression. Existing observation events retain their behavior.
+- Show concentric monitoring/alert map circles and both radii in the optional location summary. Equal radii use one circle.
+- Preserve existing location records and user history. Existing notification automations require explicit migration to adopt the new alert event.
+
+See [release notes](docs/RELEASE_0_33_0.md) and [alert setup](docs/ALERT_RADII.md).
+
 ## 0.32.0
 
 - Add explicitly enabled per-location FRMv3 forecasts with independent radii and current-day sensors.

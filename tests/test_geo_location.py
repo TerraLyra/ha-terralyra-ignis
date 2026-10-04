@@ -130,9 +130,9 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
         patch("custom_components.terralyra_ignis.geo_location.IgnisFireLocation") as entity_class,
         patch("custom_components.terralyra_ignis.geo_location._async_remove_expired_entity") as remove,
     ):
-        await async_setup_entry(Mock(), entry, add_entities)
+        await async_setup_entry(Mock(config=SimpleNamespace(language="hu")), entry, add_entities)
         registry.async_remove.assert_called_once_with("geo_location.inactive")
-        entity_class.assert_called_once_with(entry, active, disambiguate=False)
+        entity_class.assert_called_once_with(entry, active, disambiguate=False, language="hu")
         add_entities.assert_called_once_with([entity_class.return_value])
 
         active.lifecycle = FireLifecycle.INACTIVE
@@ -175,13 +175,15 @@ def test_monitoring_area_uses_location_radius_as_map_decoration() -> None:
         "gps_accuracy": 25000.0,
         "monitoring_location_id": "home",
         "monitoring_radius_km": 25.0,
+        "alert_radius_km": 25.0,
         "map_circle_meaning": "active_fire_monitoring_area",
     }
 
 
-async def test_map_adds_one_area_per_enabled_monitored_location() -> None:
+@pytest.mark.parametrize("alert_radius,count", [(None, 1), (25, 1), (10, 2)])
+async def test_map_adds_one_area_per_enabled_monitored_location(alert_radius, count) -> None:
     enabled = MonitoredLocation(
-        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant"
+        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant", alert_radius
     )
     disabled = MonitoredLocation(
         "tokyo", "Tokyo", 35.68, 139.76, 50.0, False, "manual"
@@ -210,6 +212,12 @@ async def test_map_adds_one_area_per_enabled_monitored_location() -> None:
     assert isinstance(area, IgnisMonitoringArea)
     assert area.extra_state_attributes["monitoring_location_id"] == "home"
     assert len(add_entities.call_args_list) == 1
+    areas = add_entities.call_args_list[0].args[0]
+    assert len(areas) == count
+    if count == 2:
+        assert areas[1].extra_state_attributes["gps_accuracy"] == alert_radius * 1000
+        assert areas[1].latitude == area.latitude
+        assert areas[1].longitude == area.longitude
 
 
 async def test_map_removes_area_for_deleted_or_disabled_location() -> None:
@@ -351,10 +359,10 @@ def test_multi_source_map_entity_has_explicit_provider_name() -> None:
     entity = _entity(cluster)
     entity.set_cluster(cluster)
 
-    assert entity.name == "Multiple sources · Trebišov közelében észlelt tűz"
+    assert entity.name == "LSA SAF + NASA FIRMS · Trebišov közelében észlelt tűz"
     assert (
         entity.extra_state_attributes[ATTR_PROVIDER_ATTRIBUTION]
-        == "Multiple sources"
+        == "LSA SAF + NASA FIRMS"
     )
 
 
@@ -535,3 +543,11 @@ def isolate_nifc_display_binding():
     with (patch('custom_components.terralyra_ignis.geo_location.get_nifc_map'),
           patch('custom_components.terralyra_ignis.geo_location.get_canada_map')):
         yield
+
+
+def test_sentinel_provider_names_are_readable_on_map():
+    from custom_components.terralyra_ignis.geo_location import _provider_attribution
+
+    assert _provider_attribution(("eumetsat_sentinel3a",)) == "Sentinel-3A"
+    assert _provider_attribution(("eumetsat_sentinel3b",)) == "Sentinel-3B"
+    assert _provider_attribution(("eumetsat_sentinel3a", "nasa_firms")) == "Sentinel-3A + NASA FIRMS"

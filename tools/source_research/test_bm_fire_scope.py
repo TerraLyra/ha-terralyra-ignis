@@ -60,3 +60,46 @@ class AccidentScopeTests(unittest.TestCase):
         self.assertEqual(review_fire_scope('Karambol az úton', '')['category'], 'unknown')
         self.assertEqual(review_fire_scope('Karambol az úton', 'Rövid hír', input_truncated=True)['category'], 'unknown')
         self.assertEqual(review_fire_scope('Baleset lehetett', 'A vizsgálat folyik.')['category'], 'unknown')
+
+
+class SpreadingFireTests(unittest.TestCase):
+    def test_vehicle_fire_spreading_to_brush_is_mixed(self):
+        title = 'Tűz volt Sámsonházán'
+        text = 'Kigyulladt egy lakókocsi. A tűz a bozótosra is átterjedt.'
+        result = review_fire_scope(title, text)
+        self.assertEqual(result['category'], 'mixed_fire_candidate')
+        self.assertFalse(result['large_extent_verified'])
+        self.assertFalse(result['automatically_excluded'])
+        for item in result['evidence']:
+            original = title if item['field'] == 'title' else text
+            self.assertEqual(original[item['start']:item['end']], item['evidence'])
+
+    def test_negated_spread_is_not_promoted(self):
+        result = review_fire_scope('', 'Kigyulladt egy lakókocsi. A tűz nem terjedt át a bozótosra.')
+        self.assertEqual(result['category'], 'unknown')
+
+    def test_unrelated_vegetation_sentence_is_not_spread(self):
+        result = review_fire_scope('', 'Kigyulladt egy lakókocsi. A bozótosra rálátni.')
+        self.assertEqual(result['category'], 'local_asset_fire_candidate')
+
+
+class PossessiveResponderTests(unittest.TestCase):
+    def test_observed_possessive_responder_is_not_fire_evidence(self):
+        title = 'Villanyoszlopnak ütközött egy autó a XVIII. kerületben'
+        body = 'A fővárosi hivatásos tűzoltók és a Foka ÖTE önkéntes tűzoltói érkeztek a helyszínre, áramtalanították az autót.'
+        result = review_fire_scope(title, body)
+        self.assertEqual(result['category'], 'non_fire_report_candidate')
+        self.assertFalse(any(e['kind'] == 'possible_fire' for e in result['evidence']))
+        self.assertFalse(result['automatically_excluded'])
+        self.assertTrue(result['requires_review'])
+
+    def test_responder_form_does_not_hide_real_fire_clues(self):
+        for clue in ('Füst szállt fel.', 'Tűzoltás zajlik.', 'Kigyulladt egy autó.',
+                     'A tűzoltóautó kigyulladt.', 'Nem keletkezett tűz.'):
+            with self.subTest(clue=clue):
+                body = 'Az önkéntes tűzoltói megérkeztek. ' + clue
+                result = review_fire_scope('Baleset az úton', body)
+                self.assertNotEqual(result['category'], 'non_fire_report_candidate')
+                for evidence in result['evidence']:
+                    text = body if evidence['field'] == 'description' else 'Baleset az úton'
+                    self.assertEqual(text[evidence['start']:evidence['end']], evidence['evidence'])

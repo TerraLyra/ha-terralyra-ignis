@@ -267,3 +267,33 @@ def test_count_source_attributes_do_not_claim_observation_completeness(statuses,
     assert attrs["source_retrieval_status"] == expected
     assert attrs["observation_completeness"] == "not_established"
     assert _count_source_attributes(coordinator, "nasa_firms")["source_retrieval_status"] == "unknown"
+
+
+@pytest.mark.asyncio
+async def test_alert_event_is_independent_of_observation_event(runtime, hass):
+    from custom_components.terralyra_ignis.const import BUS_EVENT_FIRE_ALERT
+    create, _ = runtime
+    alerts, observations = [], []
+    remove_alert = hass.bus.async_listen(BUS_EVENT_FIRE_ALERT, lambda e: alerts.append(dict(e.data)))
+    remove_observation = hass.bus.async_listen(BUS_EVENT_NEW_FIRE, lambda e: observations.append(dict(e.data)))
+    try:
+        instance = create()
+        instance.monitored_locations = tuple(replace(loc, alert_radius_km=5) for loc in LOCATIONS)
+        await instance._async_setup()
+        await publish(instance, snapshot(populated=False))
+        await publish(instance, snapshot(NOW+timedelta(minutes=10)))
+        await hass.async_block_till_done()
+        assert len(observations) == 1
+        assert alerts == []
+        product = snapshot(NOW+timedelta(minutes=20), latitude=38.02)
+        await publish(instance, product)
+        await hass.async_block_till_done()
+        assert len(alerts) == 1
+        assert [m['location_id'] for m in alerts[0]['alert_locations']] == ['california']
+        assert alerts[0]['alert_locations'][0]['alert_radius_km'] == 5
+        await publish(instance, product)
+        await hass.async_block_till_done()
+        assert len(alerts) == 1
+    finally:
+        remove_alert()
+        remove_observation()

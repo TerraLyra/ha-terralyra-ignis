@@ -79,6 +79,11 @@ async def async_setup_entry(
         f"{entry.entry_id}_monitoring_area_{location_id}"
         for location_id in monitored_locations
     }
+    active_alert_ids = {
+        f"{entry.entry_id}_alert_area_{loc.id}"
+        for loc in monitored_locations.values()
+        if loc.effective_alert_radius_km < loc.radius_km
+    }
     prefix = f"{entry.entry_id}_fire_"
     area_prefix = f"{entry.entry_id}_monitoring_area_"
     for registry_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
@@ -89,6 +94,8 @@ async def async_setup_entry(
             continue
         if registry_entry.unique_id.startswith(prefix):
             current_unique_ids = active_unique_ids
+        elif registry_entry.unique_id.startswith(f"{entry.entry_id}_alert_area_"):
+            current_unique_ids = active_alert_ids
         elif registry_entry.unique_id.startswith(area_prefix):
             current_unique_ids = active_area_unique_ids
         else:
@@ -107,6 +114,13 @@ async def async_setup_entry(
         )
         for location in monitored_locations.values()
     ]
+    area_entities.extend(
+        IgnisAlertArea(entry, location,
+                       home_latitude=float(hass.config.latitude),
+                       home_longitude=float(hass.config.longitude))
+        for location in monitored_locations.values()
+        if location.effective_alert_radius_km < location.radius_km
+    )
     if area_entities:
         async_add_entities(area_entities)
 
@@ -114,7 +128,7 @@ async def async_setup_entry(
     def async_sync_entities() -> None:
         active = active_clusters()
         display_name_counts = Counter(
-            _base_display_name(cluster) for cluster in active.values()
+            _base_display_name(cluster, language=hass.config.language) for cluster in active.values()
         )
 
         for track_id in entities.keys() - active.keys():
@@ -123,12 +137,12 @@ async def async_setup_entry(
 
         new_entities: list[IgnisFireLocation] = []
         for track_id, cluster in active.items():
-            disambiguate = display_name_counts[_base_display_name(cluster)] > 1
+            disambiguate = display_name_counts[_base_display_name(cluster, language=hass.config.language)] > 1
             if track_id in entities:
-                entities[track_id].set_cluster(cluster, disambiguate=disambiguate)
+                entities[track_id].set_cluster(cluster, disambiguate=disambiguate, language=hass.config.language)
                 continue
             entity = IgnisFireLocation(
-                entry, cluster, disambiguate=disambiguate
+                entry, cluster, disambiguate=disambiguate, language=hass.config.language
             )
             entities[track_id] = entity
             new_entities.append(entity)
@@ -196,7 +210,27 @@ class IgnisMonitoringArea(IgnisEntity, GeolocationEvent):
             ATTR_GPS_ACCURACY: self._location.radius_km * 1000.0,
             "monitoring_location_id": self._location.id,
             "monitoring_radius_km": self._location.radius_km,
+            "alert_radius_km": self._location.effective_alert_radius_km,
             "map_circle_meaning": "active_fire_monitoring_area",
+        }
+
+
+class IgnisAlertArea(IgnisMonitoringArea):
+    """Inner alert circle; omitted when the two radii are equal."""
+
+    _attr_icon = "mdi:bell-alert-outline"
+    _attr_translation_key = "alert_area"
+
+    def __init__(self, entry, location, **kwargs):
+        super().__init__(entry, location, **kwargs)
+        self._attr_unique_id = f"{entry.entry_id}_alert_area_{location.id}"
+        self._attr_suggested_object_id = f"{DOMAIN}_alert_area_{location.id}"
+
+    @property
+    def extra_state_attributes(self):
+        return super().extra_state_attributes | {
+            ATTR_GPS_ACCURACY: self._location.effective_alert_radius_km * 1000.0,
+            "map_circle_meaning": "satellite_fire_alert_area",
         }
 
 
@@ -214,6 +248,7 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
         cluster: FireCluster,
         *,
         disambiguate: bool = False,
+        language: str | None = "en",
     ) -> None:
         super().__init__(entry)
         self._attr_device_info = None
@@ -226,15 +261,15 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
         # settlement to reuse an expired entity's history. The incident ID is
         # stable and unique for the lifetime of one tracked fire.
         self._attr_suggested_object_id = _suggested_object_id(cluster.track_id)
-        self._attr_name = _display_name(cluster, disambiguate=disambiguate)
+        self._attr_name = _display_name(cluster, disambiguate=disambiguate, language=language)
 
     @callback
     def set_cluster(
-        self, cluster: FireCluster, *, disambiguate: bool = False
+        self, cluster: FireCluster, *, disambiguate: bool = False, language: str | None = "en"
     ) -> None:
         """Replace this entity's current cluster data."""
         self._cluster = cluster
-        self._attr_name = _display_name(cluster, disambiguate=disambiguate)
+        self._attr_name = _display_name(cluster, disambiguate=disambiguate, language=language)
 
     @property
     @override
@@ -266,6 +301,30 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
                 if match.inside_radius
             ]
         attrs["source_selection"] = "automatic_equal_peers"
+        observations = self._cluster.source_observations
+        if observations:
+            attrs["source_observations"] = [
+                {
+                    "track_id": item.track_id,
+                    "providers": list(item.providers),
+                    "provider_attribution": _provider_attribution(item.providers),
+                    "acquired": item.acquired.isoformat(),
+                    "latitude": item.latitude,
+                    "longitude": item.longitude,
+                    "evidence_role": "current" if item.current_evidence else "historical",
+                }
+                for item in observations
+            ]
+            attrs["association_status"] = (
+                "probable_same_incident" if len(observations) > 1 else "single_track"
+            )
+            attrs["association_basis"] = "spatial_temporal_track_matching"
+            # "Current" is relative to the family's newest observation, not now.
+            attrs["source_evidence_reference_time"] = max(
+                item.acquired for item in observations
+            ).isoformat()
+            attrs["source_evidence_window_minutes"] = 30
+
         attrs[ATTR_PROVIDER_ATTRIBUTION] = _provider_attribution(
             self._cluster.providers
         )
@@ -275,16 +334,30 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
         return attrs
 
 
-def _base_display_name(cluster: FireCluster) -> str:
+def _base_display_name(cluster: FireCluster, *, language: str | None = "en") -> str:
     """Return a map label that makes the actual observation source explicit."""
     track_id = cluster.track_id or "unknown"
     name = cluster.location_description or f"Fire detection {_short_id(track_id)}"
+    observed_providers = tuple(sorted({
+        provider for item in cluster.source_observations for provider in item.providers
+    }))
+    if len(observed_providers) > 1:
+        labels = {
+            "en": "Possible shared fire",
+            "hu": "Valószínűleg ugyanaz a tűzeset",
+            "de": "Wahrscheinlich derselbe Brand",
+            "es": "Posiblemente el mismo incendio",
+            "fr": "Probablement le même incendie",
+            "it": "Probabilmente lo stesso incendio",
+        }
+        code = (language or "en").lower().replace("_", "-").split("-", 1)[0]
+        return f"{_provider_attribution(observed_providers)} · {labels.get(code, labels['en'])} · {name}"
     return f"{_provider_attribution(cluster.providers)} · {name}"
 
 
-def _display_name(cluster: FireCluster, *, disambiguate: bool = False) -> str:
+def _display_name(cluster: FireCluster, *, disambiguate: bool = False, language: str | None = "en") -> str:
     """Return a distinct label when nearby incidents share the same place name."""
-    name = _base_display_name(cluster)
+    name = _base_display_name(cluster, language=language)
     if not disambiguate:
         return name
     return f"{name} · #{_short_id(cluster.track_id or 'unknown')}"
@@ -307,11 +380,13 @@ def _provider_attribution(providers: tuple[str, ...]) -> str:
         "eumetsat_lsa_saf": "LSA SAF",
         "eumetsat_lsa_saf_iodc": "LSA SAF IODC",
         "noaa_goes": "NOAA GOES",
+        "eumetsat_sentinel3a": "Sentinel-3A",
+        "eumetsat_sentinel3b": "Sentinel-3B",
         "nasa_firms": "NASA FIRMS",
     }
     unique = tuple(dict.fromkeys(providers))
     if len(unique) > 1:
-        return "Multiple sources"
+        return " + ".join(labels.get(provider, provider) for provider in unique)
     if unique:
         return labels.get(unique[0], unique[0])
     return "Unknown source"
