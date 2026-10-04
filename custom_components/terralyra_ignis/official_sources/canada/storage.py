@@ -42,7 +42,11 @@ def decode(raw):
             raise ValueError('Invalid review flag')
         if body['status'] not in {'initializing','available','unavailable','rate_limited','invalid_response','review_required'}:
             raise ValueError('Invalid status')
+        http_error = body.get('last_http_error')
+        if http_error is not None and (type(http_error) is not int or not 100 <= http_error <= 599):
+            raise ValueError('Invalid HTTP error code')
         result = RefreshState(**body)
+        result.last_attempt_at = stamp(body.get('last_attempt_at'))
         result.next_attempt = stamp(body['next_attempt'])
         result.last_success_at = stamp(body['last_success_at'])
         if result.status != 'initializing' and result.next_attempt is None:
@@ -65,7 +69,7 @@ def encode(state):
     if state.status == 'storage_error':
         raise ValueError('Do not overwrite unreadable storage')
     body = dict(vars(state))
-    for key in ('next_attempt','last_success_at'):
+    for key in ('next_attempt','last_success_at','last_attempt_at'):
         body[key] = body[key].isoformat() if body[key] is not None else None
     raw = json.dumps({'version':1,'state':body},allow_nan=False).encode()
     if len(raw) > LIMIT:

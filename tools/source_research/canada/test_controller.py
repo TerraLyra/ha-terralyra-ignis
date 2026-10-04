@@ -60,3 +60,18 @@ class ControllerTests(unittest.IsolatedAsyncioTestCase):
         state=await self.owner(AsyncMock(side_effect=ValueError('partial'))).refresh()
         self.assertEqual(state.status,'invalid_response')
         self.assertEqual(state.last_success[0],EMPTY[0])
+
+    async def test_http_rejection_is_retained_across_controller_restart(self):
+        await self.owner(AsyncMock(return_value=EMPTY)).refresh()
+        self.time += timedelta(hours=2)
+        failure_at = self.time
+        error = aiohttp.ClientResponseError(None, (), status=403, headers={})
+        await self.owner(AsyncMock(side_effect=error)).refresh()
+        self.time += timedelta(days=1)
+        fetch = AsyncMock()
+        state = await self.owner(fetch).refresh()
+        fetch.assert_not_awaited()
+        self.assertEqual(state.last_http_error, 403)
+        self.assertEqual(state.last_attempt_at, failure_at)
+        self.assertEqual(state.last_success[0], EMPTY[0])
+        self.assertTrue(state.review_required)

@@ -34,7 +34,10 @@ class CanadaOwner(Controller):
             raise
 
     def diagnostics(self):
-        return {'problem': self.problem or self.store.problem,
+        return {'last_http_error': self.state.last_http_error if self.state else None,
+                'last_attempt_at': (self.state.last_attempt_at.isoformat()
+                                    if self.state and self.state.last_attempt_at else None),
+                'problem': self.problem or self.store.problem,
                 'storage_pending': self.store.pending,
                 'storage_review_required': self.store.blocked,
                 'initialization_status': self.initialization_status}
