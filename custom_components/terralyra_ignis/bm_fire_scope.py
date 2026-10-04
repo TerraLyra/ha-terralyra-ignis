@@ -3,8 +3,8 @@ import re
 
 # Deliberately bounded vocabulary. A match is evidence for human review only.
 _PATTERNS = {
-    'vegetation': r'(?<!\w)(?:erdő(?:tűz|ben)?|bozót(?:os)?|nádas|aljnövényzet|avar|száraz fű|tarló)(?!\w)',
-    'local_asset': r'(?<!\w)(?:melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű)(?!\w)',
+    'vegetation': r'(?<!\w)(?:erdő(?:tűz|ben)?|bozót(?:os)?(?:ra)?|nádas|aljnövényzet|avar|száraz fű|tarló)(?!\w)',
+    'local_asset': r'(?<!\w)(?:melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi)(?!\w)',
     'fire': r'(?<!\w)(?:ég|égett|égnek|égették|lángol|lángolt|tűz|tüzet|tűz keletkezett|kigyulladt)(?!\w)',
     'accident': r'(?<!\w)(?:összeütközött|ütközött|karambolozott|karambol|baleset|elgázolt|felborult)(?!\w)',
     # Broad veto only: smoke, extinguishing and compounds must prevent a
@@ -37,7 +37,7 @@ def review_fire_scope(title: str, description: str, *, input_truncated: bool = F
                 for kind, pattern in PATTERNS.items():
                     matches = list(pattern.finditer(sentence.group()))
                     if kind == 'possible_fire':
-                        matches = [m for m in matches if not re.fullmatch(r'tűzoltó(?:k|kat|knak|khoz|kkal|inak|ság|ságok|sági)?', m.group(), re.I)]
+                        matches = [m for m in matches if not re.fullmatch(r'tűzoltó(?:k|kat|knak|khoz|kkal|i|inak|ság|ságok|sági)?', m.group(), re.I)]
                     found[kind] = bool(matches)
                     for match in matches:
                         start, end = sentence.start()+match.start(), sentence.start()+match.end()

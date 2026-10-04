@@ -130,9 +130,9 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
         patch("custom_components.terralyra_ignis.geo_location.IgnisFireLocation") as entity_class,
         patch("custom_components.terralyra_ignis.geo_location._async_remove_expired_entity") as remove,
     ):
-        await async_setup_entry(Mock(), entry, add_entities)
+        await async_setup_entry(Mock(config=SimpleNamespace(language="hu")), entry, add_entities)
         registry.async_remove.assert_called_once_with("geo_location.inactive")
-        entity_class.assert_called_once_with(entry, active, disambiguate=False)
+        entity_class.assert_called_once_with(entry, active, disambiguate=False, language="hu")
         add_entities.assert_called_once_with([entity_class.return_value])
 
         active.lifecycle = FireLifecycle.INACTIVE
@@ -359,10 +359,10 @@ def test_multi_source_map_entity_has_explicit_provider_name() -> None:
     entity = _entity(cluster)
     entity.set_cluster(cluster)
 
-    assert entity.name == "Multiple sources · Trebišov közelében észlelt tűz"
+    assert entity.name == "LSA SAF + NASA FIRMS · Trebišov közelében észlelt tűz"
     assert (
         entity.extra_state_attributes[ATTR_PROVIDER_ATTRIBUTION]
-        == "Multiple sources"
+        == "LSA SAF + NASA FIRMS"
     )
 
 
@@ -543,3 +543,11 @@ def isolate_nifc_display_binding():
     with (patch('custom_components.terralyra_ignis.geo_location.get_nifc_map'),
           patch('custom_components.terralyra_ignis.geo_location.get_canada_map')):
         yield
+
+
+def test_sentinel_provider_names_are_readable_on_map():
+    from custom_components.terralyra_ignis.geo_location import _provider_attribution
+
+    assert _provider_attribution(("eumetsat_sentinel3a",)) == "Sentinel-3A"
+    assert _provider_attribution(("eumetsat_sentinel3b",)) == "Sentinel-3B"
+    assert _provider_attribution(("eumetsat_sentinel3a", "nasa_firms")) == "Sentinel-3A + NASA FIRMS"

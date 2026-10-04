@@ -134,6 +134,7 @@ def test_map_distance_survives_family_consolidation(name, latitude, longitude) -
 
     family = _consolidate([cluster])[0]
     entity = _entity(family)
+    entity.set_cluster(family)
     assert entity.distance == pytest.approx(expected)
     assert entity.extra_state_attributes["location_name"] == name
     assert entity.extra_state_attributes["distance_km"] == round(entity.distance, 2)
@@ -307,3 +308,52 @@ def test_duplicate_tracks_do_not_multiply_source_count_or_corroboration():
     assert result.corroborating_detections == 2
     assert len(inputs) == 5
     assert result.frp_mw == b.frp_mw
+
+
+def test_map_source_provenance_preserves_historical_observation():
+    from tests.test_geo_location import _entity
+
+    old = _cluster("old", minutes=-120)
+    fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
+    family = _consolidate([old, fresh])[0]
+    entity = _entity(family)
+    entity.set_cluster(family)
+    assert "Possible shared fire" in entity.name
+    assert "NASA FIRMS" in entity.name
+    assert "LSA SAF" in entity.name
+    attrs = entity.extra_state_attributes
+    assert attrs["association_status"] == "probable_same_incident"
+    observations = {item["track_id"]: item for item in attrs["source_observations"]}
+    assert observations["old"]["acquired"] == old.acquired.isoformat()
+    assert observations["old"]["evidence_role"] == "historical"
+    assert observations["fresh"]["evidence_role"] == "current"
+    assert observations["old"]["latitude"] == old.latitude
+    assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE
+    assert family.providers == ("nasa_firms",)
+    assert family.track_id in {"old", "fresh"}
+
+
+@pytest.mark.parametrize(("language", "label"), [
+    ("en", "Possible shared fire"),
+    ("hu-HU", "Valószínűleg ugyanaz a tűzeset"),
+    ("de", "Wahrscheinlich derselbe Brand"),
+    ("es", "Posiblemente el mismo incendio"),
+    ("fr", "Probablement le même incendie"),
+    ("it", "Probabilmente lo stesso incendio"),
+    ("unknown", "Possible shared fire"),
+    (None, "Possible shared fire"),
+])
+def test_shared_fire_label_language_and_evidence_reference(language, label):
+    from tests.test_geo_location import _entity
+
+    old = _cluster("old", minutes=-120)
+    fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
+    family = _consolidate([old, fresh])[0]
+    entity = _entity(family)
+    entity.set_cluster(family, language=language)
+    assert label in entity.name
+    assert "NASA FIRMS" in entity.name
+    attrs = entity.extra_state_attributes
+    assert attrs["source_evidence_reference_time"] == fresh.acquired.isoformat()
+    assert attrs["source_evidence_window_minutes"] == 30
+    assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE

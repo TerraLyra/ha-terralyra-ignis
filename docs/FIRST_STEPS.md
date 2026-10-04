@@ -43,9 +43,9 @@ location circles. No fire markers can be a valid empty result; check source stat
 before interpreting it. These circles are your configured areas, not fire perimeters.
 
 For a per-place summary, follow [card setup](LOCATION_SUMMARY_CARD.md). This optional
-card requires a separate JavaScript resource. The visual editor is newer than the
-0.33.0 card asset: with the newer reviewed file, select a place from its list; with
-0.33.0, use the documented explicit entity/location YAML. Forecast binding remains
+card requires a separate JavaScript resource. The 0.34.0 card asset includes a visual editor: select a place from its list.
+If you still use the 0.33.0 file, update the existing resource separately or use
+the documented explicit entity/location YAML. Forecast binding remains
 an optional, separate step. Use one summary card per place.
 
 ### 4. Enable phone notifications
@@ -107,9 +107,9 @@ külön IGNIS JavaScript-fájl. A helyszín körei a beállított sugarakat muta
 nem a tűz kiterjedését. Ha nincs tűzjelölő, az adatforrás állapotát is ellenőrizd.
 
 Az opcionális [helyszínösszefoglalóhoz](LOCATION_SUMMARY_CARD.md) külön kártyafájl
-és erőforrás-beállítás kell. A grafikus helyszínválasztó újabb a 0.33.0-s
-kártyafájlnál. Az újabb, ellenőrzött fájllal listából választhatsz; a 0.33.0-s
-változatnál az útmutató szerinti kézi hozzárendelést használd. Az előrejelzés
+és erőforrás-beállítás kell. A 0.34.0-s kártyafájl grafikus helyszínválasztót tartalmaz.
+Ha még a 0.33.0-s fájlt használod, külön frissítsd a meglévő erőforrást,
+vagy használd az útmutató szerinti kézi hozzárendelést. Az előrejelzés
 hozzárendelése továbbra is külön, választható lépés. Helyszínenként egy kártyát adj hozzá.
 
 ### 4. Értesítési blueprint
