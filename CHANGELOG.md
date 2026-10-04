@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.34.1
+
+- Show a specific alert-radius validation error and retain submitted location form values; explain both radii in six languages.
+- Preserve Canada's last HTTP failure code and completed request time across restarts, without resetting review holds or cached reports.
+- Use readable Sentinel-3A / Sentinel-3B names on map markers.
+- Improve BM text classification for brush spread, separated ignition wording and firefighter-only references.
+- Extend offline Hungarian place review with explicitly observed aliases and quantity context; no automatic BM incident coordinates.
+
+See [release notes](docs/RELEASE_0_34_1.md).
+
 ## 0.34.0
 
 - Add an optional phone notification blueprint with concise messages in English, Hungarian, German, Spanish, French and Italian.

@@ -23,18 +23,18 @@ These observations are a limited smoke check, not proof of continuous uptime,
 full history equivalence or correct association of every physical fire. Notification
 delivery and every language were not exercised live. No test push was sent.
 
-## Merged after 0.34.0, not yet released
+## Prepared 0.34.1 candidate
 
-- #121: recognize brush-spread wording as a mixed fire candidate; add reviewed
-  Hungarian place/responder forms to offline research lookup. No automatic BM
-  incident coordinates or active-fire status inference.
-- #122: readable Sentinel-3A and Sentinel-3B map labels instead of internal IDs.
+See [candidate release notes](RELEASE_0_34_1.md). Publication remains pending.
+Included merged changes: #107 Canada diagnostics, #117 radius-form guidance,
+#121/#124/#125 BM classification and offline review, and #122 Sentinel labels.
+Candidate checks must pass before publication. Production patch acceptance remains
+pending installation; 0.34.0 smoke checks above do not validate this patch.
 
-## Open work
+## Remaining work
 
-- #117: clearer location-radius validation and retained form input; not merged.
-- #107: retained Canada HTTP diagnostics; not merged.
+- Update the separately installed summary resource where the 0.33.0 file remains.
 - #110: remaining usability work before wider HACS distribution.
 - #41: historical counter investigation remains paused; no history deletion.
 
-No further release or HA restart is implied by this document.
+No release publication or HA restart is implied by this document.
