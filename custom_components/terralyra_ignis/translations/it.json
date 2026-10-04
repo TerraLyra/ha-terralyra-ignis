@@ -146,7 +146,8 @@
           "alert_radius_km": "Raggio di allerta (km)"
         },
         "data_description": {
-          "alert_radius_km": "Il raggio di allerta deve essere positivo e non superare il raggio di monitoraggio."
+          "alert_radius_km": "Le nuove osservazioni satellitari che soddisfano i criteri entro questo raggio possono attivare la tua automazione di notifica. Non deve superare il raggio di monitoraggio; possono essere uguali.",
+          "radius_km": "Le osservazioni vengono seguite entro questa distanza dal luogo selezionato."
         }
       },
       "edit_location": {
@@ -161,7 +162,8 @@
           "alert_radius_km": "Raggio di allerta (km)"
         },
         "data_description": {
-          "alert_radius_km": "Il raggio di allerta deve essere positivo e non superare il raggio di monitoraggio."
+          "alert_radius_km": "Le nuove osservazioni satellitari che soddisfano i criteri entro questo raggio possono attivare la tua automazione di notifica. Non deve superare il raggio di monitoraggio; possono essere uguali.",
+          "radius_km": "Le osservazioni vengono seguite entro questa distanza dal luogo selezionato."
         }
       },
       "toggle_location": {
@@ -195,7 +197,8 @@
       "one_location_required": "Almeno una località monitorata deve rimanere attiva",
       "too_many_locations": "Sono supportate al massimo 10 località monitorate",
       "forecast_not_eligible": "La località è disabilitata o fuori dalla copertura FRMv3.",
-      "invalid_forecast_settings": "Impostazioni della previsione non valide."
+      "invalid_forecast_settings": "Impostazioni della previsione non valide.",
+      "alert_radius_exceeds_monitoring": "Riduci il raggio di allerta o aumenta quello di monitoraggio. Il raggio di allerta non può essere maggiore."
     }
   },
   "issues": {
