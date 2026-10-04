@@ -55,6 +55,12 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
     for phrase in _COLLISION_COUNT.finditer(value):
         if phrase.start() == start and value[start:end].casefold() == 'négyes':
             hints.append(ContextHint('possible_vehicle_count', phrase.start(), phrase.end(), phrase.group()))
+    # Retain the lexical mention but identify the observed number/unit context.
+    if value[start:end].casefold() == 'hatvan':
+        unit = re.match(r'[ \t]+négyzetméter(?:es|en|nyi)?(?!\w)', value[end:], re.I)
+        if unit:
+            stop = end + unit.end()
+            hints.append(ContextHint('area_quantity_reference', start, stop, value[start:stop]))
     for pattern in _ROUTE_PATTERNS:
         for route in pattern.finditer(value):
             if route.start() <= start and end <= route.end():

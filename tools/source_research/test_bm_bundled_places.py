@@ -90,3 +90,23 @@ class OctoberPlaceTests(unittest.TestCase):
                                  for h in m.context_hints)}
                 self.assertEqual(marked, responders)
                 self.assertFalse(result.incident_location_verified)
+
+
+class KutasContextTests(unittest.TestCase):
+    def test_kutas_event_area_quantity_and_responders(self):
+        from bm_hu_gazetteer import load_review_places
+        places = load_review_places()
+        body = 'Egy hatvan négyzetméteres épület ég Kutason, a Szellő utcában. A nagyatádi hivatásos, a böhönyei önkormányzati és a nagybajomi önkéntes tűzoltók dolgoznak.'
+        result = review_locations('Tűz Kutason', body, '', places)
+        self.assertIn('Kutas', {m.settlement_name for m in result.mentions if m.field == 'title'})
+        for name, hint in [('Hatvan', 'area_quantity_reference'), ('Szellő', 'street_name_reference'),
+                           ('Nagyatád', 'responder_list_reference'), ('Böhönye', 'responder_list_reference'),
+                           ('Nagybajom', 'responder_list_reference')]:
+            self.assertTrue(any(m.settlement_name == name and any(h.kind == hint for h in m.context_hints) for m in result.mentions), name)
+        self.assertFalse(result.incident_location_verified)
+        genuine = review_locations('Hatvan', 'Hatvan közelében történt.', '', places)
+        self.assertTrue(genuine.mentions)
+        self.assertFalse(any(h.kind == 'area_quantity_reference' for m in genuine.mentions for h in m.context_hints))
+        for m in result.mentions:
+            for h in m.context_hints:
+                self.assertEqual(getattr(result, m.field)[h.start:h.end], h.evidence)
