@@ -103,3 +103,14 @@ class PossessiveResponderTests(unittest.TestCase):
                 for evidence in result['evidence']:
                     text = body if evidence['field'] == 'description' else 'Baleset az úton'
                     self.assertEqual(text[evidence['start']:evidence['end']], evidence['evidence'])
+
+
+class SeparatedIgnitionTests(unittest.TestCase):
+    def test_mixed_ignition_and_negation(self):
+        body = 'Egy melléképület és az aljnövényzet gyulladt ki.'
+        result = review_fire_scope('Műhely ég', body)
+        self.assertEqual(result['category'], 'mixed_fire_candidate')
+        self.assertTrue(any(e['evidence'] == 'gyulladt ki' for e in result['evidence']))
+        self.assertFalse(result['large_extent_verified'])
+        self.assertEqual(review_fire_scope('', 'Az aljnövényzet nem gyulladt ki.')['category'], 'unknown')
+        self.assertEqual(review_fire_scope('', 'Az aljnövényzet gyulladt. Ki érkezett?')['category'], 'unknown')
