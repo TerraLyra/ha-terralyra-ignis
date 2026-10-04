@@ -146,7 +146,8 @@
           "alert_radius_km": "Riasztási sugár (km)"
         },
         "data_description": {
-          "alert_radius_km": "A riasztási sugár legyen pozitív, és ne legyen nagyobb a megfigyelési sugárnál."
+          "alert_radius_km": "Az ezen belüli új, megfelelő műholdas észlelések indíthatják az értesítési automatizálásodat. Nem lehet nagyobb a megfigyelési sugárnál; lehetnek egyformák.",
+          "radius_km": "A kiválasztott helyszíntől ezen a távolságon belül követjük az észleléseket."
         }
       },
       "edit_location": {
@@ -161,7 +162,8 @@
           "alert_radius_km": "Riasztási sugár (km)"
         },
         "data_description": {
-          "alert_radius_km": "A riasztási sugár legyen pozitív, és ne legyen nagyobb a megfigyelési sugárnál."
+          "alert_radius_km": "Az ezen belüli új, megfelelő műholdas észlelések indíthatják az értesítési automatizálásodat. Nem lehet nagyobb a megfigyelési sugárnál; lehetnek egyformák.",
+          "radius_km": "A kiválasztott helyszíntől ezen a távolságon belül követjük az észleléseket."
         }
       },
       "toggle_location": {
@@ -195,7 +197,8 @@
       "one_location_required": "Legalább egy figyelt helynek bekapcsolva kell maradnia",
       "too_many_locations": "Legfeljebb 10 figyelt hely használható",
       "forecast_not_eligible": "A helyszín nincs engedélyezve vagy nincs FRMv3-lefedettsége.",
-      "invalid_forecast_settings": "Érvénytelen előrejelzési beállítások."
+      "invalid_forecast_settings": "Érvénytelen előrejelzési beállítások.",
+      "alert_radius_exceeds_monitoring": "Csökkentsd a riasztási sugarat, vagy növeld a megfigyelési sugarat. A riasztási sugár nem lehet nagyobb."
     }
   },
   "issues": {

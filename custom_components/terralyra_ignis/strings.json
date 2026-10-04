@@ -146,7 +146,8 @@
           "alert_radius_km": "Alert radius (km)"
         },
         "data_description": {
-          "alert_radius_km": "The alert radius must be positive and no larger than the monitoring radius."
+          "alert_radius_km": "New qualifying satellite observations inside this radius can trigger your notification automation. It must not exceed monitoring; equal radii are allowed.",
+          "radius_km": "Observations are tracked within this distance from the selected place."
         }
       },
       "edit_location": {
@@ -161,7 +162,8 @@
           "alert_radius_km": "Alert radius (km)"
         },
         "data_description": {
-          "alert_radius_km": "The alert radius must be positive and no larger than the monitoring radius."
+          "alert_radius_km": "New qualifying satellite observations inside this radius can trigger your notification automation. It must not exceed monitoring; equal radii are allowed.",
+          "radius_km": "Observations are tracked within this distance from the selected place."
         }
       },
       "toggle_location": {
@@ -195,7 +197,8 @@
       "one_location_required": "At least one monitored location must remain enabled",
       "too_many_locations": "A maximum of 10 monitored locations is supported",
       "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
-      "invalid_forecast_settings": "Invalid forecast settings."
+      "invalid_forecast_settings": "Invalid forecast settings.",
+      "alert_radius_exceeds_monitoring": "Reduce the alert radius or increase the monitoring radius. The alert radius cannot be larger."
     }
   },
   "issues": {
