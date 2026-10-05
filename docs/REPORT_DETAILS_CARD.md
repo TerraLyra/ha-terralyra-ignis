@@ -1,7 +1,7 @@
 # Report details map — 0.29.1
 
-> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
-> The manual-file instructions below apply to 0.34.1 and earlier.
+> **IGNIS 0.35.0+:** cards are bundled with the integration. See
+> [one-time resource setup, updates and older-version migration](CARD_RESOURCES.md).
 
 This optional dashboard resource wraps Home Assistant's existing map card. It
 intercepts report clicks only inside this card, for the Canada and NIFC sources.
@@ -20,15 +20,12 @@ remain the original source values. Text is rendered as text, never upstream HTML
 
 ## Installation and updates
 
-The JavaScript card is distributed separately from the HACS integration.
-Download it from the 0.29.1 release assets. It is not installed automatically.
-Copy `frontend/ignis-report-map.js` to `/config/www/ignis-report-map.js` and register
-`/local/ignis-report-map.js` as a JavaScript module in Dashboard resources.
-For an update, replace the card file, change its resource URL query to
-`?v=0.29.1`, and reload the browser. Keep only one resource entry for this card.
-If you already use a differently named card file, update that file or point the
-existing resource entry to the new one. A browser reload is required because
-an already registered custom element cannot be replaced in the current page.
+On IGNIS 0.35.0+, register `/terralyra_ignis/cards/ignis-report-map.js` once as a
+JavaScript module in Dashboard resources. HACS delivers the matching card file.
+When migrating an existing local resource, edit that entry instead of adding a
+second one. Keep existing map settings. After updates, restart HA and fully reload
+the browser or Companion App frontend; the resource URL stays unchanged.
+Older-version installation and rollback are covered in [resource setup](CARD_RESOURCES.md).
 
 On a duplicate card, retain all existing map settings and change only:
 
