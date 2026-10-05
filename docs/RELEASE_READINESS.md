@@ -1,10 +1,11 @@
 # Release readiness
 
-Stable 0.27.1 was published on 2026-09-21, adding source retrieval diagnostics to
-current fire counts. See [release notes](RELEASE_0_27_1.md) and
-[release validation](NEXT_RELEASE_READINESS.md). Optional NIFC reports shipped in
-0.27.0. The
-standalone model packaging pilot retains its independent experimental version.
+For the current published version, merged-but-unreleased changes and sampled
+live checks, see [release validation](NEXT_RELEASE_READINESS.md).
+Public onboarding acceptance is tracked separately in
+[the acceptance checklist](ONBOARDING_ACCEPTANCE.md). A successful release test
+suite alone does not establish that a new user can complete setup unaided.
+The standalone model packaging pilot retains its independent experimental version.
 
 Release gates: tests and 100% config-flow coverage, Python/JSON validation, HACS,
 Hassfest, security, model packaging and GOES ARM64/x86-64 compatibility. Require
