@@ -83,3 +83,14 @@ test('editor lists explicit location-status sensors only, including unavailable 
  assert.deepEqual(locationChoices(states).map(c=>[c.entity,c.location_id]),[['sensor.place','ca'],['sensor.unavailable','other']]);
  assert.deepEqual(locationChoices(),[]);
 });
+
+const {sourceGuidance}=await import('../../frontend/ignis-location-summary.js');
+test('source guidance prioritizes authentication and failed retrieval over cached freshness',()=>{
+ assert.match(sourceGuidance({status:'auth_error',retrieval_status:'failed'}),/hozzáférési/);
+ assert.match(sourceGuidance({status:'available',retrieval_status:'failed'}),/sikertelen/);
+ assert.match(sourceGuidance({status:'delayed',retrieval_status:'failed'}),/sikertelen/);
+ assert.match(sourceGuidance({status:'delayed',retrieval_status:'successful'}),/nem jelent friss/);
+ assert.match(sourceGuidance({status:'no_product'}),/nem következik/);
+ assert.match(sourceGuidance({status:'initializing'}),/első lekérés/);
+ for(const source of [null,{}, {status:'available'}, {status:'future_status'}])assert.equal(sourceGuidance(source),'');
+});
