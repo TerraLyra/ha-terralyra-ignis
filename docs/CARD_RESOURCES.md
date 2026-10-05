@@ -1,7 +1,7 @@
 # Dashboard card installation and updates
 
-Bundled card delivery is an unreleased change after 0.34.1. These URLs work only
-with a version containing this feature; 0.34.1 and earlier still use manual files.
+Bundled card delivery requires 0.35.0 or later. While 0.35.0 is a release candidate,
+use these URLs only with that installed version; 0.34.1 and earlier use manual files.
 
 ## One-time setup
 
@@ -43,7 +43,7 @@ and ensure there is exactly one resource entry for that card before reloading.
 
 ## Magyar: egyszeri átállás
 
-Ez a megoldás még kiadatlan, a 0.34.1 utáni fejlesztés része. A támogató verzió
+Ez a megoldás 0.35.0-tól érhető el, jelenleg kiadásjelölt. A támogató verzió
 telepítése és HA-újraindítás után a **Beállítások → Dashboardok → Erőforrások**
 alatt a meglévő kártya címét cseréld a fenti táblázat megfelelő címére.
 Típusa JavaScript-modul legyen. Ne adj hozzá második példányt ugyanabból a kártyából.

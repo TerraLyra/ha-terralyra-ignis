@@ -42,20 +42,21 @@ are recorded in
 
 ## Product status
 
-Latest stable release: **0.34.0**, with a six-language notification blueprint,
+Latest stable release: **0.34.1**, with a six-language notification blueprint,
 a visual location selector for the optional summary card and clearer shared-fire
 source details. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
-and [0.34.0 release notes](docs/RELEASE_0_34_0.md).
+and [0.34.1 release notes](docs/RELEASE_0_34_1.md).
 
-Import the blueprint and update the optional card resource separately. A HACS
-integration update does not replace dashboard JavaScript or existing automations.
-The visual selector is included in the 0.34.0 card asset.
+The **0.35.0 candidate** bundles optional cards for HACS updates after a one-time
+[resource migration](docs/CARD_RESOURCES.md). Until then, stable 0.34.1 uses
+separate local card files. Blueprints remain separately imported; existing
+automations are never overwritten.
 
 Version **0.31.0** adds an optional location summary with source health, current
 location-relative nearest-incident distance and an explicitly verified near-home
 fire-risk forecast binding. Canada/NIFC map controls follow their configured map
-switches and stay hidden when disabled or unavailable. Dashboard JavaScript files
-require a separate update; HACS updates the integration only. See
+switches and stay hidden when disabled or unavailable. For these older releases, dashboard JavaScript files
+require a separate update. See
 [0.31.0 release notes](docs/RELEASE_0_31_0.md) and
 [summary setup](docs/LOCATION_SUMMARY_CARD.md).
 
@@ -70,8 +71,8 @@ See [release notes](docs/RELEASE_0_29_1.md).
 Version 0.29.0 adds an optional report map card with independent satellite, Canada
 and NIFC layers, report-update age filters, and readable report dialogs. NIFC
 records now include source-provided names and short descriptions when supplied.
-The card requires a separate dashboard resource installation; a HACS integration
-update alone does not install or update it. See [card setup](docs/REPORT_DETAILS_CARD.md)
+The card requires a dashboard resource entry; 0.35.0 adds bundled files, while
+older versions require separate file updates. See [card setup](docs/REPORT_DETAILS_CARD.md)
 and [0.29.0 release notes](docs/RELEASE_0_29_0.md).
 
 Version 0.28.0 adds optional Canadian official reports through CWFIF: a source-status

@@ -23,17 +23,22 @@ These observations are a limited smoke check, not proof of continuous uptime,
 full history equivalence or correct association of every physical fire. Notification
 delivery and every language were not exercised live. No test push was sent.
 
-## Prepared 0.34.1 candidate
+## Published 0.34.1
 
-See [candidate release notes](RELEASE_0_34_1.md). Publication remains pending.
-Included merged changes: #107 Canada diagnostics, #117 radius-form guidance,
-#121/#124/#125 BM classification and offline review, and #122 Sentinel labels.
-Candidate checks must pass before publication. Production patch acceptance remains
-pending installation; 0.34.0 smoke checks above do not validate this patch.
+Stable v0.34.1 was published from `61db1eb758b3d3dee4dfdccaa4c4a2d0db53b6f0`.
+After the user updated and restarted, the integration page showed 0.34.1 without
+visible setup errors. The dashboard rendered Sentinel-3A/B names and both radii;
+IODC remained delayed. This is a sampled smoke check, not complete live acceptance.
+
+## Prepared 0.35.0 candidate
+
+See [candidate notes](RELEASE_0_35_0.md). Includes #127 bundled cards, #128 offline
+WLF preflight and #129 BM fixes. Publication requires successful candidate checks
+and explicit approval. New bundled URLs still require live acceptance after update.
 
 ## Remaining work
 
-- Update the separately installed summary resource where the 0.33.0 file remains.
+- Migrate existing optional card resources to bundled URLs after installing 0.35.0.
 - #110: remaining usability work before wider HACS distribution.
 - #41: historical counter investigation remains paused; no history deletion.
 

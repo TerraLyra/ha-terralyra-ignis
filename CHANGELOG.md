@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.35.0
+
+- Bundle the three optional dashboard cards with the integration, using stable resource URLs after a one-time migration.
+- Preserve existing dashboard configuration, local files, blueprints and history.
+- Recognize kitchen fires and garage spread in BM reports; keep uncertain and mixed cases reviewable.
+- Extend offline Hungarian place aliases and add offline JAXA WLF preflight checks; no live Himawari provider is enabled.
+
+See [release notes](docs/RELEASE_0_35_0.md).
+
 ## 0.34.1
 
 - Show a specific alert-radius validation error and retain submitted location form values; explain both radii in six languages.

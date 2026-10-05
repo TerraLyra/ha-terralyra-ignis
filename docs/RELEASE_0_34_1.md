@@ -1,6 +1,6 @@
 # 0.34.1 — Clearer setup errors and report diagnostics
 
-Release candidate; publication is pending.
+Published stable release.
 
 ## Changes
 
@@ -33,6 +33,6 @@ its visual editor; HACS does not replace dashboard resources or import blueprint
 ## Validation
 
 The included feature PRs passed their checks, including 82 offline BM tests for
-the latest wording/context change. Candidate CI must pass before publication.
+the latest wording/context change. All 27 candidate checks passed before publication.
 Live acceptance of this patch follows installation; no test notification was sent
 and no production HA restart was performed during preparation.
