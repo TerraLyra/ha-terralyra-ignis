@@ -98,6 +98,9 @@ async def test_home_assistant_action_returns_only_sanitized_schema(hass) -> None
     )
     entry.add_to_hass(hass)
     entry.mock_state(hass, ConfigEntryState.LOADED)
+    from homeassistant.setup import async_setup_component
+
+    assert await async_setup_component(hass, "http", {})
     await async_setup(hass, {})
     schema = {
         "format": "terralyra-ignis-msg-iodc-schema-v1",

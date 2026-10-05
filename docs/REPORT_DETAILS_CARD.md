@@ -1,5 +1,8 @@
 # Report details map — 0.29.1
 
+> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
+> The manual-file instructions below apply to 0.34.1 and earlier.
+
 This optional dashboard resource wraps Home Assistant's existing map card. It
 intercepts report clicks only inside this card, for the Canada and NIFC sources.
 Satellite markers, monitoring areas and other entities retain HA's normal dialog.

@@ -1,5 +1,8 @@
 # Optional location summary card
 
+> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
+> The manual-file instructions below apply to 0.34.1 and earlier.
+
 This optional Hungarian card reads per-location operational-status entities and
 explicitly bound forecast sensors. It never
 calls a service, fetches a provider, or changes HA state/history.

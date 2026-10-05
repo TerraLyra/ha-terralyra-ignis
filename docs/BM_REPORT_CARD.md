@@ -1,5 +1,8 @@
 # Optional BM OKF report card
 
+> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
+> The manual-file instructions below apply to 0.34.1 and earlier.
+
 Copy `frontend/ignis-bm-reports.js` to `/config/www/ignis-bm-reports.js` and add
 `/local/ignis-bm-reports.js?v=1` as a JavaScript module dashboard resource. Add:
 
