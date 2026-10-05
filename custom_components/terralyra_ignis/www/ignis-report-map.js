@@ -144,7 +144,41 @@ export function filterMapStates(states, enabled, maxDays, now = Date.now()) {
 
 // Guard permits dependency-free model tests in Node without a browser DOM.
 if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-map')) {
+  class IgnisReportMapEditor extends HTMLElement {
+    setConfig(config){this.config={...config};this.render();}
+    set hass(value){
+      this._hass=value;
+      const signature=JSON.stringify([value?.language,this.choices()]);
+      if(signature!==this.signature){this.signature=signature;this.render();}
+    }
+    choices(){return Object.entries(this._hass?.states||{}).filter(([id])=>id.startsWith('switch.')).map(([id,state])=>[id,String(state.attributes?.friendly_name||id)]).sort((a,b)=>a[1].localeCompare(b[1]));}
+    node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
+    update(patch){this.config={...this.config,...patch};this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:this.config},bubbles:true,composed:true}));}
+    render(){
+      if(!this.config)return;
+      if(!this.shadowRoot)this.attachShadow({mode:'open'});
+      const root=this.shadowRoot;root.replaceChildren();
+      const hu=this._hass?.language?.startsWith('hu');
+      root.append(this.node('style',`:host{display:block;color:var(--primary-text-color);overflow-wrap:anywhere}label{display:block;margin:16px 0}input,select{box-sizing:border-box;width:100%;min-width:0;padding:12px;margin-top:8px;font:inherit;color:inherit;background:var(--card-background-color,white);border:1px solid var(--divider-color,#999);border-radius:8px}p{line-height:1.5}`));
+      const titleText=hu?'Térkép címe (nem kötelező)':'Map title (optional)';
+      const label=this.node('label',titleText),input=this.node('input');input.type='text';input.value=this.config.title||'';input.setAttribute('aria-label',titleText);input.onchange=()=>this.update({title:input.value});label.append(input);root.append(label);
+      root.append(this.node('p',hu?'Válaszd ki az adott forrás IGNIS térképes megjelenítési kapcsolóját. Ez csak hozzárendelés: nem engedélyez adatforrást, és nem kapcsol át entitást.':'Select each source’s IGNIS map visibility switch. This only creates a binding: it does not enable a provider or toggle an entity.'));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']]){
+        const caption=name+(hu?' térképkapcsoló':' map switch'),label=this.node('label',caption),select=this.node('select');select.setAttribute('aria-label',caption);
+        const empty=this.node('option',hu?'Nincs hozzárendelés':'No binding');empty.value='';select.append(empty);
+        const choices=this.choices(),current=this.config.report_switches?.[source]||'';
+        for(const [id,name] of choices){const option=this.node('option',`${name} — ${id}`);option.value=id;select.append(option);}
+        if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Jelenleg nem elérhető: ':'Currently unavailable: ')+current);option.value=current;select.append(option);}
+        select.value=current;select.onchange=()=>{const bindings={...this.config.report_switches};if(select.value)bindings[source]=select.value;else delete bindings[source];this.update({report_switches:bindings});};label.append(select);root.append(label);
+      }
+      root.append(this.node('p',hu?'A hozzárendelés nélküli vagy kikapcsolt riportforrás vezérlője rejtve marad. A helyszínkörök és egyéb haladó térképbeállítások a kódszerkesztőben módosíthatók; a meglévő értékeket megőrizzük.':'Report controls stay hidden without a binding or when their switch is off. Location circles and other advanced map options remain available in the code editor; existing values are preserved.'));
+    }
+  }
+  customElements.define('ignis-report-map-editor',IgnisReportMapEditor);
   class IgnisReportMap extends HTMLElement {
+    static getConfigElement(){return document.createElement('ignis-report-map-editor');}
+    static getStubConfig(){return {type:'custom:ignis-report-map'};}
+
     constructor() {
       super();
       this.attachShadow({mode:'open'});
