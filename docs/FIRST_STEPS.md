@@ -1,7 +1,7 @@
 # First setup / Első beállítás
 
-> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
-> The manual-file instructions below apply to 0.34.1 and earlier.
+> **IGNIS 0.35.0+:** cards are bundled with the integration. See
+> [one-time resource setup, updates and older-version migration](CARD_RESOURCES.md).
 
 [English](#english) · [Magyar](#magyar)
 
@@ -45,11 +45,13 @@ It needs no IGNIS JavaScript resource and displays satellite markers and optiona
 location circles. No fire markers can be a valid empty result; check source status
 before interpreting it. These circles are your configured areas, not fire perimeters.
 
-For a per-place summary, follow [card setup](LOCATION_SUMMARY_CARD.md). This optional
-card requires a separate JavaScript resource. The 0.34.0 card asset includes a visual editor: select a place from its list.
-If you still use the 0.33.0 file, update the existing resource separately or use
-the documented explicit entity/location YAML. Forecast binding remains
-an optional, separate step. Use one summary card per place.
+For a per-place summary, register `/terralyra_ignis/cards/ignis-location-summary.js`
+once as a **JavaScript module** under **Settings → Dashboards → Resources**.
+Then edit your dashboard, add **IGNIS helyszínösszefoglaló**, and select the place
+in its visual editor. No file copying is needed on 0.35.0+. Use one card per place.
+Forecast binding is an optional separate step; see [card setup](LOCATION_SUMMARY_CARD.md).
+If replacing a `/local/` resource, edit the existing entry rather than adding a duplicate.
+Fully reload the browser after changing resources.
 
 ### 4. Enable phone notifications
 
@@ -69,8 +71,9 @@ notification. [Notification behavior](ALERT_RADII.md#event-semantics).
 
 You have checked the place, both radii and source health; the map opens; and the
 notification automation uses the intended phone and language. An optional summary
-shows the same place. HACS updates the integration; custom-card resources and
-imported blueprints need their own update steps. Satellite notices supplement
+shows the same place. HACS updates the integration and bundled card files. Restart HA after an update
+and fully reload the browser or Companion App frontend. Resource URLs stay the
+same; imported blueprints still need their own update steps. Satellite notices supplement
 awareness and do not replace official emergency warnings.
 
 ## Magyar
@@ -109,11 +112,15 @@ A [natív térképpéldához](MONITORING_RADIUS_MAP.md#recommended-map-card) nem
 külön IGNIS JavaScript-fájl. A helyszín körei a beállított sugarakat mutatják,
 nem a tűz kiterjedését. Ha nincs tűzjelölő, az adatforrás állapotát is ellenőrizd.
 
-Az opcionális [helyszínösszefoglalóhoz](LOCATION_SUMMARY_CARD.md) külön kártyafájl
-és erőforrás-beállítás kell. A 0.34.0-s kártyafájl grafikus helyszínválasztót tartalmaz.
-Ha még a 0.33.0-s fájlt használod, külön frissítsd a meglévő erőforrást,
-vagy használd az útmutató szerinti kézi hozzárendelést. Az előrejelzés
-hozzárendelése továbbra is külön, választható lépés. Helyszínenként egy kártyát adj hozzá.
+Az opcionális összefoglalóhoz a **Beállítások → Dashboardok → Erőforrások** alatt
+add hozzá egyszer a `/terralyra_ignis/cards/ignis-location-summary.js` címet,
+**JavaScript-modul** típussal. Ezután a dashboard szerkesztőjében add hozzá az
+**IGNIS helyszínösszefoglaló** kártyát, és válaszd ki a helyszínt a listából.
+0.35.0-tól nem kell fájlt másolni. Helyszínenként egy kártyát használj.
+Az előrejelzés hozzárendelése külön, választható lépés; lásd a
+[kártya útmutatóját](LOCATION_SUMMARY_CARD.md).
+Régi `/local/` cím esetén a meglévő erőforrást módosítsd, ne adj hozzá második példányt.
+Végül töltsd újra teljesen a böngészőt.
 
 ### 4. Értesítési blueprint
 
@@ -130,5 +137,7 @@ meg a riasztási sugarat pusztán azért, hogy értesítést kapj.
 
 A beállítás kész, ha a helyszín, a két sugár és a forrásállapot ellenőrzött,
 a térkép megnyílik, az automatizálás pedig a kívánt telefonra és nyelvre van állítva.
-A HACS az integrációt frissíti; a kártyafájl és az importált blueprint külön frissül.
+A HACS az integrációt és a csomagolt kártyafájlokat is frissíti. Frissítés után
+indítsd újra a HA-t, majd töltsd újra teljesen a böngészőt vagy a Companion App
+felületét. Az erőforráscímek maradnak; az importált blueprint továbbra is külön frissül.
 Az IGNIS értesítése nem helyettesíti a hivatalos hatósági figyelmeztetést.

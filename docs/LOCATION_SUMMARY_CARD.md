@@ -1,15 +1,15 @@
 # Optional location summary card
 
-> **Upcoming bundled cards:** see [one-time setup and migration](CARD_RESOURCES.md).
-> The manual-file instructions below apply to 0.34.1 and earlier.
+> **IGNIS 0.35.0+:** cards are bundled with the integration. See
+> [one-time resource setup, updates and older-version migration](CARD_RESOURCES.md).
 
 This optional Hungarian card reads per-location operational-status entities and
 explicitly bound forecast sensors. It never
 calls a service, fetches a provider, or changes HA state/history.
 
-When installing a reviewed version, copy frontend/ignis-location-summary.js to
-/config/www/ignis-location-summary.js, register it as a JavaScript module resource
-at /local/ignis-location-summary.js. In dashboard edit mode, add
+On IGNIS 0.35.0+, register `/terralyra_ignis/cards/ignis-location-summary.js`
+as a JavaScript module resource once. HACS delivers the matching file; no manual
+copy is needed. In dashboard edit mode, add
 **IGNIS helyszínösszefoglaló**, then select the monitored location's status sensor
 from the visual editor. It copies the exact location ID from that sensor; no
 entity-name guessing or location-ID copying is needed. You can also enter a custom
