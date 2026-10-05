@@ -10,11 +10,11 @@ from custom_components.terralyra_ignis.frontend_resources import (
 )
 
 
-async def test_card_paths_served_once(hass, aiohttp_client):
+async def test_card_paths_served_once(hass, hass_client):
     assert await async_setup_component(hass, "http", {})
     await async_register_card_paths(hass)
     await async_register_card_paths(hass)
-    client = await aiohttp_client(hass.http.app)
+    client = await hass_client()
     for name in CARD_FILES:
         response = await client.get(f"{URL_BASE}/{name}")
         assert response.status == 200

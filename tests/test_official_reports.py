@@ -176,6 +176,9 @@ async def test_action_returns_attributed_response(hass):
         "custom_components.terralyra_ignis.OfficialReportClient.async_get_notices",
         new=AsyncMock(return_value=response),
     ):
+        from homeassistant.setup import async_setup_component
+
+        assert await async_setup_component(hass, "http", {})
         await async_setup(hass, {})
         result = await hass.services.async_call(
             "terralyra_ignis", "get_official_reports", {},
