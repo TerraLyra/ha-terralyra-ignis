@@ -42,15 +42,13 @@ are recorded in
 
 ## Product status
 
-Latest stable release: **0.34.1**, with a six-language notification blueprint,
-a visual location selector for the optional summary card and clearer shared-fire
-source details. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
-and [0.34.1 release notes](docs/RELEASE_0_34_1.md).
+Latest stable release: **0.35.1**, with small decorative icons on the optional
+location summary card. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
+and [0.35.1 release notes](docs/RELEASE_0_35_1.md).
 
-The **0.35.0 candidate** bundles optional cards for HACS updates after a one-time
-[resource migration](docs/CARD_RESOURCES.md). Until then, stable 0.34.1 uses
-separate local card files. Blueprints remain separately imported; existing
-automations are never overwritten.
+Since **0.35.0**, optional cards are bundled for HACS updates after a one-time
+[resource migration](docs/CARD_RESOURCES.md). Blueprints remain separately
+imported; existing automations are never overwritten.
 
 Version **0.31.0** adds an optional location summary with source health, current
 location-relative nearest-incident distance and an explicitly verified near-home

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.35.1
+
+- Add small decorative icons to the optional location summary card, keeping text labels and existing behavior.
+- Ship the updated card at its existing bundled resource URL.
+
+See [release notes](docs/RELEASE_0_35_1.md).
+
 ## 0.35.0
 
 - Bundle the three optional dashboard cards with the integration, using stable resource URLs after a one-time migration.

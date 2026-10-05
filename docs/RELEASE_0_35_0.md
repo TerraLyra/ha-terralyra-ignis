@@ -1,7 +1,5 @@
 # 0.35.0 — Dashboard cards bundled with IGNIS
 
-Release candidate; publication is pending.
-
 ## Changes
 
 The three optional dashboard cards are now included in the integration package.
