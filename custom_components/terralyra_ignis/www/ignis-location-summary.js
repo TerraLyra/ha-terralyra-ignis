@@ -1,5 +1,16 @@
 // Optional read-only card. Explicit entity/location association; no service calls.
 const statusLabels = {available:'Adatforrások elérhetők',degraded:'Késleltetett adatellátás',partial:'Részleges adatellátás',initializing:'Első adatokra vár',unavailable:'Adatok nem érhetők el',no_coverage:'Nincs megfelelő forrás'};
+// Describe only the reported state; never infer an all-clear or a scheduled retry.
+export function sourceGuidance(source) {
+  if(!source || typeof source!=='object')return '';
+  if(source.status==='auth_error')return 'Ellenőrizd a forrás hozzáférési adatait az IGNIS beállításaiban.';
+  if(source.retrieval_status==='failed'||source.status==='outage')return 'A lekérés sikertelen. Ha tartósan fennáll, ellenőrizd az IGNIS diagnosztikáját és a hálózati kapcsolatot.';
+  return ({
+    delayed:'Az adatok késnek. A sikeres lekérés önmagában nem jelent friss műholdas megfigyelést.',
+    no_product:'Jelenleg nincs elérhető adatcsomag; ebből nem következik, hogy nincs tűz.',
+    initializing:'Várd meg az első lekérés eredményét. Ha ez az állapot tartós, ellenőrizd az IGNIS diagnosztikáját.'
+  })[source.status]||'';
+}
 export function summarizeLocation(entity, locationId) {
   const a=entity?.attributes;
   if(!a || a.location_id!==locationId || !Array.isArray(a.source_health))return {error:'A kiválasztott érzékelő nem ehhez a helyszínhez tartozik, vagy nem támogatott.'};
@@ -120,7 +131,7 @@ class IgnisLocationSummary extends HTMLElement {
     if(Number.isFinite(model.monitoringRadius)&&Number.isFinite(model.alertRadius)&&model.alertRadius>0&&model.alertRadius<=model.monitoringRadius)
       card.append(this.labelled('p',`Megfigyelés: ${model.monitoringRadius} km · Riasztás: ${model.alertRadius} km`,'mdi:radar'));
     card.append(this.labelled('h3','Adatforrások','mdi:satellite-variant'));
-    const list=this.node('ul');for(const source of model.sources){if(!source||typeof source!=='object')continue;list.append(this.node('li',`${source.name||source.provider||'Ismeretlen forrás'}${source.satellite?' · '+source.satellite:''}: ${statusLabels[source.status]||({delayed:'Késleltetett',outage:'Forráskiesés',auth_error:'Hozzáférési hiba',no_product:'Nincs termék'}[source.status])||'Ismeretlen állapot'}`));}card.append(list);
+    const list=this.node('ul');for(const source of model.sources){if(!source||typeof source!=='object')continue;const row=this.node('li',`${source.name||source.provider||'Ismeretlen forrás'}${source.satellite?' · '+source.satellite:''}: ${statusLabels[source.status]||({delayed:'Késleltetett',outage:'Forráskiesés',auth_error:'Hozzáférési hiba',no_product:'Nincs termék'}[source.status])||'Ismeretlen állapot'}`);const guidance=sourceGuidance(source);if(guidance){const hint=this.node('div',guidance);hint.className='muted';row.append(hint);}list.append(row);}card.append(list);
     const date=typeof model.received==='string'?new Date(model.received):null;
     const stamp=this.node('p',date&&!Number.isNaN(date.getTime())?`Legutóbbi sikeres adatátvétel: ${date.toLocaleString(this._hass?.locale?.language||'hu')}`:'Nincs adatátvételi időpont.');stamp.className='muted';card.append(stamp);
     card.append(this.labelled('h3','Tűzveszély-előrejelzés','mdi:chart-line'));
