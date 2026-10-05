@@ -27,6 +27,20 @@ second one. Keep existing map settings. After updates, restart HA and fully relo
 the browser or Companion App frontend; the resource URL stays unchanged.
 Older-version installation and rollback are covered in [resource setup](CARD_RESOURCES.md).
 
+### Visual editor (main branch, not yet released)
+
+Add **IGNIS report map** in the dashboard card picker. The visual editor supports
+an optional title and explicit Canada/NIFC map-switch bindings. Choose the IGNIS
+map visibility switch for the corresponding source, not an unrelated switch.
+The list includes switch entities without guessing from their translated names.
+No source is enabled and no switch is toggled by making this association.
+Unbound or off report controls stay hidden. Missing existing selections remain
+visible, so a temporarily unavailable entity does not silently lose its binding.
+
+Existing map entities, zoom and other advanced options are preserved. Edit those
+in the code editor. The editor uses Hungarian for a Hungarian HA language and
+English otherwise. The initial card makes no automatic report-switch selection.
+
 On a duplicate card, retain all existing map settings and change only:
 
 ```yaml
