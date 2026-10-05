@@ -40,3 +40,13 @@ missing rows as proof of no fire or infer event extinction from feed disappearan
 A licence clarification does not itself validate a transport or decoder. No raw
 imagery download is needed for this small CSV product. Existing historical data
 and unrelated source settings must remain untouched.
+
+## Offline preflight implemented
+
+`tools/source_research/jaxa_wlf.py` checks the UTC eligibility boundary and bounded
+CSV structure without guessing column mappings. It preserves both headers and a
+content hash. Header-only input remains semantically unverified. Synthetic tests
+cover offsets, missing/naive dates, byte/line/row bounds, malformed CSV and encoding.
+This tool is not imported by the integration and does not fetch data or produce
+fire detections. Real-file validation, FRP conversion and quality selection remain
+open; a passing structure check does not satisfy those gates.
