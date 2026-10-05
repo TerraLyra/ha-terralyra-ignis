@@ -6,6 +6,11 @@ stable machine-access endpoint**
 
 Official access rechecked: **2026-09-06**
 
+This spike describes **IPMA/KCL FRP-PIXEL**, not JAXA WLF. For the separate
+JAXA CSV implementation path, see [WLF adapter contract](JAXA_WLF_ADAPTER.md)
+and [product-specific terms](HIMAWARI_PRODUCT_TERMS.md). Its HDF5 gates below
+must not be applied to the JAXA CSV decoder.
+
 ## Decision
 
 Himawari-9 AHI is a valuable future equal-peer active-fire source for Asia and

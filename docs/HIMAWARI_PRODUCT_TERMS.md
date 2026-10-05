@@ -1,6 +1,6 @@
 # Himawari product access boundaries
 
-Checked 2026-09-30. Two different derived fire products must not inherit each
+Checked 2026-10-05. Two different derived fire products must not inherit each
 other's terms, credentials or algorithms. Neither is an enabled IGNIS provider.
 This records product/access requirements, not correspondence or account details.
 
@@ -18,25 +18,24 @@ This records product/access requirements, not correspondence or account details.
   research-product and other contributor credits. Section 2.3 requires advance
   notification of commercial use; it does not itself describe an approval queue.
   Section 2.2 requests publication notification where possible.
-- These research terms also require compliance with the
-  [general site policy](https://global.jaxa.jp/policy.html), whose generic
-  commercial-use clause requires prior permission and whose generic modification
-  clause is restrictive. The specific research grant appears intended to permit
-  derived-data use, but the relationship of these clauses for a distributed
-  software product should be confirmed rather than silently assuming precedence.
+- Apply these terms to JAXA WLF specifically, with the date boundary and credits
+  above. Do not extend this scope to raw HSD, other model products or the separate
+  KCL/IPMA product. Retain the general site-policy link for downstream users;
+  a change of intended use needs its own terms review.
 - The [2018 P-Tree service terms](https://www.eorc.jaxa.jp/ptree/terms.html) require
   registration and credential responsibility. Their section 6 restriction on
   redistribution explicitly names **Himawari Standard Data**, not all derived WLF
   products; do not misreport it as a blanket ban on WLF redistribution.
 
-Implementation boundary: restrict any future adapter to the confirmed WLF
-product/version and allowed observation dates; use each installation's own
-registered access rather than distributing project credentials. Clarify whether
-local caching, parsed map markers and a public open-source client fall under the
-specific research-data grant, and whether notification alone suffices for any
-commercial deployment. Open-source distribution by itself does not establish
-that every downstream use is non-commercial. No credentials or account creation
-are needed for offline development.
+Implementation boundary: target JAXA WLF Level 2 only, with observation times
+at or after 2026-02-01T00:00:00Z. Reject missing/ambiguous times and earlier data
+from this adapter rather than inferring eligibility from download time. This
+restriction does not delete existing user history. Use each installation's own
+registered access, never distributed project credentials. Preserve JAXA P-Tree,
+WLF and JMA provenance in source details and exported observations. User Guide
+section 3 and FAQ Q4-2 define reporting/credit expectations. No account is needed
+for offline development; authenticated transport and real-file validation remain
+separate implementation gates. See [WLF adapter contract](JAXA_WLF_ADAPTER.md).
 
 ## KCL/IPMA CAMS FRP-PIXEL List Product
 
@@ -65,6 +64,7 @@ uncertainty as proof that reuse is forbidden, or borrow LSA SAF's CC BY 4.0 gran
 
 ## Runtime decision
 
-Both routes remain inactive until these product-specific gates are settled.
+Both routes remain inactive. JAXA WLF now proceeds through its technical
+validation gates; the separate CAMS route retains its access/licence gates.
 JAXA WLF and CAMS FRP need separate decoders, quality handling and attribution.
 Neither constitutes a fire-danger forecast: both report satellite observations.
