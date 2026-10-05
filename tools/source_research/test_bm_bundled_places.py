@@ -110,3 +110,16 @@ class KutasContextTests(unittest.TestCase):
         for m in result.mentions:
             for h in m.context_hints:
                 self.assertEqual(getattr(result, m.field)[h.start:h.end], h.evidence)
+
+
+class OctoberAliasesTests(unittest.TestCase):
+    def test_reviewed_sarvar_and_pand_forms(self):
+        places = load_hungarian_places()
+        for title, body, expected in [
+            ('Kigyulladt egy konyha Sárváron', 'Egy sárvári házban.', {'Sárvár'}),
+            ('Tűz volt Pándon', 'Egy pándi telken. A nagykátai tűzoltók érkeztek.', {'Pánd', 'Nagykáta'}),
+        ]:
+            with self.subTest(title=title):
+                result = review_locations(title, body, '', places)
+                self.assertEqual({m.settlement_name for m in result.mentions}, expected)
+                self.assertFalse(result.incident_location_verified)

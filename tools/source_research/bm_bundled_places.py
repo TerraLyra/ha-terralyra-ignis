@@ -10,6 +10,12 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # BM RSS 92570-92573: reviewed event and responder forms.
+    'Sárvár': ('Sárváron', 'sárvári'),
+    'Pánd': ('Pándon', 'pándi'),
+    'Nagykáta': ('nagykátai',),
+    'Kaba': ('kabai',),
+    'Kisbér': ('kisbéri',),
     # BM RSS 92559: explicitly observed event/responder forms.
     'Kutas': ('Kutason',),
     'Nagyatád': ('nagyatádi',),
