@@ -4,7 +4,7 @@ import re
 # Deliberately bounded vocabulary. A match is evidence for human review only.
 _PATTERNS = {
     'vegetation': r'(?<!\w)(?:erdő(?:tűz|ben)?|bozót(?:os)?(?:ra)?|nádas|aljnövényzet|avar|száraz fű|tarló)(?!\w)',
-    'local_asset': r'(?<!\w)(?:melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi)(?!\w)',
+    'local_asset': r'(?<!\w)(?:garázs(?:ra|ban)?|konyha|konyhában|melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi)(?!\w)',
     'fire': r'(?<!\w)(?:ég|égett|égnek|égették|lángol|lángolt|tűz|tüzet|tűz keletkezett|kigyulladt|gyulladt[ \t]+ki)(?!\w)',
     'accident': r'(?<!\w)(?:összeütközött|ütközött|karambolozott|karambol|baleset|elgázolt|felborult)(?!\w)',
     # Broad veto only: smoke, extinguishing and compounds must prevent a

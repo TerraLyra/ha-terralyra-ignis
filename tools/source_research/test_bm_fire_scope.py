@@ -114,3 +114,25 @@ class SeparatedIgnitionTests(unittest.TestCase):
         self.assertFalse(result['large_extent_verified'])
         self.assertEqual(review_fire_scope('', 'Az aljnövényzet nem gyulladt ki.')['category'], 'unknown')
         self.assertEqual(review_fire_scope('', 'Az aljnövényzet gyulladt. Ki érkezett?')['category'], 'unknown')
+
+
+class KitchenGarageTests(unittest.TestCase):
+    def test_grass_spreading_to_garage_is_mixed(self):
+        text = 'Kigyulladt a száraz fű, a lángok átterjedtek egy garázsra is.'
+        result = review_fire_scope('Tűz volt Pándon', text)
+        self.assertEqual(result['category'], 'mixed_fire_candidate')
+        self.assertFalse(result['automatically_excluded'])
+        self.assertFalse(result['large_extent_verified'])
+        for evidence in result['evidence']:
+            source = text if evidence['field'] == 'description' else 'Tűz volt Pándon'
+            self.assertEqual(source[evidence['start']:evidence['end']], evidence['evidence'])
+
+    def test_kitchen_fire_is_local(self):
+        self.assertEqual(review_fire_scope('Kigyulladt egy konyha Sárváron', '')['category'],
+                         'local_asset_fire_candidate')
+
+    def test_nearby_garage_does_not_prove_spread(self):
+        self.assertEqual(review_fire_scope('Ég a száraz fű.', 'A közelben garázs található.')['category'],
+                         'vegetation_fire_candidate')
+        self.assertEqual(review_fire_scope('Nem ég a garázs.', '')['category'], 'unknown')
+        self.assertEqual(review_fire_scope('Garázsra terjedt a tűz.', '', input_truncated=True)['category'], 'unknown')
