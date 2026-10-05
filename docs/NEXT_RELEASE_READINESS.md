@@ -30,16 +30,32 @@ After the user updated and restarted, the integration page showed 0.34.1 without
 visible setup errors. The dashboard rendered Sentinel-3A/B names and both radii;
 IODC remained delayed. This is a sampled smoke check, not complete live acceptance.
 
-## Prepared 0.35.0 candidate
+## Published 0.35.0 and 0.35.1
 
-See [candidate notes](RELEASE_0_35_0.md). Includes #127 bundled cards, #128 offline
-WLF preflight and #129 BM fixes. Publication requires successful candidate checks
-and explicit approval. New bundled URLs still require live acceptance after update.
+Stable 0.35.0 bundled the optional dashboard cards and shipped BM classification
+improvements and offline WLF preflight checks. Existing dashboard resource URLs
+were migrated to the bundled routes; the dashboard subsequently rendered.
+See [0.35.0 notes](RELEASE_0_35_0.md).
+
+Stable 0.35.1 was published from `178ca30644d1b797f11d82ada125f29f719cabd0`.
+The merged tree matched the candidate that passed all 27 checks. It adds small
+decorative summary icons. The user confirmed update and restart; a subsequent
+read-only dashboard check found location summaries and forecasts rendering.
+This does not independently verify every icon, notification delivery or history
+continuity. See [0.35.1 notes](RELEASE_0_35_1.md).
+
+## Main branch after 0.35.1
+
+- #132 adds actionable source-state guidance to the summary card. This is merged
+  but not included in the published 0.35.1 package.
+- #133 updates English/Hungarian onboarding and card installation documentation
+  for bundled resources. These instructions are available on the main branch.
 
 ## Remaining work
 
-- Migrate existing optional card resources to bundled URLs after installing 0.35.0.
-- #110: remaining usability work before wider HACS distribution.
+- [Public onboarding acceptance](ONBOARDING_ACCEPTANCE.md): distinguish delivered
+  building blocks from first-time-user acceptance that has not yet been performed.
+- #110 remains open for the guided setup and dashboard usability work.
 - #41: historical counter investigation remains paused; no history deletion.
 
 No release publication or HA restart is implied by this document.
