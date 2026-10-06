@@ -146,3 +146,29 @@ class SarisapContextTests(unittest.TestCase):
         result = review_locations('', 'A bajnai és a nyergesújfalui házak közelében.', '', load_hungarian_places())
         self.assertTrue(result.mentions)
         self.assertFalse(any(h.kind.startswith('responder') for m in result.mentions for h in m.context_hints))
+
+
+class SzolnokLebenyTests(unittest.TestCase):
+    def test_szolnok_inflection_retains_original_text(self):
+        title = 'Ráfutásos baleset Szolnokon'
+        result = review_locations(title, 'Kisbusz karambolozott Szolnokon.', '', load_hungarian_places())
+        self.assertEqual(result.title, title)
+        self.assertEqual({m.settlement_name for m in result.mentions}, {'Szolnok'})
+        self.assertFalse(result.incident_location_verified)
+
+    def test_lebeny_event_responder_and_route_are_distinct(self):
+        body = ('A Hegyeshalom felé vezető oldalon, Lébény közelében történt. '
+                'A műszaki mentést a lébényi hivatásos tűzoltók végzik.')
+        result = review_locations('Négy kamion ütközött Lébénynél', body, '', load_hungarian_places())
+        self.assertEqual({m.settlement_name for m in result.mentions if m.field == 'title'}, {'Lébény'})
+        hints = {(m.settlement_name, h.kind) for m in result.mentions for h in m.context_hints}
+        self.assertIn(('Lébény', 'responder_reference'), hints)
+        self.assertIn(('Hegyeshalom', 'direction_reference'), hints)
+        self.assertFalse(result.incident_location_verified)
+        for m in result.mentions:
+            for h in m.context_hints:
+                self.assertEqual(getattr(result, m.field)[h.start:h.end], h.evidence)
+
+    def test_unreviewed_inflections_are_not_inferred(self):
+        result = review_locations('Szolnokról Lébénybe', '', '', load_hungarian_places())
+        self.assertEqual(result.mentions, ())
