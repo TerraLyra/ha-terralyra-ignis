@@ -136,3 +136,19 @@ class KitchenGarageTests(unittest.TestCase):
                          'vegetation_fire_candidate')
         self.assertEqual(review_fire_scope('Nem ég a garázs.', '')['category'], 'unknown')
         self.assertEqual(review_fire_scope('Garázsra terjedt a tűz.', '', input_truncated=True)['category'], 'unknown')
+
+
+class AccusativeResponderTests(unittest.TestCase):
+    def test_responders_called_to_accident_are_not_fire_evidence(self):
+        result = review_fire_scope('Ráfutásos baleset Szolnokon',
+            'A város hivatásos tűzoltóit riasztották, akik a kisbuszt áramtalanították.')
+        self.assertEqual(result['category'], 'non_fire_report_candidate')
+        self.assertFalse(result['automatically_excluded'])
+        self.assertTrue(result['requires_review'])
+
+    def test_actual_fire_still_prevents_non_fire_label(self):
+        for clue in ('Füst szállt fel.', 'Az autó kigyulladt.', 'Tűzoltás zajlik.'):
+            with self.subTest(clue=clue):
+                result = review_fire_scope('Baleset Szolnokon',
+                    'A város tűzoltóit riasztották. ' + clue)
+                self.assertNotEqual(result['category'], 'non_fire_report_candidate')
