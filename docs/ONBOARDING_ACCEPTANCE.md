@@ -13,7 +13,8 @@ not automatically a passed first-time-user trial.
 | Six-language notification blueprint | 0.34.0 | Separate import and user-selected phone; no silent automation replacement |
 | Bundled optional cards | 0.35.0; resource migration observed | One-time resource registration remains manual |
 | Summary icons | 0.35.1 | Decoration only; no safety or official-status inference |
-| Source problem guidance | #132, merged after 0.35.1 | Not yet in a published release; currently Hungarian |
+| Source problem guidance | 0.36.0; sampled live after browser cache recovery | Currently Hungarian; broader acceptance remains open |
+| Visual report-map editor and binding status | 0.36.0 | Explicit source switches remain required; all editor interactions not yet exercised live |
 | Updated first-setup instructions | #133 | English/Hungarian documentation is not an unaided-user acceptance result |
 
 ## Next implementation work
