@@ -123,3 +123,26 @@ class OctoberAliasesTests(unittest.TestCase):
                 result = review_locations(title, body, '', places)
                 self.assertEqual({m.settlement_name for m in result.mentions}, expected)
                 self.assertFalse(result.incident_location_verified)
+
+
+class SarisapContextTests(unittest.TestCase):
+    def test_event_and_singular_responder_unit_are_distinct(self):
+        from bm_hu_gazetteer import load_review_places
+        body = ('Egy melléképület égett Sárisápon. A sárisápi önkéntes tűzoltók, '
+                'majd a bajnai és a nyergesújfalui hivatásos egység érkezett.')
+        result = review_locations('Melléképület égett Sárisápon', body, '', load_review_places())
+        self.assertEqual({m.settlement_name for m in result.mentions if m.field == 'title'}, {'Sárisáp'})
+        responders = {m.settlement_name for m in result.mentions
+                      if any(h.kind in ('responder_reference', 'responder_list_reference')
+                             for h in m.context_hints)}
+        self.assertEqual(responders, {'Sárisáp', 'Bajna', 'Nyergesújfalu'})
+        for m in result.mentions:
+            for hint in m.context_hints:
+                text = body if m.field == 'description' else result.title
+                self.assertEqual(text[hint.start:hint.end], hint.evidence)
+        self.assertFalse(result.incident_location_verified)
+
+    def test_place_list_without_unit_is_not_a_responder_list(self):
+        result = review_locations('', 'A bajnai és a nyergesújfalui házak közelében.', '', load_hungarian_places())
+        self.assertTrue(result.mentions)
+        self.assertFalse(any(h.kind.startswith('responder') for m in result.mentions for h in m.context_hints))

@@ -28,7 +28,7 @@ class ContextHint:
 
 # Narrow lexical clues only. Unknown context is never promoted to event location.
 _COUNTY = re.compile(r"(?<!\w)\w+(?:[-–]\w+)*\s+(?:vár)?megy(?:e(?:i)?|ében|éből|ének)(?!\w)", re.IGNORECASE)
-_RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)", re.IGNORECASE)
+_RESPONDER = re.compile(r"\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?(?:tűzoltók(?:at)?|tűzoltóság|egység|egységek(?:et)?)(?!\w)", re.IGNORECASE)
 
 
 # Explicit street suffix only; retain the mention and original evidence.
@@ -142,7 +142,7 @@ def review_locations(title: str, description: str, source_url: str,
         modifier = r'(?:[ \t]+(?:hivatásos|önkéntes|önkormányzati))?'
         member = name + r'(?!\w)' + modifier
         separator = r'(?:[ \t]*,[ \t]*(?:(?:és|illetve|valamint)[ \t]+)?|[ \t]+(?:és|illetve|valamint)[ \t]+)(?:(?:a|az)[ \t]+)?'
-        noun = r'[ \t]+(?:tűzoltók(?:at)?|tűzoltóság|egységek(?:et)?)(?!\w)'
+        noun = r'[ \t]+(?:tűzoltók(?:at)?|tűzoltóság|egység|egységek(?:et)?)(?!\w)'
         list_pattern = re.compile(r'(?<!\w)' + member + '(?:' + separator + member
                                   + r'){1,7}' + noun, re.IGNORECASE)
     mentions = []
