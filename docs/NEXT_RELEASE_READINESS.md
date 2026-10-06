@@ -51,6 +51,13 @@ continuity. See [0.35.1 notes](RELEASE_0_35_1.md).
 - #133 updates English/Hungarian onboarding and card installation documentation
   for bundled resources. These instructions are available on the main branch.
 
+## Prepared 0.36.0 candidate
+
+See [candidate notes](RELEASE_0_36_0.md). Includes #132 source guidance, #135/#137
+visual map editing and binding status, #136 offline BM fixes, and updated onboarding.
+The exact release candidate must pass the full CI gates before publication.
+Preparing or merging this candidate does not publish a release or restart HA.
+
 ## Remaining work
 
 - [Public onboarding acceptance](ONBOARDING_ACCEPTANCE.md): distinguish delivered
