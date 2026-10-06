@@ -72,8 +72,9 @@ notification. [Notification behavior](ALERT_RADII.md#event-semantics).
 You have checked the place, both radii and source health; the map opens; and the
 notification automation uses the intended phone and language. An optional summary
 shows the same place. HACS updates the integration and bundled card files. Restart HA after an update
-and fully reload the browser or Companion App frontend. Resource URLs stay the
-same; imported blueprints still need their own update steps. Satellite notices supplement
+and fully reload the browser or Companion App frontend. Resource paths stay the
+same; if old code persists, use the [version-query recovery](CARD_RESOURCES.md#later-updates-and-rollback).
+Imported blueprints still need their own update steps. Satellite notices supplement
 awareness and do not replace official emergency warnings.
 
 ## Magyar
@@ -139,5 +140,7 @@ A beállítás kész, ha a helyszín, a két sugár és a forrásállapot ellen�
 a térkép megnyílik, az automatizálás pedig a kívánt telefonra és nyelvre van állítva.
 A HACS az integrációt és a csomagolt kártyafájlokat is frissíti. Frissítés után
 indítsd újra a HA-t, majd töltsd újra teljesen a böngészőt vagy a Companion App
-felületét. Az erőforráscímek maradnak; az importált blueprint továbbra is külön frissül.
+felületét. Az erőforrások útvonala marad; régi megjelenés esetén kövesd a
+[verziójelöléses frissítés lépéseit](CARD_RESOURCES.md#magyar-egyszeri-átállás).
+Az importált blueprint továbbra is külön frissül.
 Az IGNIS értesítése nem helyettesíti a hivatalos hatósági figyelmeztetést.

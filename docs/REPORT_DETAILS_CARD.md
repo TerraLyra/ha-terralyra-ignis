@@ -24,7 +24,8 @@ On IGNIS 0.35.0+, register `/terralyra_ignis/cards/ignis-report-map.js` once as 
 JavaScript module in Dashboard resources. HACS delivers the matching card file.
 When migrating an existing local resource, edit that entry instead of adding a
 second one. Keep existing map settings. After updates, restart HA and fully reload
-the browser or Companion App frontend; the resource URL stays unchanged.
+the browser or Companion App frontend; the resource path stays unchanged. If old code persists, update the existing
+resource version query as described in [resource recovery](CARD_RESOURCES.md#later-updates-and-rollback).
 Older-version installation and rollback are covered in [resource setup](CARD_RESOURCES.md).
 
 ### Visual editor (0.36.0 candidate)

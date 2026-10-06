@@ -32,9 +32,23 @@ no files, resource entries, automations or history are deleted automatically.
 
 HACS now brings the matching card files with the integration. After an update,
 restart HA at a suitable time, then reload each browser/Companion App frontend.
-The stable URLs do not need a version query update. Already-open pages keep their
-loaded JavaScript until reloaded. HTTP serving disables long-lived cache headers.
+The resource paths remain stable, but browsers can retain older card code even
+after a normal reload. HTTP serving disables long-lived cache headers; this does
+not guarantee that every frontend discards its previously loaded resource.
 Blueprints remain separately imported and are not overwritten.
+
+If the installed integration version is correct but a card still shows the old
+interface, edit that card's **existing** resource URL to append or replace a
+version query, for example:
+
+- `/terralyra_ignis/cards/ignis-location-summary.js?v=0.36.0`
+- `/terralyra_ignis/cards/ignis-report-map.js?v=0.36.0`
+
+Use the installed release version. Keep the JavaScript module type and only one
+resource entry per card, then fully reload each browser or Companion App frontend.
+The query forces a new resource URL; it does not select or install a different
+integration version. No additional HA restart, file deletion or history reset is
+needed for this resource-only correction.
 
 If rolling back to 0.34.1 or earlier, restore the previous `/local/...` resource
 URLs and matching local files, then reload. Those releases do not serve bundled URLs.
@@ -51,6 +65,10 @@ A dashboard és a helyszínek beállításai maradnak. Ezután töltsd újra a b
 
 A következő HACS-frissítések már a kártyafájlokat is hozzák; a HA újraindítása
 után a böngészőt vagy a mobilalkalmazás felületét is újra kell tölteni.
+Ha újratöltés után is a régi kártya látszik, a meglévő erőforráscímhez adj hozzá
+verziójelölést, például `?v=0.36.0`, vagy cseréld a korábbi jelölést a telepített
+verzióra. Maradjon egy bejegyzés kártyánként, JavaScript-modul típussal, majd töltsd
+újra a felületet. Ez nem telepít más verziót és nem igényel újabb HA-újraindítást.
 A blueprint továbbra is külön importálható. A régi helyi fájlokat nem töröljük.
 0.34.1-re vagy korábbira visszaálláskor a régi erőforráscímet is vissza kell állítani.
 
