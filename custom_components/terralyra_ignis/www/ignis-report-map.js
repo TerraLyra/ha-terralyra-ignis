@@ -7,6 +7,13 @@ export function visibleMapSources(states = {}, switches = {}) {
     return [source, typeof id === 'string' && id.startsWith('switch.') && states[id]?.state === 'on'];
   }))};
 }
+export function mapBindingStatus(states, id) {
+  if(!id)return 'unbound';
+  if(typeof id!=='string'||!id.startsWith('switch.'))return 'invalid';
+  if(!states)return 'loading';
+  if(!states[id])return 'missing';
+  return ['on','off'].includes(states[id].state)?states[id].state:'unavailable';
+}
 const WORDS = {
   en: {close:'Close', details:'Home Assistant details', source:'Source information',
     absent:'No incident text has been loaded for this report.',
@@ -149,11 +156,34 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     set hass(value){
       this._hass=value;
       const signature=JSON.stringify([value?.language,this.choices()]);
-      if(signature!==this.signature){this.signature=signature;this.render();}
+      if(signature!==this.signature){this.signature=signature;this.render();}else this.renderStatus();
     }
     choices(){return Object.entries(this._hass?.states||{}).filter(([id])=>id.startsWith('switch.')).map(([id,state])=>[id,String(state.attributes?.friendly_name||id)]).sort((a,b)=>a[1].localeCompare(b[1]));}
     node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
-    update(patch){this.config={...this.config,...patch};this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:this.config},bubbles:true,composed:true}));}
+    update(patch){this.config={...this.config,...patch};this.renderStatus();this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:this.config},bubbles:true,composed:true}));}
+    renderStatus(){
+      if(!this.statusHost)return;
+      const hu=this._hass?.language?.startsWith('hu');
+      const messages=hu?{
+        unbound:'Nincs hozzárendelés; a riportvezérlő rejtve marad.',
+        invalid:'Kapcsolóentitást válassz; a jelenlegi hozzárendelés nem használható.',
+        loading:'Várakozás a Home Assistant állapotadataira.',
+        missing:'A hozzárendelt kapcsoló nem található. Ellenőrizd a kiválasztást.',
+        unavailable:'A kapcsoló állapota nem elérhető; a riportvezérlő rejtve marad.',
+        off:'A térképkapcsoló ki van kapcsolva; a riportvezérlő rejtve marad.',
+        on:'A térképkapcsoló be van kapcsolva. Ez nem igazolja friss riportok meglétét.'
+      }:{
+        unbound:'No binding; the report control stays hidden.',
+        invalid:'Select a switch entity; the current binding cannot be used.',
+        loading:'Waiting for Home Assistant state data.',
+        missing:'The bound switch was not found. Check the selection.',
+        unavailable:'Switch state unavailable; the report control stays hidden.',
+        off:'The map switch is off; the report control stays hidden.',
+        on:'The map switch is on. This does not establish that fresh reports exist.'
+      };
+      this.statusHost.replaceChildren(this.node('h3',hu?'Hozzárendelések állapota':'Binding status'));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source])]));
+    }
     render(){
       if(!this.config)return;
       if(!this.shadowRoot)this.attachShadow({mode:'open'});
@@ -171,6 +201,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Jelenleg nem elérhető: ':'Currently unavailable: ')+current);option.value=current;select.append(option);}
         select.value=current;select.onchange=()=>{const bindings={...this.config.report_switches};if(select.value)bindings[source]=select.value;else delete bindings[source];this.update({report_switches:bindings});};label.append(select);root.append(label);
       }
+      this.statusHost=this.node('section');this.statusHost.setAttribute('aria-live','polite');root.append(this.statusHost);this.renderStatus();
       root.append(this.node('p',hu?'A hozzárendelés nélküli vagy kikapcsolt riportforrás vezérlője rejtve marad. A helyszínkörök és egyéb haladó térképbeállítások a kódszerkesztőben módosíthatók; a meglévő értékeket megőrizzük.':'Report controls stay hidden without a binding or when their switch is off. Location circles and other advanced map options remain available in the code editor; existing values are preserved.'));
     }
   }

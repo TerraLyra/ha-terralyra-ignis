@@ -41,6 +41,10 @@ Existing map entities, zoom and other advanced options are preserved. Edit those
 in the code editor. The editor uses Hungarian for a Hungarian HA language and
 English otherwise. The initial card makes no automatic report-switch selection.
 
+The binding-status summary distinguishes unbound, invalid, loading, missing,
+unavailable, off and on switches. An on switch does not establish fresh reports.
+State updates refresh this summary without replacing a title being typed.
+
 On a duplicate card, retain all existing map settings and change only:
 
 ```yaml
