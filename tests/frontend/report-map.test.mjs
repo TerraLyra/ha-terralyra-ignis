@@ -122,3 +122,13 @@ test('success and unknown retrieval states never invent retention or freshness',
     assert.doesNotMatch(view.label,/Successful/);
   }
 });
+
+const {mapBindingStatus}=await import('../../frontend/ignis-report-map.js');
+test('binding readiness distinguishes absent, loading, missing and unavailable states',()=>{
+ assert.equal(mapBindingStatus(undefined,''),'unbound');
+ assert.equal(mapBindingStatus({},'sensor.other'),'invalid');
+ assert.equal(mapBindingStatus(undefined,'switch.test'),'loading');
+ assert.equal(mapBindingStatus({},'switch.test'),'missing');
+ for(const state of ['on','off'])assert.equal(mapBindingStatus({'switch.test':{state}},'switch.test'),state);
+ for(const state of ['unknown','unavailable','unexpected'])assert.equal(mapBindingStatus({'switch.test':{state}},'switch.test'),'unavailable');
+});
