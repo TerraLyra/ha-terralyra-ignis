@@ -46,8 +46,8 @@ Latest stable release: **0.35.1**, with small decorative icons on the optional
 location summary card. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
 and [0.35.1 release notes](docs/RELEASE_0_35_1.md).
 
-The **0.36.0 candidate** adds a visual report-map editor, binding-status feedback
-and summary source guidance. See [candidate notes](docs/RELEASE_0_36_0.md).
+The **0.36.0 release** adds a visual report-map editor, binding-status feedback
+and summary source guidance. See [release notes](docs/RELEASE_0_36_0.md).
 
 Since **0.35.0**, optional cards are bundled for HACS updates after a one-time
 [resource migration](docs/CARD_RESOURCES.md). Blueprints remain separately

@@ -44,19 +44,23 @@ read-only dashboard check found location summaries and forecasts rendering.
 This does not independently verify every icon, notification delivery or history
 continuity. See [0.35.1 notes](RELEASE_0_35_1.md).
 
-## Main branch after 0.35.1
+## Published 0.36.0
 
-- #132 adds actionable source-state guidance to the summary card. This is merged
-  but not included in the published 0.35.1 package.
-- #133 updates English/Hungarian onboarding and card installation documentation
-  for bundled resources. These instructions are available on the main branch.
+Stable [v0.36.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.36.0)
+was published from `bdcf628db109195928b646a843658b1c1b977456`.
+The merged tree matched the candidate that passed all 27 checks.
+See [release notes](RELEASE_0_36_0.md). Includes source guidance, visual map editing
+and binding status, offline BM fixes, and updated onboarding.
 
-## Prepared 0.36.0 candidate
+After the user confirmed update and restart, the integration page showed 0.36.0.
+The bundled summary JavaScript matched the released file, but the browser retained
+older card code. Updating the two existing summary/map resource URLs with
+`?v=0.36.0` and reloading the dashboard made the new delayed-source guidance
+visible in both sampled location summaries. No additional HA restart was needed.
+See [browser cache recovery](CARD_RESOURCES.md).
 
-See [candidate notes](RELEASE_0_36_0.md). Includes #132 source guidance, #135/#137
-visual map editing and binding status, #136 offline BM fixes, and updated onboarding.
-The exact release candidate must pass the full CI gates before publication.
-Preparing or merging this candidate does not publish a release or restart HA.
+This is a sampled live check, not clean-install acceptance or verification of every
+editor interaction, notification delivery, language or history continuity.
 
 ## Remaining work
 
