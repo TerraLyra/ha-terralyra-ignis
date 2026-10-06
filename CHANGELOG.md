@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.36.0
+
+- Add a Hungarian/English visual report-map editor for the title and explicit Canada/NIFC map-switch bindings.
+- Explain missing, unavailable, disabled and enabled map bindings without toggling switches or inferring report freshness.
+- Add concise source-problem guidance to the Hungarian location summary.
+- Update onboarding for bundled cards and improve offline BM place/responder review.
+
+See [release notes](docs/RELEASE_0_36_0.md).
+
 ## 0.35.1
 
 - Add small decorative icons to the optional location summary card, keeping text labels and existing behavior.

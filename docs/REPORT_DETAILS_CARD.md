@@ -27,7 +27,7 @@ second one. Keep existing map settings. After updates, restart HA and fully relo
 the browser or Companion App frontend; the resource URL stays unchanged.
 Older-version installation and rollback are covered in [resource setup](CARD_RESOURCES.md).
 
-### Visual editor (main branch, not yet released)
+### Visual editor (0.36.0 candidate)
 
 Add **IGNIS report map** in the dashboard card picker. The visual editor supports
 an optional title and explicit Canada/NIFC map-switch bindings. Choose the IGNIS
