@@ -198,3 +198,17 @@ completion statement exists in the report, not that every fire is extinguished
 or that the current incident state is known. Object/verb association within a
 complex sentence and historical/quoted contexts remain limitations. Production
 use is still disabled; event timestamps and coordinates are not inferred.
+
+## Extinguishing context boundaries
+
+Completion phrases now require a fire/flames object in the same conservatively
+split clause. This rejects “Tűz van, a lámpát eloltották” and equivalent conjunction
+and semicolon variants. Negation/modal vetoes still apply to the whole sentence.
+Explicit historical markers produce historical evidence; quotation marks yield
+uncertain evidence, not a completion flag. This deliberately misses some valid
+quoted or coordinated statements rather than resolving them without evidence.
+
+A completion clause beside an ongoing-fire clause is retained as local evidence
+only; no global extinguished state exists. Date resolution, attribution and
+cross-sentence references remain unimplemented. Saved 92649/92648 replay retains
+the corrected results. New tests cover these boundaries without model downloads.

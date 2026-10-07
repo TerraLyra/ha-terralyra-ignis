@@ -21,3 +21,20 @@ class ExtinguishingTests(unittest.TestCase):
         r=reported_extinguishing('A tüzet eloltották. Máshol még ég a növényzet.')
         self.assertEqual(len(r),1)
         self.assertNotIn('Máshol',r[0]['evidence'])
+
+    def test_fire_in_other_clause_does_not_make_lamp_extinguishing_fire_completion(self):
+        for text in ['Tűz van, a lámpát eloltották.', 'Tűz van és a lámpát eloltották.',
+                     'A tüzet oltják; a lámpát eloltotta.']:
+            self.assertFalse(reported_extinguishing(text),text)
+
+    def test_historical_and_quoted_completion_are_separate(self):
+        self.assertEqual(reported_extinguishing('Tegnap eloltották a tüzet.')[0]['kind'],'historical_extinguishing')
+        self.assertEqual(reported_extinguishing('„Eloltották a tüzet” – mondta.')[0]['kind'],'uncertain_extinguishing')
+
+    def test_separate_clauses_retain_only_supported_completion(self):
+        text='A lángokat eloltották, de a melléképület még ég.'
+        r=reported_extinguishing(text)
+        self.assertEqual(len(r),1)
+        self.assertEqual(r[0]['kind'],'reported_extinguished')
+        self.assertNotIn('melléképület',r[0]['evidence'])
+        self.assertEqual(text[r[0]['start']:r[0]['end']],r[0]['evidence'])

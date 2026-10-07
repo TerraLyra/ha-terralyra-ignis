@@ -6,6 +6,9 @@ _DONE = re.compile(r'\b(?:eloltott(?:ák|ak|a)|elfojtott(?:ák|ak|a)|oltott(?:á
 _OBJECT = re.compile(r'\b(?:tüzet|tűz|lángokat|lángok|lángot)\b', re.I)
 _UNCERTAIN = re.compile(r'\b(?:nem|nincs|ne|ha|volna|talán|állítólag|próbált\w*|megpróbált\w*|gyakorlat\w*|teszt\w*)\b', re.I)
 
+_HISTORICAL = re.compile(r'\b(?:tegnap|korábban|tavaly|múlt[ \t]+(?:héten|hónapban|évben))\b', re.I)
+_CLAUSE = re.compile(r'[^,;]+?(?=[,;]|[ \t]+(?:de|azonban|viszont|és)[ \t]+|$)', re.I)
+
 
 def reported_extinguishing(text):
     result = []
@@ -15,10 +18,18 @@ def reported_extinguishing(text):
         part = sentence.group()
         if not _OBJECT.search(part):
             continue
-        for match in _DONE.finditer(part):
-            result.append(dict(kind='uncertain_extinguishing' if _UNCERTAIN.search(part)
-                               else 'reported_extinguished',
-                               start=sentence.start(),end=sentence.end(),evidence=part,
-                               verb_start=sentence.start()+match.start(),
-                               verb_end=sentence.start()+match.end()))
+        for clause in _CLAUSE.finditer(part):
+            value = clause.group()
+            if not _OBJECT.search(value):
+                continue
+            for match in _DONE.finditer(value):
+                uncertain = bool(_UNCERTAIN.search(part))
+                historical = bool(_HISTORICAL.search(part))
+                quoted = any(c in part for c in ('"', '„', '“', '”', '«', '»'))
+                kind = ('uncertain_extinguishing' if uncertain or quoted else
+                        'historical_extinguishing' if historical else 'reported_extinguished')
+                start = sentence.start()+clause.start()
+                result.append(dict(kind=kind,
+                                   start=start,end=sentence.start()+clause.end(),evidence=value,
+                                   verb_start=start+match.start(),verb_end=start+match.end()))
     return result
