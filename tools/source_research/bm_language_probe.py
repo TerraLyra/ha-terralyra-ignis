@@ -56,7 +56,7 @@ def main():
     print(json.dumps(dict(model=args.model, version=nlp.meta.get('version'),
                          license=nlp.meta.get('license'), spacy_version=spacy.__version__,
                          research_code_sha256={name:hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
-                            for name in ('bm_language_probe.py','bm_language_roles.py','bm_language_involvement.py')},
+                            for name in ('bm_language_probe.py','bm_language_roles.py','bm_language_involvement.py','bm_reported_extinguishing.py')},
                          input_sha256=hashlib.sha256(data).hexdigest(),
                          load_seconds=loaded-start, analysis_seconds=time.perf_counter()-loaded,
                          results=results), ensure_ascii=False, indent=2))

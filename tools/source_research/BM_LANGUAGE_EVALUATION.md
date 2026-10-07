@@ -182,3 +182,19 @@ The model remains experimental. Next priority is reliable verb/particle and
 negation handling for reported extinguishing, validated separately from fire
 involvement and location roles. Original output and manual expectations are
 retained under local-validation, outside tracked production artifacts.
+
+## Completed extinguishing phrases
+
+`bm_reported_extinguishing.py` adds a bounded surface-form fallback for finite
+past-tense extinguishing/containing-flames verbs, including separated `oltották el`.
+It requires a fire/flames object in the sentence and conservatively vetoes
+negation, conditional, attempt, hearsay and exercise markers. Original sentence
+and verb spans are retained. This avoids dependence on the observed incorrect
+`elfojtot` lemma, rather than patching the model's lemma dictionary.
+
+Replay of 92649 now detects the reported completion; 92648 remains without it.
+This is regression evidence, not another unseen result. The boolean means a
+completion statement exists in the report, not that every fire is extinguished
+or that the current incident state is known. Object/verb association within a
+complex sentence and historical/quoted contexts remain limitations. Production
+use is still disabled; event timestamps and coordinates are not inferred.

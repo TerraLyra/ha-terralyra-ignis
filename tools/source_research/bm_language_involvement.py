@@ -4,12 +4,12 @@ Uses NLP lemmas but preserves source spans. Unknown relations stay unknown.
 No production imports, network access or automatic report suppression.
 """
 import re
+from bm_reported_extinguishing import reported_extinguishing
 
 _CATEGORIES = {'vegetation': {'aljnövényzet','növényzet','fű','erdő','bozót','avar','tarló'},
                'building': {'épület','melléképület','tanyaépület','ház','lakás','tároló'},
                'vehicle': {'autó','gépkocsi','jármű','kamion','kisbusz'}}
 _BURN = {'ég','égett','kigyullad','gyullad','lángol'}
-_EXTINGUISHED = {'elfojt','elolt'}
 
 
 def review_involvement(analysis):
@@ -42,8 +42,7 @@ def review_involvement(analysis):
                 add('involved_candidate', category)
             else:
                 add('unknown', category)
-        if lemmas & _EXTINGUISHED and lemmas & {'láng','tűz'}:
-            add('uncertain_extinguishing' if negative or uncertain else 'reported_extinguished')
+    evidence.extend(dict(category=None, **e) for e in reported_extinguishing(text))
     involved = sorted({e['category'] for e in evidence if e['kind']=='involved_candidate'})
     return dict(involvement=involved,
                 threatened=sorted({e['category'] for e in evidence if e['kind']=='threatened'}),
