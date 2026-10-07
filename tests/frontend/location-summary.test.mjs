@@ -94,3 +94,13 @@ test('source guidance prioritizes authentication and failed retrieval over cache
  assert.match(sourceGuidance({status:'initializing'}),/első lekérés/);
  for(const source of [null,{}, {status:'available'}, {status:'future_status'}])assert.equal(sourceGuidance(source),'');
 });
+
+const {setupReview}=await import('../../frontend/ignis-location-summary.js');
+test('setup review never claims notifications are configured and respects identity',()=>{
+ assert.equal(setupReview(entity,'wrong').length,1);
+ const configured={...entity,attributes:{...entity.attributes,monitoring_radius_km:100,alert_radius_km:100}};
+ assert.match(setupReview(configured,'ca').join(' '),/Megfigyelés: 100 km/);
+ assert.match(setupReview(configured,'ca').join(' '),/nem ellenőrzi/);
+ assert.match(setupReview({...configured,state:'unavailable'},'ca').join(' '),/adatellátás jelenleg nem ellenőrizhető/);
+ for(const alert_radius_km of [101,0,-1,'50',NaN])assert.match(setupReview({...configured,attributes:{...configured.attributes,alert_radius_km}},'ca')[1],/Ellenőrizd/);
+});

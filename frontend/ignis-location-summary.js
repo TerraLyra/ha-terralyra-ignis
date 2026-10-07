@@ -57,17 +57,36 @@ export function locationChoices(states={}) {
       name:String(state.attributes.location_name||state.attributes.friendly_name||entity)}))
     .sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
 }
+// Setup review is descriptive: it cannot inspect notification automation delivery.
+export function setupReview(entity, locationId) {
+  const a=entity?.attributes;
+  if(!a || a.location_id!==locationId)return ['A helyszín hozzárendelése még nem ellenőrizhető.'];
+  const valid=Number.isFinite(a.monitoring_radius_km)&&Number.isFinite(a.alert_radius_km)&&a.alert_radius_km>0&&a.alert_radius_km<=a.monitoring_radius_km;
+  return [
+    `Helyszín: ${a.location_name||locationId}`,
+    valid?`Megfigyelés: ${a.monitoring_radius_km} km · Riasztás: ${a.alert_radius_km} km`:'Ellenőrizd a sugarakat az IGNIS beállításaiban: a riasztási sugár legyen pozitív és legfeljebb a megfigyelési sugár.',
+    ['unknown','unavailable'].includes(entity.state)?'Az adatellátás jelenleg nem ellenőrizhető.':(statusLabels[a.operational_status]||'Ismeretlen adatellátás'),
+    'Telefonos értesítés: külön blueprint és értesítési cél szükséges. A kártya nem ellenőrzi a meglévő automatizálást vagy a kézbesítést.'
+  ];
+}
 class IgnisLocationSummaryEditor extends HTMLElement {
   setConfig(config){this.config={...config};this.render();}
   set hass(value){
     this._hass=value;
     const signature=JSON.stringify(locationChoices(value?.states));
     if(signature!==this._choicesSignature){this._choicesSignature=signature;this.render();}
+    else this.refreshReview();
   }
   node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);return n;}
   update(patch){
     this.config={...this.config,...patch};
+    this.refreshReview();
     this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
+  }
+  refreshReview(){
+    if(!this.reviewHost||!this.config)return;
+    this.reviewHost.replaceChildren(this.node('h3','Beállítások áttekintése'));
+    for(const text of setupReview(this._hass?.states?.[this.config.entity],this.config.location_id))this.reviewHost.append(this.node('p',text));
   }
   render(){
     if(!this.config)return;
@@ -92,6 +111,8 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     root.append(this.node('p','A helyszínazonosítót a kiválasztott érzékelőből vesszük át. A sugarakat az IGNIS beállításaiban módosíthatod.'));
     const titleLabel=this.node('label','Egyéni cím (nem kötelező)'),title=this.node('input');title.type='text';title.value=this.config.title||'';title.setAttribute('aria-label','Egyéni cím (nem kötelező)');
     title.onchange=()=>this.update({title:title.value});titleLabel.append(title);root.append(titleLabel);
+    const review=this.node('section');review.setAttribute('aria-label','Beállítások áttekintése');this.reviewHost=review;this.refreshReview();
+    root.append(review);
     root.append(this.node('p','Az opcionális előrejelzés hozzárendelését a kódszerkesztőben állíthatod be. A meglévő hozzárendelés megmarad; helyszínváltás után ellenőrizd, hogy az új helyszínhez tartozik-e.'));
   }
 }
