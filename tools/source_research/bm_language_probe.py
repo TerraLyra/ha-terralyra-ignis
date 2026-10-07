@@ -48,15 +48,17 @@ def main():
         from bm_hu_gazetteer import load_review_places
         from bm_language_roles import annotate_roles
         from bm_language_involvement import review_involvement
+        from bm_event_town_adapter import event_town_evidence
         places = load_review_places()
         for result in results:
             for field in ('title', 'description'):
                 result[field]['role_review'] = annotate_roles(result[field], places)
                 result[field]['fire_review'] = review_involvement(result[field])
+            result['satellite_context_evidence'] = event_town_evidence(result, places)
     print(json.dumps(dict(model=args.model, version=nlp.meta.get('version'),
                          license=nlp.meta.get('license'), spacy_version=spacy.__version__,
                          research_code_sha256={name:hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
-                            for name in ('bm_language_probe.py','bm_language_roles.py','bm_language_involvement.py','bm_reported_extinguishing.py')},
+                            for name in ('bm_language_probe.py','bm_language_roles.py','bm_language_involvement.py','bm_reported_extinguishing.py','bm_event_town_adapter.py')},
                          input_sha256=hashlib.sha256(data).hexdigest(),
                          load_seconds=loaded-start, analysis_seconds=time.perf_counter()-loaded,
                          results=results), ensure_ascii=False, indent=2))

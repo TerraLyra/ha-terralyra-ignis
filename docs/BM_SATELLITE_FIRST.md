@@ -48,3 +48,17 @@ The extraction adapter must still establish event-role IDs rather than passing
 all mentioned towns. That adapter and frontend display are not yet connected;
 this function alone does not enable automatic production links. Existing manual
 links and satellite history remain unchanged.
+
+## Experimental evidence adapter
+
+The offline NLP probe now emits `satellite_context_evidence` via
+`bm_event_town_adapter`. It requires an unambiguous gazetteer ID, a locative or
+near-town construction inside positive fire evidence, and no conflicting
+responder/organization/direction/street/negation/corridor role. Unknown mentions
+alone are insufficient. Original mention and fire-clause evidence are retained.
+
+Saved 92649 replay passes Hejőbába (not the responding town); 92648 rail accident
+produces no fire-place evidence. This is a regression check, not a new holdout.
+The adapter does not derive coordinates or create incidents. Multi-town corridors
+remain unlinked rather than being reduced to either endpoint. Runtime source
+fetching, compatible satellite gazetteer IDs and display wiring remain pending.
