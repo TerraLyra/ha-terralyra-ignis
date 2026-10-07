@@ -86,3 +86,36 @@ distinguished. However, “elfojtották” was lemmatized as “elfojtot”; ext
 was missed. Do not count idealized-lemma unit tests as model accuracy. Wider
 negation/modal scope, cross-clause references, separated verb particles and
 unseen reports remain unvalidated. This module is not a production classifier.
+
+## Frozen unseen-sample probe, 2026-10-07
+
+Evaluated commit 728d603 against six newly retrieved RSS notices 92638–92643.
+Manual expectations were written before inspecting model predictions. No role,
+lemma or fire rule was changed on the basis of this batch. The corpus is now
+seen and cannot remain a holdout if subsequently used for development.
+
+Across the six records, all eight expected event-place names were present in the
+hybrid mentions (seven in the baseline). This is name coverage, NOT event-role
+accuracy or verified incident geography. Kecskemétnél accounts for the difference.
+Between-town corridors remain unresolved geography, not town-centre coordinates.
+
+Only three of nine annotated municipality responder targets received responder
+hints. All six targets in the long Szeged–Algyő notice were missed as responders;
+several names were recognized but remained unknown. The current list grammar and
+adjective/gazetteer linkage are inadequate. Rózsadomb was additionally proposed
+as a responder district, which the municipality-target annotation did not cover.
+
+Union of title/description fire categories matched the manual category sets in
+these six cases (two fire notices, four accidents). Empty category output does
+not confirm absence of fire, and these notices do not validate mixed-fire,
+threatened-building or extinguishing behavior. The Budapest building category
+came from the title; the body was missed.
+
+Decision: keep experimental. Next research should use dependency/clause structure
+for shared-noun responder coordination, preserve unmatched list members, and
+explicitly model geographic corridors. Freeze this batch as a regression corpus
+if used for tuning; collect a new holdout afterward. Do not present a general
+accuracy percentage or integrate this model into HA on these results.
+
+`bm_language_score.py GOLD PROBE` reproduces the bounded comparison. Raw RSS,
+manual labels and model outputs are retained locally, not packaged with IGNIS.
