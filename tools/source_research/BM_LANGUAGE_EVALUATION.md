@@ -73,3 +73,16 @@ negation/direction hints. Nagylókon remains missed in one synthetic description
 because the model leaves its lemma inflected. These are development observations,
 not holdout accuracy. Fire involvement/state classification is still pending.
 No production module imports the optional NLP model or role annotator.
+
+## Experimental involvement evidence
+
+The `--roles` probe also emits clause-local `fire_review` hints: multiple object
+categories, threatened objects and reported extinguishing. Evidence spans remain
+available. Neither active nor extinguished *current* status is asserted.
+
+On the synthetic development pair, HuSpaCy lemmas allowed vegetation+building
+spread and vegetation-only burning with a threatened/non-ignited building to be
+distinguished. However, “elfojtották” was lemmatized as “elfojtot”; extinguishing
+was missed. Do not count idealized-lemma unit tests as model accuracy. Wider
+negation/modal scope, cross-clause references, separated verb particles and
+unseen reports remain unvalidated. This module is not a production classifier.

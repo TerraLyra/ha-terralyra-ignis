@@ -47,10 +47,12 @@ def main():
     if args.roles:
         from bm_hu_gazetteer import load_review_places
         from bm_language_roles import annotate_roles
+        from bm_language_involvement import review_involvement
         places = load_review_places()
         for result in results:
             for field in ('title', 'description'):
                 result[field]['role_review'] = annotate_roles(result[field], places)
+                result[field]['fire_review'] = review_involvement(result[field])
     print(json.dumps(dict(model=args.model, version=nlp.meta.get('version'),
                          license=nlp.meta.get('license'), input_sha256=hashlib.sha256(data).hexdigest(),
                          load_seconds=loaded-start, analysis_seconds=time.perf_counter()-loaded,
