@@ -561,6 +561,10 @@
           "description": "Konfigurationseintrag, dessen gespeicherte LSA-SAF-Zugangsdaten verwendet werden."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Zugehörige BM-Meldungen",
+      "description": "Wahrscheinlich zugehörige BM-Meldungen zu einer Satellitenbeobachtung im lokalen Archiv suchen."
     }
   }
 }

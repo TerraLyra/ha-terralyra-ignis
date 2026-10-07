@@ -561,6 +561,10 @@
           "description": "Az a konfigurációs bejegyzés, amelynek mentett LSA SAF hozzáférését az ellenőrzés használja."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Kapcsolódó BM-hírek",
+      "description": "Valószínűleg kapcsolódó BM-hírek keresése meglévő műholdas észleléshez a helyi archívumban."
     }
   }
 }

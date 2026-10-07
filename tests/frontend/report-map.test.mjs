@@ -132,3 +132,10 @@ test('binding readiness distinguishes absent, loading, missing and unavailable s
  for(const state of ['on','off'])assert.equal(mapBindingStatus({'switch.test':{state}},'switch.test'),state);
  for(const state of ['unknown','unavailable','unexpected'])assert.equal(mapBindingStatus({'switch.test':{state}},'switch.test'),'unavailable');
 });
+
+test('satellite context requires explicit integration and incident identities',async()=>{
+  const {satelliteContextRequest}=await import('../../frontend/ignis-report-map.js');
+  assert.equal(satelliteContextRequest(state),null);
+  assert.equal(satelliteContextRequest({attributes:{source:'terralyra_ignis'}}),null);
+  assert.deepEqual(satelliteContextRequest({attributes:{source:'terralyra_ignis',context_entry_id:'entry',context_incident_id:'family'}}),{config_entry_id:'entry',incident_id:'family'});
+});

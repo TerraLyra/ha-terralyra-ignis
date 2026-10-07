@@ -104,3 +104,23 @@ The optional model remains a development-only comparison tool. The experimental
 NLP adapter is not a runtime dependency; a lightweight evidence adapter is still
 required before automatic display can be enabled. Context matching itself does
 not require a model.
+
+## Model-free implementation and closure scope
+
+The runtime implementation now uses `bm_lightweight`: locative/near-town phrases
+in an affirmative fire clause, with conservative rejection of negation, exercise
+text, responder clauses, homonyms and truncated notices. It deliberately leaves
+unrecognized phrasing unmatched rather than growing a general language system.
+
+`get_satellite_report_context` resolves the bounded satellite population against
+the existing gazetteers in an executor, then matches up to the newest 100 locally
+archived notices. It uses a read-only archive snapshot; no feed/article requests,
+archive expiry writes, manual-link updates or incident creation are performed.
+The report-map card requests this context on satellite selection and displays the
+original RSS description with probable association, source and publication time.
+Multiple satellite candidates are disclosed. Native HA details remain accessible.
+
+Closure scope is this satellite-first context feature. Expanding language coverage,
+new geographic datasets and comprehensive NLP are deferred. Local pure Python,
+frontend contract and browser tests cover the implementation; a full HA service
+integration check and release review are still required before deployment.

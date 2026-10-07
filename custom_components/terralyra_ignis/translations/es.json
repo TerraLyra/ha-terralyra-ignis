@@ -561,6 +561,10 @@
           "description": "Entrada de configuración cuyas credenciales LSA SAF guardadas se utilizan."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Noticias BM relacionadas",
+      "description": "Buscar noticias BM probablemente relacionadas con una observación satelital en el archivo local."
     }
   }
 }

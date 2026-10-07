@@ -43,6 +43,25 @@ class ReportArchive:
         self._lock = asyncio.Lock()
         self._records = None
 
+    async def async_snapshot(self) -> list[dict]:
+        """Read validated notices without saving, expiring or deleting records."""
+        async with self._lock:
+            records = self._records
+            if records is None:
+                saved = await self._store.async_load()
+                records = saved.get("notices", []) if isinstance(saved, dict) else []
+            if not isinstance(records, list):
+                return []
+            now = datetime.now(UTC)
+            result = {}
+            for raw in records[:MAX_RECORDS]:
+                try:
+                    record = clean_record(raw, now)
+                except (KeyError, TypeError, ValueError, OverflowError):
+                    continue
+                result[record["url"]] = record
+            return sorted(result.values(), key=lambda n: (n["published_at"], n["url"]), reverse=True)
+
     async def async_merge(self, notices=(), *, origin="rss") -> list[dict]:
         async with self._lock:
             now = datetime.now(UTC)
