@@ -77,8 +77,11 @@ These 151 records remain unresolved. No network lookup or database replacement i
 performed. A nearest settlement is still not proof that a detection falls inside
 that municipality; the context relationship remains heuristic.
 
-Runtime geocoding currently discards the selected settlement centre and country
-before exposing PlaceInfo. Passing that provenance through, applying the bridge,
-and connecting the BM evidence adapter remain necessary before automatic display.
-The offline bridge is not enabled in HA. The research suite passes 128 checks;
+Runtime geocoding now exposes the selected settlement centre, country and distance
+in optional PlaceInfo fields. Existing three/four-argument callers remain valid.
+An isolated replay of the actual async resolver checks the shared-record bridge
+with the packaged databases and an offset observation. Persisting that provenance,
+applying the bridge in the coordinator and connecting the BM evidence adapter
+remain necessary before automatic display.
+The offline bridge is not enabled in HA. The research suite passes 129 checks;
 these cover contracts/regressions, not calibrated matching accuracy.
