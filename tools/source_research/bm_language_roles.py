@@ -6,7 +6,24 @@ mentions. Gazetteer matching by lemma is not geographic verification.
 import re
 
 _RESPONDER = r'(?:tűzoltó(?:k|kat|i|it|inak|ság(?:a|ai|ának|át|ról|ból|hoz)?)?|egység(?:ek|ei|e|et|ét)?)'
-_CONNECTORS = re.compile(r'^(?:\s|,|és\b|a\b|az\b|valamint\b|illetve\b|hivatásos\b|önkéntes\b|önkormányzati\b)*$', re.I)
+
+
+# Parse the list before linking its members to the gazetteer. Unlinked words
+# remain surface evidence, not invented municipalities or coordinates.
+_MODIFIER = r'(?:hivatásos|önkéntes|önkormányzati|létesítményi)'
+_MEMBER = r'(?<!\w)(?!' + _MODIFIER + r'\b)[^\W\d_]+i\b'
+_SEPARATOR = r'(?:[ \t]*,[ \t]*(?:(?:és|valamint|illetve)[ \t]+)?|[ \t]+(?:és|valamint|illetve)[ \t]+)(?:(?:a|az)[ \t]+)?'
+_LIST = re.compile(r'(?<!\w)' + _MEMBER + r'(?:[ \t]+' + _MODIFIER + r')?(?:' + _SEPARATOR + _MEMBER + r'(?:[ \t]+' + _MODIFIER + r')?){1,15}[ \t]+' + _RESPONDER + r'\b', re.I)
+
+
+def responder_lists(text):
+    result = []
+    for match in _LIST.finditer(text):
+        members = [dict(start=match.start()+m.start(), end=match.start()+m.end(),
+                        evidence=m.group()) for m in re.finditer(_MEMBER, match.group(), re.I)
+                   if m.group().casefold() not in {'tűzoltói'}]
+        result.append(dict(start=match.start(), end=match.end(), evidence=match.group(), members=members))
+    return result
 
 
 def annotate_roles(analysis, settlements):
@@ -28,25 +45,26 @@ def annotate_roles(analysis, settlements):
             mentions.append(dict(start=start, end=end, evidence=text[start:end],
                                  settlements=sorted(matches or adjective),
                                  linkage='lemma_or_exact' if matches else 'adjective_candidate', roles=[]))
-    for index, mention in enumerate(mentions):
+    groups = responder_lists(text)
+    linked_spans = {(m['start'], m['end']) for m in mentions}
+    for group in groups:
+        for member in group['members']:
+            if (member['start'], member['end']) not in linked_spans:
+                mentions.append(dict(**member, settlements=[], linkage='unlinked_responder_member', roles=[]))
+                linked_spans.add((member['start'], member['end']))
+    mentions.sort(key=lambda m:m['start'])
+    for mention in mentions:
         start, end = mention['start'], mention['end']
         roles = mention['roles']
         def evidence(role, a, b):
             roles.append(dict(role=role, start=a, end=b, evidence=text[a:b]))
+        for group in groups:
+            if any(m['start']==start and m['end']==end for m in group['members']):
+                evidence('responder', group['start'], group['end'])
         following = text[end:]
         responder = re.match(r'\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?'+_RESPONDER+r'\b', following, re.I)
         if responder:
             evidence('responder', start, end+responder.end())
-        # Recognize a bounded shared-noun list, but never cross sentences.
-        cursor = end
-        for later in mentions[index+1:index+9]:
-            if not _CONNECTORS.fullmatch(text[cursor:later['start']]):
-                break
-            cursor = later['end']
-            tail = re.match(r'\s+(?:(?:hivatásos|önkéntes|önkormányzati)\s+)?'+_RESPONDER+r'\b', text[cursor:], re.I)
-            if tail:
-                evidence('responder', start, cursor+tail.end())
-                break
         for entity in analysis['entities']:
             if entity['label']=='ORG' and entity['start']<=start and end<=entity['end']:
                 evidence('organization', entity['start'], entity['end'])

@@ -39,3 +39,21 @@ class RolesTests(unittest.TestCase):
     def test_fire_engine_is_not_a_firefighter_organization(self):
         r=review('Dabas tűzoltóautója ég.')
         self.assertEqual(r['mentions'][0]['roles'][0]['role'],'unknown')
+
+    def test_unknown_member_does_not_break_qualified_list(self):
+        text='A gyöngyösi, az ismeretlenfalvi létesítményi és a hatvani önkéntes tűzoltók dolgoznak.'
+        r=review(text)
+        self.assertEqual([m['evidence'] for m in r['mentions']],['gyöngyösi','ismeretlenfalvi','hatvani'])
+        self.assertTrue(all(any(h['role']=='responder' for h in m['roles']) for m in r['mentions']))
+        self.assertEqual(r['mentions'][1]['settlements'],[])
+        self.assertIsNone(r['event_location'])
+        for m in r['mentions']:
+            for h in m['roles']:
+                self.assertEqual(text[h['start']:h['end']],h['evidence'])
+
+    def test_shared_list_cannot_cross_sentence_or_nonresponder_noun(self):
+        for text in ['A gyöngyösi és hatvani házak égnek.',
+                     'A gyöngyösi házak égnek. A hatvani tűzoltók érkeztek.',
+                     'A gyöngyösi, a hatvani épület mellett tűzoltók állnak.']:
+            r=review(text)
+            self.assertEqual(r['mentions'][0]['roles'][0]['role'],'unknown')

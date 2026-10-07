@@ -119,3 +119,19 @@ accuracy percentage or integrate this model into HA on these results.
 
 `bm_language_score.py GOLD PROBE` reproduces the bounded comparison. Raw RSS,
 manual labels and model outputs are retained locally, not packaged with IGNIS.
+
+## Gazetteer-independent responder lists
+
+The former holdout is now explicitly development/regression material. The new
+bounded list grammar reads coordinated adjectival members and unit qualifiers
+before gazetteer linking. Unknown list members remain unlinked surface evidence;
+it does not invent a municipality. Sentence and non-responder-noun boundaries
+are negative cases. This is lexical list structure, not a complete dependency
+parser or general Hungarian morphology solution.
+
+Replaying the saved NLP output for 92641 identifies all six responder mentions;
+five link to gazetteer names, while sándorfalvi remains unlinked. Szeged and Algyő
+in the first sentence keep their separate unknown/event-candidate context.
+The replay reuses saved model tokens: no fresh model run or unseen validation
+is claimed. The temporary model environment was no longer present. A new unseen
+batch is required after this change before assessing generalization.
