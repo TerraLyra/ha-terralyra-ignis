@@ -39,3 +39,30 @@ class SatelliteContextTests(unittest.TestCase):
     def test_report_alone_cannot_create_incident(self):
         with self.assertRaises(ValueError):bm_reports_for_satellite('a',(),{},(self.report,))
         with self.assertRaises(ValueError):replace(self.report,published_at=self.now.replace(tzinfo=None))
+
+    def test_original_text_is_preserved_as_context(self):
+        report=replace(self.report,title='Eredeti cím',description='Eredeti szöveg <nem HTML>')
+        output=self.run_match(report)['reports'][0]
+        self.assertEqual(output['description'],report.description)
+        self.assertEqual(output['publisher'],'BM OKF')
+        self.assertEqual(output['association_method'],'automatic_town_time_heuristic')
+        with self.assertRaises(ValueError):replace(report,description='x'*6001)
+
+    def test_current_notice_adapter_rejects_stale_analysis(self):
+        from bm_event_town_adapter import report_from_current_notice
+        from test_bm_event_town_adapter import EventTownTests
+        from bm_location_candidates import Settlement
+        fields=EventTownTests().sample()
+        notice=dict(url=self.report.url,published_at=self.now.isoformat(),title=fields['title']['text'],description='')
+        report=report_from_current_notice(notice,fields,(Settlement('HU:1','Gyöngyös'),),BMTownReport)
+        self.assertEqual(self.run_match(report)['reports'][0]['relation'],'probable')
+        notice['description']='Új helyszínre javított szöveg'
+        with self.assertRaises(ValueError):
+            report_from_current_notice(notice,fields,(Settlement('HU:1','Gyöngyös'),),BMTownReport)
+
+    def test_truncated_notice_is_not_automatically_promoted(self):
+        from bm_event_town_adapter import report_from_current_notice
+        from test_bm_event_town_adapter import EventTownTests
+        fields=EventTownTests().sample()
+        notice=dict(url=self.report.url,published_at=self.now.isoformat(),title=fields['title']['text'],description='',description_status='truncated')
+        with self.assertRaises(ValueError):report_from_current_notice(notice,fields,(),BMTownReport)

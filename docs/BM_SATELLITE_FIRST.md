@@ -85,3 +85,17 @@ applying the bridge in the coordinator and connecting the BM evidence adapter
 remain necessary before automatic display.
 The offline bridge is not enabled in HA. The research suite passes 129 checks;
 these cover contracts/regressions, not calibrated matching accuracy.
+
+## Current-text context adapter
+
+`report_from_current_notice` checks title and description against the analyzed
+text before creating the bounded pure context report. A changed or explicitly
+truncated description cannot reuse the analysis. Publication time comes from the
+current notice and must be timezone-aware. The returned match includes original
+RSS text, BM OKF attribution and an explicit automatic-heuristic method label.
+Consumers must render this text as text, never interpolate it into HTML.
+Manual review storage is neither read nor written by this adapter.
+
+This remains offline research: the HuSpaCy model is not bundled or enabled in HA.
+Choosing a lightweight runtime adapter versus an optional local model remains a
+separate deployment decision. Context matching does not require a model itself.

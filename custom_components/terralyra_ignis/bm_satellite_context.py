@@ -18,11 +18,14 @@ class BMTownReport:
     event_settlement_ids: frozenset[str]
     fire_report: bool
     title: str = ''
+    description: str = ''
 
     def __post_init__(self):
         if not NOTICE_URL.fullmatch(self.url):
             raise ValueError('Original BM event URL required')
         _time(self.published_at)
+        if any(not isinstance(value, str) or len(value) > 6000 for value in (self.title, self.description)):
+            raise ValueError('Bounded original report text required')
         if not isinstance(self.event_settlement_ids, frozenset) or any(
             not isinstance(s,str) or not s.strip() for s in self.event_settlement_ids
         ):
@@ -58,6 +61,8 @@ def bm_reports_for_satellite(incident_id, incidents, settlement_ids_by_incident,
                 candidates.append(incident.incident_id)
         if incident_id in candidates:
             output.append(dict(report_url=report.url,title=report.title,
+                description=report.description, publisher="BM OKF",
+                association_method="automatic_town_time_heuristic",
                 published_at=report.published_at.isoformat(), relation='probable',
                 basis='event_settlement_and_publication_window',
                 candidate_incident_ids=sorted(candidates), ambiguous=len(candidates)>1,

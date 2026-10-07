@@ -48,3 +48,25 @@ def event_town_evidence(fields, settlements):
     return dict(event_settlement_ids=sorted({a['settlement_id'] for a in accepted}),
                 evidence=accepted, incident_location_verified=False,
                 creates_incident=False)
+
+
+def report_from_current_notice(notice, fields, settlements, report_type):
+    """Reject stale analyses before constructing a satellite context report.
+
+    report_type is the pure BMTownReport class, injected to keep this offline
+    research module independent of Home Assistant package initialization.
+    No archive, manual review, observation or source text is modified.
+    """
+    from datetime import datetime
+    if notice.get('description_status') == 'truncated':
+        raise ValueError('Incomplete report text requires review')
+    for field in ('title', 'description'):
+        if fields[field]['text'] != notice.get(field, ''):
+            raise ValueError('Analysis does not match the current report text')
+    evidence = event_town_evidence(fields, settlements)
+    return report_type(
+        url=notice['url'], published_at=datetime.fromisoformat(notice['published_at']),
+        event_settlement_ids=frozenset(evidence['event_settlement_ids']),
+        fire_report=bool(evidence['evidence']),
+        title=notice.get('title', ''), description=notice.get('description', ''),
+    )
