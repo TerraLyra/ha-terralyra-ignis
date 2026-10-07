@@ -19,3 +19,22 @@ class ScoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):score([],probe)
         gold[0]['title']='Other'
         with self.assertRaises(ValueError):score(gold,probe)
+
+    def test_unlinked_responder_is_visible_and_scored_by_span(self):
+        gold,probe=self.sample()
+        probe['results'][0]['description']=dict(text='falvi',role_review=dict(mentions=[dict(start=0,end=5,evidence='falvi',settlements=[],roles=[dict(role='responder')])]),fire_review=dict(involvement=[]))
+        gold[0]['mention_roles']=[dict(field='description',start=0,end=5,evidence='falvi',role='responder')]
+        r=score(gold,probe)['records'][0]
+        self.assertEqual(r['unlinked_responders'][0]['evidence'],'falvi')
+        self.assertEqual(len(r['mention_role_comparison']['matched']),1)
+        self.assertEqual(r['responders_found'],[])
+        gold[0]['mention_roles'][0]['evidence']='wrong'
+        with self.assertRaises(ValueError):score(gold,probe)
+
+    def test_extra_role_is_not_hidden_by_correct_place_name(self):
+        gold,probe=self.sample()
+        probe['results'][0]['description']=dict(text='Place',role_review=dict(mentions=[dict(start=0,end=5,evidence='Place',settlements=['Place'],roles=[dict(role='responder')])]),fire_review=dict(involvement=[]))
+        gold[0]['mention_roles']=[]
+        r=score(gold,probe)['records'][0]
+        self.assertEqual(len(r['mention_role_comparison']['extra']),1)
+        self.assertEqual(r['mention_role_comparison']['matched'],[])

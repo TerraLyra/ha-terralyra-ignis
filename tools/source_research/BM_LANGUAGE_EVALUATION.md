@@ -135,3 +135,16 @@ in the first sentence keep their separate unknown/event-candidate context.
 The replay reuses saved model tokens: no fresh model run or unseen validation
 is claimed. The temporary model environment was no longer present. A new unseen
 batch is required after this change before assessing generalization.
+
+## Mention-level evaluation
+
+Optional exhaustive `mention_roles` gold labels use field, original start/end,
+evidence and role. The scorer distinguishes matched, missed and extra role
+assignments independently of municipality linkage. An omitted annotation is
+unassessed; an explicit empty list asserts that no non-unknown role is expected.
+Unlinked responder spans are always exposed rather than silently dropped.
+
+On the now-seen 92641 regression, six manually marked responder spans match with
+no missed or extra role assignments. Only five link to municipalities; the
+sándorfalvi span remains explicitly unlinked. This measures one annotated record,
+not overall role accuracy. No event-location promotion has been added.
