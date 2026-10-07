@@ -57,3 +57,22 @@ class RolesTests(unittest.TestCase):
                      'A gyöngyösi, a hatvani épület mellett tűzoltók állnak.']:
             r=review(text)
             self.assertEqual(r['mentions'][0]['roles'][0]['role'],'unknown')
+
+    def test_between_places_preserves_corridor_without_coordinates(self):
+        text='Gyöngyös és Hatvan között ég a fű.'
+        r=review(text)
+        self.assertEqual(len(r['corridors']),1)
+        self.assertEqual(r['corridors'][0]['endpoints'],[['Gyöngyös'],['Hatvan']])
+        self.assertFalse(r['corridors'][0]['incident_geometry_verified'])
+        self.assertIsNone(r['event_location'])
+        self.assertTrue(all(m['roles'][0]['role']=='between_places' for m in r['mentions']))
+        c=r['corridors'][0]
+        self.assertEqual(text[c['start']:c['end']],c['evidence'])
+
+    def test_corridor_does_not_override_other_context_or_cross_unknown_text(self):
+        for text in ['Nem Gyöngyös és Hatvan között ég.',
+                     'Gyöngyös és Hatvan utca között.',
+                     'Gyöngyös ég. És Hatvan között.',
+                     'Gyöngyös és Ismeretlenfalva között.',
+                     'Gyöngyös és Hatvan tűzoltósága között egyeztetnek.']:
+            self.assertEqual(review(text)['corridors'],[],text)

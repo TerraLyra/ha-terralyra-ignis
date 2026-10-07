@@ -148,3 +148,16 @@ On the now-seen 92641 regression, six manually marked responder spans match with
 no missed or extra role assignments. Only five link to municipalities; the
 sándorfalvi span remains explicitly unlinked. This measures one annotated record,
 not overall role accuracy. No event-location promotion has been added.
+
+## Between-place relationships
+
+Explicit adjacent `place és place között` mentions now retain a `corridors`
+relationship and `between_places` roles. Both endpoints must already link to
+names and have no conflicting responder, street, organization or negation role.
+Unknown intervening text, sentence breaks and unlinked endpoints fail closed.
+This is a textual relationship, not a fire perimeter, road geometry, midpoint
+or verified incident location. Negation with wider syntactic scope remains open.
+
+Saved-token regression detects Jászberény–Nagykáta in 92642 and Szeged–Algyő in
+92641 (title and body). The responder list remains separately identified.
+No new model run or independent holdout result is claimed.

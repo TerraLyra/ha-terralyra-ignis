@@ -77,5 +77,26 @@ def annotate_roles(analysis, settlements):
             evidence('negated', negation.start(), end)
         if not roles:
             evidence('unknown', start, end)
-    return dict(mentions=mentions, incident_location_verified=False,
+    corridors = []
+    for left, right in zip(mentions, mentions[1:]):
+        # Explicit adjacent linked names only. Do not jump across unknown text,
+        # clauses, responders or street references to fabricate a corridor.
+        if not left['settlements'] or not right['settlements']:
+            continue
+        if any(h['role'] != 'unknown' for m in (left,right) for h in m['roles']):
+            continue
+        if not re.fullmatch(r'[ \t]+és[ \t]+', text[left['end']:right['start']], re.I):
+            continue
+        tail = re.match(r'[ \t]+között\b', text[right['end']:], re.I)
+        if not tail:
+            continue
+        end = right['end'] + tail.end()
+        relation = dict(start=left['start'], end=end, evidence=text[left['start']:end],
+                        endpoints=[left['settlements'],right['settlements']],
+                        incident_geometry_verified=False)
+        corridors.append(relation)
+        for mention in (left,right):
+            mention['roles'] = [dict(role='between_places',start=relation['start'],
+                                     end=end,evidence=relation['evidence'])]
+    return dict(mentions=mentions, corridors=corridors, incident_location_verified=False,
                 event_location=None, requires_review=True)
