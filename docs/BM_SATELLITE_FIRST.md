@@ -19,8 +19,10 @@ no matching context was found, never that the satellite observation is false.
 - Build BM evidence adapters around the satellite area and observation interval.
   Event-role mentions can support matching; responder towns, street-name matches,
   negated locations and unresolved corridors cannot supply precise coordinates.
-- A town centroid and RSS publication time alone cannot qualify a probable match.
-  Explicit provenance and uncertainty must accompany spatial/temporal evidence.
+- The user-approved BM policy accepts an explicit event-settlement identity plus
+  nearby RSS publication as probable context, without requiring an exact event
+  timestamp. The initial window is six hours before/after the satellite interval.
+  Town identity is not a town-centre coordinate or a verified fire location.
 - Re-evaluate links when notice content or incident identity changes. Do not save
   automatic links as manually approved records or overwrite existing reviews.
 - Show context only on the satellite item. No BM-derived satellite entity/calendar
@@ -32,3 +34,17 @@ no matching context was found, never that the satellite observation is false.
 The lookup function is implemented and has focused checks. Automatic BM extraction,
 persistence and frontend wiring are not yet enabled. Existing manual review actions
 remain backward-compatible during this transition.
+
+## Town/time matching implementation
+
+`bm_satellite_context.bm_reports_for_satellite` implements this policy separately
+from legacy manually reviewed coordinate matching. BM reports need explicit event
+settlement IDs in the same gazetteer namespace as the satellite assignment and
+fire relevance. Empty event-place sets (including responder-only notices) do not
+match. Competing satellite IDs are returned with an ambiguity flag without
+removing the probable label. No real probability is claimed.
+
+The extraction adapter must still establish event-role IDs rather than passing
+all mentioned towns. That adapter and frontend display are not yet connected;
+this function alone does not enable automatic production links. Existing manual
+links and satellite history remain unchanged.
