@@ -164,3 +164,29 @@ def match_reports(
             reasons, min(distance for _, distance, _ in members),
         ))
     return tuple(results)
+
+
+def reports_for_incident(
+    incident_id: str,
+    incidents: tuple[IncidentContext, ...],
+    reports: tuple[FireReport, ...],
+) -> dict:
+    """Satellite-first context lookup, never a report-driven incident creator.
+
+    The complete bounded incident population is required: looking only at the
+    selected incident would hide competing detections and overstate confidence.
+    Reports still require attributed site geometry; a responder's town or an
+    unverified town centre must not be supplied as the event site by an adapter.
+    No probability percentage, persistence or satellite-state mutation occurs.
+    """
+    if not incident_id or not any(i.incident_id == incident_id for i in incidents):
+        raise ValueError('Select an existing satellite incident')
+    matches = tuple(m for m in match_reports(incidents, reports)
+                    if m.incident_id == incident_id)
+    return {
+        'incident_id': incident_id,
+        'probable_reports': tuple(m for m in matches if m.relation == 'probable'),
+        'review_candidates': tuple(m for m in matches if m.relation != 'probable'),
+        'creates_incident': False,
+        'official_confirmation': False,
+    }
