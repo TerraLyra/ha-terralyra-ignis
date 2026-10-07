@@ -62,3 +62,23 @@ produces no fire-place evidence. This is a regression check, not a new holdout.
 The adapter does not derive coordinates or create incidents. Multi-town corridors
 remain unlinked rather than being reduced to either endpoint. Runtime source
 fetching, compatible satellite gazetteer IDs and display wiring remain pending.
+
+## Satellite settlement identity audit
+
+The offline `bm_settlement_identity` bridge joins a *selected settlement record*
+from cities500 to the HU supplement by exact name, country and centre coordinates.
+It never substitutes the satellite position with a settlement centre. Same-name
+places, changed coordinates, non-HU records and duplicate identities do not get
+an inferred ID. This is a record identity check, not municipality-boundary proof.
+
+The packaged snapshots contain 1,226 HU cities500 records: 1,075 join uniquely;
+142 names are absent from the supplement and 9 have differing centre coordinates.
+These 151 records remain unresolved. No network lookup or database replacement is
+performed. A nearest settlement is still not proof that a detection falls inside
+that municipality; the context relationship remains heuristic.
+
+Runtime geocoding currently discards the selected settlement centre and country
+before exposing PlaceInfo. Passing that provenance through, applying the bridge,
+and connecting the BM evidence adapter remain necessary before automatic display.
+The offline bridge is not enabled in HA. The research suite passes 128 checks;
+these cover contracts/regressions, not calibrated matching accuracy.
