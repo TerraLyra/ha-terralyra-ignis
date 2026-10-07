@@ -323,6 +323,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.renderReport();
     }
     renderSatellite(state) {
+      this.selectedState=state;
       const hu=this._hass.language?.startsWith('hu');
       const el=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
       const close=el('button',hu?'Bezárás':'Close');close.onclick=()=>this.dialog.close();

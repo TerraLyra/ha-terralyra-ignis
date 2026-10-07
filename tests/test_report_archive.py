@@ -102,3 +102,14 @@ async def test_saved_egyek_survives_restart_and_matches_reviewed_history():
     assert all(n["relation"] == "possible" for n in reviewed["candidates"])
     assert reviewed["changes_applied"] is False
     assert history == original
+
+async def test_snapshot_never_writes_or_deletes_expired_records():
+    original = {"notices": [record(), record(2, published_at=(NOW-timedelta(days=31)).isoformat())]}
+    store = MemoryStore(deepcopy(original))
+    archive = ReportArchive(store)
+    snapshot = await archive.async_snapshot()
+    assert len(snapshot) == 1
+    snapshot[0]["title"] = "Caller changed text"
+    assert (await archive.async_snapshot())[0]["title"] == "Notice"
+    store.async_save.assert_not_awaited()
+    assert store.data == original

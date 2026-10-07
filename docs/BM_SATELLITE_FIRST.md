@@ -121,6 +121,9 @@ original RSS description with probable association, source and publication time.
 Multiple satellite candidates are disclosed. Native HA details remain accessible.
 
 Closure scope is this satellite-first context feature. Expanding language coverage,
-new geographic datasets and comprehensive NLP are deferred. Local pure Python,
-frontend contract and browser tests cover the implementation; a full HA service
-integration check and release review are still required before deployment.
+new geographic datasets and comprehensive NLP are deferred. Local validation covers 137 BM checks, 32 frontend checks, the browser flow,
+and 112 targeted HA tests (service/archive/geocoding, geo entities, existing
+manual links, translations and served frontend resources). The new service uses
+a read-only archive snapshot and tests entry unloading during the read. This is
+local validation, not a production HA acceptance test. Release review remains
+required before deployment.

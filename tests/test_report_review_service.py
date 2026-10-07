@@ -152,3 +152,32 @@ async def test_save_requires_separate_explicit_confirmation(hass, review_action)
     with pytest.raises(vol.Invalid):
         await hass.services.async_call("terralyra_ignis", "save_official_report_link", save | {"confirm_association": False}, blocking=True, return_response=True)
     client.async_get_archived_notices.assert_not_called()
+
+async def test_satellite_context_reads_snapshot_without_polling_or_saving(hass, review_action):
+    from unittest.mock import patch
+    client, data = review_action
+    entry = hass.config_entries.async_get_entry(data['config_entry_id'])
+    entry.runtime_data.coordinator.data.incident_history = HISTORY
+    client.archive.async_snapshot.return_value = []
+    with patch('custom_components.terralyra_ignis.bm_context_lookup.lookup_context',return_value={'reports':[], 'creates_incident':False}) as lookup:
+        result = await hass.services.async_call('terralyra_ignis','get_satellite_report_context',
+            {'config_entry_id':entry.entry_id,'incident_id':'one'},blocking=True,return_response=True)
+    assert result['creates_incident'] is False
+    assert lookup.call_args.args[:3] == ('one',HISTORY,[])
+    client.archive.async_snapshot.assert_awaited_once_with()
+    client.archive.async_merge.assert_not_awaited()
+    client.async_get_archived_notices.assert_not_awaited()
+    assert entry.runtime_data.coordinator.data.incident_history == HISTORY
+
+
+async def test_satellite_context_rejects_unloaded_entry_after_archive_read(hass, review_action):
+    client, data = review_action
+    entry = hass.config_entries.async_get_entry(data['config_entry_id'])
+    async def unload():
+        entry.mock_state(hass,ConfigEntryState.NOT_LOADED)
+        return []
+    client.archive.async_snapshot.side_effect = unload
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call('terralyra_ignis','get_satellite_report_context',
+            {'config_entry_id':entry.entry_id,'incident_id':'one'},blocking=True,return_response=True)
+    client.async_get_archived_notices.assert_not_awaited()
