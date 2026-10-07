@@ -53,7 +53,14 @@ def score(gold, probe):
         unlinked = [dict(field=field, start=m['start'], end=m['end'], evidence=m['evidence'])
                     for field in ('title','description') for m in row[field]['role_review']['mentions']
                     if not m['settlements'] and any(h['role']=='responder' for h in m['roles'])]
-        output.append(dict(id=expected['id'], unlinked_responders=unlinked,
+        extinguished = any(row[field]['fire_review'].get('reported_extinguishing',False)
+                           for field in ('title','description'))
+        extinguishing_match = None
+        if 'reported_extinguished' in expected:
+            if type(expected['reported_extinguished']) is not bool:
+                raise ValueError('Reported extinguishing annotation must be boolean')
+            extinguishing_match = extinguished == expected['reported_extinguished']
+        output.append(dict(id=expected['id'], reported_extinguishing_matches=extinguishing_match, unlinked_responders=unlinked,
                            mention_role_comparison=score_roles(expected,row), event_names_found=sorted(places & names),
                            event_names_missed=sorted(places - names),
                            responders_found=sorted(target_responders & responders),
@@ -61,7 +68,8 @@ def score(gold, probe):
                            extra_responder_candidates=sorted(responders-target_responders),
                            involvement_matches=involvement==set(expected['involvement'])))
     return dict(records=output, event_role_accuracy_assessed=False,
-                extinguishing_accuracy_assessed=False,
+                extinguishing_accuracy_assessed=all(
+                    'reported_extinguished' in g for g in gold) and bool(gold),
                 no_fire_verified=False)
 
 

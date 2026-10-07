@@ -76,3 +76,9 @@ class RolesTests(unittest.TestCase):
                      'Gyöngyös és Ismeretlenfalva között.',
                      'Gyöngyös és Hatvan tűzoltósága között egyeztetnek.']:
             self.assertEqual(review(text)['corridors'],[],text)
+
+    def test_corridor_and_responders_in_same_notice_remain_separate(self):
+        r=review('Gyöngyös és Hatvan között ég. A gyöngyösi és hatvani tűzoltók érkeztek.')
+        self.assertEqual(len(r['corridors']),1)
+        self.assertEqual([m['roles'][0]['role'] for m in r['mentions']],
+                         ['between_places','between_places','responder','responder'])

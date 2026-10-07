@@ -161,3 +161,24 @@ or verified incident location. Negation with wider syntactic scope remains open.
 Saved-token regression detects Jászberény–Nagykáta in 92642 and Szeged–Algyő in
 92641 (title and body). The responder list remains separately identified.
 No new model run or independent holdout result is claimed.
+
+## Second unseen batch: 92648–92649
+
+Two fresh RSS items were annotated before viewing predictions; recognition rules
+were unchanged during this batch. The restored hu_core_news_md 3.8.1 model ran
+locally, with model/runtime versions and research-code hashes recorded in output.
+
+Hejőbába and Simontornya were both recognized by name. Tiszaújváros, Sárbogárd
+and Simontornya were correctly marked as responder targets. The involvement
+sets matched the manual labels (building fire; no fire described in the rail
+accident). These results still do not establish exact incident locations.
+
+Reported extinguishing was missed in 92649, again on “elfojtották”. It is now
+scored explicitly and cannot be hidden by a correct building-fire category.
+The accident correctly produced no reported-extinguishing evidence. This is
+one positive extinguishing example, not an accuracy estimate.
+
+The model remains experimental. Next priority is reliable verb/particle and
+negation handling for reported extinguishing, validated separately from fire
+involvement and location roles. Original output and manual expectations are
+retained under local-validation, outside tracked production artifacts.

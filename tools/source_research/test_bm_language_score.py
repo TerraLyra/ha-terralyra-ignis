@@ -38,3 +38,12 @@ class ScoreTests(unittest.TestCase):
         r=score(gold,probe)['records'][0]
         self.assertEqual(len(r['mention_role_comparison']['extra']),1)
         self.assertEqual(r['mention_role_comparison']['matched'],[])
+
+    def test_missed_extinguishing_is_counted_without_claiming_current_status(self):
+        gold,probe=self.sample()
+        self.assertIsNone(score(gold,probe)['records'][0]['reported_extinguishing_matches'])
+        gold[0]['reported_extinguished']=True
+        result=score(gold,probe)
+        self.assertFalse(result['records'][0]['reported_extinguishing_matches'])
+        self.assertTrue(result['extinguishing_accuracy_assessed'])
+        self.assertFalse(result['no_fire_verified'])
