@@ -17,6 +17,11 @@ not automatically a passed first-time-user trial.
 | Visual report-map editor and binding status | 0.36.0 | Explicit source switches remain required; all editor interactions not yet exercised live |
 | Updated first-setup instructions | #133 | English/Hungarian documentation is not an unaided-user acceptance result |
 
+The summary visual editor now reviews the selected location, both radii and
+reported data availability. It explicitly states that notification setup and
+delivery cannot be verified by the card. This is a card-setup review, not a full
+integration onboarding wizard or notification acceptance.
+
 ## Next implementation work
 
 1. Reduce manual map/summary setup while retaining explicit location bindings.

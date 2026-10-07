@@ -50,7 +50,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.evaluate(()=>editor.setConfig({...changes.at(-1),forecast:{entity:'sensor.forecast',location_id:'ca',latitude:47,longitude:19},custom_option:true}));
  await page.getByRole('textbox').fill('My place');
  // A HA state update must not discard a title currently being typed.
- await page.evaluate(()=>editor.hass={states:editorStates});
+ await page.evaluate(()=>{editorStates['sensor.place'].attributes.monitoring_radius_km=100;editorStates['sensor.place'].attributes.alert_radius_km=50;editor.hass={states:editorStates}});
+ assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/Megfigyelés: 100 km/);
  assert.equal(await page.getByRole('textbox').inputValue(),'My place');
  await page.getByRole('textbox').press('Tab');
  assert.equal(await page.evaluate(()=>changes.at(-1).title),'My place');
@@ -65,5 +66,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.equal(await page.getByRole('combobox').inputValue(),'sensor.other');
  assert.equal(await page.evaluate(()=>changes.at(-1).entity),'sensor.other');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ if(process.env.IGNIS_SCREENSHOT){
+   await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});entity.attributes.location_name='Home';editor.hass={states:{'sensor.place':entity}}});
+   await page.screenshot({path:process.env.IGNIS_SCREENSHOT,fullPage:true});
+ }
  console.log('Location summary browser checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
