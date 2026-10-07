@@ -97,5 +97,10 @@ Consumers must render this text as text, never interpolate it into HTML.
 Manual review storage is neither read nor written by this adapter.
 
 This remains offline research: the HuSpaCy model is not bundled or enabled in HA.
-Choosing a lightweight runtime adapter versus an optional local model remains a
-separate deployment decision. Context matching does not require a model itself.
+Deployment decision: use lightweight local rules and the packaged gazetteer for
+runtime evidence extraction. Do not bundle HuSpaCy, spaCy or the Hungarian model,
+add them as integration dependencies, or download a model during setup/runtime.
+The optional model remains a development-only comparison tool. The experimental
+NLP adapter is not a runtime dependency; a lightweight evidence adapter is still
+required before automatic display can be enabled. Context matching itself does
+not require a model.
