@@ -59,3 +59,17 @@ unseen notices for holdout evaluation, compare baseline and hybrid outputs for
 missed places, wrong event-place promotion and multi-label fire involvement.
 Measure memory and startup cost on representative hardware. Do not tune on the
 holdout and then describe it as independent validation.
+
+## Experimental role annotations
+
+`--roles` adds `bm_language_roles.py` output using the packaged HU gazetteer.
+Exact/lemma matches and narrowly marked adjectival candidates are retained with
+original spans. Organization, responder/list, direction, street and immediate
+negation hints are separate from identity. All other mentions stay unknown;
+there is deliberately no event-location promotion or coordinate output.
+
+The seven development cases identify the expected responder lists and direct
+negation/direction hints. Nagylókon remains missed in one synthetic description
+because the model leaves its lemma inflected. These are development observations,
+not holdout accuracy. Fire involvement/state classification is still pending.
+No production module imports the optional NLP model or role annotator.

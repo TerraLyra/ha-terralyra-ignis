@@ -12,7 +12,7 @@ from pathlib import Path
 
 def analyze(nlp, text):
     doc = nlp(text)
-    return {
+    result = {
         'text': text,
         'entities': [dict(text=e.text, start=e.start_char, end=e.end_char,
                           label=e.label_) for e in doc.ents],
@@ -21,11 +21,13 @@ def analyze(nlp, text):
                         head_start=t.head.idx) for t in doc],
         'incident_location_verified': False,
     }
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
+    parser.add_argument('--roles', action='store_true', help='Experimental gazetteer-linked role hints')
     parser.add_argument('--model', default='hu_core_news_md')
     args = parser.parse_args()
     data = args.input.read_bytes()
@@ -42,6 +44,13 @@ def main():
     loaded = time.perf_counter()
     results = [dict(title=analyze(nlp, r['title']), description=analyze(nlp, r['description']))
                for r in records]
+    if args.roles:
+        from bm_hu_gazetteer import load_review_places
+        from bm_language_roles import annotate_roles
+        places = load_review_places()
+        for result in results:
+            for field in ('title', 'description'):
+                result[field]['role_review'] = annotate_roles(result[field], places)
     print(json.dumps(dict(model=args.model, version=nlp.meta.get('version'),
                          license=nlp.meta.get('license'), input_sha256=hashlib.sha256(data).hexdigest(),
                          load_seconds=loaded-start, analysis_seconds=time.perf_counter()-loaded,
