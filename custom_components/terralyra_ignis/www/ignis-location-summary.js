@@ -71,6 +71,11 @@ export function forecastChoices(states={},locationId) {
     location_id:locationId,latitude:state.attributes.latitude,longitude:state.attributes.longitude,
     radius_km:state.attributes.forecast_radius_km})).sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
 }
+export function forecastSetupReview(states, config, now=new Date()) {
+  if(!config.forecast)return 'Előrejelzés: nincs hozzárendelve (nem kötelező).';
+  const result=summarizeForecast(states?.[config.forecast.entity],config.forecast,config.location_id,now);
+  return result.message?`Előrejelzés: ${result.message}`:`Előrejelzés: ${result.risk} · UTC terméknap: ${result.validDate}. ${result.freshness}`;
+}
 // Setup review is descriptive: it cannot inspect notification automation delivery.
 export function setupReview(entity, locationId) {
   const a=entity?.attributes;
@@ -121,6 +126,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     if(!this.reviewHost||!this.config)return;
     this.reviewHost.replaceChildren(this.node('h3','Beállítások áttekintése'));
     for(const text of setupReview(this._hass?.states?.[this.config.entity],this.config.location_id))this.reviewHost.append(this.node('p',text));
+    this.reviewHost.append(this.node('p',forecastSetupReview(this._hass?.states,this.config)));
   }
   render(){
     if(!this.config)return;

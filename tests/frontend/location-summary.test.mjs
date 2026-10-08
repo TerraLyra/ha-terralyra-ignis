@@ -112,3 +112,10 @@ test('visual forecasts require exact location and valid source geometry',async()
  for(const patch of [{scope:'near_home'},{location_id:'other'},{provider:'other'},{latitude:NaN},{longitude:190},{forecast_radius_km:0}])assert.equal(forecastChoices({'sensor.risk':{...good,attributes:{...good.attributes,...patch}}},'home').length,0);
  assert.equal(forecastChoices({'sensor.risk':good},undefined).length,0);
 });
+
+test('setup review distinguishes optional missing forecast from mismatched binding',async()=>{
+ const {forecastSetupReview}=await import('../../frontend/ignis-location-summary.js');
+ assert.match(forecastSetupReview({}, {location_id:'home'}),/nem kötelező/);
+ assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'other',latitude:47,longitude:19}}),/eltérő/);
+ assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'home',latitude:47,longitude:19}}),/nem érhető el/);
+});
