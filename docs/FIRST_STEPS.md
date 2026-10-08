@@ -49,7 +49,10 @@ For a per-place summary, register `/terralyra_ignis/cards/ignis-location-summary
 once as a **JavaScript module** under **Settings → Dashboards → Resources**.
 Then edit your dashboard, add **IGNIS helyszínösszefoglaló**, and select the place
 in its visual editor. No file copying is needed on 0.35.0+. Use one card per place.
-Forecast binding is an optional separate step; see [card setup](LOCATION_SUMMARY_CARD.md).
+Forecast binding is optional. The prepared 0.38.0 editor offers matching forecast
+sensors directly; see [card setup](LOCATION_SUMMARY_CARD.md). Review the chosen
+place, both radii and data status in the editor. Notification delivery still
+requires the separate blueprint setup below.
 If replacing a `/local/` resource, edit the existing entry rather than adding a duplicate.
 Fully reload the browser after changing resources.
 
@@ -118,8 +121,11 @@ add hozzá egyszer a `/terralyra_ignis/cards/ignis-location-summary.js` címet,
 **JavaScript-modul** típussal. Ezután a dashboard szerkesztőjében add hozzá az
 **IGNIS helyszínösszefoglaló** kártyát, és válaszd ki a helyszínt a listából.
 0.35.0-tól nem kell fájlt másolni. Helyszínenként egy kártyát használj.
-Az előrejelzés hozzárendelése külön, választható lépés; lásd a
-[kártya útmutatóját](LOCATION_SUMMARY_CARD.md).
+Az előrejelzés hozzárendelése választható lépés. Az előkészített 0.38.0-ban
+a szerkesztő listából kínálja a helyhez tartozó előrejelzéseket; lásd a
+[kártya útmutatóját](LOCATION_SUMMARY_CARD.md). Ellenőrizd a helyszínt, a két
+sugarat és az adatellátást a beállítások áttekintésében. Az értesítéshez továbbra
+is az alábbi, külön blueprint-beállítás szükséges.
 Régi `/local/` cím esetén a meglévő erőforrást módosítsd, ne adj hozzá második példányt.
 Végül töltsd újra teljesen a böngészőt.
 
