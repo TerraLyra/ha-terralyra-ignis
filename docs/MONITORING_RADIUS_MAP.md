@@ -40,3 +40,17 @@ Assistant map. It is also exposed as `monitoring_radius_km`, together with
   the card or interactively.
 - Changing a location, its enabled state, or its radius reloads the integration
   and recreates the corresponding overlay from the saved settings.
+
+## Optional IGNIS map visual editor
+
+On the development branch (not yet in stable 0.37.0), the IGNIS report-map editor
+includes **Monitoring and alert circles** / **Megfigyelési és riasztási körök**.
+Selecting it adds the monitoring-area source with icon labels and `focus: false`.
+If clustering has not been configured, it sets `cluster: false` so the circle
+centres remain separate. Existing source options and explicit clustering settings
+are preserved; the editor explains when clustering can hide circles.
+
+Clearing the checkbox removes only this source from the card. It does not disable
+monitored locations or change their radii. With native `show_all: true`, separate
+circle filtering is disabled; the editor explains that this advanced setting must
+first be changed in the code editor. Equal radii still use one circle.
