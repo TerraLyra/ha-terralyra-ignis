@@ -104,3 +104,18 @@ test('setup review never claims notifications are configured and respects identi
  assert.match(setupReview({...configured,state:'unavailable'},'ca').join(' '),/adatellátás jelenleg nem ellenőrizhető/);
  for(const alert_radius_km of [101,0,-1,'50',NaN])assert.match(setupReview({...configured,attributes:{...configured.attributes,alert_radius_km}},'ca')[1],/Ellenőrizd/);
 });
+
+test('visual forecasts require exact location and valid source geometry',async()=>{
+ const {forecastChoices}=await import('../../frontend/ignis-location-summary.js');
+ const good={state:'unavailable',attributes:{scope:'monitored_location',location_id:'home',provider:'eumetsat_lsa_saf_frmv3',product:'FRMv3',latitude:47,longitude:19,forecast_radius_km:25}};
+ assert.deepEqual(forecastChoices({'sensor.risk':good},'home')[0],{entity:'sensor.risk',name:'sensor.risk',location_id:'home',latitude:47,longitude:19,radius_km:25});
+ for(const patch of [{scope:'near_home'},{location_id:'other'},{provider:'other'},{latitude:NaN},{longitude:190},{forecast_radius_km:0}])assert.equal(forecastChoices({'sensor.risk':{...good,attributes:{...good.attributes,...patch}}},'home').length,0);
+ assert.equal(forecastChoices({'sensor.risk':good},undefined).length,0);
+});
+
+test('setup review distinguishes optional missing forecast from mismatched binding',async()=>{
+ const {forecastSetupReview}=await import('../../frontend/ignis-location-summary.js');
+ assert.match(forecastSetupReview({}, {location_id:'home'}),/nem kötelező/);
+ assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'other',latitude:47,longitude:19}}),/eltérő/);
+ assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'home',latitude:47,longitude:19}}),/nem érhető el/);
+});

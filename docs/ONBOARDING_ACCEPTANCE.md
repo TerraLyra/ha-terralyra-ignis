@@ -9,7 +9,7 @@ not automatically a passed first-time-user trial.
 | Capability | Evidence | Remaining boundary |
 | --- | --- | --- |
 | Separate monitoring and alert radii | 0.33.0; improved validation in 0.34.1 | Integrated guided setup and completion summary remain open |
-| Visual summary location selection | 0.34.0 | Forecast association still uses explicit code configuration |
+| Visual summary location selection | 0.34.0 | Visual forecast binding implemented; first-time-user acceptance remains open |
 | Six-language notification blueprint | 0.34.0 | Separate import and user-selected phone; no silent automation replacement |
 | Bundled optional cards | 0.35.0; resource migration observed | One-time resource registration remains manual |
 | Summary icons | 0.35.1 | Decoration only; no safety or official-status inference |
@@ -64,3 +64,11 @@ data must never become “no ban”. Unknown provider states must not invent adv
 
 References: [first setup](FIRST_STEPS.md), [card resources](CARD_RESOURCES.md),
 [release validation](NEXT_RELEASE_READINESS.md).
+
+## Visual forecast binding
+
+The summary editor offers explicit monitored-location FRMv3 sensors matching the
+selected location. Selecting one fills the required coordinates and forecast
+radius; it does not enable a provider. Unsupported or legacy saved bindings are
+preserved and marked for review. Clearing the selection removes only the card
+binding. No automatic forecast selection is performed.
