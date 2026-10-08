@@ -7,6 +7,14 @@ export function visibleMapSources(states = {}, switches = {}) {
     return [source, typeof id === 'string' && id.startsWith('switch.') && states[id]?.state === 'on'];
   }))};
 }
+// Stable backend contract, independent of entity IDs and translated names.
+export function mapSwitchChoices(states={},source) {
+  return Object.entries(states).filter(([id,state])=>id.startsWith('switch.') &&
+    SOURCES.has(state?.attributes?.ignis_map_source) &&
+    (!source || state.attributes.ignis_map_source===source))
+    .map(([id,state])=>[id,String(state.attributes.friendly_name||id)])
+    .sort((a,b)=>a[1].localeCompare(b[1])||a[0].localeCompare(b[0]));
+}
 export function mapBindingStatus(states, id) {
   if(!id)return 'unbound';
   if(typeof id!=='string'||!id.startsWith('switch.'))return 'invalid';
@@ -161,10 +169,10 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     setConfig(config){this.config={...config};this.render();}
     set hass(value){
       this._hass=value;
-      const signature=JSON.stringify([value?.language,this.choices()]);
+      const signature=JSON.stringify([value?.language,[...SOURCES].map(source=>[source,this.choices(source)])]);
       if(signature!==this.signature){this.signature=signature;this.render();}else this.renderStatus();
     }
-    choices(){return Object.entries(this._hass?.states||{}).filter(([id])=>id.startsWith('switch.')).map(([id,state])=>[id,String(state.attributes?.friendly_name||id)]).sort((a,b)=>a[1].localeCompare(b[1]));}
+    choices(source){return mapSwitchChoices(this._hass?.states,source);}
     node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
     update(patch){this.config={...this.config,...patch};this.renderStatus();this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:this.config},bubbles:true,composed:true}));}
     renderStatus(){
@@ -202,9 +210,9 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']]){
         const caption=name+(hu?' térképkapcsoló':' map switch'),label=this.node('label',caption),select=this.node('select');select.setAttribute('aria-label',caption);
         const empty=this.node('option',hu?'Nincs hozzárendelés':'No binding');empty.value='';select.append(empty);
-        const choices=this.choices(),current=this.config.report_switches?.[source]||'';
+        const choices=this.choices(source),current=this.config.report_switches?.[source]||'';
         for(const [id,name] of choices){const option=this.node('option',`${name} — ${id}`);option.value=id;select.append(option);}
-        if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Jelenleg nem elérhető: ':'Currently unavailable: ')+current);option.value=current;select.append(option);}
+        if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Megőrzött, ellenőrizendő: ':'Saved; check binding: ')+current);option.value=current;select.append(option);}
         select.value=current;select.onchange=()=>{const bindings={...this.config.report_switches};if(select.value)bindings[source]=select.value;else delete bindings[source];this.update({report_switches:bindings});};label.append(select);root.append(label);
       }
       this.statusHost=this.node('section');this.statusHost.setAttribute('aria-live','polite');root.append(this.statusHost);this.renderStatus();

@@ -52,7 +52,8 @@ class NifcMapSwitch(SwitchEntity, RestoreEntity):
         return {**self._manager.runtime.owner.diagnostics(), 'map_status': self._manager.status,
                 'matched_source_records': self._manager.relevant_count,
                 'visible_markers': sum(not entity.retired for entity in self._manager.entities.values()),
-                'source_freshness': 'not_established'}
+                'source_freshness': 'not_established',
+                'ignis_map_source': 'terralyra_ignis_nifc_reports'}
 
 
 class CanadaMapSwitch(SwitchEntity, RestoreEntity):
@@ -95,4 +96,5 @@ class CanadaMapSwitch(SwitchEntity, RestoreEntity):
         return {**self._manager.runtime.owner.diagnostics(), 'map_status': self._manager.status,
                 'matched_source_records': self._manager.relevant_count,
                 'visible_markers': sum(not entity.retired for entity in self._manager.entities.values()),
-                'source_freshness': 'not_established'}
+                'source_freshness': 'not_established',
+                'ignis_map_source': 'terralyra_ignis_canada_reports'}
