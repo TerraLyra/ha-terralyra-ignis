@@ -130,7 +130,8 @@ export function summarizeForecast(entity, binding, locationId, now=new Date(), l
 export function locationChoices(states={}) {
   return Object.entries(states).filter(([id,state])=>id.startsWith('sensor.') &&
     typeof state?.attributes?.location_id==='string' && state.attributes.location_id.trim() &&
-    typeof state.attributes.operational_status==='string' && Array.isArray(state.attributes.source_health))
+    typeof state.attributes.operational_status==='string' && Array.isArray(state.attributes.source_health) &&
+    Object.hasOwn(state.attributes,'active_incidents'))
     .map(([entity,state])=>({entity,location_id:state.attributes.location_id,
       name:String(state.attributes.location_name||state.attributes.friendly_name||entity)}))
     .sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
@@ -170,7 +171,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
   setConfig(config){this.config={...config};this.render();}
   set hass(value){
     this._hass=value;
-    const signature=JSON.stringify([summaryLanguage(value),locationChoices(value?.states),forecastChoices(value?.states,this.config?.location_id)]);
+    const signature=JSON.stringify([summaryLanguage(value),locationChoices(value?.states),forecastChoices(value?.states,this.config?.location_id),value?.states?.[this.config?.forecast?.entity]?.attributes?.scope]);
     if(signature!==this._choicesSignature){this._choicesSignature=signature;this.render();}
     else this.refreshReview();
   }
@@ -191,7 +192,8 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     const empty=this.node('option',text("Nincs hozzárendelve",language));empty.value='';select.append(empty);
     for(const choice of choices){const option=this.node('option',`${choice.name} — ${choice.radius_km} km — ${choice.entity}`);option.value=choice.entity;select.append(option);}
     const current=this.config.forecast?.entity;
-    if(current&&!choices.some(c=>c.entity===current)){const saved=this.node('option',(language==='hu'?`Megőrzött hozzárendelés, ellenőrizendő: ${current}`:`Saved binding; check: ${current}`));saved.value=current;select.append(saved);}
+    const legacyHome=this._hass?.states?.[current]?.attributes?.scope==='near_home';
+    if(current&&!choices.some(c=>c.entity===current)){const saved=this.node('option',(legacyHome?(language==='hu'?`Megőrzött Home-előrejelzés: ${current}`:`Saved Home forecast: ${current}`):(language==='hu'?`Megőrzött hozzárendelés, ellenőrizendő: ${current}`:`Saved binding; check: ${current}`)));saved.value=current;select.append(saved);}
     select.value=current||'';
     select.onchange=()=>{
       const choice=forecastChoices(this._hass?.states,this.config.location_id).find(c=>c.entity===select.value);
@@ -210,7 +212,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
       };
       host.append(this.node('p',(language==='hu'?`A kiválasztott előrejelzés beállításai változtak. Aktuális pont: ${selected.latitude}, ${selected.longitude}; előrejelzési sugár: ${selected.radius_km} km. A gombbal átveheted ezeket a kártyához.`:`The selected forecast settings have changed. Current point: ${selected.latitude}, ${selected.longitude}; forecast radius: ${selected.radius_km} km. Use the button to apply these to the card.`)),refresh);
     }
-    host.append(this.node('p',choices.length?text("Csak a kiválasztott helyhez tartozó előrejelzések választhatók. A hozzárendelés nem kapcsol be adatforrást.",language):text("Ehhez a helyhez még nincs választható előrejelzés. Az IGNIS beállításaiban engedélyezheted, ahol elérhető.",language)));
+    host.append(this.node('p',legacyHome?(language==='hu'?'A korábbi Home-előrejelzés hozzárendelését megőriztük. Érvényességét a beállítások áttekintése jelzi; nem szükséges új előrejelzést engedélyezni csak a kártya frissítése miatt.':'The existing Home forecast binding is preserved. Setup review shows its validity; a card update alone does not require enabling a new forecast.'):choices.length?text("Csak a kiválasztott helyhez tartozó előrejelzések választhatók. A hozzárendelés nem kapcsol be adatforrást.",language):text("Ehhez a helyhez még nincs választható előrejelzés. Az IGNIS beállításaiban engedélyezheted, ahol elérhető.",language)));
   }
   refreshReview(){
     const language=summaryLanguage(this._hass);

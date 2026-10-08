@@ -89,6 +89,15 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.equal(await page.getByRole('combobox',{name:'Előrejelzés (nem kötelező)',exact:true}).inputValue(),'sensor.risk');
  assert.equal(await page.evaluate(()=>editor.config.forecast.radius_km),25);
 
+ // Legacy Home binding is described neutrally, while validity is still checked.
+ await page.evaluate(()=>{
+   editor.setConfig({...editor.config,forecast:{entity:'sensor.legacy',location_id:'ca',latitude:47,longitude:19}});
+   editor.hass={language:'en',states:{...editor._hass.states,'sensor.legacy':{state:'unavailable',attributes:{scope:'near_home'}}}};
+ });
+ assert.match(await page.getByRole('combobox',{name:'Forecast (optional)',exact:true}).innerText(),/Saved Home forecast/);
+ assert.match(await page.getByRole('region',{name:'Setup review'}).innerText(),/currently unavailable/);
+ assert.equal(await page.getByText('No forecast is available to select for this location yet. Enable it in IGNIS settings where supported.',{exact:true}).count(),0);
+ await page.evaluate(()=>editor.setConfig({...editor.config,forecast:{entity:'sensor.risk',location_id:'ca',latitude:47,longitude:19,radius_km:25}}));
  // Language changes re-render controls without changing saved configuration.
  await page.evaluate(()=>{window.beforeLanguage=JSON.stringify(editor.config);window.beforeChanges=changes.length;editor.hass={...editor._hass,language:'en'};});
  assert.equal(await page.getByRole('combobox',{name:'Monitored location',exact:true}).inputValue(),'sensor.place');
