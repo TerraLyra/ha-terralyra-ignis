@@ -172,3 +172,19 @@ test('monitoring overlay selection preserves unrelated map configuration',async(
  const all={show_all:true,entities:['zone.home']};
  assert.deepEqual(withMonitoringAreas(all,false),all);
 });
+
+
+test('declared mismatching source cannot enable another report layer',()=>{
+ const canada='terralyra_ignis_canada_reports',nifc='terralyra_ignis_nifc_reports';
+ const states={'switch.test':{state:'on',attributes:{ignis_map_source:nifc}}};
+ assert.equal(mapBindingStatus(states,'switch.test',canada),'wrong_source');
+ assert.equal(visibleMapSources(states,{[canada]:'switch.test'})[canada],false);
+ assert.equal(visibleMapSources(states,{[nifc]:'switch.test'})[nifc],true);
+ // Explicit legacy bindings remain compatible until backend metadata is available.
+ delete states['switch.test'].attributes.ignis_map_source;
+ assert.equal(visibleMapSources(states,{[canada]:'switch.test'})[canada],true);
+ for(const invalid of [null,'unknown-provider','']){
+  states['switch.test'].attributes.ignis_map_source=invalid;
+  assert.equal(visibleMapSources(states,{[canada]:'switch.test'})[canada],false);
+ }
+});
