@@ -62,12 +62,22 @@ See [browser cache recovery](CARD_RESOURCES.md).
 This is a sampled live check, not clean-install acceptance or verification of every
 editor interaction, notification delivery, language or history continuity.
 
-## Prepared 0.38.0
+## Published 0.38.0
 
-The candidate contains the dashboard setup improvements in PRs #146–#151.
-See [release notes](RELEASE_0_38_0.md). Version preparation does not publish a
-GitHub release or update production HA. All feature PR checks passed; release
-preparation must pass CI separately.
+Stable [v0.38.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.38.0)
+was published from `c8f95fefc965bd5a779425955497d9c0202e2675`.
+After the user upgraded and restarted, a sampled read-only check on HA 2026.10.0
+confirmed summaries, forecasts, radii and visual editors rendering. This is not
+full clean-install or notification-delivery acceptance.
+
+## Prepared 0.38.1
+
+Contains PRs #153 and #154: summary location choices, saved Home forecast wording,
+and explicit QFD Web Mercator conversion. See [release notes](RELEASE_0_38_1.md).
+Feature checks passed; the exact release candidate must pass CI before tagging.
+The saved QFD feed yielded 42 records with zero invalid records offline. Production
+QFD recovery is not yet verified. Canada's existing review hold remains unresolved;
+no protection reset or live configuration change is part of this release.
 
 ## Remaining work
 
