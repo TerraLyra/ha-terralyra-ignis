@@ -20,9 +20,11 @@ none are available, it explains how to enable a monitored location and wait for
 its sensor. A temporarily missing configured sensor is retained rather than
 silently replaced. The editor and card currently use Hungarian labels.
 
-The optional forecast binding below still uses the code editor. Existing forecast
-and advanced configuration fields are preserved when editing the title or
-location. After changing location, review the forecast binding too: a mismatched
+On the development branch (not yet in stable 0.37.0), choose a matching sensor
+under **Előrejelzés (nem kötelező)** in the visual editor. This copies its location,
+coordinates and forecast radius without enabling a provider. The code-editor
+examples below remain supported. Existing forecast and advanced configuration
+fields are preserved when editing the title or location. After changing location, review the forecast binding too: a mismatched
 binding stays hidden with an explanation, never showing another place's risk.
 
 Existing manual YAML remains supported:
@@ -121,5 +123,8 @@ The location ID must also match the card's top-level `location_id`. These are
 requested coordinates, not `sample_latitude`/`sample_longitude`, which can point
 to a nearby valid forecast pixel. The radius is the forecast radius, not the
 satellite-monitoring radius. After moving/resizing a location, update the binding;
-a mismatch deliberately hides the risk. Nothing here enables additional providers
+a mismatch deliberately hides the risk. In the updated visual editor,
+**Előrejelzés hozzárendelésének frissítése** shows the new coordinates and forecast
+radius and copies them only when clicked. A missing or different-location sensor
+is never substituted automatically. Nothing here enables additional providers
 or automatically edits a dashboard.

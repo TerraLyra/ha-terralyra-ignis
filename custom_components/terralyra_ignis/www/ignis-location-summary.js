@@ -120,6 +120,17 @@ class IgnisLocationSummaryEditor extends HTMLElement {
       else if(select.value===''){const {forecast,...rest}=this.config;this.config=rest;this.update({});}
     };
     label.append(select);host.append(label);
+    const selected=choices.find(c=>c.entity===current);
+    if(selected && ['location_id','latitude','longitude','radius_km'].some(key=>selected[key]!==this.config.forecast[key])){
+      const refresh=this.node('button','Előrejelzés hozzárendelésének frissítése');refresh.type='button';
+      refresh.onclick=()=>{
+        // Re-read current metadata at click time; never reuse stale coordinates.
+        const latest=forecastChoices(this._hass?.states,this.config.location_id).find(c=>c.entity===this.config.forecast?.entity);
+        if(latest){const {name,...binding}=latest;this.update({forecast:binding});}
+        else this.refreshForecast();
+      };
+      host.append(this.node('p',`A kiválasztott előrejelzés beállításai változtak. Aktuális pont: ${selected.latitude}, ${selected.longitude}; előrejelzési sugár: ${selected.radius_km} km. A gombbal átveheted ezeket a kártyához.`),refresh);
+    }
     host.append(this.node('p',choices.length?'Csak a kiválasztott helyhez tartozó előrejelzések választhatók. A hozzárendelés nem kapcsol be adatforrást.':'Ehhez a helyhez még nincs választható előrejelzés. Az IGNIS beállításaiban engedélyezheted, ahol elérhető.'));
   }
   refreshReview(){
