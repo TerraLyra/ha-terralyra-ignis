@@ -1,6 +1,6 @@
 # 0.38.0 — Easier dashboard setup
 
-Prepared for stable publication; not published yet.
+Published as stable v0.38.0 on 2026-10-08.
 
 ## Changes
 
@@ -19,7 +19,7 @@ Prepared for stable publication; not published yet.
 
 ## Upgrade
 
-1. Once published, update through HACS and restart HA at a convenient time.
+1. Update through HACS and restart HA at a convenient time.
 2. Fully reload the browser or Companion App frontend.
 3. Keep existing card resources and bindings. If old code persists, update the
    existing resource query to `?v=0.38.0`; do not add duplicate resources.
@@ -34,8 +34,10 @@ and notification rules are unchanged. No language model or new provider is added
 The feature PRs passed all GitHub checks. Local validation passed 38 frontend
 checks and isolated browser tests covering explicit selections, changed forecast
 bindings, language switching, source mismatch handling and circle configuration.
-Release-preparation CI must also pass before publication. A clean-install trial,
-full production upgrade acceptance and notification delivery remain unverified.
+Release-preparation CI passed before publication. After the user upgraded, a
+sampled live check on HA 2026.10.0 confirmed rendering of summaries and editors.
+A clean-install trial, full production upgrade acceptance and notification
+delivery remain unverified.
 
 See [first setup](FIRST_STEPS.md), [card resources](CARD_RESOURCES.md) and
 [onboarding acceptance](ONBOARDING_ACCEPTANCE.md).

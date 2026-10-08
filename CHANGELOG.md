@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.38.0 — prepared, not yet published
+## 0.38.1 — prepared, not yet published
+
+- Restore Queensland report parsing for explicitly declared Web Mercator coordinates.
+- Remove source-count sensors from the summary location selector.
+- Explain saved legacy Home forecasts without suggesting a new forecast must be enabled.
+
+See [release notes](docs/RELEASE_0_38_1.md).
+
+## 0.38.0
 
 - Select location forecasts visually and explicitly refresh changed forecast coordinates/radii.
 - Follow the Home Assistant language in the summary and editor: Hungarian or English fallback.
