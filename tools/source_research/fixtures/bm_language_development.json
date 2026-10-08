@@ -1,0 +1,93 @@
+[
+  {
+    "title": "Tűz Nagylókon",
+    "description": "Nagylókon aljnövényzet égett. A sárbogárdi tűzoltók eloltották.",
+    "manual_expectations": {
+      "event": [
+        "Nagylók"
+      ],
+      "responders": [
+        "Sárbogárd"
+      ]
+    }
+  },
+  {
+    "title": "Tűz egy melléképületben",
+    "description": "A Gyöngyös Tűzoltóság egységei vonultak ki. A helyszínt nem közölték.",
+    "manual_expectations": {
+      "event": [],
+      "responders": [
+        "Gyöngyös"
+      ]
+    }
+  },
+  {
+    "title": "Tűz Gyöngyösön",
+    "description": "Gyöngyösön egy tároló égett. A gyöngyösi és a hatvani tűzoltók dolgoztak.",
+    "manual_expectations": {
+      "event": [
+        "Gyöngyös"
+      ],
+      "responders": [
+        "Gyöngyös",
+        "Hatvan"
+      ]
+    }
+  },
+  {
+    "title": "Tűz egy telepen",
+    "description": "A dabasi tűzoltóság érkezett. Nem Dabason, hanem Ócsán ég a növényzet.",
+    "manual_expectations": {
+      "event": [
+        "Ócsa"
+      ],
+      "responders": [
+        "Dabas"
+      ],
+      "negated": [
+        "Dabas"
+      ]
+    }
+  },
+  {
+    "title": "Tűz az M5 mellett",
+    "description": "Ócsa közelében ég a fű. Budapest felé egy sáv járható. A dabasi és gyömrői tűzoltók dolgoznak.",
+    "manual_expectations": {
+      "event": [
+        "Ócsa"
+      ],
+      "responders": [
+        "Dabas",
+        "Gyömrő"
+      ],
+      "direction": [
+        "Budapest"
+      ]
+    }
+  },
+  {
+    "title": "Vegyes eset",
+    "description": "Az aljnövényzetről két melléképületre terjedt a tűz. A lángokat elfojtották.",
+    "manual_expectations": {
+      "event": [],
+      "involvement": [
+        "vegetation",
+        "building"
+      ],
+      "reported_state": "extinguished"
+    }
+  },
+  {
+    "title": "Veszélyeztetett épület",
+    "description": "A száraz fű ég, egy tanyaépületet veszélyeztet, de az épület nem gyulladt ki.",
+    "manual_expectations": {
+      "event": [],
+      "involvement": [
+        "vegetation"
+      ],
+      "threatened": [
+        "building"
+      ]
+    }
+  }
+]

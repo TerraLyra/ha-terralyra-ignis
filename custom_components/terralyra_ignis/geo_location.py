@@ -255,6 +255,7 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
         if cluster.track_id is None:
             raise ValueError("A map entity requires a tracked fire cluster")
         self._cluster = cluster
+        self._context_entry_id = entry.entry_id
         self._attr_unique_id = f"{entry.entry_id}_fire_{cluster.track_id}"
         # Home Assistant records history by entity_id. Deriving the object ID
         # from the changing display name allowed a later fire near the same
@@ -291,6 +292,8 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
     def extra_state_attributes(self) -> dict[str, Any]:
         data = self.coordinator.data
         attrs = self._cluster.attrs()
+        attrs["context_entry_id"] = self._context_entry_id
+        attrs["context_incident_id"] = self._cluster.family_id or self._cluster.track_id
         if self._cluster.location_matches:
             # Keep full comparisons available without labelling outsiders matches.
             # Do not change cluster serialization used by events and history.

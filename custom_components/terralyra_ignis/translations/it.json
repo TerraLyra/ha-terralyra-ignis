@@ -561,6 +561,10 @@
           "description": "Voce di configurazione di cui vengono usate le credenziali LSA SAF salvate."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Notizie BM collegate",
+      "description": "Cercare notizie BM probabilmente collegate a un’osservazione satellitare nell’archivio locale."
     }
   }
 }

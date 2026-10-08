@@ -80,6 +80,7 @@ def _cluster(**changes) -> FireCluster:
 
 def _entity(cluster: FireCluster) -> IgnisFireLocation:
     entity = object.__new__(IgnisFireLocation)
+    entity._context_entry_id = "test-entry"
     entity._cluster = cluster
     entity.entry = SimpleNamespace(data={})
     entity.coordinator = SimpleNamespace(
@@ -551,3 +552,9 @@ def test_sentinel_provider_names_are_readable_on_map():
     assert _provider_attribution(("eumetsat_sentinel3a",)) == "Sentinel-3A"
     assert _provider_attribution(("eumetsat_sentinel3b",)) == "Sentinel-3B"
     assert _provider_attribution(("eumetsat_sentinel3a", "nasa_firms")) == "Sentinel-3A + NASA FIRMS"
+
+
+def test_satellite_context_uses_family_identity():
+    entity = _entity(_cluster(family_id="family-one"))
+    assert entity.extra_state_attributes["context_entry_id"] == "test-entry"
+    assert entity.extra_state_attributes["context_incident_id"] == "family-one"

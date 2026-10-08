@@ -561,6 +561,10 @@
           "description": "Entrée de configuration dont les identifiants LSA SAF enregistrés sont utilisés."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Communiqués BM associés",
+      "description": "Rechercher les communiqués BM probablement associés à une observation satellitaire dans les archives locales."
     }
   }
 }

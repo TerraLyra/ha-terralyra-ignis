@@ -28,6 +28,11 @@ class PlaceInfo:
     nearest_settlement: str | None
     location_description: str
     attribution: str = GEONAMES_ATTRIBUTION
+    # Gazetteer centre provenance, never the observed fire position.
+    settlement_country: str | None = None
+    settlement_latitude: float | None = None
+    settlement_longitude: float | None = None
+    settlement_distance_km: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,10 +70,14 @@ class PlaceNameResolver:
             )
         if result is None:
             raise PlaceLookupError("No settlement was found")
-        name, _country_code, _distance_km = result
+        name, country_code, distance_km, centre_lat, centre_lon = result
         return PlaceInfo(
             place_name=None,
             nearest_settlement=name,
+            settlement_country=country_code,
+            settlement_latitude=centre_lat,
+            settlement_longitude=centre_lon,
+            settlement_distance_km=distance_km,
             location_description=_location_description(
                 self._hass.config.language, name
             ),
@@ -107,7 +116,7 @@ class PlaceNameResolver:
 
     def _resolve_sync(
         self, latitude: float, longitude: float
-    ) -> tuple[str, str, float] | None:
+    ) -> tuple[str, str, float, float, float] | None:
         try:
             with closing(self._connect()) as connection:
                 for radius_km in SEARCH_RADII_KM:
@@ -119,6 +128,7 @@ class PlaceNameResolver:
                                     name,
                                     country,
                                     _haversine_km(latitude, longitude, lat, lon),
+                                    lat, lon,
                                 )
                         for lat, lon, name, country in candidates
                     ]

@@ -104,6 +104,23 @@ const assert=require('node:assert/strict');
   await page.evaluate(()=>editor.hass={...editorHass,language:'en'});
   assert.equal(await page.getByRole('combobox',{name:'Canada map switch'}).count(),1);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.evaluate(()=>{
+    card.dialog.close(); card.selected=null;
+    document.querySelector('main').replaceChildren(card);
+    const satellite={entity_id:'geo_location.satellite',state:'3',attributes:{source:'terralyra_ignis',friendly_name:'Műholdas észlelés',context_entry_id:'entry',context_incident_id:'a'}};
+    card.hass={language:'hu',states:{[satellite.entity_id]:satellite},callWS:async request=>{
+      window.contextRequest=request;
+      return {response:{reports:[{title:'Teszt hír',description:'<img src=x onerror=alert(1)>',published_at:'2026-10-07T12:00:00Z',report_url:'https://www.katasztrofavedelem.hu/modules/vesz/esemeny/1',ambiguous:true}]}};
+    }};
+    card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:satellite.entity_id},bubbles:true,composed:true}));
+  });
+  await page.getByRole('heading',{name:'Teszt hír'}).waitFor();
+  assert.match(await page.locator('dialog').innerText(),/Valószínűleg/);
+  assert.equal(await page.locator('dialog img').count(),0);
+  assert.equal(await page.evaluate(()=>contextRequest.service),'get_satellite_report_context');
+  assert.equal(await page.evaluate(()=>contextRequest.service_data.incident_id),'a');
+  await page.getByRole('button',{name:'Home Assistant részletek'}).click();
+  assert.equal(await page.evaluate(()=>nativeClicks.at(-1)),'geo_location.satellite');
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

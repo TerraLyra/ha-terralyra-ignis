@@ -31,6 +31,12 @@ const WORDS = {
     received:'Legutóbbi sikeres lekérés', response:'Lekérés állapota', unknown:'Nincs megadva'}
 };
 
+export function satelliteContextRequest(state) {
+  const a=state?.attributes;
+  if(a?.source !== 'terralyra_ignis' || typeof a.context_entry_id !== 'string' || typeof a.context_incident_id !== 'string') return null;
+  return {config_entry_id:a.context_entry_id,incident_id:a.context_incident_id};
+}
+
 export function safeLink(value) {
   try {
     const url = new URL(value);
@@ -225,9 +231,12 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.shadowRoot.append(style,this.controls,this.mapHost,this.dialog);
       this.mapHost.addEventListener('hass-more-info', event => {
         const id = event.detail?.entityId;
-        if (!reportView(this._hass?.states[id],this._hass?.language)) return;
+        const context=satelliteContextRequest(this._hass?.states[id]);
+        if (!context && !reportView(this._hass?.states[id],this._hass?.language)) return;
         event.stopPropagation();
         this.selected = id;
+        this.satelliteResult = null;
+        if(context) this.loadSatelliteContext(id,context);
         this.renderReport();
         this.dialog.showModal();
       });
@@ -301,7 +310,40 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     }
     getCardSize() {return this.map?.getCardSize?.() ?? 7;}
     disconnectedCallback() {if(this.dialog.open) this.dialog.close();}
+    async loadSatelliteContext(id, data) {
+      const token={}; this.contextToken=token;
+      try {
+        const response=await this._hass.callWS({type:'call_service',domain:'terralyra_ignis',service:'get_satellite_report_context',service_data:data,return_response:true});
+        if(this.selected!==id || this.contextToken!==token)return;
+        this.satelliteResult=response.response || {reports:[]};
+      } catch {
+        if(this.selected!==id || this.contextToken!==token)return;
+        this.satelliteResult={error:true};
+      }
+      this.renderReport();
+    }
+    renderSatellite(state) {
+      this.selectedState=state;
+      const hu=this._hass.language?.startsWith('hu');
+      const el=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
+      const close=el('button',hu?'Bezárás':'Close');close.onclick=()=>this.dialog.close();
+      const heading=el('h2',state.attributes.friendly_name || this.selected);heading.id='report-title';
+      const details=el('button',hu?'Home Assistant részletek':'Home Assistant details');
+      details.onclick=()=>{const entityId=this.selected;this.dialog.close();this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId},bubbles:true,composed:true}));};
+      this.dialog.replaceChildren(close,heading,details);
+      const result=this.satelliteResult;
+      if(!result || result.error){this.dialog.append(el('p',hu?(!result?'Kapcsolódó hírek ellenőrzése…':'A kapcsolódó hírek most nem ellenőrizhetők.'):(!result?'Checking related reports…':'Related reports could not be checked.')));return;}
+      if(!result.reports?.length)this.dialog.append(el('p',hu?'A helyben tárolt hírek között nem találtunk kapcsolódó BM-hírt.':'No related BM report was found in the local archive.'));
+      for(const report of result.reports || []) {
+        this.dialog.append(el('h3',hu?'Valószínűleg ehhez az észleléshez kapcsolódó BM-hír':'BM report probably related to this observation'),el('h4',report.title));
+        const body=el('p',report.description);body.style.whiteSpace='pre-wrap';this.dialog.append(body);
+        this.dialog.append(el('p',`BM OKF · ${report.published_at}`));
+        if(report.ambiguous)this.dialog.append(el('p',hu?'Több műholdas észleléshez is illeszkedhet.':'May relate to multiple satellite observations.'));
+        const url=safeLink(report.report_url);if(url){const link=el('a',hu?'Eredeti hír':'Original report');link.href=url;link.target='_blank';link.rel='noopener noreferrer';this.dialog.append(link);}
+      }
+    }
     renderReport() {
+      if(satelliteContextRequest(this._hass?.states[this.selected])) {this.renderSatellite(this._hass.states[this.selected]);return;}
       const state = this._hass.states[this.selected];
       this.selectedState = state;
       const view = reportView(state,this._hass.language);

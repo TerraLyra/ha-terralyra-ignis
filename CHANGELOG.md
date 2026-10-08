@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Show probably related BM OKF reports in the optional report-map satellite popup, using local town/time matching without a language model.
+- Preserve original RSS text and source links; keep satellite evidence, manual links and stored history unchanged.
+- Read up to 100 recent locally archived BM reports without fetching RSS or linked articles when opening a marker.
+
+
 ## 0.36.0
 
 - Add a Hungarian/English visual report-map editor for the title and explicit Canada/NIFC map-switch bindings.

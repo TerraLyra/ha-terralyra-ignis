@@ -88,3 +88,25 @@ def test_input_work_is_bounded() -> None:
         match_reports((INCIDENT,), (REPORT,) * 101)
     with pytest.raises(ValueError):
         match_reports((INCIDENT, INCIDENT), (REPORT,))
+
+
+def test_satellite_first_lookup_requires_existing_detection():
+    from custom_components.terralyra_ignis.report_context import reports_for_incident
+    with pytest.raises(ValueError):
+        reports_for_incident('missing', (), (REPORT,))
+    result = reports_for_incident(INCIDENT.incident_id, (INCIDENT,), (REPORT,))
+    assert len(result['probable_reports']) == 1
+    assert result['creates_incident'] is False
+    assert result['official_confirmation'] is False
+
+
+def test_satellite_first_lookup_keeps_competing_incidents_and_publication_uncertainty():
+    from custom_components.terralyra_ignis.report_context import reports_for_incident
+    other = replace(INCIDENT, incident_id='other', latitude=47.61)
+    result = reports_for_incident(INCIDENT.incident_id, (INCIDENT, other), (REPORT,))
+    assert result['probable_reports'] == ()
+    assert len(result['review_candidates']) == 1
+    publication_only = replace(REPORT, event_start=None)
+    result = reports_for_incident(INCIDENT.incident_id, (INCIDENT,), (publication_only,))
+    assert result['probable_reports'] == ()
+    assert 'publication_time_only' in result['review_candidates'][0].reasons

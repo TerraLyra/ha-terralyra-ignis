@@ -561,6 +561,10 @@
           "description": "Configuration entry whose saved LSA SAF credentials are used."
         }
       }
+    },
+    "get_satellite_report_context": {
+      "name": "Related BM reports",
+      "description": "Find probable BM context for an existing satellite incident using the local archive."
     }
   }
 }

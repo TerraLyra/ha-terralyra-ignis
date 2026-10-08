@@ -49,6 +49,10 @@ async def test_resolves_nearest_settlement_without_network(hass, tmp_path: Path)
     assert place.nearest_settlement == "Szeged"
     assert place.location_description == "Szeged közelében észlelt tűz"
     assert place.attribution == GEONAMES_ATTRIBUTION
+    assert place.settlement_country == "HU"
+    assert place.settlement_latitude == 46.2530
+    assert place.settlement_longitude == 20.1414
+    assert place.settlement_distance_km > 0
 
 
 @pytest.mark.parametrize(

@@ -231,3 +231,17 @@ recover_canada:
       name: I reviewed and resolved the source or storage problem
       selector:
         boolean:
+
+get_satellite_report_context:
+  name: Get related BM reports for a satellite incident
+  description: Match locally archived BM reports to an existing satellite incident. No article fetching or incident creation.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    incident_id:
+      required: true
+      selector:
+        text:

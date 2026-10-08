@@ -25,6 +25,39 @@ def register_report_review(hass: HomeAssistant, client: OfficialReportClient, li
             raise ServiceValidationError("Select a loaded TerraLyra IGNIS entry")
         return entry
 
+    async def satellite_context(call: ServiceCall) -> ServiceResponse:
+        # Local archive only: opening a satellite item does not poll BM.
+        import sqlite3
+        from copy import deepcopy
+        from .bm_context_lookup import lookup_context
+        from .geocoding import PlaceNameResolver, PlaceLookupError
+        entry = loaded_entry(call)
+        data = entry.runtime_data.coordinator.data
+        if data is None:
+            raise ServiceValidationError("Incident history is not available yet")
+        notices = await client.archive.async_snapshot() if client.archive is not None else []
+        entry = loaded_entry(call)
+        data = entry.runtime_data.coordinator.data
+        if data is None:
+            raise ServiceValidationError("Incident history is not available yet")
+        history = deepcopy(data.incident_history)
+        if len(notices) > 100:
+            # A bounded snapshot, newest first; do not alter the source archive.
+            notices = sorted(notices, key=lambda n: n.get("published_at", ""), reverse=True)[:100]
+        try:
+            return await hass.async_add_executor_job(
+                lookup_context, call.data["incident_id"], history, notices, PlaceNameResolver(hass)
+            )
+        except (ValueError, TypeError, KeyError, PlaceLookupError, sqlite3.Error) as err:
+            raise ServiceValidationError("Satellite report context could not be resolved") from err
+
+    hass.services.async_register(
+        DOMAIN, "get_satellite_report_context", satellite_context,
+        schema=vol.Schema({vol.Required("config_entry_id"): cv.string,
+                           vol.Required("incident_id"): vol.All(cv.string, vol.Length(min=1,max=128))}),
+        supports_response=SupportsResponse.ONLY,
+    )
+
     async def prepare(call):
         entry = loaded_entry(call)
         url = call.data["report_url"]
