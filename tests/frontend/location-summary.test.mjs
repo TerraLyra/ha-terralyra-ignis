@@ -119,3 +119,21 @@ test('setup review distinguishes optional missing forecast from mismatched bindi
  assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'other',latitude:47,longitude:19}}),/eltérő/);
  assert.match(forecastSetupReview({}, {location_id:'home',forecast:{entity:'sensor.risk',location_id:'home',latitude:47,longitude:19}}),/nem érhető el/);
 });
+
+test('English summary retains data meaning and source text',async()=>{
+ const {summaryLanguage,sourceGuidance,setupReview,forecastSetupReview}=await import('../../frontend/ignis-location-summary.js');
+ assert.equal(summaryLanguage({language:'hu-HU'}),'hu');
+ assert.equal(summaryLanguage({language:'de'}),'en');
+ assert.equal(summaryLanguage({locale:{language:'en-US'}}),'en');
+ assert.equal(summaryLanguage({}),'hu');
+ const e={...entity,attributes:{...entity.attributes,location_name:'Magas',monitoring_radius_km:100,alert_radius_km:25}};
+ assert.equal(summarizeLocation(e,'ca','en').name,'Magas');
+ assert.equal(summarizeLocation(e,'ca','en').status,'Sources available');
+ assert.equal(summarizeLocation({...e,state:'unavailable'},'ca','en').active,null);
+ assert.match(sourceGuidance({status:'no_product'},'en'),/does not mean there is no fire/);
+ assert.match(setupReview(e,'ca','en').join(' '),/Monitoring: 100 km · Alert: 25 km/);
+ assert.match(setupReview(e,'ca','en').join(' '),/does not verify existing automations or delivery/);
+ assert.equal(summarizeForecast(forecast,binding,'home',now,'en').risk,'Low');
+ assert.match(summarizeForecast({...forecast,state:'unavailable'},binding,'home',now,'en').message,/unavailable/);
+ assert.match(forecastSetupReview({}, {},now,'en'),/not linked/);
+});
