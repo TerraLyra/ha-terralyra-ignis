@@ -75,6 +75,7 @@ test('editor lists explicit location-status sensors only, including unavailable 
  const states={
   'sensor.place':entity,
   'sensor.unavailable':{...entity,state:'unavailable',attributes:{...entity.attributes,location_id:'other',location_name:'Other'}},
+  'sensor.source_count':{state:'5',attributes:{location_id:'ca',operational_status:'available',source_health:[]}},
   'sensor.forecast':{attributes:{location_id:'ca',scope:'monitored_location'}},
   'sensor.global':{attributes:{operational_status:'available',source_health:[]}},
   'binary_sensor.place':entity,
