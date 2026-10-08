@@ -57,6 +57,20 @@ export function locationChoices(states={}) {
       name:String(state.attributes.location_name||state.attributes.friendly_name||entity)}))
     .sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
 }
+// Offer explicit monitored-location forecasts only; legacy bindings remain intact.
+export function forecastChoices(states={},locationId) {
+  return Object.entries(states).filter(([id,state])=>{
+    const a=state?.attributes;
+    return id.startsWith('sensor.') && a?.scope==='monitored_location' &&
+      typeof locationId==='string' && locationId.length>0 && a.location_id===locationId &&
+      a.provider==='eumetsat_lsa_saf_frmv3' && a.product==='FRMv3' &&
+      Number.isFinite(a.latitude)&&Math.abs(a.latitude)<=90 &&
+      Number.isFinite(a.longitude)&&Math.abs(a.longitude)<=180 &&
+      Number.isFinite(a.forecast_radius_km)&&a.forecast_radius_km>=1&&a.forecast_radius_km<=500;
+  }).map(([entity,state])=>({entity,name:String(state.attributes.friendly_name||entity),
+    location_id:locationId,latitude:state.attributes.latitude,longitude:state.attributes.longitude,
+    radius_km:state.attributes.forecast_radius_km})).sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
+}
 // Setup review is descriptive: it cannot inspect notification automation delivery.
 export function setupReview(entity, locationId) {
   const a=entity?.attributes;
@@ -73,7 +87,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
   setConfig(config){this.config={...config};this.render();}
   set hass(value){
     this._hass=value;
-    const signature=JSON.stringify(locationChoices(value?.states));
+    const signature=JSON.stringify([locationChoices(value?.states),forecastChoices(value?.states,this.config?.location_id)]);
     if(signature!==this._choicesSignature){this._choicesSignature=signature;this.render();}
     else this.refreshReview();
   }
@@ -81,7 +95,27 @@ class IgnisLocationSummaryEditor extends HTMLElement {
   update(patch){
     this.config={...this.config,...patch};
     this.refreshReview();
+    this.refreshForecast();
     this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
+  }
+  refreshForecast(){
+    if(!this.forecastHost)return;
+    const host=this.forecastHost;host.replaceChildren();
+    const choices=forecastChoices(this._hass?.states,this.config.location_id);
+    const label=this.node('label','Előrejelzés (nem kötelező)'),select=this.node('select');
+    select.setAttribute('aria-label','Előrejelzés (nem kötelező)');
+    const empty=this.node('option','Nincs hozzárendelve');empty.value='';select.append(empty);
+    for(const choice of choices){const option=this.node('option',`${choice.name} — ${choice.radius_km} km — ${choice.entity}`);option.value=choice.entity;select.append(option);}
+    const current=this.config.forecast?.entity;
+    if(current&&!choices.some(c=>c.entity===current)){const saved=this.node('option',`Megőrzött hozzárendelés, ellenőrizendő: ${current}`);saved.value=current;select.append(saved);}
+    select.value=current||'';
+    select.onchange=()=>{
+      const choice=forecastChoices(this._hass?.states,this.config.location_id).find(c=>c.entity===select.value);
+      if(choice){const {name,...binding}=choice;this.update({forecast:binding});}
+      else if(select.value===''){const {forecast,...rest}=this.config;this.config=rest;this.update({});}
+    };
+    label.append(select);host.append(label);
+    host.append(this.node('p',choices.length?'Csak a kiválasztott helyhez tartozó előrejelzések választhatók. A hozzárendelés nem kapcsol be adatforrást.':'Ehhez a helyhez még nincs választható előrejelzés. Az IGNIS beállításaiban engedélyezheted, ahol elérhető.'));
   }
   refreshReview(){
     if(!this.reviewHost||!this.config)return;
@@ -113,7 +147,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     title.onchange=()=>this.update({title:title.value});titleLabel.append(title);root.append(titleLabel);
     const review=this.node('section');review.setAttribute('aria-label','Beállítások áttekintése');this.reviewHost=review;this.refreshReview();
     root.append(review);
-    root.append(this.node('p','Az opcionális előrejelzés hozzárendelését a kódszerkesztőben állíthatod be. A meglévő hozzárendelés megmarad; helyszínváltás után ellenőrizd, hogy az új helyszínhez tartozik-e.'));
+    this.forecastHost=this.node('section');root.append(this.forecastHost);this.refreshForecast();
   }
 }
 customElements.define('ignis-location-summary-editor',IgnisLocationSummaryEditor);
