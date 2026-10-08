@@ -1,4 +1,4 @@
-"""Lazy Canada owner; not registered by integration setup yet."""
+"""Shared Canada owner with explicit initialization and recovery."""
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
 
@@ -34,7 +34,15 @@ class CanadaOwner(Controller):
             raise
 
     def diagnostics(self):
-        return {'last_http_error': self.state.last_http_error if self.state else None,
+        # Describe only retained evidence; older holds may have no HTTP code.
+        review_reason = None
+        if self.state and self.state.review_required:
+            code = self.state.last_http_error
+            review_reason = ('http_client_error' if isinstance(code, int)
+                             and 400 <= code < 500 and code not in (408, 429)
+                             else 'unknown_prior_cause')
+        return {'review_reason': review_reason,
+                'last_http_error': self.state.last_http_error if self.state else None,
                 'last_attempt_at': (self.state.last_attempt_at.isoformat()
                                     if self.state and self.state.last_attempt_at else None),
                 'problem': self.problem or self.store.problem,

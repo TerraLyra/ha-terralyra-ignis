@@ -44,3 +44,21 @@ async def test_diagnostics_expose_only_structured_http_evidence(hass):
                                review_required=True, status='review_required')
     assert owner.diagnostics()['last_http_error'] == 403
     assert owner.diagnostics()['last_attempt_at'] == now.isoformat()
+
+
+async def test_review_reason_does_not_infer_missing_evidence_or_clear_hold(hass):
+    from dataclasses import asdict
+    from custom_components.terralyra_ignis.official_sources.canada.retry import RefreshState
+
+    owner = get_canada_owner(hass)
+    assert owner.diagnostics()['review_reason'] is None
+    for code, expected in [(None, 'unknown_prior_cause'), (403, 'http_client_error'),
+                           (404, 'http_client_error'), (429, 'unknown_prior_cause'),
+                           (503, 'unknown_prior_cause')]:
+        owner.state = RefreshState(last_http_error=code, review_required=True,
+                                   status='review_required')
+        before = asdict(owner.state)
+        assert owner.diagnostics()['review_reason'] == expected
+        assert asdict(owner.state) == before
+    owner.state = RefreshState(last_http_error=403)
+    assert owner.diagnostics()['review_reason'] is None

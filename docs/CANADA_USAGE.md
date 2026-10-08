@@ -57,6 +57,12 @@ headers or URLs. Older stored states have no such evidence: an unknown code does
 not establish the reason for an existing review hold. The diagnostics do not reset
 that hold or change request intervals.
 
+`review_reason` describes a retained retrieval hold: `http_client_error` means a
+stored non-retryable HTTP 4xx code is present; `unknown_prior_cause` means the
+retained evidence does not establish its cause. A null value means no retrieval
+hold is loaded, not that storage is healthy: inspect `problem` and
+`storage_review_required` separately. This field never authorizes recovery.
+
 ## Recovery and data preservation
 
 Resolve the source/storage problem, then an administrator may run
