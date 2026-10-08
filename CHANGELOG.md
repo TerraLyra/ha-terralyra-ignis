@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.37.0 — prepared, not yet published
+## 0.38.0 — prepared, not yet published
+
+- Select location forecasts visually and explicitly refresh changed forecast coordinates/radii.
+- Follow the Home Assistant language in the summary and editor: Hungarian or English fallback.
+- Offer only matching IGNIS source switches in map setup; reject declared source mismatches while preserving legacy bindings.
+- Show monitoring and alert circles through a visual map checkbox while preserving advanced options.
+
+See [release notes](docs/RELEASE_0_38_0.md).
+
+## 0.37.0
 
 - Show probably related BM OKF reports in the optional report-map satellite popup, using local town/time matching without a language model.
 - Preserve original RSS text and source links; keep satellite evidence, manual links and stored history unchanged.

@@ -1,6 +1,6 @@
 # 0.37.0 — Related BM reports beside satellite observations
 
-Prepared for stable publication; not published yet.
+Published as stable [v0.37.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.37.0) on 2026-10-08.
 
 ## Changes
 
@@ -34,6 +34,8 @@ preserved. BM reports do not create satellite fire entities or notifications.
 The feature PR passed all GitHub checks, including HACS, Hassfest, frontend,
 source-research, security and Linux ARM64/x86-64 compatibility checks. Local
 validation included 137 BM checks, 32 frontend checks, browser popup checks and
-112 targeted HA tests. Production upgrade acceptance remains to be performed.
+112 targeted HA tests. The user subsequently confirmed the upgrade; a read-only check showed 0.37.0
+and the related-report action. Matching against a suitable live incident remains
+unverified; this was not a complete production acceptance test.
 
 See [matching limits and usage](BM_SATELLITE_FIRST.md).

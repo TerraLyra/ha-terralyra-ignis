@@ -62,6 +62,13 @@ See [browser cache recovery](CARD_RESOURCES.md).
 This is a sampled live check, not clean-install acceptance or verification of every
 editor interaction, notification delivery, language or history continuity.
 
+## Prepared 0.38.0
+
+The candidate contains the dashboard setup improvements in PRs #146–#151.
+See [release notes](RELEASE_0_38_0.md). Version preparation does not publish a
+GitHub release or update production HA. All feature PR checks passed; release
+preparation must pass CI separately.
+
 ## Remaining work
 
 - [Public onboarding acceptance](ONBOARDING_ACCEPTANCE.md): distinguish delivered
