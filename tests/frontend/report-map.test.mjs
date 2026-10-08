@@ -151,3 +151,24 @@ test('map switch choices use provider metadata rather than translated names',asy
  assert.deepEqual(mapSwitchChoices(states,'terralyra_ignis_nifc_reports'),[['switch.nifc','switch.nifc']]);
  assert.equal(mapSwitchChoices(states).length,2);
 });
+
+test('monitoring overlay selection preserves unrelated map configuration',async()=>{
+ const {hasMonitoringAreas,withMonitoringAreas}=await import('../../frontend/ignis-report-map.js');
+ const original={entities:['zone.home'],geo_location_sources:[{source:'other',focus:true}],default_zoom:7,report_switches:{a:'switch.a'}};
+ const enabled=withMonitoringAreas(original,true);
+ assert.equal(hasMonitoringAreas(enabled),true);
+ assert.equal(enabled.cluster,false);
+ assert.equal(original.geo_location_sources.length,1);
+ assert.deepEqual(enabled.entities,original.entities);
+ assert.deepEqual(enabled.report_switches,original.report_switches);
+ assert.equal(enabled.default_zoom,7);
+ assert.deepEqual(withMonitoringAreas(enabled,true),enabled);
+ const disabled=withMonitoringAreas(enabled,false);
+ assert.deepEqual(disabled.geo_location_sources,original.geo_location_sources);
+ assert.equal(hasMonitoringAreas(disabled),false);
+ const legacy={geo_location_sources:['terralyra_ignis_monitoring_areas'],cluster:true};
+ assert.equal(withMonitoringAreas(legacy,true).cluster,true);
+ assert.deepEqual(withMonitoringAreas(legacy,false).geo_location_sources,[]);
+ const all={show_all:true,entities:['zone.home']};
+ assert.deepEqual(withMonitoringAreas(all,false),all);
+});

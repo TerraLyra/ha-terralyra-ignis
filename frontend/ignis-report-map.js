@@ -15,6 +15,21 @@ export function mapSwitchChoices(states={},source) {
     .map(([id,state])=>[id,String(state.attributes.friendly_name||id)])
     .sort((a,b)=>a[1].localeCompare(b[1])||a[0].localeCompare(b[0]));
 }
+const MONITORING_AREAS='terralyra_ignis_monitoring_areas';
+export function hasMonitoringAreas(config) {
+  return Boolean(config.show_all || config.geo_location_sources?.some(item=>(typeof item==='string'?item:item?.source)===MONITORING_AREAS));
+}
+// Preserve all unrelated source options and native map settings.
+export function withMonitoringAreas(config, enabled) {
+  if(config.show_all)return {...config};
+  const sources=[...(config.geo_location_sources||[])];
+  if(enabled){
+    if(!hasMonitoringAreas(config))sources.push({source:MONITORING_AREAS,label_mode:'icon',focus:false});
+  } else {
+    return {...config,geo_location_sources:sources.filter(item=>(typeof item==='string'?item:item?.source)!==MONITORING_AREAS)};
+  }
+  return {...config,geo_location_sources:sources,...(config.cluster===undefined?{cluster:false}:{})};
+}
 export function mapBindingStatus(states, id) {
   if(!id)return 'unbound';
   if(typeof id!=='string'||!id.startsWith('switch.'))return 'invalid';
@@ -215,8 +230,15 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Megőrzött, ellenőrizendő: ':'Saved; check binding: ')+current);option.value=current;select.append(option);}
         select.value=current;select.onchange=()=>{const bindings={...this.config.report_switches};if(select.value)bindings[source]=select.value;else delete bindings[source];this.update({report_switches:bindings});};label.append(select);root.append(label);
       }
+      const circlesLabel=this.node('label',hu?'Megfigyelési és riasztási körök':'Monitoring and alert circles'),circles=this.node('input');
+      circles.type='checkbox';circles.style.cssText='width:auto;margin-right:8px';circles.checked=hasMonitoringAreas(this.config);circles.disabled=Boolean(this.config.show_all);
+      circles.setAttribute('aria-label',hu?'Megfigyelési és riasztási körök':'Monitoring and alert circles');
+      circles.onchange=()=>{this.update(withMonitoringAreas(this.config,circles.checked));this.render();};circlesLabel.prepend(circles);root.append(circlesLabel);
+      root.append(this.node('p',hu?'A körök a megfigyelt helyszínek beállított sugarait mutatják. Egyenlő sugaraknál egy kör jelenik meg. Nem a tűz kiterjedését jelölik.':'Circles show the configured radii of monitored locations. Equal radii use one circle. They do not represent fire perimeters.'));
+      if(this.config.show_all)root.append(this.node('p',hu?'Az összes entitás megjelenítése aktív; a körök külön szűréséhez előbb kapcsold ki a show_all beállítást a kódszerkesztőben.':'Show all entities is active; turn off show_all in the code editor before filtering circles separately.'));
+      if(this.config.cluster===true)root.append(this.node('p',hu?'A jelölők csoportosítása aktív; a köröket elrejtheti. Ha szükséges, állítsd a cluster értékét false-ra a kódszerkesztőben.':'Marker clustering is active and may hide circles. If needed, set cluster to false in the code editor.'));
       this.statusHost=this.node('section');this.statusHost.setAttribute('aria-live','polite');root.append(this.statusHost);this.renderStatus();
-      root.append(this.node('p',hu?'A hozzárendelés nélküli vagy kikapcsolt riportforrás vezérlője rejtve marad. A helyszínkörök és egyéb haladó térképbeállítások a kódszerkesztőben módosíthatók; a meglévő értékeket megőrizzük.':'Report controls stay hidden without a binding or when their switch is off. Location circles and other advanced map options remain available in the code editor; existing values are preserved.'));
+      root.append(this.node('p',hu?'A hozzárendelés nélküli vagy kikapcsolt riportforrás vezérlője rejtve marad. Az egyéb haladó térképbeállítások a kódszerkesztőben módosíthatók; a meglévő értékeket megőrizzük.':'Report controls stay hidden without a binding or when their switch is off. Other advanced map options remain available in the code editor; existing values are preserved.'));
     }
   }
   customElements.define('ignis-report-map-editor',IgnisReportMapEditor);

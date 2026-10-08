@@ -105,6 +105,17 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>Object.hasOwn(edits.at(-1).report_switches,'terralyra_ignis_canada_reports')),false);
   await page.evaluate(()=>editor.hass={...editorHass,language:'en'});
   assert.equal(await page.getByRole('combobox',{name:'Canada map switch'}).count(),1);
+  await page.getByRole('checkbox',{name:'Monitoring and alert circles',exact:true}).check();
+  assert.deepEqual(await page.evaluate(()=>edits.at(-1).geo_location_sources),[{source:'terralyra_ignis_monitoring_areas',label_mode:'icon',focus:false}]);
+  assert.deepEqual(await page.evaluate(()=>edits.at(-1).entities),['zone.home']);
+  assert.equal(await page.evaluate(()=>edits.at(-1).default_zoom),7);
+  assert.equal(await page.evaluate(()=>edits.at(-1).cluster),false);
+  await page.getByRole('checkbox',{name:'Monitoring and alert circles',exact:true}).uncheck();
+  assert.deepEqual(await page.evaluate(()=>edits.at(-1).geo_location_sources),[]);
+  await page.evaluate(()=>editor.setConfig({...editor.config,show_all:true}));
+  assert.equal(await page.getByRole('checkbox',{name:'Monitoring and alert circles',exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole('checkbox',{name:'Monitoring and alert circles',exact:true}).isChecked(),true);
+
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.evaluate(()=>{
     card.dialog.close(); card.selected=null;
