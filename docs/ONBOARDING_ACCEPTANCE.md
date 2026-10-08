@@ -22,6 +22,11 @@ reported data availability. It explicitly states that notification setup and
 delivery cannot be verified by the card. This is a card-setup review, not a full
 integration onboarding wizard or notification acceptance.
 
+The report-map editor offers only switches carrying the matching IGNIS source
+metadata. Unrelated household switches are excluded. Existing explicit bindings
+remain preserved for review, including older switches without metadata. Selecting
+a binding does not enable its provider or turn on the switch.
+
 ## Next implementation work
 
 1. Reduce manual map/summary setup while retaining explicit location bindings.

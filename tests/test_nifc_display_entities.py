@@ -57,3 +57,11 @@ async def test_map_switch_starts_off_and_subscribes_only_when_on(hass):
         assert (entry.entry_id,'map') not in runtime._listeners
         await entity_platform.async_remove_entity(entity.entity_id)
         assert entity._manager._control_listener is None
+
+async def test_map_switch_metadata_identifies_provider_without_enabling(hass):
+    from custom_components.terralyra_ignis.switch import CanadaMapSwitch
+    entry=MockConfigEntry(domain='terralyra_ignis');entry.add_to_hass(hass)
+    for cls,source in [(NifcMapSwitch,'terralyra_ignis_nifc_reports'),(CanadaMapSwitch,'terralyra_ignis_canada_reports')]:
+        entity=cls(hass,entry)
+        assert entity.extra_state_attributes['ignis_map_source']==source
+        assert entity.is_on is False

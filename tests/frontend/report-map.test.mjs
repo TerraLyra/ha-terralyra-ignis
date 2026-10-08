@@ -139,3 +139,15 @@ test('satellite context requires explicit integration and incident identities',a
   assert.equal(satelliteContextRequest({attributes:{source:'terralyra_ignis'}}),null);
   assert.deepEqual(satelliteContextRequest({attributes:{source:'terralyra_ignis',context_entry_id:'entry',context_incident_id:'family'}}),{config_entry_id:'entry',incident_id:'family'});
 });
+
+test('map switch choices use provider metadata rather than translated names',async()=>{
+ const {mapSwitchChoices}=await import('../../frontend/ignis-report-map.js');
+ const states={
+  'switch.light':{attributes:{friendly_name:'Canada NIFC'}},
+  'switch.renamed':{state:'off',attributes:{friendly_name:'Saját név',ignis_map_source:'terralyra_ignis_canada_reports'}},
+  'switch.nifc':{state:'unavailable',attributes:{ignis_map_source:'terralyra_ignis_nifc_reports'}}
+ };
+ assert.deepEqual(mapSwitchChoices(states,'terralyra_ignis_canada_reports'),[['switch.renamed','Saját név']]);
+ assert.deepEqual(mapSwitchChoices(states,'terralyra_ignis_nifc_reports'),[['switch.nifc','switch.nifc']]);
+ assert.equal(mapSwitchChoices(states).length,2);
+});
