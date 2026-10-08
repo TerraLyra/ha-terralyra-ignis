@@ -73,8 +73,22 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.getByRole('combobox',{name:'Előrejelzés (nem kötelező)',exact:true}).selectOption('sensor.risk');
  assert.deepEqual(await page.evaluate(()=>changes.at(-1).forecast),{entity:'sensor.risk',location_id:'ca',latitude:47,longitude:19,radius_km:25});
  assert.equal(await page.evaluate(()=>changes.at(-1).custom_option),true);
+ await page.evaluate(()=>{editor.hass={states:{...editor._hass.states,'sensor.risk':{state:'available',attributes:{...editor._hass.states['sensor.risk'].attributes,forecast_radius_km:40,latitude:48}}}}});
+ assert.equal(await page.evaluate(()=>changes.at(-1).forecast.radius_km),25);
+ await page.getByRole('button',{name:'Előrejelzés hozzárendelésének frissítése',exact:true}).click();
+ assert.deepEqual(await page.evaluate(()=>changes.at(-1).forecast),{entity:'sensor.risk',location_id:'ca',latitude:48,longitude:19,radius_km:40});
+ assert.equal(await page.evaluate(()=>changes.at(-1).custom_option),true);
+ assert.equal(await page.getByRole('button',{name:'Előrejelzés hozzárendelésének frissítése',exact:true}).count(),0);
  await page.getByRole('combobox',{name:'Előrejelzés (nem kötelező)',exact:true}).selectOption('');
  assert.equal(await page.evaluate(()=>Object.hasOwn(changes.at(-1),'forecast')),false);
+ await page.evaluate(()=>{
+   editor.setConfig({...editor.config,forecast:{entity:'sensor.risk',location_id:'ca',latitude:47,longitude:19,radius_km:25}});
+   editor.hass={states:{...editor._hass.states,'sensor.risk':{state:'available',attributes:{...editor._hass.states['sensor.risk'].attributes,location_id:'different-place'}}}};
+ });
+ assert.equal(await page.getByRole('button',{name:'Előrejelzés hozzárendelésének frissítése',exact:true}).count(),0);
+ assert.equal(await page.getByRole('combobox',{name:'Előrejelzés (nem kötelező)',exact:true}).inputValue(),'sensor.risk');
+ assert.equal(await page.evaluate(()=>editor.config.forecast.radius_km),25);
+
  if(process.env.IGNIS_SCREENSHOT){
    await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});entity.attributes.location_name='Home';editor.hass={states:{'sensor.place':entity}}});
    await page.screenshot({path:process.env.IGNIS_SCREENSHOT,fullPage:true});
