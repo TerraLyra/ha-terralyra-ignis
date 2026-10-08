@@ -49,21 +49,29 @@ def _time(value):
     return stamp.astimezone(UTC)
 
 
-def _position(value):
+def _position(value, projected=False):
     if not isinstance(value, list) or len(value) not in (2, 3):
         raise ValueError("Invalid QFD position")
     if any(type(n) not in (int, float) or not math.isfinite(n) for n in value):
         raise ValueError("Invalid QFD ordinate")
+    if projected:
+        # EPSG:3857 inverse, WGS84 semi-major axis; see PROJ webmerc definition.
+        radius = 6378137.0
+        limit = math.pi * radius
+        if abs(value[0]) > limit or abs(value[1]) > limit:
+            raise ValueError("QFD Web Mercator position outside supported world bounds")
+        value = [math.degrees(value[0] / radius),
+                 math.degrees(math.atan(math.sinh(value[1] / radius))), *value[2:]]
     if not -180 <= value[0] <= 180 or not -90 <= value[1] <= 90:
         raise ValueError("QFD position outside geographic range")
     return tuple(value)  # Retain optional third ordinate; never infer its meaning.
 
 
-def _geometry(value, kind):
+def _geometry(value, kind, projected=False):
     if not isinstance(value, dict):
         raise ValueError("Missing QFD geometry")
     if kind == RecordKind.INCIDENT and value.get("type") == "Point":
-        return OfficialGeometry(GeometryRole.INCIDENT_POINT, _position(value.get("coordinates")))
+        return OfficialGeometry(GeometryRole.INCIDENT_POINT, _position(value.get("coordinates"), projected))
     if kind != RecordKind.WARNING or value.get("type") != "Polygon":
         raise ValueError("Unsupported QFD geometry/record combination")
     rings = value.get("coordinates")
@@ -73,7 +81,7 @@ def _geometry(value, kind):
         raise ValueError("QFD polygon too large")
     result = []
     for ring in rings:
-        points = tuple(_position(p) for p in ring)
+        points = tuple(_position(p, projected) for p in ring)
         if len(points) < 4 or points[0] != points[-1] or len(set(p[:2] for p in points)) < 3:
             raise ValueError("Invalid QFD ring")
         if len({len(p) for p in points}) != 1:
@@ -82,7 +90,7 @@ def _geometry(value, kind):
     return OfficialGeometry(GeometryRole.WARNING_AREA, tuple(result))
 
 
-def _record(feature, retrieved_at):
+def _record(feature, retrieved_at, projected=False):
     if not isinstance(feature, dict) or feature.get("type") != "Feature":
         raise ValueError("Invalid QFD feature")
     p = feature.get("properties")
@@ -105,7 +113,7 @@ def _record(feature, retrieved_at):
     return OfficialReport(
         provider="qld_qfd", source_id=source_id, kind=kind, jurisdiction="AU-QLD",
         title=_text(p.get("WarningTitle"), required=True), source_url=PUBLIC_URL,
-        attribution=ATTRIBUTION, geometry=_geometry(feature.get("geometry"), kind),
+        attribution=ATTRIBUTION, geometry=_geometry(feature.get("geometry"), kind, projected),
         raw_type=fire_type, raw_status=_optional_text(p.get("CurrentStatus")),
         raw_warning_level=level, planned_burn=fire_type == "FIRE PERMITTED BURN",
         retrieved_at=retrieved_at, event_updated_at=_time(p.get("ItemDateTimeLocal_ISO")),
@@ -128,6 +136,12 @@ def parse_feed(body: bytes, *, retrieved_at: datetime) -> ParsedReports:
         raise ValueError("Invalid QFD JSON") from err
     if not isinstance(document, dict) or document.get("type") != "FeatureCollection":
         raise ValueError("Invalid QFD collection")
+    crs = document.get("crs")
+    projected = crs == {"type": "name", "properties": {"name": "EPSG:3857"}}
+    if crs is not None and not projected and crs != {
+        "type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
+    }:
+        raise ValueError("Unsupported QFD coordinate reference system")
     features = document.get("features")
     if not isinstance(features, list) or len(features) > MAX_ITEMS:
         raise ValueError("Invalid QFD feature count")
@@ -135,7 +149,7 @@ def parse_feed(body: bytes, *, retrieved_at: datetime) -> ParsedReports:
     filtered = invalid = conflicts = 0
     for feature in features:
         try:
-            record = _record(feature, retrieved_at)
+            record = _record(feature, retrieved_at, projected)
             if record is None:
                 filtered += 1
             else:
