@@ -4,7 +4,7 @@ const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc
 export function visibleMapSources(states = {}, switches = {}) {
   return {terralyra_ignis:true, ...Object.fromEntries([...SOURCES].map(source => {
     const id = switches[source];
-    return [source, typeof id === 'string' && id.startsWith('switch.') && states[id]?.state === 'on'];
+    return [source, mapBindingStatus(states,id,source) === 'on'];
   }))};
 }
 // Stable backend contract, independent of entity IDs and translated names.
@@ -30,11 +30,13 @@ export function withMonitoringAreas(config, enabled) {
   }
   return {...config,geo_location_sources:sources,...(config.cluster===undefined?{cluster:false}:{})};
 }
-export function mapBindingStatus(states, id) {
+export function mapBindingStatus(states, id, source) {
   if(!id)return 'unbound';
   if(typeof id!=='string'||!id.startsWith('switch.'))return 'invalid';
   if(!states)return 'loading';
   if(!states[id])return 'missing';
+  const declared=states[id].attributes?.ignis_map_source;
+  if(source && declared!==undefined && declared!==source)return 'wrong_source';
   return ['on','off'].includes(states[id].state)?states[id].state:'unavailable';
 }
 const WORDS = {
@@ -194,6 +196,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       if(!this.statusHost)return;
       const hu=this._hass?.language?.startsWith('hu');
       const messages=hu?{
+        wrong_source:'A kapcsoló másik forráshoz tartozik; válaszd ki a megfelelő kapcsolót. A riportvezérlő rejtve marad.',
         unbound:'Nincs hozzárendelés; a riportvezérlő rejtve marad.',
         invalid:'Kapcsolóentitást válassz; a jelenlegi hozzárendelés nem használható.',
         loading:'Várakozás a Home Assistant állapotadataira.',
@@ -202,6 +205,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         off:'A térképkapcsoló ki van kapcsolva; a riportvezérlő rejtve marad.',
         on:'A térképkapcsoló be van kapcsolva. Ez nem igazolja friss riportok meglétét.'
       }:{
+        wrong_source:'The switch belongs to a different source; select the matching switch. The report control stays hidden.',
         unbound:'No binding; the report control stays hidden.',
         invalid:'Select a switch entity; the current binding cannot be used.',
         loading:'Waiting for Home Assistant state data.',
@@ -211,7 +215,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         on:'The map switch is on. This does not establish that fresh reports exist.'
       };
       this.statusHost.replaceChildren(this.node('h3',hu?'Hozzárendelések állapota':'Binding status'));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source])]));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
     }
     render(){
       if(!this.config)return;

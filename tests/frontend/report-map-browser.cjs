@@ -103,6 +103,12 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>edits.at(-1).title),'New title');
   await page.getByRole('combobox',{name:'Canada térképkapcsoló'}).selectOption('');
   assert.equal(await page.evaluate(()=>Object.hasOwn(edits.at(-1).report_switches,'terralyra_ignis_canada_reports')),false);
+  await page.evaluate(()=>{
+    editor.setConfig({...editor.config,report_switches:{terralyra_ignis_nifc_reports:'switch.canada'}});
+    editor.hass=editorHass;
+  });
+  assert.match(await page.locator('section').innerText(),/másik forráshoz tartozik/);
+  assert.equal(await page.getByRole('combobox',{name:'NIFC térképkapcsoló'}).inputValue(),'switch.canada');
   await page.evaluate(()=>editor.hass={...editorHass,language:'en'});
   assert.equal(await page.getByRole('combobox',{name:'Canada map switch'}).count(),1);
   await page.getByRole('checkbox',{name:'Monitoring and alert circles',exact:true}).check();
