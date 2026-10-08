@@ -89,6 +89,26 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.equal(await page.getByRole('combobox',{name:'Előrejelzés (nem kötelező)',exact:true}).inputValue(),'sensor.risk');
  assert.equal(await page.evaluate(()=>editor.config.forecast.radius_km),25);
 
+ // Language changes re-render controls without changing saved configuration.
+ await page.evaluate(()=>{window.beforeLanguage=JSON.stringify(editor.config);window.beforeChanges=changes.length;editor.hass={...editor._hass,language:'en'};});
+ assert.equal(await page.getByRole('combobox',{name:'Monitored location',exact:true}).inputValue(),'sensor.place');
+ assert.equal(await page.getByRole('combobox',{name:'Forecast (optional)',exact:true}).inputValue(),'sensor.risk');
+ assert.match(await page.getByRole('region',{name:'Setup review'}).innerText(),/does not verify/);
+ assert.equal(await page.evaluate(()=>JSON.stringify(editor.config)),await page.evaluate(()=>beforeLanguage));
+ assert.equal(await page.evaluate(()=>changes.length),await page.evaluate(()=>beforeChanges));
+ await page.evaluate(()=>{
+   document.querySelector('main').replaceChildren(card);
+   card.setConfig({entity:'sensor.place',location_id:'ca',title:'Magas'});
+   card.hass={language:'en',states:{'sensor.place':entity}};
+ });
+ assert.equal(await page.locator('h2').innerText(),'Magas');
+ assert.match(await page.locator('ha-card').innerText(),/Official fire restrictions/);
+ assert.match(await page.locator('ha-card').innerText(),/No detections does not mean no fire/);
+ await page.getByRole('button',{name:'Sensor details',exact:true}).click();
+ assert.equal(await page.evaluate(()=>info),'sensor.place');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.evaluate(()=>{card.hass={...card._hass,language:'hu'};});
+ assert.equal(await page.getByRole('button',{name:'Érzékelő részletei',exact:true}).count(),1);
  if(process.env.IGNIS_SCREENSHOT){
    await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});entity.attributes.location_name='Home';editor.hass={states:{'sensor.place':entity}}});
    await page.screenshot({path:process.env.IGNIS_SCREENSHOT,fullPage:true});

@@ -3,7 +3,7 @@
 > **IGNIS 0.35.0+:** cards are bundled with the integration. See
 > [one-time resource setup, updates and older-version migration](CARD_RESOURCES.md).
 
-This optional Hungarian card reads per-location operational-status entities and
+This optional card reads per-location operational-status entities and
 explicitly bound forecast sensors. It never
 calls a service, fetches a provider, or changes HA state/history.
 
@@ -18,7 +18,10 @@ title. No location is selected automatically, even if only one is available.
 The editor lists sensors with the location operational-status attributes. If
 none are available, it explains how to enable a monitored location and wait for
 its sensor. A temporarily missing configured sensor is retained rather than
-silently replaced. The editor and card currently use Hungarian labels.
+silently replaced. On the development branch (not yet in stable 0.37.0), the editor and card follow
+the Home Assistant UI language: Hungarian for Hungarian, English for other
+languages. Before HA connects, the historical Hungarian default is preserved.
+Custom titles, location names and source attribution are displayed unchanged.
 
 On the development branch (not yet in stable 0.37.0), choose a matching sensor
 under **Előrejelzés (nem kötelező)** in the visual editor. This copies its location,
