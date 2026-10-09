@@ -127,6 +127,11 @@ export function summarizeForecast(entity, binding, locationId, now=new Date(), l
     attribution:typeof a.attribution==='string'?a.attribution:'EUMETSAT / LSA SAF'};
 }
 // Only offer states carrying the location-status contract, never forecast/global sensors.
+export function locationChoiceLabel(choice, choices) {
+  return choices.filter(candidate=>candidate.name===choice.name).length>1
+    ? `${choice.name} — ${choice.entity}` : choice.name;
+}
+
 export function locationChoices(states={}) {
   return Object.entries(states).filter(([id,state])=>id.startsWith('sensor.') &&
     typeof state?.attributes?.location_id==='string' && state.attributes.location_id.trim() &&
@@ -231,7 +236,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     const label=this.node('label',text("Megfigyelt helyszín",language)),select=this.node('select');
     select.setAttribute('aria-label',text("Megfigyelt helyszín",language));
     const placeholder=this.node('option',text("Válassz helyszínt…",language));placeholder.value='';placeholder.disabled=true;select.append(placeholder);
-    for(const choice of choices){const option=this.node('option',`${choice.name} — ${choice.entity}`);option.value=choice.entity;select.append(option);}
+    for(const choice of choices){const option=this.node('option',locationChoiceLabel(choice,choices));option.value=choice.entity;select.append(option);}
     if(this.config.entity&&!choices.some(c=>c.entity===this.config.entity)){
       const missing=this.node('option',(language==='hu'?`Jelenleg nem elérhető: ${this.config.entity}`:`Currently unavailable: ${this.config.entity}`));missing.value=this.config.entity;missing.disabled=true;select.append(missing);
     }

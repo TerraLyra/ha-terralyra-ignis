@@ -138,3 +138,13 @@ test('English summary retains data meaning and source text',async()=>{
  assert.match(summarizeForecast({...forecast,state:'unavailable'},binding,'home',now,'en').message,/unavailable/);
  assert.match(forecastSetupReview({}, {},now,'en'),/not linked/);
 });
+
+
+const {locationChoiceLabel}=await import('../../frontend/ignis-location-summary.js');
+test('location labels hide technical IDs unless names collide',()=>{
+ const home={name:'Home',entity:'sensor.home'};
+ const second={name:'Home',entity:'sensor.other'};
+ assert.equal(locationChoiceLabel(home,[home]),'Home');
+ assert.equal(locationChoiceLabel(home,[home,second]),'Home — sensor.home');
+ assert.equal(locationChoiceLabel(second,[home,second]),'Home — sensor.other');
+});
