@@ -1,6 +1,6 @@
 # 0.38.1 — Queensland reports and summary fixes
 
-Prepared for stable publication; not published yet.
+Published as stable v0.38.1 on 2026-10-08 (UTC).
 
 ## Changes
 
@@ -14,7 +14,7 @@ Prepared for stable publication; not published yet.
 
 ## Upgrade
 
-1. Once published, update through HACS and restart Home Assistant when convenient.
+1. Update through HACS and restart Home Assistant when convenient.
 2. Fully reload the browser or Companion App frontend.
 3. If old card code persists, change the existing resource query to `?v=0.38.1`;
    do not add duplicate resources.
@@ -28,5 +28,8 @@ opt-ins, history, notification rules and Canada's existing review hold are uncha
 The feature changes passed GitHub CI. Targeted QFD tests covered 24 parser, client
 and calendar cases. The saved official feed parsed 42 records with zero invalid
 records. Summary changes passed 38 frontend checks and isolated browser tests.
-The release candidate requires its own successful CI before publication.
-Live Queensland recovery after upgrade remains to be verified.
+The release candidate passed all CI checks; the merged tree matched the tested
+candidate. After upgrade, a sampled live check confirmed QFD availability with
+zero invalid records and corrected summary choices and saved Home wording.
+This does not establish continuous source availability or complete onboarding
+acceptance.

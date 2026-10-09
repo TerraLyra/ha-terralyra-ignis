@@ -70,14 +70,33 @@ After the user upgraded and restarted, a sampled read-only check on HA 2026.10.0
 confirmed summaries, forecasts, radii and visual editors rendering. This is not
 full clean-install or notification-delivery acceptance.
 
-## Prepared 0.38.1
+## Published 0.38.1
 
-Contains PRs #153 and #154: summary location choices, saved Home forecast wording,
-and explicit QFD Web Mercator conversion. See [release notes](RELEASE_0_38_1.md).
-Feature checks passed; the exact release candidate must pass CI before tagging.
-The saved QFD feed yielded 42 records with zero invalid records offline. Production
-QFD recovery is not yet verified. Canada's existing review hold remains unresolved;
-no protection reset or live configuration change is part of this release.
+Stable [v0.38.1](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.38.1)
+was published from `1d0eee6c9298908c1ea4a4d32ee6055bafdf54fe` after successful
+candidate CI and a matching merged tree. Contains PRs #153 and #154: summary
+location choices, saved Home forecast wording and explicit QFD Web Mercator
+conversion. See [release notes](RELEASE_0_38_1.md).
+
+After the user upgraded, restarted and reloaded the frontend, a sampled live check
+confirmed version 0.38.1, QFD feed availability with zero invalid records, six
+nonduplicate location choices and saved Home forecast wording. Map and summary
+cards rendered; no dashboard settings were saved during verification.
+
+## Canada recovery validation — 2026-10-09
+
+After an explicit administrator-approved recovery, the existing reports and history
+were preserved and the one-hour cooldown was applied. A later read-only check
+showed Response available, 166 source records, a successful retrieval at
+12:21:43 Europe/Budapest, and the next eligible attempt at 13:21:43. Storage was
+neither pending nor blocked. This confirms recovery of retrieval, not freshness
+of every upstream report or nationwide completeness. The original historical
+failure cause remains unknown.
+
+## Merged but unreleased
+
+PR #156 adds a diagnostic distinction between retained HTTP client errors and
+unknown prior review causes. It does not change recovery policy or clear holds.
 
 ## Remaining work
 

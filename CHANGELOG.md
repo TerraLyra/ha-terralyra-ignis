@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.38.1 — prepared, not yet published
+## 0.38.1
 
 - Restore Queensland report parsing for explicitly declared Web Mercator coordinates.
 - Remove source-count sensors from the summary location selector.
