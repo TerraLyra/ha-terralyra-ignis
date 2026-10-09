@@ -118,6 +118,15 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.evaluate(()=>{card.hass={...card._hass,language:'hu'};});
  assert.equal(await page.getByRole('button',{name:'Érzékelő részletei',exact:true}).count(),1);
+ await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary'});editor.hass={language:'en',states:{}}});
+ const settings=page.getByRole('link',{name:'Configure locations and radii'});
+ assert.equal(await settings.getAttribute('href'),'/config/integrations/integration/terralyra_ignis');
+ assert.equal(await settings.getAttribute('target'),'_blank');
+ assert.equal(await settings.getAttribute('rel'),'noopener noreferrer');
+ assert.match(await page.getByRole('link',{name:'First setup guide'}).getAttribute('href'),/#english$/);
+ await page.evaluate(()=>editor.hass={language:'hu',states:{}});
+ assert.equal(await page.getByRole('link',{name:'Helyszínek és sugarak beállítása'}).count(),1);
+ assert.match(await page.getByRole('link',{name:'Első lépések útmutató'}).getAttribute('href'),/#magyar$/);
  if(process.env.IGNIS_SCREENSHOT){
    await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});entity.attributes.location_name='Home';editor.hass={states:{'sensor.place':entity}}});
    await page.screenshot({path:process.env.IGNIS_SCREENSHOT,fullPage:true});
