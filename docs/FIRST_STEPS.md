@@ -45,7 +45,13 @@ It needs no IGNIS JavaScript resource and displays satellite markers and optiona
 location circles. No fire markers can be a valid empty result; check source status
 before interpreting it. These circles are your configured areas, not fire perimeters.
 
-For a per-place summary, register `/terralyra_ignis/cards/ignis-location-summary.js`
+On 0.39.0+, an administrator can use **Developer tools → Actions → TerraLyra
+IGNIS: Set up a dashboard card** and choose **Location summary**. Leave confirmation
+off first. Follow the [result guidance](CARD_RESOURCES.md#optional-setup-action--stable-0390)
+before confirming a missing resource. An already registered card needs no changes.
+Reload the browser after registration.
+
+Alternatively, for a per-place summary, register `/terralyra_ignis/cards/ignis-location-summary.js`
 once as a **JavaScript module** under **Settings → Dashboards → Resources**.
 Then edit your dashboard, add **IGNIS helyszínösszefoglaló**, and select the place
 in its visual editor. No file copying is needed on 0.35.0+. Use one card per place.
@@ -122,7 +128,13 @@ A [natív térképpéldához](MONITORING_RADIUS_MAP.md#recommended-map-card) nem
 külön IGNIS JavaScript-fájl. A helyszín körei a beállított sugarakat mutatják,
 nem a tűz kiterjedését. Ha nincs tűzjelölő, az adatforrás állapotát is ellenőrizd.
 
-Az opcionális összefoglalóhoz a **Beállítások → Dashboardok → Erőforrások** alatt
+0.39.0-tól rendszergazdaként a **Fejlesztői eszközök → Műveletek → TerraLyra
+IGNIS: Dashboardkártya beállítása** műveletben válaszd a **Location summary**
+kártyát. Először hagyd kikapcsolva a megerősítést, majd kövesd az
+[eredményhez tartozó útmutatást](CARD_RESOURCES.md). Már regisztrált kártyánál
+nincs teendő; új erőforrás hozzáadása után töltsd újra a böngészőt.
+
+Kézi lehetőségként az opcionális összefoglalóhoz a **Beállítások → Dashboardok → Erőforrások** alatt
 add hozzá egyszer a `/terralyra_ignis/cards/ignis-location-summary.js` címet,
 **JavaScript-modul** típussal. Ezután a dashboard szerkesztőjében add hozzá az
 **IGNIS helyszínösszefoglaló** kártyát, és válaszd ki a helyszínt a listából.

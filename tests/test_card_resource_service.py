@@ -54,3 +54,46 @@ async def test_real_collection_persists_module(hass, hass_storage):
     assert len(collection.async_items())==1
     assert collection.async_items()[0]['type']=='module'
     assert collection.async_items()[0]['url'].endswith('/ignis-report-map.js')
+
+@pytest.mark.parametrize('card,filename', [
+    ('summary', 'ignis-location-summary.js'),
+    ('map', 'ignis-report-map.js'),
+    ('bm', 'ignis-bm-reports.js'),
+])
+async def test_fresh_setup_survives_collection_reload(hass, hass_storage, card, filename):
+    """A first registration survives storage reload without duplicating resources."""
+    from datetime import timedelta
+    from homeassistant.util import dt as dt_util
+    from pytest_homeassistant_custom_component.common import async_fire_time_changed
+
+    config = SimpleNamespace(async_load=AsyncMock(return_value={}))
+    collection = ResourceStorageCollection(hass, config)
+    data = SimpleNamespace(resources=collection, resource_mode='storage')
+    hass.data[LOVELACE_DATA] = data
+    register_card_resource_service(hass)
+
+    async def call(confirm=False):
+        return await hass.services.async_call(
+            'terralyra_ignis', 'register_dashboard_card',
+            {'card': card, 'confirm_no_renamed_copy': confirm},
+            blocking=True, return_response=True, context=Context(user_id='admin'))
+
+    with patch.object(hass.auth, 'async_get_user', AsyncMock(
+        return_value=SimpleNamespace(is_admin=True)
+    )):
+        preview = await call()
+        assert preview['status'] == 'confirm_no_renamed_copy'
+        assert preview['changed'] is False
+        assert collection.async_items() == []
+        assert (await call(True))['status'] == 'registered'
+        original = list(collection.async_items())
+        async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=15))
+        await hass.async_block_till_done()
+
+        data.resources = ResourceStorageCollection(hass, config)
+        result = await call(True)
+        assert result['status'] == 'already_registered'
+        assert result['changed'] is False
+        assert data.resources.async_items() == original
+        assert original[0]['url'] == f'/terralyra_ignis/cards/{filename}'
+        assert original[0]['type'] == 'module'

@@ -11,7 +11,7 @@ not automatically a passed first-time-user trial.
 | Separate monitoring and alert radii | 0.33.0; improved validation in 0.34.1 | Integrated guided setup and completion summary remain open |
 | Visual summary location selection | 0.34.0 | Visual forecast binding implemented; first-time-user acceptance remains open |
 | Six-language notification blueprint | 0.34.0 | Separate import and user-selected phone; no silent automation replacement |
-| Bundled optional cards | 0.35.0; resource migration observed | One-time resource registration remains manual |
+| Bundled optional cards | 0.35.0; resource migration observed | 0.39.0 adds an explicit administrator setup action; dashboard placement remains manual |
 | Summary icons | 0.35.1 | Decoration only; no safety or official-status inference |
 | Source problem guidance | 0.36.0; sampled live after browser cache recovery | Hungarian/English summary guidance implemented; broader acceptance remains open |
 | Visual report-map editor and binding status | 0.36.0 | Explicit source switches remain required; all editor interactions not yet exercised live |
@@ -27,11 +27,13 @@ metadata. Unrelated household switches are excluded. Existing explicit bindings
 remain preserved for review, including older switches without metadata. Selecting
 a binding does not enable its provider or turn on the switch.
 
-## Additional delivered setup improvements (unreleased)
+## Additional delivered setup improvements (0.39.0)
 
 PRs #158–#159 simplify unique location labels, retain disambiguation for equal
 names, and provide direct settings/help links without leaving unfinished edits.
-They do not automate resource registration or establish first-time-user acceptance.
+The separate registration action can add a missing module after confirmation.
+Neither feature establishes first-time-user acceptance. A live preview recognized
+an existing summary resource without changing it.
 
 ## Next implementation work
 
@@ -63,6 +65,14 @@ integration, erase storage or reset history to simulate a clean installation.
 - [ ] Confirm old history remains available; do not delete it to make checks pass.
 - [ ] Confirm bundled card updates load after browser/app reload without duplicate resources.
 - [ ] Confirm existing notification automations are unchanged and not duplicated.
+
+## Isolated resource-storage check
+
+Automated tests use Home Assistant's real resource collection with isolated test
+storage. For summary, map and BM cards, they check an empty first-run preview,
+explicit creation, delayed persistence and collection reload. Repeating setup
+after reload preserves the same resource ID and creates no duplicate. This does
+not test browser execution or replace the unaided installation trial above.
 
 ## Offline negative-state review
 

@@ -93,13 +93,17 @@ neither pending nor blocked. This confirms recovery of retrieval, not freshness
 of every upstream report or nationwide completeness. The original historical
 failure cause remains unknown.
 
-## Prepared 0.39.0
+## Published 0.39.0
 
 See [release notes](RELEASE_0_39_0.md) for card registration, setup guidance and
-Canada diagnostics. Candidate CI and explicit publication approval remain required.
-Live registration acceptance is not yet performed.
+Canada diagnostics. Stable publication followed successful CI and user approval.
+After the user updated and restarted, the integration page showed 0.39.0.
+The registration preview returned `already_registered` and `changed: false` for
+the existing summary module. Maps and summaries rendered. This sampled check
+does not establish clean-install acceptance or successful creation of a new live
+resource. No resources or dashboard settings were changed.
 
-## Merged changes included in the candidate
+## Merged changes included in 0.39.0
 
 PR #156 adds a diagnostic distinction between retained HTTP client errors and
 unknown prior review causes. It does not change recovery policy or clear holds.
