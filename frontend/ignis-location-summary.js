@@ -231,7 +231,17 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     if(!this.config)return;
     if(!this.shadowRoot)this.attachShadow({mode:'open'});
     const root=this.shadowRoot;root.replaceChildren();
-    root.append(this.node('style',`:host{display:block;color:var(--primary-text-color);overflow-wrap:anywhere}label{display:block;margin:16px 0}select,input{display:block;box-sizing:border-box;width:100%;min-width:0;font:inherit;padding:12px;margin-top:8px;color:inherit;background:var(--card-background-color,white);border:1px solid var(--divider-color,#999);border-radius:8px}p{line-height:1.5}`));
+    root.append(this.node('style',`:host{display:block;color:var(--primary-text-color);overflow-wrap:anywhere}label{display:block;margin:16px 0}select,input{display:block;box-sizing:border-box;width:100%;min-width:0;font:inherit;padding:12px;margin-top:8px;color:inherit;background:var(--card-background-color,white);border:1px solid var(--divider-color,#999);border-radius:8px}p{line-height:1.5}a{color:var(--primary-color,#007a8a)}`));
+    const help=this.node('nav');
+    help.setAttribute('aria-label',language==='hu'?'Beállítási segítség':'Setup help');
+    for(const [caption,url] of [
+      [language==='hu'?'Helyszínek és sugarak beállítása':'Configure locations and radii','/config/integrations/integration/terralyra_ignis'],
+      [language==='hu'?'Első lépések útmutató':'First setup guide','https://github.com/TerraLyra/ha-terralyra-ignis/blob/main/docs/FIRST_STEPS.md'+(language==='hu'?'#magyar':'#english')]
+    ]){
+      const link=this.node('a',caption);link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+      const line=this.node('p');line.append(link);help.append(line);
+    }
+    root.append(help);
     const choices=locationChoices(this._hass?.states);
     const label=this.node('label',text("Megfigyelt helyszín",language)),select=this.node('select');
     select.setAttribute('aria-label',text("Megfigyelt helyszín",language));
