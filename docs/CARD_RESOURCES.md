@@ -81,10 +81,10 @@ Only the three named JavaScript files are served; no integration/config/storage
 folder is exposed. The integration uses Home Assistant's
 [asynchronous static-file API](https://developers.home-assistant.io/blog/2024/06/18/async_register_static_paths/).
 
-## Optional setup action — next release, not yet published
+## Optional setup action — stable 0.39.0+
 
 An administrator can use **Developer tools → Actions → TerraLyra IGNIS: Set up an
-optional dashboard card**. Choose the summary, map or BM reports card. Leave the
+dashboard card**. Choose the summary, map or BM reports card. Leave the
 confirmation off for the first run to review the result. If no known copy exists,
 check Resources for renamed copies of that same card before confirming and running
 again. The action adds only the missing module, never replaces or deletes entries.
@@ -97,7 +97,7 @@ A renamed file cannot be identified reliably from its URL alone; confirmation is
 required even when no known filename matches. Registration does not add dashboard
 cards, enable providers, select locations or configure notifications.
 
-### Magyar — új regisztrációs művelet (még nincs stabil kiadásban)
+### Magyar — regisztrációs művelet (stabil 0.39.0-tól)
 
 A **Fejlesztői eszközök → Műveletek → TerraLyra IGNIS: Dashboardkártya
 beállítása** alatt válaszd ki a kártyát. Első alkalommal hagyd kikapcsolva a

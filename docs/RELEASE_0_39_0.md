@@ -1,6 +1,6 @@
 # 0.39.0 — Easier optional card setup
 
-Prepared for stable publication; not published yet.
+Published as stable [v0.39.0](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.39.0).
 
 ## Changes
 
@@ -19,7 +19,7 @@ Prepared for stable publication; not published yet.
 
 ## Upgrade and optional setup
 
-1. Once published, update through HACS, restart HA and fully reload the frontend.
+1. Update through HACS, restart HA and fully reload the frontend.
 2. Keep existing resources. If old card code persists, update the existing resource
    query to `?v=0.39.0`; do not create duplicate entries.
 3. Existing working cards need no re-registration. For a missing optional card,
