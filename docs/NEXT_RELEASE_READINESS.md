@@ -93,7 +93,13 @@ neither pending nor blocked. This confirms recovery of retrieval, not freshness
 of every upstream report or nationwide completeness. The original historical
 failure cause remains unknown.
 
-## Merged but unreleased
+## Prepared 0.39.0
+
+See [release notes](RELEASE_0_39_0.md) for card registration, setup guidance and
+Canada diagnostics. Candidate CI and explicit publication approval remain required.
+Live registration acceptance is not yet performed.
+
+## Merged changes included in the candidate
 
 PR #156 adds a diagnostic distinction between retained HTTP client errors and
 unknown prior review causes. It does not change recovery policy or clear holds.

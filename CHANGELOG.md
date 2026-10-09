@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.0 — prepared, not yet published
+
+- Add an explicit administrator action to review and register optional dashboard card resources.
+- Simplify location choice labels and link directly to settings and first-setup help.
+- Translate registration guidance into six languages.
+- Distinguish retained HTTP errors from unknown prior Canada review causes.
+
+See [release notes](docs/RELEASE_0_39_0.md).
+
 ## 0.38.1
 
 - Restore Queensland report parsing for explicitly declared Web Mercator coordinates.
