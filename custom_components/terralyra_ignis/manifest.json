@@ -1,6 +1,7 @@
 {
   "domain": "terralyra_ignis",
   "name": "TerraLyra IGNIS",
+  "after_dependencies": ["lovelace"],
   "codeowners": [
     "@janosbali"
   ],

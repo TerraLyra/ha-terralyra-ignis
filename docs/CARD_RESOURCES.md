@@ -80,3 +80,19 @@ CI checks byte-for-byte equality with the frontend files used by the browser tes
 Only the three named JavaScript files are served; no integration/config/storage
 folder is exposed. The integration uses Home Assistant's
 [asynchronous static-file API](https://developers.home-assistant.io/blog/2024/06/18/async_register_static_paths/).
+
+## Optional setup action — next release, not yet published
+
+An administrator can use **Developer tools → Actions → TerraLyra IGNIS: Set up an
+optional dashboard card**. Choose the summary, map or BM reports card. Leave the
+confirmation off for the first run to review the result. If no known copy exists,
+check Resources for renamed copies of that same card before confirming and running
+again. The action adds only the missing module, never replaces or deletes entries.
+Reload the browser, then add the card through the dashboard editor.
+
+`already_registered` requires no new entry. `legacy_review`, `type_review` and
+`duplicate_review` require inspecting the existing resources using the instructions
+above. `yaml_manual_setup` means retain your YAML-managed resource configuration.
+A renamed file cannot be identified reliably from its URL alone; confirmation is
+required even when no known filename matches. Registration does not add dashboard
+cards, enable providers, select locations or configure notifications.

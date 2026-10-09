@@ -245,3 +245,24 @@ get_satellite_report_context:
       required: true
       selector:
         text:
+
+register_dashboard_card:
+  name: Set up an optional dashboard card
+  description: Administrator-only. Without confirmation, review the resource inventory. Confirm only after checking that no renamed copy of this card is loaded. Adds one missing module; never updates or deletes existing entries. YAML resources require manual setup. Reload the browser after registration.
+  fields:
+    card:
+      required: true
+      selector:
+        select:
+          options:
+            - label: Location summary
+              value: summary
+            - label: Report map
+              value: map
+            - label: BM OKF reports
+              value: bm
+    confirm_no_renamed_copy:
+      default: false
+      name: I checked that no renamed copy of this card is loaded
+      selector:
+        boolean:

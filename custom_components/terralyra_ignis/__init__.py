@@ -19,6 +19,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .frontend_resources import async_register_card_paths
+from .card_resource_service import register_card_resource_service
 from .nifc_service import register_nifc_initialization
 from .canada_service import register_canada_initialization
 from .const import (
@@ -99,6 +100,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register explicit, response-only diagnostic actions."""
 
     await async_register_card_paths(hass)
+    register_card_resource_service(hass)
 
     official_reports = OfficialReportClient(
         async_get_clientsession(hass),
