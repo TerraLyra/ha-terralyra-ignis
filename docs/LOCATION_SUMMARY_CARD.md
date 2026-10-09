@@ -18,19 +18,31 @@ title. No location is selected automatically, even if only one is available.
 The editor lists sensors with the location operational-status attributes. If
 none are available, it explains how to enable a monitored location and wait for
 its sensor. A temporarily missing configured sensor is retained rather than
-silently replaced. In 0.38.0 (prepared, not yet published), the editor and card follow
+silently replaced. In 0.38.0+, the editor and card follow
 the Home Assistant UI language: Hungarian for Hungarian, English for other
 languages. Before HA connects, the historical Hungarian default is preserved.
 Custom titles, location names and source attribution are displayed unchanged.
 
-In 0.38.0 (prepared, not yet published), choose a matching sensor
+In 0.38.0+, choose a matching sensor
 under **Előrejelzés (nem kötelező)** in the visual editor. This copies its location,
 coordinates and forecast radius without enabling a provider. The code-editor
 examples below remain supported. Existing forecast and advanced configuration
 fields are preserved when editing the title or location. After changing location, review the forecast binding too: a mismatched
 binding stays hidden with an explanation, never showing another place's risk.
 
-Existing manual YAML remains supported:
+## Next release: simpler setup navigation
+
+Merged after 0.38.1, not yet included in a stable release:
+
+- Unique location names appear without technical IDs; duplicate names retain IDs
+  to make the selection unambiguous. The selected entity remains explicit.
+- Editor links open IGNIS location/radius settings and the English or Hungarian
+  first-setup guide in a separate tab, preserving the unfinished card editor.
+  Opening a link does not change configuration or enable sources.
+
+## Advanced manual configuration
+
+The visual editor above is the recommended setup path. Existing manual YAML remains supported:
 
 ```yaml
 type: custom:ignis-location-summary
