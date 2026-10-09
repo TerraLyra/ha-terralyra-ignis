@@ -565,6 +565,19 @@
     "get_satellite_report_context": {
       "name": "Notizie BM collegate",
       "description": "Cercare notizie BM probabilmente collegate a un’osservazione satellitare nell’archivio locale."
+    },
+    "register_dashboard_card": {
+      "name": "Configura una scheda della dashboard",
+      "description": "Controlla le risorse esistenti. Un amministratore può aggiungere una scheda mancante dopo aver confermato che non è caricata una copia rinominata. Le voci esistenti restano invariate. Poi ricarica il browser.",
+      "fields": {
+        "card": {
+          "name": "Scheda"
+        },
+        "confirm_no_renamed_copy": {
+          "name": "Nessuna copia rinominata caricata",
+          "description": "Ho verificato che non sia caricata una copia rinominata di questa scheda. Se disattivato, controlla soltanto senza aggiungere risorse."
+        }
+      }
     }
   }
 }

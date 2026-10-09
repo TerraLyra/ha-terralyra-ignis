@@ -565,6 +565,19 @@
     "get_satellite_report_context": {
       "name": "Related BM reports",
       "description": "Find probable BM context for an existing satellite incident using the local archive."
+    },
+    "register_dashboard_card": {
+      "name": "Set up a dashboard card",
+      "description": "Checks existing resources. An administrator can add a missing card after confirming that no renamed copy is loaded. Existing entries remain unchanged. Reload the browser afterwards.",
+      "fields": {
+        "card": {
+          "name": "Card"
+        },
+        "confirm_no_renamed_copy": {
+          "name": "Confirm no renamed copy",
+          "description": "I checked that no renamed copy of this card is loaded. Leave off to check without adding a resource."
+        }
+      }
     }
   }
 }

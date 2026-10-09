@@ -96,3 +96,21 @@ above. `yaml_manual_setup` means retain your YAML-managed resource configuration
 A renamed file cannot be identified reliably from its URL alone; confirmation is
 required even when no known filename matches. Registration does not add dashboard
 cards, enable providers, select locations or configure notifications.
+
+### Magyar — új regisztrációs művelet (még nincs stabil kiadásban)
+
+A **Fejlesztői eszközök → Műveletek → TerraLyra IGNIS: Dashboardkártya
+beállítása** alatt válaszd ki a kártyát. Első alkalommal hagyd kikapcsolva a
+megerősítést: így csak ellenőrzés történik. Ha hiányzik az erőforrás, nézd meg,
+hogy nincs-e a kártyának átnevezett példánya az erőforrások között. Csak ezután
+kapcsold be a megerősítést és futtasd újra. Végül töltsd újra a böngészőt.
+
+- `registered`: hozzáadva; a dashboard szerkesztőjében felveheted a kártyát.
+- `already_registered`: már regisztrálva, nem kell újabb bejegyzés.
+- `confirm_no_renamed_copy`: ellenőrizd az átnevezett példányokat, majd erősítsd meg.
+- `legacy_review`, `type_review`, `duplicate_review`: a meglévő bejegyzést kell
+  átnézni; a művelet nem cseréli vagy törli automatikusan.
+- `yaml_manual_setup`: a YAML-ban kezelt erőforrást kézzel állítsd be.
+
+A művelet nem hoz létre dashboardkártyát vagy értesítési automatizálást,
+és nem kapcsol be adatforrást. A helyszínt továbbra is te választod ki.

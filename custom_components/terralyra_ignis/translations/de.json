@@ -565,6 +565,19 @@
     "get_satellite_report_context": {
       "name": "Zugehörige BM-Meldungen",
       "description": "Wahrscheinlich zugehörige BM-Meldungen zu einer Satellitenbeobachtung im lokalen Archiv suchen."
+    },
+    "register_dashboard_card": {
+      "name": "Dashboard-Karte einrichten",
+      "description": "Prüft vorhandene Ressourcen. Ein Administrator kann eine fehlende Karte hinzufügen, nachdem bestätigt wurde, dass keine umbenannte Kopie geladen ist. Vorhandene Einträge bleiben unverändert. Danach den Browser neu laden.",
+      "fields": {
+        "card": {
+          "name": "Karte"
+        },
+        "confirm_no_renamed_copy": {
+          "name": "Keine umbenannte Kopie geladen",
+          "description": "Ich habe geprüft, dass keine umbenannte Kopie dieser Karte geladen ist. Ausgeschaltet wird nur geprüft, ohne eine Ressource hinzuzufügen."
+        }
+      }
     }
   }
 }
