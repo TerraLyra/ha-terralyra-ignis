@@ -27,6 +27,12 @@ metadata. Unrelated household switches are excluded. Existing explicit bindings
 remain preserved for review, including older switches without metadata. Selecting
 a binding does not enable its provider or turn on the switch.
 
+## Additional delivered setup improvements (unreleased)
+
+PRs #158–#159 simplify unique location labels, retain disambiguation for equal
+names, and provide direct settings/help links without leaving unfinished edits.
+They do not automate resource registration or establish first-time-user acceptance.
+
 ## Next implementation work
 
 1. Reduce manual map/summary setup while retaining explicit location bindings.
