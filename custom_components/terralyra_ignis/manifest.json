@@ -1,12 +1,12 @@
 {
   "domain": "terralyra_ignis",
   "name": "TerraLyra IGNIS",
+  "after_dependencies": ["lovelace"],
   "codeowners": [
     "@janosbali"
   ],
   "config_flow": true,
   "dependencies": ["http"],
-  "after_dependencies": ["lovelace"],
   "documentation": "https://github.com/TerraLyra/ha-terralyra-ignis",
   "integration_type": "service",
   "iot_class": "cloud_polling",
