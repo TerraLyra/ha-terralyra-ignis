@@ -565,6 +565,19 @@
     "get_satellite_report_context": {
       "name": "Noticias BM relacionadas",
       "description": "Buscar noticias BM probablemente relacionadas con una observación satelital en el archivo local."
+    },
+    "register_dashboard_card": {
+      "name": "Configurar una tarjeta del panel",
+      "description": "Comprueba los recursos existentes. Un administrador puede añadir una tarjeta que falte tras confirmar que no hay una copia renombrada cargada. Las entradas existentes no cambian. Después, recarga el navegador.",
+      "fields": {
+        "card": {
+          "name": "Tarjeta"
+        },
+        "confirm_no_renamed_copy": {
+          "name": "No hay ninguna copia renombrada cargada",
+          "description": "He comprobado que no hay una copia renombrada de esta tarjeta cargada. Desactivado, solo comprueba sin añadir recursos."
+        }
+      }
     }
   }
 }

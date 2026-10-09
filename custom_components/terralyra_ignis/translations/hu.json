@@ -565,6 +565,19 @@
     "get_satellite_report_context": {
       "name": "Kapcsolódó BM-hírek",
       "description": "Valószínűleg kapcsolódó BM-hírek keresése meglévő műholdas észleléshez a helyi archívumban."
+    },
+    "register_dashboard_card": {
+      "name": "Dashboardkártya beállítása",
+      "description": "Ellenőrzi a meglévő erőforrásokat. Az adminisztrátor hozzáadhat egy hiányzó kártyát, ha megerősíti, hogy nincs átnevezett példány betöltve. A meglévő bejegyzések változatlanok maradnak. Ezután töltsd újra a böngészőt.",
+      "fields": {
+        "card": {
+          "name": "Kártya"
+        },
+        "confirm_no_renamed_copy": {
+          "name": "Nincs betöltött átnevezett példány",
+          "description": "Ellenőriztem, hogy nincs betöltve a kártya átnevezett példánya. Kikapcsolva csak ellenőriz, erőforrást nem ad hozzá."
+        }
+      }
     }
   }
 }
