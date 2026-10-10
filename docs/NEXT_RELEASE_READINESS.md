@@ -116,3 +116,9 @@ unknown prior review causes. It does not change recovery policy or clear holds.
 - #41: historical counter investigation remains paused; no history deletion.
 
 No release publication or HA restart is implied by this document.
+
+## Prepared 0.39.1
+
+See [release notes](RELEASE_0_39_1.md). Includes map setup controls, localized
+resource errors and expanded isolated validation. Final candidate CI and explicit
+stable-publication approval are required. No live HA restart is authorized here.
