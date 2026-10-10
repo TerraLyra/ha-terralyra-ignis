@@ -97,3 +97,26 @@ async def test_fresh_setup_survives_collection_reload(hass, hass_storage, card, 
         assert data.resources.async_items() == original
         assert original[0]['url'] == f'/terralyra_ignis/cards/{filename}'
         assert original[0]['type'] == 'module'
+
+@pytest.mark.parametrize('inventory,expected', [
+    (None, 'card_resources_unavailable'),
+    ([{'url': 42, 'type': 'module'}], 'card_resources_review'),
+])
+async def test_setup_errors_are_translatable_and_never_write(hass, inventory, expected):
+    from homeassistant.exceptions import ServiceValidationError
+    collection = Mock(spec=ResourceStorageCollection)
+    collection.async_get_info = AsyncMock()
+    collection.async_items.return_value = inventory
+    collection.async_create_item = AsyncMock()
+    if inventory is not None:
+        hass.data[LOVELACE_DATA] = SimpleNamespace(resources=collection, resource_mode='storage')
+    register_card_resource_service(hass)
+    with patch.object(hass.auth, 'async_get_user', AsyncMock(return_value=SimpleNamespace(is_admin=True))):
+        with pytest.raises(ServiceValidationError) as error:
+            await hass.services.async_call(
+                'terralyra_ignis', 'register_dashboard_card',
+                {'card': 'summary', 'confirm_no_renamed_copy': True},
+                blocking=True, return_response=True, context=Context(user_id='admin'))
+    assert error.value.translation_domain == 'terralyra_ignis'
+    assert error.value.translation_key == expected
+    collection.async_create_item.assert_not_awaited()

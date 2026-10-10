@@ -579,5 +579,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "card_resources_unavailable": {
+      "message": "Dashboard resources are not available yet. Wait for Home Assistant to finish starting, then try again. If this persists, check Settings → Dashboards → Resources."
+    },
+    "card_resources_review": {
+      "message": "The dashboard resource list could not be interpreted. Check Settings → Dashboards → Resources before trying again. Do not add another copy of the card."
+    }
   }
 }
