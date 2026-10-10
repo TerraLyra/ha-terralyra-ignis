@@ -322,4 +322,4 @@ class IgnisLocationSummary extends HTMLElement {
 }
 customElements.define('ignis-location-summary',IgnisLocationSummary);
 window.customCards=window.customCards||[];
-window.customCards.push({type:'ignis-location-summary',name:'IGNIS helyszínösszefoglaló',description:'Egy kijelölt helyszín műholdas eseményei és forrásállapota.'});
+window.customCards.push({type:'ignis-location-summary',name:'IGNIS location summary',description:'Satellite incidents and source status for a selected location.'});

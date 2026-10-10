@@ -42,9 +42,10 @@ are recorded in
 
 ## Product status
 
-Latest stable release: **0.35.1**, with small decorative icons on the optional
-location summary card. Start with the [English / Hungarian first-setup guide](docs/FIRST_STEPS.md)
-and [0.35.1 release notes](docs/RELEASE_0_35_1.md).
+The [latest stable release](https://github.com/TerraLyra/ha-terralyra-ignis/releases/latest)
+is available through HACS. Start with the
+[English / Hungarian first-setup guide](docs/FIRST_STEPS.md); release notes are
+included on each release page.
 
 The **0.36.0 release** adds a visual report-map editor, binding-status feedback
 and summary source guidance. See [release notes](docs/RELEASE_0_36_0.md).
