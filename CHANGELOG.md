@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.39.0 — prepared, not yet published
+## 0.39.1 — prepared, not yet published
+
+- Configure marker clustering from the visual map editor.
+- Open settings and first-setup help directly from the map editor.
+- Explain resource setup errors in all six supported languages.
+- Expand isolated registration, persistence and HTTP delivery checks.
+- Flag vegetation wording in offline BM review; production matching is unchanged.
+
+See [release notes](docs/RELEASE_0_39_1.md).
+
+## 0.39.0
 
 - Add an explicit administrator action to review and register optional dashboard card resources.
 - Simplify location choice labels and link directly to settings and first-setup help.
