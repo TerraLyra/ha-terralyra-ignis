@@ -140,6 +140,17 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>contextRequest.service_data.incident_id),'a');
   await page.getByRole('button',{name:'Home Assistant részletek'}).click();
   assert.equal(await page.evaluate(()=>nativeClicks.at(-1)),'geo_location.satellite');
+  await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);window.savedHelpConfig=JSON.stringify(editor.config);window.savedHelpEdits=edits.length;editor.hass={...editorHass,language:'en'}});
+  const settingsHelp=page.getByRole('link',{name:'Configure locations and sources',exact:true});
+  assert.equal(await settingsHelp.getAttribute('href'),'/config/integrations/integration/terralyra_ignis');
+  assert.equal(await settingsHelp.getAttribute('target'),'_blank');
+  assert.equal(await settingsHelp.getAttribute('rel'),'noopener noreferrer');
+  assert.match(await page.getByRole('link',{name:'First setup guide',exact:true}).getAttribute('href'),/#english$/);
+  await page.evaluate(()=>editor.hass={...editorHass,language:'hu'});
+  assert.equal(await page.getByRole('link',{name:'Helyszínek és adatforrások beállítása',exact:true}).count(),1);
+  assert.match(await page.getByRole('link',{name:'Első lépések útmutató',exact:true}).getAttribute('href'),/#magyar$/);
+  assert.equal(await page.evaluate(()=>JSON.stringify(editor.config)),await page.evaluate(()=>savedHelpConfig));
+  assert.equal(await page.evaluate(()=>edits.length),await page.evaluate(()=>savedHelpEdits));
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

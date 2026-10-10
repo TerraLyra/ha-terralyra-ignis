@@ -94,3 +94,9 @@ selected location. Selecting one fills the required coordinates and forecast
 radius; it does not enable a provider. Unsupported or legacy saved bindings are
 preserved and marked for review. Clearing the selection removes only the card
 binding. No automatic forecast selection is performed.
+
+## Map editor setup links — next release
+
+The map editor links directly to IGNIS settings and the English/Hungarian first-setup
+guide in separate tabs. Opening help does not configure providers or replace saved
+map bindings. This makes setup guidance accessible without leaving the editor.
