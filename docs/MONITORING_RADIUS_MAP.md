@@ -43,7 +43,7 @@ Assistant map. It is also exposed as `monitoring_radius_km`, together with
 
 ## Optional IGNIS map visual editor
 
-In 0.38.0 (prepared, not yet published), the IGNIS report-map editor
+Since stable 0.38.0, the IGNIS report-map editor
 includes **Monitoring and alert circles** / **Megfigyelési és riasztási körök**.
 Selecting it adds the monitoring-area source with icon labels and `focus: false`.
 If clustering has not been configured, it sets `cluster: false` so the circle

@@ -223,6 +223,15 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const root=this.shadowRoot;root.replaceChildren();
       const hu=this._hass?.language?.startsWith('hu');
       root.append(this.node('style',`:host{display:block;color:var(--primary-text-color);overflow-wrap:anywhere}label{display:block;margin:16px 0}input,select{box-sizing:border-box;width:100%;min-width:0;padding:12px;margin-top:8px;font:inherit;color:inherit;background:var(--card-background-color,white);border:1px solid var(--divider-color,#999);border-radius:8px}p{line-height:1.5}`));
+      const help=this.node('nav');help.setAttribute('aria-label',hu?'Beállítási segítség':'Setup help');
+      for(const [caption,url] of [
+        [hu?'Helyszínek és adatforrások beállítása':'Configure locations and sources','/config/integrations/integration/terralyra_ignis'],
+        [hu?'Első lépések útmutató':'First setup guide','https://github.com/TerraLyra/ha-terralyra-ignis/blob/main/docs/FIRST_STEPS.md'+(hu?'#magyar':'#english')]
+      ]){
+        const link=this.node('a',caption);link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.style.color='var(--primary-color,#007a8a)';
+        const line=this.node('p');line.append(link);help.append(line);
+      }
+      root.append(help);
       const titleText=hu?'Térkép címe (nem kötelező)':'Map title (optional)';
       const label=this.node('label',titleText),input=this.node('input');input.type='text';input.value=this.config.title||'';input.setAttribute('aria-label',titleText);input.onchange=()=>this.update({title:input.value});label.append(input);root.append(label);
       root.append(this.node('p',hu?'Válaszd ki az adott forrás IGNIS térképes megjelenítési kapcsolóját. Ez csak hozzárendelés: nem engedélyez adatforrást, és nem kapcsol át entitást.':'Select each source’s IGNIS map visibility switch. This only creates a binding: it does not enable a provider or toggle an entity.'));
