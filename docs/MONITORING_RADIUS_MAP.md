@@ -54,3 +54,11 @@ Clearing the checkbox removes only this source from the card. It does not disabl
 monitored locations or change their radii. With native `show_all: true`, separate
 circle filtering is disabled; the editor explains that this advanced setting must
 first be changed in the code editor. Equal radii still use one circle.
+
+## Visual clustering control — next release
+
+The IGNIS map editor offers Default, On and Off for marker clustering, in English
+and Hungarian. Default removes only the explicit `cluster` override; On and Off
+set it explicitly. Existing entities, source bindings and map options are preserved.
+Choose Off when grouped centre markers hide monitoring circles. This controls
+visual grouping only, not satellite incident matching or notification behavior.
