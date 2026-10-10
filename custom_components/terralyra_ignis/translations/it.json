@@ -579,5 +579,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "card_resources_unavailable": {
+      "message": "Le risorse della dashboard non sono ancora disponibili. Attendi il completamento dell’avvio di Home Assistant, poi riprova. Se il problema persiste, controlla Impostazioni → Dashboard → Risorse."
+    },
+    "card_resources_review": {
+      "message": "Impossibile interpretare l’elenco delle risorse della dashboard. Controlla Impostazioni → Dashboard → Risorse prima di riprovare. Non aggiungere un’altra copia della scheda."
+    }
   }
 }

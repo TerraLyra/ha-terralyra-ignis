@@ -21,13 +21,13 @@ def register_card_resource_service(hass):
         async with lock:
             data = hass.data.get(LOVELACE_DATA)
             if data is None:
-                raise ServiceValidationError('Dashboard resources are not available yet')
+                raise ServiceValidationError(translation_domain=DOMAIN, translation_key='card_resources_unavailable')
             collection = data.resources
             await collection.async_get_info()
             try:
                 plan = plan_card_resource(call.data['card'], collection.async_items())
             except ValueError as err:
-                raise ServiceValidationError('Resource inventory needs manual review') from err
+                raise ServiceValidationError(translation_domain=DOMAIN, translation_key='card_resources_review') from err
             plan['changed'] = False
             if data.resource_mode != 'storage' or not isinstance(collection, ResourceStorageCollection):
                 return {**plan, 'status': 'yaml_manual_setup'}

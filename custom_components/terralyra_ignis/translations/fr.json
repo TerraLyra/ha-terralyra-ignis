@@ -579,5 +579,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "card_resources_unavailable": {
+      "message": "Les ressources du tableau de bord ne sont pas encore disponibles. Attendez la fin du démarrage de Home Assistant, puis réessayez. Si le problème persiste, vérifiez Paramètres → Tableaux de bord → Ressources."
+    },
+    "card_resources_review": {
+      "message": "La liste des ressources du tableau de bord ne peut pas être interprétée. Vérifiez Paramètres → Tableaux de bord → Ressources avant de réessayer. N’ajoutez pas une autre copie de la carte."
+    }
   }
 }

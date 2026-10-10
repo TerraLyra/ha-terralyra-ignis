@@ -579,5 +579,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "card_resources_unavailable": {
+      "message": "Los recursos del panel aún no están disponibles. Espera a que Home Assistant termine de iniciarse y vuelve a intentarlo. Si el problema persiste, revisa Ajustes → Paneles → Recursos."
+    },
+    "card_resources_review": {
+      "message": "No se pudo interpretar la lista de recursos del panel. Revisa Ajustes → Paneles → Recursos antes de volver a intentarlo. No añadas otra copia de la tarjeta."
+    }
   }
 }

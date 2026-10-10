@@ -579,5 +579,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "card_resources_unavailable": {
+      "message": "A dashboard erőforrásai még nem érhetők el. Várd meg a Home Assistant indulását, majd próbáld újra. Ha a hiba megmarad, ellenőrizd a Beállítások → Dashboardok → Erőforrások oldalt."
+    },
+    "card_resources_review": {
+      "message": "A dashboard erőforráslistája nem értelmezhető. Újrapróbálás előtt ellenőrizd a Beállítások → Dashboardok → Erőforrások oldalt. Ne adj hozzá újabb példányt ugyanabból a kártyából."
+    }
   }
 }
