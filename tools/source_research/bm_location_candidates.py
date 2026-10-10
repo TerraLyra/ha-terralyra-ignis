@@ -61,6 +61,13 @@ def _context(value: str, start: int, end: int) -> tuple[ContextHint, ...]:
         if unit:
             stop = end + unit.end()
             hints.append(ContextHint('area_quantity_reference', start, stop, value[start:stop]))
+    # A vegetation adjective before 'terület' is not evidence for the town Bokros.
+    # Keep the original mention for review instead of blacklisting the place.
+    if value[start:end].casefold() == 'bokros':
+        area = re.match(r'[ \t]+terület(?:et|en|re|ről|nek|tel)?(?!\w)', value[end:], re.I)
+        if area:
+            stop = end + area.end()
+            hints.append(ContextHint('vegetation_description', start, stop, value[start:stop]))
     for pattern in _ROUTE_PATTERNS:
         for route in pattern.finditer(value):
             if route.start() <= start and end <= route.end():

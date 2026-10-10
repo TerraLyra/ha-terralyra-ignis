@@ -27,3 +27,13 @@ class LightweightTests(unittest.TestCase):
         report,_=self.run_text(text,{'geonames:2':'Szeged'})
         self.assertEqual(report.title,text)
         self.assertTrue(report.fire_report)
+
+    def test_vegetation_adjective_is_not_bokros_settlement(self):
+        names = {'b': 'Bokros', 'f': 'Balatonfűzfő'}
+        for text in ('A bokros terület ég.',
+                     'Árokba borult egy autó Balatonfűzfőnél. A tűzoltók megtisztítják a bokros területet.'):
+            report, evidence = self.run_text(text, names)
+            self.assertFalse(report.fire_report)
+            self.assertFalse(evidence)
+        report, _ = self.run_text('Bokros közelében ég a nádas.', names)
+        self.assertEqual(report.event_settlement_ids, frozenset({'b'}))
