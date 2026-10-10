@@ -74,6 +74,12 @@ explicit creation, delayed persistence and collection reload. Repeating setup
 after reload preserves the same resource ID and creates no duplicate. This does
 not test browser execution or replace the unaided installation trial above.
 
+An additional isolated test runs the integration setup, invokes concurrent
+registration requests and retrieves each returned URL through the HA HTTP test
+client. It confirms one resource per card and byte-for-byte bundled file delivery,
+with and without a version query. This is automated technical coverage, not a
+first-time-user installation result.
+
 ## Offline negative-state review
 
 Existing automated tests cover unavailable counts, mismatched location/forecast
