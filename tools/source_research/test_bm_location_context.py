@@ -196,3 +196,22 @@ class TransportRouteTests(unittest.TestCase):
         result = review_locations('', 'Berettyóújfalu és Biharkeresztes között pótlóbuszok',
                                   '', self.places, input_truncated=True)
         self.assertEqual(result.mentions, ())
+
+
+class VegetationContextTests(unittest.TestCase):
+    def test_adjective_is_flagged_without_losing_evidence(self):
+        for phrase in ('bokros területet', 'Bokros területen', 'bokros terület'):
+            text = f'A tűzoltók megtisztítják a {phrase}.'
+            result = review_locations('', text, '', (Settlement('b', 'Bokros'),))
+            mention, = result.mentions
+            hint, = mention.context_hints
+            self.assertEqual(hint.kind, 'vegetation_description')
+            self.assertEqual(text[hint.start:hint.end], phrase)
+            self.assertEqual(text[mention.start:mention.end], mention.evidence)
+            self.assertFalse(result.incident_location_verified)
+
+    def test_place_and_sentence_boundaries_are_preserved(self):
+        for text in ('Bokros közelében ég a nádas.', 'Bokros. Területet vizsgálnak.',
+                     'Bokros\nterületet vizsgálnak.'):
+            result = review_locations('', text, '', (Settlement('b', 'Bokros'),))
+            self.assertEqual(result.mentions[0].context_hints, ())
