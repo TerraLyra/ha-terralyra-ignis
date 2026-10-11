@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.39.1 — prepared, not yet published
+## 0.39.2 — prepared, not yet published
+
+- Hide report-age controls when no report source is enabled; retain the selected filter.
+- Correct English map age wording and summary card picker metadata.
+- Link the README to the current stable release.
+
+See [release notes](docs/RELEASE_0_39_2.md).
+
+## 0.39.1
 
 - Configure marker clustering from the visual map editor.
 - Open settings and first-setup help directly from the map editor.

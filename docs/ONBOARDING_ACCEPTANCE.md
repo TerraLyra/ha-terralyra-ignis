@@ -101,8 +101,36 @@ radius; it does not enable a provider. Unsupported or legacy saved bindings are
 preserved and marked for review. Clearing the selection removes only the card
 binding. No automatic forecast selection is performed.
 
-## Map editor setup links — next release
+## Map editor setup links — 0.39.1
 
 The map editor links directly to IGNIS settings and the English/Hungarian first-setup
 guide in separate tabs. Opening help does not configure providers or replace saved
 map bindings. This makes setup guidance accessible without leaving the editor.
+
+## Assisted clean-install trial — 2026-10-11
+
+An isolated macOS Home Assistant Core 2026.9.2 instance installed stable IGNIS
+0.39.1 through HACS 2.0.5. This was agent-assisted technical validation, not an
+unaided-user trial or a Home Assistant OS dependency-installation test.
+
+Verified through the UI:
+
+- Custom repository addition, stable download and integration setup without
+  optional provider credentials, using a synthetic monitoring location.
+- Two available Sentinel-3 sources and zero current detections.
+- Equal default 25 km radii; rejection of a 30 km alert radius against 25 km
+  monitoring, followed by successful saving of a 10 km alert radius.
+- Resource preview without mutation, then explicit summary/map registration.
+- Visual summary location selection, correct 25/10 km values, map circles and
+  hidden disabled report controls, including persistence after frontend reload.
+- Version-pinned blueprint import and opening its configuration form. No phone
+  was selected and no notification automation was saved or triggered.
+
+The test Home coordinate was outside the forecast area and forecast availability
+was not accepted by this trial. Live incident rendering and real phone delivery
+were not established. Missing local Core dependencies were supplied separately;
+this does not establish automatic dependency installation on HA OS.
+
+The trial found stale README release wording and Hungarian summary picker metadata
+on an English interface, fixed in #171. Unused report-age controls on satellite-only
+maps were addressed in #172. The unaided checklist above remains open.

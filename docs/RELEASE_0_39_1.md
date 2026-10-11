@@ -1,6 +1,6 @@
 # 0.39.1 — Clearer map setup
 
-Prepared for stable publication; not published yet.
+Published as stable [v0.39.1](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.39.1).
 
 ## Changes
 
@@ -18,13 +18,13 @@ Prepared for stable publication; not published yet.
 
 ## Upgrade
 
-After publication, update through HACS, restart HA and fully reload the frontend.
+Update through HACS, restart HA and fully reload the frontend.
 Keep existing resource entries and card bindings. If an old editor remains visible,
 update the existing resource URL query to `?v=0.39.1`, then reload. Do not register
 a second copy. No source, notification or history migration is required.
 
 ## Validation boundary
 
-Feature checks passed before merging. The final release candidate requires CI.
+Feature checks and final candidate CI passed before stable publication.
 Automated isolated checks are not an unaided first-time-user installation trial.
 No production HA configuration change or restart is part of release preparation.

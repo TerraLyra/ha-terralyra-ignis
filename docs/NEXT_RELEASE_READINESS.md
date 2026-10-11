@@ -117,8 +117,13 @@ unknown prior review causes. It does not change recovery policy or clear holds.
 
 No release publication or HA restart is implied by this document.
 
-## Prepared 0.39.1
+## Published 0.39.1
 
-See [release notes](RELEASE_0_39_1.md). Includes map setup controls, localized
-resource errors and expanded isolated validation. Final candidate CI and explicit
-stable-publication approval are required. No live HA restart is authorized here.
+Stable v0.39.1 was published from `5ca7caba5f70bb33a78eb54bc2744cd27c9bcb23`
+after successful CI and explicit approval. See [release notes](RELEASE_0_39_1.md).
+
+## Prepared 0.39.2
+
+Contains the dashboard wording and report-filter visibility fixes from #171 and
+#172. See [release notes](RELEASE_0_39_2.md). Candidate CI and explicit stable
+publication approval are required. No production HA restart is implied.
