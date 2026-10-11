@@ -122,8 +122,18 @@ No release publication or HA restart is implied by this document.
 Stable v0.39.1 was published from `5ca7caba5f70bb33a78eb54bc2744cd27c9bcb23`
 after successful CI and explicit approval. See [release notes](RELEASE_0_39_1.md).
 
-## Prepared 0.39.2
+## Published 0.39.2
 
-Contains the dashboard wording and report-filter visibility fixes from #171 and
-#172. See [release notes](RELEASE_0_39_2.md). Candidate CI and explicit stable
-publication approval are required. No production HA restart is implied.
+Stable [v0.39.2](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.39.2)
+was published from `fbadb7044bd2c9ae74c5586cd2329dbd67783bb1` after successful
+candidate CI and explicit approval. Includes the dashboard wording and report-filter
+visibility fixes from #171 and #172. See [release notes](RELEASE_0_39_2.md).
+
+After the user confirmed the HACS update, HA restart and frontend reload on
+2026-10-11, a read-only check confirmed version 0.39.2, rendered map markers,
+location summaries and the updated one-day report filter wording. Temporary
+calendar errors during startup disappeared after loading. IODC and Sentinel-3A
+reported delayed data; one sampled location forecast was unavailable at the final
+check. No settings were changed. This is a sampled upgrade smoke check, not
+proof of every source's freshness, history continuity or notification delivery.
+The user's separate manual reinstall trial remains pending.
