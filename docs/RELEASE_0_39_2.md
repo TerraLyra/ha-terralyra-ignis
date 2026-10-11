@@ -1,6 +1,7 @@
 # 0.39.2 — Cleaner dashboard setup
 
-Prepared for stable publication; not published yet.
+Stable [v0.39.2](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.39.2)
+was published from `fbadb7044bd2c9ae74c5586cd2329dbd67783bb1`.
 
 ## Changes
 
@@ -13,7 +14,7 @@ Prepared for stable publication; not published yet.
 
 ## Upgrade
 
-After publication, update through HACS, restart HA and fully reload the browser or
+Update through HACS, restart HA and fully reload the browser or
 Companion App frontend. Keep one resource entry per card and existing bindings.
 If cached code persists, update the existing resource query to `?v=0.39.2`.
 No provider, alert-rule or history migration is needed.
@@ -21,6 +22,6 @@ No provider, alert-rule or history migration is needed.
 ## Validation
 
 The underlying changes passed 39 frontend tests, isolated Chrome checks and CI.
-The versioned release candidate must pass CI before publication. The assisted
+The versioned release candidate passed CI before publication. The assisted
 clean-install trial is recorded in [onboarding acceptance](ONBOARDING_ACCEPTANCE.md);
 unaided-user acceptance and real phone delivery remain unverified.

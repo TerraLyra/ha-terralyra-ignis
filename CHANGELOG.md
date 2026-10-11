@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.39.2 — prepared, not yet published
+## 0.39.2
 
 - Hide report-age controls when no report source is enabled; retain the selected filter.
 - Correct English map age wording and summary card picker metadata.
