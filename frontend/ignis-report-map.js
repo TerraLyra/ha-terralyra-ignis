@@ -346,12 +346,13 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         input.onchange=()=>{this.enabled[source]=input.checked;this.updateMap();};
         label.append(input,document.createTextNode(labels[index]));this.controls.append(label);
       });
+      if (![...SOURCES].some(source=>visibility[source])) return;
       const label=document.createElement('label');
       label.append(document.createTextNode(hu ? 'Jelentés frissítése: ' : 'Report updated: '));
       const select=document.createElement('select');
       for (const days of [0,1,7,30]) {
         const option=document.createElement('option');option.value=days;
-        option.textContent=days ? (hu ? `Legfeljebb ${days} napja` : `Within ${days} days`) : (hu ? 'Bármikor' : 'Any time');
+        option.textContent=days ? (hu ? `Legfeljebb ${days} napja` : `Within ${days} ${days === 1 ? 'day' : 'days'}`) : (hu ? 'Bármikor' : 'Any time');
         select.append(option);
       }
       select.value=this.maxDays;

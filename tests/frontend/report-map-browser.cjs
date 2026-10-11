@@ -75,6 +75,14 @@ const assert=require('node:assert/strict');
   assert.equal(await page.getByRole('checkbox',{name:'Kanadai jelentések'}).count(),1);
   await page.evaluate(()=>{card.hass={language:'hu',states:{'switch.canada':{state:'off'}}};});
   assert.equal(await page.getByRole('checkbox').count(),1);
+  assert.equal(await page.getByRole('combobox').count(),0);
+  assert.doesNotMatch(await page.locator('main').innerText(),/A szűrés csak/);
+  await page.evaluate(()=>{card.maxDays=7;card.hass={language:'en',states:{'switch.canada':{state:'on'}}};});
+  assert.equal(await page.getByRole('combobox').inputValue(),'7');
+  assert.equal(await page.getByRole('option',{name:'Within 1 day',exact:true}).count(),1);
+  await page.evaluate(()=>{card.hass={language:'en',states:{}};});
+  assert.equal(await page.getByRole('combobox').count(),0);
+  assert.equal(await page.evaluate(()=>card.maxDays),7);
   await page.evaluate(()=>{
     document.querySelector('main').replaceChildren();
     window.editor=customElements.get('ignis-report-map').getConfigElement();
