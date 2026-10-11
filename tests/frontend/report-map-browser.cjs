@@ -21,6 +21,12 @@ const assert=require('node:assert/strict');
    window.report={entity_id:'geo_location.report',state:'186.1',attributes:{source:'terralyra_ignis_canada_reports',friendly_name:'Canada · <img src=x onerror=alert(1)>',distance_reference_name:'Canada',unit_of_measurement:'km',source_url:'javascript:alert(1)',source_times:{status_date:'2026-06-12T07:30:00Z'}}};
    card.hass={language:'hu',states:{'switch.canada':{state:'on'},'switch.nifc':{state:'on'},[report.entity_id]:report}};
   });
+  // New cards show configured areas without changing legacy saved configurations.
+  const starter=await page.evaluate(()=>customElements.get('ignis-report-map').getStubConfig());
+  assert.equal(starter.cluster,false);
+  assert.deepEqual(starter.geo_location_sources,[{source:'terralyra_ignis_monitoring_areas',label_mode:'icon',focus:false}]);
+  assert.equal(starter.report_switches,undefined);
+  assert.equal(await page.evaluate(()=>card.config.geo_location_sources.some(item=>(typeof item==='string'?item:item.source)==='terralyra_ignis_monitoring_areas')),false);
   await page.evaluate(()=>card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true})));
   assert.equal(await page.locator('dialog').isVisible(),true);
   assert.equal(await page.getByRole('checkbox').count(),3);

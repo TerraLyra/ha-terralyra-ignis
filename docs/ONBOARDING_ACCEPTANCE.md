@@ -134,3 +134,11 @@ this does not establish automatic dependency installation on HA OS.
 The trial found stale README release wording and Hungarian summary picker metadata
 on an English interface, fixed in #171. Unused report-age controls on satellite-only
 maps were addressed in #172. The unaided checklist above remains open.
+
+## New map starter configuration — next release
+
+New report-map cards added through the picker include monitoring and alert circles
+with clustering off, so configured areas remain visible. Users can change these
+options in the visual editor. Existing saved cards retain their configuration;
+no report switch is automatically bound or enabled. This does not replace
+first-time-user acceptance.
