@@ -270,7 +270,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
   customElements.define('ignis-report-map-editor',IgnisReportMapEditor);
   class IgnisReportMap extends HTMLElement {
     static getConfigElement(){return document.createElement('ignis-report-map-editor');}
-    static getStubConfig(){return {type:'custom:ignis-report-map'};}
+    static getStubConfig(){return withMonitoringAreas({type:'custom:ignis-report-map'},true);}
 
     constructor() {
       super();
