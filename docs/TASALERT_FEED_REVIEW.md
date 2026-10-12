@@ -1,6 +1,8 @@
 # TasALERT feed preflight
 
-Research only; no runtime provider, entities or calendar entries are enabled.
+Current status: optional HA runtime and map display are implemented, disabled
+until explicit opt-in. See the final section for setup and recovery. Earlier
+sections record research checkpoints; no TasALERT calendar is implemented.
 
 ## Products and attribution
 
