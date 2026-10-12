@@ -27,7 +27,7 @@ def locative_pattern(name: str):
     stem = name[:-1] + {'a':'á', 'e':'é'}.get(name[-1], name[-1])
     forms = {stem + suffix for suffix in _SUFFIXES}
     return re.compile(r'(?<!\w)(?:' + '|'.join(re.escape(v) for v in sorted(forms, key=len, reverse=True))
-                      + '|' + re.escape(name) + r'\s+(?:közelében|határában|térségében))(?!\w)', re.I)
+                      + '|' + re.escape(name) + r'\s+(?:közelében|határában|térségében|külterületén))(?!\w)', re.I)
 
 
 def lightweight_report(notice, settlement_names):
