@@ -67,3 +67,17 @@ silent assumption. Do not combine CAP, RSS and KML as independent events.
   no polling interval is inferred from the license or cache lifetime.
 - Validate update/removal behavior before production wiring. An empty feed or
   failed parse must not erase retained reports or claim the area is safe.
+
+## Offline parser checkpoint
+
+`tools/source_research/tasalert_kml.py` validates bounded UTF-8 KML without network
+access. It rejects entity declarations, duplicate IDs/fields, unknown feed types,
+unsafe source links, invalid points and offset-free supplied clocks. Unknown
+incident statuses/types remain verbatim. Polygon-only burnt-area records remain
+separate and receive no fabricated point. It does not implement retrieval,
+persistence, lifecycle transitions or production entities.
+
+Seven synthetic test cases pass, including winter/summer offsets and the two
+explicit offsets for a repeated DST clock. The saved 2026-10-12 sample parsed as
+14 incidents and six burnt-area records. This validates that snapshot's syntax,
+not identifier lifetime, completeness or status semantics.
