@@ -81,3 +81,18 @@ Seven synthetic test cases pass, including winter/summer offsets and the two
 explicit offsets for a repeated DST clock. The saved 2026-10-12 sample parsed as
 14 incidents and six burnt-area records. This validates that snapshot's syntax,
 not identifier lifetime, completeness or status semantics.
+
+## Offline snapshot comparison
+
+`tasalert_snapshot.compare_snapshots` validates both inputs before returning a
+change plan. First-seen, unchanged, updated, not-in-snapshot and review-required
+are observation states, not physical fire lifecycle states. Missing records retain
+their prior representation in the plan; the comparator never deletes history or
+infers extinction. A returned first-seen record need not be a newly ignited fire.
+
+Identity-field changes, missing clocks, regressing update clocks and changed
+content without an advancing update clock require review. Status strings remain
+verbatim. Comparison does not persist state or perform automatic replacement;
+a future consumer must handle review-required plans and parse errors explicitly.
+Thirteen synthetic parser/comparison tests pass. Long-term retention, reappearance
+across multiple snapshots and actual upstream identifier continuity remain open.
