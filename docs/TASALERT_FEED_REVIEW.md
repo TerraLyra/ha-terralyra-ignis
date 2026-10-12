@@ -133,3 +133,16 @@ combine conditional-response and ledger acceptance without losing review state,
 serialize receipt clocks and validators atomically, define operator recovery, and
 validate fresh real snapshots. Runtime activation remains out of scope until these
 boundaries are resolved.
+
+## Offline response-state storage
+
+`tasalert_storage` saves the accepted response bytes, validator, failure counter,
+status and next-attempt deadline in a versioned, size-bounded file. It validates
+before writing, flushes a same-directory temporary file and replaces the target
+atomically. Failed replacement preserves the prior file. Corrupt/unknown versions
+raise rather than silently clearing history or cooldown. This is a local prototype,
+not HA Store integration, concurrent-writer coordination or a power-loss durability
+guarantee. The separate per-record ledger is not yet serialized by this module.
+
+26 offline tests pass, including restart cooldown/validator preservation, malformed
+storage rejection and simulated replacement failure. No live HA files are accessed.
