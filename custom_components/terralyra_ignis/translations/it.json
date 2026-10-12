@@ -258,6 +258,9 @@
       },
       "canada_map": {
         "name": "Mappa dei rapporti Canada CWFIF"
+      },
+      "tasalert_map": {
+        "name": "Rapporti TasALERT sulla mappa"
       }
     },
     "geo_location": {
@@ -439,6 +442,9 @@
           "extreme": "Estremo",
           "unknown": "Sconosciuto"
         }
+      },
+      "tasalert_source_status": {
+        "name": "Stato della fonte TasALERT"
       }
     },
     "event": {
@@ -576,6 +582,30 @@
         "confirm_no_renamed_copy": {
           "name": "Nessuna copia rinominata caricata",
           "description": "Ho verificato che non sia caricata una copia rinominata di questa scheda. Se disattivato, controlla soltanto senza aggiungere risorse."
+        }
+      }
+    },
+    "initialize_tasalert": {
+      "name": "Inizializza archivio TasALERT",
+      "description": "Prepara il primo utilizzo senza attivare richieste o azzerare i dati.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Voce IGNIS"
+        },
+        "confirm_first_use": {
+          "name": "Confermo il primo utilizzo, non un recupero o ripristino"
+        }
+      }
+    },
+    "recover_tasalert": {
+      "name": "Ripristina archivio TasALERT",
+      "description": "Rileggi l’archivio valido dopo verifica; conserva rapporti e attese, con almeno 30 minuti prima della richiesta.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Voce IGNIS"
+        },
+        "confirm_review": {
+          "name": "Ho verificato e risolto il problema della fonte o dell’archivio"
         }
       }
     }

@@ -1,5 +1,5 @@
 // Optional local dashboard resource. No external libraries or report-page requests.
-const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc_reports']);
+const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc_reports', 'terralyra_ignis_tasalert_reports']);
 // Explicit map-switch entity associations; never infer opt-in from report count.
 export function visibleMapSources(states = {}, switches = {}) {
   return {terralyra_ignis:true, ...Object.fromEntries([...SOURCES].map(source => {
@@ -46,14 +46,14 @@ const WORDS = {
     warning:'Official source report, not a satellite detection. Current fire activity and complete coverage are not established.',
     location:'Distance reference', distance:'Distance', status:'Reported status',
     category:'Report category', updated:'Source status / update time', discovered:'Reported discovery time',
-    received:'Last successful retrieval', response:'Retrieval status', unknown:'Not provided'},
+    created:'Source record creation time', received:'Last successful retrieval', response:'Retrieval status', unknown:'Not provided'},
   hu: {close:'Bezárás', details:'Home Assistant részletek', source:'Forrásadatok megnyitása',
     absent:'Ehhez a jelentéshez nincs betöltött eseményleírás.',
     unavailable:'Ez a jelentés már nem érhető el az aktuális megjelenítésben.',
     warning:'Hivatalos forrásjelentés, nem műholdas észlelés. A jelenlegi tűzaktivitás és a teljes lefedettség nem igazolt.',
     location:'Viszonyítási helyszín', distance:'Távolság', status:'Jelentett állapot',
     category:'Jelentés típusa', updated:'Forrás szerinti státusz / frissítés időpontja', discovered:'Jelentett felfedezés ideje',
-    received:'Legutóbbi sikeres lekérés', response:'Lekérés állapota', unknown:'Nincs megadva'}
+    created:'Forrásrekord létrehozása', received:'Legutóbbi sikeres lekérés', response:'Lekérés állapota', unknown:'Nincs megadva'}
 };
 
 export function satelliteContextRequest(state) {
@@ -98,9 +98,17 @@ export function retrievalView(attributes = {}, language = 'en') {
   const hu = language.startsWith('hu');
   const status = attributes.response_status;
   const source = attributes.source;
+  const tasalert = source === 'terralyra_ignis_tasalert_reports';
   const canada = source === 'terralyra_ignis_canada_reports';
   const nifc = source === 'terralyra_ignis_nifc_reports';
   const labels = {
+    accepted:['Sikeres adatátvétel','Successful retrieval'],
+    not_modified:['A forrás nem változott','Source unchanged'],
+    retrieval_failed:['Sikertelen lekérés','Retrieval failed'],
+    empty_snapshot_review:['Üres forrásválasz; ellenőrzést igényel','Empty source response; review required'],
+    unexpected_304:['Váratlan változatlansági válasz','Unexpected unchanged response'],
+    invalid_snapshot:['Érvénytelen forrásválasz','Invalid source response'],
+    replacement_review:['A változások ellenőrzést igényelnek','Changes require review'],
     not_requested:['Még nincs lekérés','Not yet requested'],
     initializing:['Inicializálás','Initializing'],
     never_fetched:['Még nincs sikeres lekérés','Not yet retrieved'],
@@ -118,10 +126,10 @@ export function retrievalView(attributes = {}, language = 'en') {
     refresh_failed_invalid_data:['Érvénytelen forrásválasz','Invalid source response'],
     refresh_failed_access_denied:['Hozzáférési hiba','Access denied']
   };
-  const valid = canada ? ['not_requested','initializing','available','rate_limited','unavailable','invalid_response','review_required','storage_error'] :
+  const valid = tasalert ? ['not_requested','accepted','not_modified','retrieval_failed','empty_snapshot_review','unexpected_304','invalid_snapshot','replacement_review','review_required'] : canada ? ['not_requested','initializing','available','rate_limited','unavailable','invalid_response','review_required','storage_error'] :
     nifc ? ['not_requested','never_fetched','retrieved','restored_cooldown','persistence_review_required','refresh_failed_transient','refresh_failed_rate_limited','refresh_failed_invalid_data','refresh_failed_access_denied'] : [];
   const known = valid.includes(status);
-  const success = (canada && status === 'available') || (nifc && status === 'retrieved');
+  const success = (tasalert && ['accepted','not_modified'].includes(status)) || (canada && status === 'available') || (nifc && status === 'retrieved');
   const retained = known && !success && !['not_requested','initializing','never_fetched'].includes(status);
   return {
     label:known ? `${labels[status][hu ? 0 : 1]} (${status})` :
@@ -147,7 +155,7 @@ export function reportView(state, language = 'en') {
     && typeof a.incident_name === 'string' ? a.incident_name.trim() : '';
   return {w, title:incidentName ? `NIFC · ${text(incidentName)}` : text(a.friendly_name), attribution:text(a.attribution),
     unavailable: ['unavailable','unknown'].includes(state.state),
-    source:safeLink(a.source_url),
+    source:safeLink(a.source_url), license:safeLink(a.license_url), transformation:text(a.transformation),
     retrievalNotice:retrievalView(a,language).notice,
     rows:[
       [w.location,text(a.distance_reference_name)],
@@ -155,7 +163,7 @@ export function reportView(state, language = 'en') {
       [w.status,text(a.source_status || a.stage_of_control)],
       [w.category,text(a.report_category || a.prescribed_status)],
       [w.updated,time(a.source_times?.status_date || a.source_modified_at)],
-      [w.discovered,time(a.source_discovered_at)],
+      ...(a.source === 'terralyra_ignis_tasalert_reports' ? [[w.created,time(a.source_created_at)]] : [[w.discovered,time(a.source_discovered_at)]]),
       [w.received,time(a.last_success_at)],
       [w.response,retrievalView(a,language).label]
     ]};
@@ -215,7 +223,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         on:'The map switch is on. This does not establish that fresh reports exist.'
       };
       this.statusHost.replaceChildren(this.node('h3',hu?'Hozzárendelések állapota':'Binding status'));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
     }
     render(){
       if(!this.config)return;
@@ -235,7 +243,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const titleText=hu?'Térkép címe (nem kötelező)':'Map title (optional)';
       const label=this.node('label',titleText),input=this.node('input');input.type='text';input.value=this.config.title||'';input.setAttribute('aria-label',titleText);input.onchange=()=>this.update({title:input.value});label.append(input);root.append(label);
       root.append(this.node('p',hu?'Válaszd ki az adott forrás IGNIS térképes megjelenítési kapcsolóját. Ez csak hozzárendelés: nem engedélyez adatforrást, és nem kapcsol át entitást.':'Select each source’s IGNIS map visibility switch. This only creates a binding: it does not enable a provider or toggle an entity.'));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC']]){
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']]){
         const caption=name+(hu?' térképkapcsoló':' map switch'),label=this.node('label',caption),select=this.node('select');select.setAttribute('aria-label',caption);
         const empty=this.node('option',hu?'Nincs hozzárendelés':'No binding');empty.value='';select.append(empty);
         const choices=this.choices(source),current=this.config.report_switches?.[source]||'';
@@ -277,7 +285,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.attachShadow({mode:'open'});
       const style = document.createElement('style');
       style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a{font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
-      this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true};
+      this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true, terralyra_ignis_tasalert_reports:true};
       this.maxDays = 0;
       this.controls = document.createElement('div');
       this.controls.style.cssText='display:flex;flex-wrap:wrap;gap:12px;padding:12px;background:var(--card-background-color,#fff)';
@@ -338,7 +346,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       if (this.controlsKey === key) return;
       this.controlsKey = key;
       this.controls.replaceChildren();
-      const labels = hu ? ['Műholdas észlelések','Kanadai jelentések','NIFC jelentések'] : ['Satellite detections','Canada reports','NIFC reports'];
+      const labels = hu ? ['Műholdas észlelések','Kanadai jelentések','NIFC jelentések','TasALERT jelentések'] : ['Satellite detections','Canada reports','NIFC reports','TasALERT reports'];
       Object.keys(this.enabled).forEach((source,index)=>{
         if (!visibility[source]) return;
         const label=document.createElement('label');
@@ -432,6 +440,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         link.href=view.source;link.target='_blank';link.rel='noopener noreferrer';link.dataset.action='source';
         footer.append(link);
       }
+      if(view.license){const link=element('a','CC BY 4.0');link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);this.dialog.append(element('p',view.transformation));}
       const details=element('button',w.details);
       details.dataset.action='details';
       details.onclick=()=>{
@@ -445,5 +454,5 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
   }
   customElements.define('ignis-report-map',IgnisReportMap);
   window.customCards=window.customCards || [];
-  window.customCards.push({type:'ignis-report-map',name:'IGNIS report map',description:'Map with readable Canada and NIFC official report details.'});
+  window.customCards.push({type:'ignis-report-map',name:'IGNIS report map',description:'Map with readable official report details, including TasALERT.'});
 }

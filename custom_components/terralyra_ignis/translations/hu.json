@@ -258,6 +258,9 @@
       },
       "canada_map": {
         "name": "Canada CWFIF jelentéstérkép"
+      },
+      "tasalert_map": {
+        "name": "TasALERT jelentések a térképen"
       }
     },
     "geo_location": {
@@ -439,6 +442,9 @@
           "extreme": "Szélsőséges",
           "unknown": "Ismeretlen"
         }
+      },
+      "tasalert_source_status": {
+        "name": "TasALERT forrásállapot"
       }
     },
     "event": {
@@ -576,6 +582,30 @@
         "confirm_no_renamed_copy": {
           "name": "Nincs betöltött átnevezett példány",
           "description": "Ellenőriztem, hogy nincs betöltve a kártya átnevezett példánya. Kikapcsolva csak ellenőriz, erőforrást nem ad hozzá."
+        }
+      }
+    },
+    "initialize_tasalert": {
+      "name": "TasALERT tároló inicializálása",
+      "description": "Tároló előkészítése első használatra. Nem engedélyez lekérést, és nem töröl meglévő adatot.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-bejegyzés"
+        },
+        "confirm_first_use": {
+          "name": "Megerősítem az első használatot; nem helyreállítás vagy visszaállítás"
+        }
+      }
+    },
+    "recover_tasalert": {
+      "name": "TasALERT tároló helyreállítása",
+      "description": "Ellenőrzött, érvényes tároló újraolvasása. Megőrzi a jelentéseket és a várakozást; legalább 30 perc a következő lekérésig.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-bejegyzés"
+        },
+        "confirm_review": {
+          "name": "Ellenőriztem és elhárítottam a forrás vagy a tárolás hibáját"
         }
       }
     }

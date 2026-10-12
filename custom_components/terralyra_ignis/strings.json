@@ -258,6 +258,9 @@
       },
       "canada_map": {
         "name": "Canada CWFIF report map"
+      },
+      "tasalert_map": {
+        "name": "TasALERT reports on map"
       }
     },
     "geo_location": {
@@ -439,6 +442,9 @@
           "extreme": "Extreme",
           "unknown": "Unknown"
         }
+      },
+      "tasalert_source_status": {
+        "name": "TasALERT source status"
       }
     },
     "event": {
@@ -576,6 +582,30 @@
         "confirm_no_renamed_copy": {
           "name": "Confirm no renamed copy",
           "description": "I checked that no renamed copy of this card is loaded. Leave off to check without adding a resource."
+        }
+      }
+    },
+    "initialize_tasalert": {
+      "name": "Initialize TasALERT storage",
+      "description": "Prepare first-use storage without enabling retrieval or resetting existing data.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS entry"
+        },
+        "confirm_first_use": {
+          "name": "I confirm first use, not recovery or reset"
+        }
+      }
+    },
+    "recover_tasalert": {
+      "name": "Recover TasALERT storage",
+      "description": "Re-read valid existing storage after review; preserve reports and waits, with at least 30 minutes before retrieval.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS entry"
+        },
+        "confirm_review": {
+          "name": "I reviewed and resolved the source or storage problem"
         }
       }
     }

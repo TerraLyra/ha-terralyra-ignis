@@ -1,6 +1,8 @@
 # TasALERT feed preflight
 
-Research only; no runtime provider, entities or calendar entries are enabled.
+Current status: optional HA runtime and map display are implemented, disabled
+until explicit opt-in. See the final section for setup and recovery. Earlier
+sections record research checkpoints; no TasALERT calendar is implemented.
 
 ## Products and attribution
 
@@ -245,3 +247,43 @@ later; a blocked/closed owner must not be reused. Recovery remains unimplemented
 All 50 existing TasALERT tests and these four HA tests passed locally. This is not
 yet config-entry setup/unload acceptance: setup registration, provider opt-in,
 scheduler, diagnostics and presentation remain unwired.
+
+## HA opt-in, shared runtime and map implementation
+
+TasALERT is now wired as an optional official-report provider. Its map switch
+starts off and its diagnostic sensor starts disabled. Either explicit consumer
+can request retrieval; all entries share one serialized owner and persisted
+30-minute minimum interval/backoff. Removing the last consumer stops scheduling.
+Disabling the map removes display entities only; it does not erase reports.
+
+First use requires the administrator action `terralyra_ignis.initialize_tasalert`
+with a loaded IGNIS entry and `confirm_first_use: true`. This creates storage only
+when absent and does not enable a consumer. Never use it as a reset after deleting
+established storage. Invalid storage blocks requests. After fixing/reviewing a
+storage fault, `terralyra_ignis.recover_tasalert` with `confirm_review: true` re-reads
+valid existing storage, refuses unfinished disk operations, and preserves longer
+waits with at least 30 minutes before another request. It never creates missing
+storage, clears incident history, or fetches immediately.
+
+For display, turn on the TasALERT map switch and bind it in the IGNIS report map
+editor. The source control is hidden while the bound switch is off. Records are
+filtered against enabled monitored locations; distance is relative to the nearest
+matching configured place. Only unambiguous point incidents present in the latest
+validated snapshot become markers. Missing/review-held records stay in the ledger
+but are not represented as current map incidents. Failed or empty responses retain
+the previous view with retrieval diagnostics, without claiming freshness.
+
+Bushfire, Fuel Reduction Burn and Structure Fire retain separate categories and
+icons. The popup preserves original type/status, record creation/change times,
+source URL, TasALERT attribution, CC BY 4.0 link and transformation notice. These
+are official reports, never satellite detections or verified active-fire claims.
+No narrative text is invented, no event pages are fetched, and source record
+creation time is not described as ignition/discovery time. There is no TasALERT
+calendar or satellite-alert coupling in this implementation.
+
+Validation covers isolated HA Store persistence/restart, consumer sharing,
+initialization/recovery authorization, pending/corrupt storage refusal, map
+disable/source preservation and local projection. Offline HTTP tests cover
+transport failures, conditional requests and backoff. Browser tests cover the
+mobile popup, attribution, category, source binding and hiding disabled controls.
+Production HA installation/restart remains a separate release acceptance step.
