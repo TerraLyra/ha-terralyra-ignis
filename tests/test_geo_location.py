@@ -542,7 +542,8 @@ def isolate_nifc_display_binding():
     Official-source binding/lifecycle has separate real-HA tests.
     """
     with (patch('custom_components.terralyra_ignis.geo_location.get_nifc_map'),
-          patch('custom_components.terralyra_ignis.geo_location.get_canada_map')):
+          patch('custom_components.terralyra_ignis.geo_location.get_canada_map'),
+          patch('custom_components.terralyra_ignis.geo_location.get_tasalert_map')):
         yield
 
 

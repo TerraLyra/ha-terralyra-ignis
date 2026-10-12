@@ -176,6 +176,19 @@ const assert=require('node:assert/strict');
   assert.match(await page.getByRole('link',{name:'Első lépések útmutató',exact:true}).getAttribute('href'),/#magyar$/);
   assert.equal(await page.evaluate(()=>JSON.stringify(editor.config)),await page.evaluate(()=>savedHelpConfig));
   assert.equal(await page.evaluate(()=>edits.length),await page.evaluate(()=>savedHelpEdits));
+  await page.evaluate(()=>{
+    document.querySelector('main').replaceChildren(card);
+    card.setConfig({type:'custom:ignis-report-map',report_switches:{terralyra_ignis_tasalert_reports:'switch.tas'}});
+    window.tas={entity_id:'geo_location.tas',state:'2',attributes:{source:'terralyra_ignis_tasalert_reports',friendly_name:'TasALERT · Sample',report_category:'Fuel Reduction Burn',source_status:'Patrol',attribution:'TasALERT',license_url:'https://creativecommons.org/licenses/by/4.0/',transformation:'Filtered incident records',source_modified_at:'2026-10-12T11:00:00+11:00',response_status:'accepted'}};
+    card.hass={language:'hu',states:{[tas.entity_id]:tas,'switch.tas':{state:'on',attributes:{ignis_map_source:'terralyra_ignis_tasalert_reports'}}}};
+    card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:tas.entity_id},bubbles:true,composed:true}));
+  });
+  assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),1);
+  assert.match(await page.locator('dialog').innerText(),/Fuel Reduction Burn/);
+  assert.match(await page.locator('dialog').innerText(),/Patrol/);
+  assert.equal(await page.getByRole('link',{name:'CC BY 4.0'}).getAttribute('href'),'https://creativecommons.org/licenses/by/4.0/');
+  await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,'switch.tas':{state:'off'}}});
+  assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),0);
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

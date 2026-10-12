@@ -22,6 +22,7 @@ from .frontend_resources import async_register_card_paths
 from .card_resource_service import register_card_resource_service
 from .nifc_service import register_nifc_initialization
 from .canada_service import register_canada_initialization
+from .tasalert_service import register_tasalert_initialization
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
     CONF_ENABLE_FIRMS,
@@ -112,6 +113,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     get_nifc_owner(hass)  # Lazy registration only: no NIFC request or storage write.
     register_nifc_initialization(hass)
     register_canada_initialization(hass)
+    register_tasalert_initialization(hass)
     hass.data[DOMAIN]["gdacs_client"] = GdacsClient(
         async_get_clientsession(hass),
         GdacsArchive(Store(hass, 1, f"{DOMAIN}.gdacs_context_archive")),
@@ -319,4 +321,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> bo
         canada = hass.data.get(DOMAIN, {}).get("canada_maps", {}).get(entry.entry_id)
         if canada is not None:
             await canada.close()
+        tasalert = hass.data.get(DOMAIN, {}).get("tasalert_maps", {}).get(entry.entry_id)
+        if tasalert is not None:
+            await tasalert.close()
     return unloaded

@@ -266,3 +266,31 @@ register_dashboard_card:
       name: I checked that no renamed copy of this card is loaded
       selector:
         boolean:
+
+initialize_tasalert:
+  name: Initialize TasALERT storage
+  description: Explicit first-use initialization. Preserves existing data and cooldown; does not enable the disabled diagnostic entity.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_first_use:
+      required: true
+      selector:
+        boolean:
+
+recover_tasalert:
+  name: Recover TasALERT storage
+  description: Re-read valid existing TasALERT storage after review. Preserves reports and request cooldown; never resets data or fetches immediately.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    confirm_review:
+      required: true
+      selector:
+        boolean:

@@ -258,6 +258,9 @@
       },
       "canada_map": {
         "name": "Canada CWFIF-Berichtskarte"
+      },
+      "tasalert_map": {
+        "name": "TasALERT-Berichte auf der Karte"
       }
     },
     "geo_location": {
@@ -439,6 +442,9 @@
           "extreme": "Extrem",
           "unknown": "Unbekannt"
         }
+      },
+      "tasalert_source_status": {
+        "name": "TasALERT-Quellenstatus"
       }
     },
     "event": {
@@ -576,6 +582,30 @@
         "confirm_no_renamed_copy": {
           "name": "Keine umbenannte Kopie geladen",
           "description": "Ich habe geprüft, dass keine umbenannte Kopie dieser Karte geladen ist. Ausgeschaltet wird nur geprüft, ohne eine Ressource hinzuzufügen."
+        }
+      }
+    },
+    "initialize_tasalert": {
+      "name": "TasALERT-Speicher initialisieren",
+      "description": "Speicher für die erste Nutzung vorbereiten; keine Abfragen aktivieren oder Daten zurücksetzen.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-Eintrag"
+        },
+        "confirm_first_use": {
+          "name": "Ich bestätige die Erstnutzung, keine Wiederherstellung oder Zurücksetzung"
+        }
+      }
+    },
+    "recover_tasalert": {
+      "name": "TasALERT-Speicher wiederherstellen",
+      "description": "Gültigen Speicher nach Prüfung erneut lesen; Berichte und Wartezeiten bleiben erhalten, mindestens 30 Minuten bis zur Abfrage.",
+      "fields": {
+        "config_entry_id": {
+          "name": "IGNIS-Eintrag"
+        },
+        "confirm_review": {
+          "name": "Ich habe das Quellen- oder Speicherproblem geprüft und behoben"
         }
       }
     }

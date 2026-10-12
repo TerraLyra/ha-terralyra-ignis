@@ -258,6 +258,9 @@
       },
       "canada_map": {
         "name": "Carte des rapports Canada CWFIF"
+      },
+      "tasalert_map": {
+        "name": "Rapports TasALERT sur la carte"
       }
     },
     "geo_location": {
@@ -439,6 +442,9 @@
           "extreme": "Extrême",
           "unknown": "Inconnu"
         }
+      },
+      "tasalert_source_status": {
+        "name": "État de la source TasALERT"
       }
     },
     "event": {
@@ -576,6 +582,30 @@
         "confirm_no_renamed_copy": {
           "name": "Aucune copie renommée chargée",
           "description": "J’ai vérifié qu’aucune copie renommée de cette carte n’est chargée. Désactivé, vérifie uniquement sans ajouter de ressource."
+        }
+      }
+    },
+    "initialize_tasalert": {
+      "name": "Initialiser le stockage TasALERT",
+      "description": "Préparer le premier usage sans activer les requêtes ni réinitialiser les données.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée IGNIS"
+        },
+        "confirm_first_use": {
+          "name": "Je confirme une première utilisation, sans récupération ni réinitialisation"
+        }
+      }
+    },
+    "recover_tasalert": {
+      "name": "Restaurer le stockage TasALERT",
+      "description": "Relire le stockage valide après vérification; conserver les rapports et délais, avec au moins 30 minutes avant la prochaine requête.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée IGNIS"
+        },
+        "confirm_review": {
+          "name": "J’ai vérifié et résolu le problème de source ou de stockage"
         }
       }
     }

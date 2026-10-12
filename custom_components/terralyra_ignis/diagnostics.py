@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 
 from . import IgnisConfigEntry
 from .const import (
+    DOMAIN,
     CONF_FIRMS_MAP_KEY,
     CONF_MONITORED_LOCATIONS,
     CONF_MONITORING_CENTER_NAME,
@@ -57,7 +58,9 @@ async def async_get_config_entry_diagnostics(
     )
     provider_health = tuple(getattr(active.provider, "health", ()))
 
+    tasalert = hass.data.get(DOMAIN, {}).get("tasalert_runtime")
     return {
+        "tasalert": tasalert.owner.diagnostics() if tasalert is not None else {"response_status": "not_requested"},
         "entry": {
             "data": async_redact_data(dict(entry.data), TO_REDACT),
             "options": async_redact_data(dict(entry.options), TO_REDACT),

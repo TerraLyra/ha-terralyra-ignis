@@ -188,3 +188,21 @@ test('declared mismatching source cannot enable another report layer',()=>{
   assert.equal(visibleMapSources(states,{[canada]:'switch.test'})[canada],false);
  }
 });
+
+test('TasALERT keeps planned burns distinct and displays licensed source clocks',()=>{
+ const source='terralyra_ignis_tasalert_reports';
+ const state={entity_id:'geo_location.tas',state:'2',attributes:{source,
+   friendly_name:'TasALERT · Example',report_category:'Fuel Reduction Burn',source_status:'Patrol',
+   source_created_at:'2026-10-12T10:00:00+11:00',source_modified_at:'2026-10-12T11:00:00+11:00',
+   license_url:'https://creativecommons.org/licenses/by/4.0/',attribution:'TasALERT',response_status:'accepted'}};
+ const view=reportView(state);
+ assert.equal(view.license,state.attributes.license_url);
+ assert.ok(view.rows.some(row=>row[1]==='Fuel Reduction Burn'));
+ assert.ok(view.rows.some(row=>row[1]==='Patrol'));
+ assert.ok(view.rows.some(row=>row[0]==='Source record creation time'));
+ assert.equal(view.retrievalNotice,null);
+ state.attributes.response_status='retrieval_failed';
+ assert.match(reportView(state).retrievalNotice,/retained/i);
+ assert.equal(visibleMapSources({}, {})[source],false);
+ assert.equal(visibleMapSources({'switch.tas':{state:'on',attributes:{ignis_map_source:source}}},{[source]:'switch.tas'})[source],true);
+});

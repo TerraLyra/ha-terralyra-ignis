@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add opt-in TasALERT official-report retrieval shared across monitored locations.
+- Display separate bushfire, planned burn and structure fire markers with original source status, times and CC BY 4.0 attribution.
+- Add explicit first-use initialization, conservative storage recovery and diagnostic status.
+
 ## 0.39.2
 
 - Hide report-age controls when no report source is enabled; retain the selected filter.
