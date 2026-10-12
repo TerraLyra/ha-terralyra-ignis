@@ -96,3 +96,22 @@ verbatim. Comparison does not persist state or perform automatic replacement;
 a future consumer must handle review-required plans and parse errors explicitly.
 Thirteen synthetic parser/comparison tests pass. Long-term retention, reappearance
 across multiple snapshots and actual upstream identifier continuity remain open.
+
+## Offline response policy
+
+`tasalert_policy` is a pure state transition model, not an HTTP client. Its local
+30-minute starting interval is a conservative engineering choice, not a documented
+provider limit. Failures back off exponentially up to 24 hours; valid Retry-After
+values can extend that deadline. An aware receipt clock and due-time gate are
+required. ETags are sent only for an accepted representation; 304 without one is
+an error. A 304 response establishes no observation freshness.
+
+Malformed/empty responses and identity/clock/missing-record review signals keep
+the previous accepted snapshot and validator. This first conservative model holds
+the whole replacement, so unrelated updates may also be delayed pending review.
+It has no expiry, disk persistence or production scheduling and must not be used
+as a finished retention implementation. The next stage must address bounded
+retention, operator recovery and partial-record reconciliation explicitly.
+
+All 18 offline parser, comparison and response-policy tests pass. No additional
+upstream requests were needed for these tests.
