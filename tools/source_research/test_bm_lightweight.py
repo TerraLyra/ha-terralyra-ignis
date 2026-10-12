@@ -37,3 +37,22 @@ class LightweightTests(unittest.TestCase):
             self.assertFalse(evidence)
         report, _ = self.run_text('Bokros közelében ég a nádas.', names)
         self.assertEqual(report.event_settlement_ids, frozenset({'b'}))
+
+    def test_outskirts_location_keeps_exact_evidence_and_original_text(self):
+        text = 'Ég egy ház Debrecen külterületén'
+        report, evidence = self.run_text(text, {'d': 'Debrecen', 'h': 'Hajdúböszörmény'})
+        self.assertEqual(report.event_settlement_ids, frozenset({'d'}))
+        self.assertEqual(report.title, text)
+        self.assertEqual(evidence[0]['text'], 'Debrecen külterületén')
+        self.assertEqual(text[evidence[0]['start']:evidence[0]['end']], evidence[0]['text'])
+
+    def test_outskirts_does_not_cross_responder_negation_or_sentence_boundaries(self):
+        for text in (
+            'Debrecen külterületén dolgozó tűzoltók szerint ég egy ház.',
+            'Debrecen külterületén nem ég a ház.',
+            'Debrecen külterületén baleset történt. Máshol ég egy ház.',
+            'Debrecen külterületének közelében ég egy ház.',
+        ):
+            report, evidence = self.run_text(text, {'d': 'Debrecen'})
+            self.assertFalse(report.fire_report, text)
+            self.assertFalse(evidence, text)
