@@ -190,3 +190,28 @@ serialize fetch/save and retain in-memory state if persistence fails.
 22-record snapshot (16 incidents, six burnt areas), and the composite state passed
 an exact save/load roundtrip in a temporary file. This is a point-in-time transport
 check, not sustained availability, completeness or event-lifetime validation.
+
+## Async transport prototype
+
+`tasalert_async_fetch` accepts a caller-owned aiohttp-compatible session and enforces
+an asyncio total deadline across connection, headers and streamed body. Cancellation
+propagates without committing state; payload limits apply during streaming. The
+caller must use verified TLS, serialize fetch/save, and supply aiohttp.ClientError
+in transport_errors so library-specific payload failures use backoff. No aiohttp
+session is constructed and no HA runtime provider is enabled by this prototype.
+
+43 offline tests pass, including total timeout, cancellation, partial payloads,
+size bounds and injected transport failures. Actual aiohttp/HA session integration
+still requires validation; these tests use a controlled compatible fake transport.
+
+## Actual aiohttp loopback validation
+
+Four integration tests now exercise a real aiohttp ClientSession against a local
+loopback server: conditional 304, redirect refusal, full-request timeout and 429
+Retry-After. With cached aiohttp dependencies available, all 47 TasALERT tests ran
+without skips. These four tests explicitly skip when optional aiohttp is absent;
+that skip must not be reported as transport validation. The fixed production URL
+is patched only inside the local test fixture. No external feed or HA was queried.
+
+This establishes actual session compatibility, not HA runtime setup or persistence
+coordination. TLS verification remains the caller-owned session's responsibility.
