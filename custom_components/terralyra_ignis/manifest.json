@@ -1,16 +1,24 @@
 {
   "domain": "terralyra_ignis",
   "name": "TerraLyra IGNIS",
-  "after_dependencies": ["lovelace"],
+  "after_dependencies": [
+    "lovelace"
+  ],
   "codeowners": [
     "@janosbali"
   ],
   "config_flow": true,
-  "dependencies": ["http"],
+  "dependencies": [
+    "http"
+  ],
   "documentation": "https://github.com/TerraLyra/ha-terralyra-ignis",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/TerraLyra/ha-terralyra-ignis/issues",
-  "requirements": ["defusedxml>=0.7.1", "h5py==3.16.0", "shapely==2.1.2"],
-  "version": "0.39.2"
+  "requirements": [
+    "defusedxml>=0.7.1",
+    "h5py==3.16.0",
+    "shapely==2.1.2"
+  ],
+  "version": "0.40.0"
 }

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.0
 
 - Add opt-in TasALERT official-report retrieval shared across monitored locations.
 - Display separate bushfire, planned burn and structure fire markers with original source status, times and CC BY 4.0 attribution.
