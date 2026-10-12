@@ -75,3 +75,19 @@ async def test_recovery_waits_for_pending_write_and_preserves_longer_pause(hass,
     assert not owner.blocked
     assert owner.state.response.failures==2
     await owner.async_close()
+
+
+async def test_recovery_preserves_new_retry_after_when_save_failed(hass,hass_storage):
+    from datetime import timedelta
+    from unittest.mock import patch
+    owner=TasAlertOwner(Store(hass,1,STORE_KEY),None)
+    await owner.async_load(confirmed_new=True)
+    future=datetime.now(UTC)+timedelta(days=3)
+    candidate=Engine(response=State(failures=1,next_attempt=future,status='retrieval_failed'))
+    owner.fetcher=AsyncMock(return_value=candidate)
+    with patch.object(owner.store,'async_save',AsyncMock(side_effect=OSError('disk error'))):
+        with pytest.raises(OSError):await owner.async_refresh()
+    assert owner.state==Engine()
+    await owner.async_recover()
+    assert owner.state.response.next_attempt==future
+    await owner.async_close()

@@ -25,6 +25,7 @@ class TasAlertOwner:
         self.storage_timeout=storage_timeout
         self._pending=None
         self._active=None
+        self._recovery_deadline=None
 
     def diagnostics(self):
         state = self.state
@@ -102,6 +103,7 @@ class TasAlertOwner:
             # immediate repeat request after a failed save.
             deadline = max(filter(None, (state.response.next_attempt,
                            self.state.response.next_attempt if self.state else None,
+                           self._recovery_deadline,
                            datetime.now(UTC) + INTERVAL)))
             state = replace(state, response=replace(state.response, next_attempt=deadline))
             await self._storage(self.store.async_save, json.loads(encode(state)))
@@ -125,6 +127,8 @@ class TasAlertOwner:
         candidate=await self.fetcher(self.state,self.session,transport_errors=(ClientError,OSError))
         if self.closed:raise OSError('TasALERT owner closed')
         if candidate is self.state:return self.state
+        # Preserve a newly received Retry-After even if its disk save fails.
+        self._recovery_deadline=candidate.response.next_attempt
         # A cancelled/failed save has unknown durability: block subsequent I/O.
         try:
             await self._storage(self.store.async_save,json.loads(encode(candidate)))
