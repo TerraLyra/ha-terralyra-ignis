@@ -203,3 +203,15 @@ session is constructed and no HA runtime provider is enabled by this prototype.
 43 offline tests pass, including total timeout, cancellation, partial payloads,
 size bounds and injected transport failures. Actual aiohttp/HA session integration
 still requires validation; these tests use a controlled compatible fake transport.
+
+## Actual aiohttp loopback validation
+
+Four integration tests now exercise a real aiohttp ClientSession against a local
+loopback server: conditional 304, redirect refusal, full-request timeout and 429
+Retry-After. With cached aiohttp dependencies available, all 47 TasALERT tests ran
+without skips. These four tests explicitly skip when optional aiohttp is absent;
+that skip must not be reported as transport validation. The fixed production URL
+is patched only inside the local test fixture. No external feed or HA was queried.
+
+This establishes actual session compatibility, not HA runtime setup or persistence
+coordination. TLS verification remains the caller-owned session's responsibility.
