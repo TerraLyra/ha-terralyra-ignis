@@ -133,3 +133,45 @@ combine conditional-response and ledger acceptance without losing review state,
 serialize receipt clocks and validators atomically, define operator recovery, and
 validate fresh real snapshots. Runtime activation remains out of scope until these
 boundaries are resolved.
+
+## Offline response-state storage
+
+`tasalert_storage` saves the accepted response bytes, validator, failure counter,
+status and next-attempt deadline in a versioned, size-bounded file. It validates
+before writing, flushes a same-directory temporary file and replaces the target
+atomically. Failed replacement preserves the prior file. Corrupt/unknown versions
+raise rather than silently clearing history or cooldown. This is a local prototype,
+not HA Store integration, concurrent-writer coordination or a power-loss durability
+guarantee. The separate per-record ledger is not yet serialized by this module.
+
+26 offline tests pass, including restart cooldown/validator preservation, malformed
+storage rejection and simulated replacement failure. No live HA files are accessed.
+
+## Composed offline engine
+
+`tasalert_engine.advance` now combines conditional-response policy and per-record
+reconciliation. The accepted HTTP representation and retained report payloads are
+separate: a valid response may contain a disputed record while other records update.
+The disputed payload stays in the ledger with review diagnostics. A 304 preserves
+those diagnostics and never refreshes last-seen clocks or expires missing records.
+Invalid/empty responses keep both representations and their validator. Inputs are
+not mutated. Expiry results belong only to the transition that performs expiry.
+
+29 offline tests pass. The response-only storage module must not be used to persist
+this composite engine: ledger and review persistence still need a single validated
+storage envelope before restart-safe integration is possible. No runtime wiring
+or automatic network requests are present.
+
+## Composite restart checkpoint
+
+`tasalert_engine_storage` now stores the accepted response and retained ledger in
+one validated, bounded, versioned envelope using atomic replacement. Record shapes,
+coordinates, clocks, IDs and review membership are validated before acceptance.
+The stored HTTP representation may intentionally differ from a retained disputed
+payload. Review diagnostics survive restart and 304; expiry actions do not replay.
+32 offline tests pass. Earlier response-only storage remains a lower-level helper,
+not the correct persistence entry point for a composite engine.
+
+Still research-only: no HTTP client, HA Store integration, concurrency control,
+operator recovery workflow or live activation. Real-world identity/status continuity
+and persistence failure behavior in the eventual HA integration remain to validate.
