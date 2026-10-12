@@ -115,3 +115,21 @@ retention, operator recovery and partial-record reconciliation explicitly.
 
 All 18 offline parser, comparison and response-policy tests pass. No additional
 upstream requests were needed for these tests.
+
+## Per-record reconciliation prototype
+
+`tasalert_retention.reconcile` is a separate offline ledger prototype, not yet
+connected to the response policy or persistent storage. An identity/clock conflict
+holds that record while independent records update. Missing records remain labelled
+not-in-snapshot and can expire after seven days during a validated nonempty update.
+Seven days is a local research choice, not the event lifetime or a provider rule.
+Reappearance refreshes presence without claiming a new ignition. Empty or invalid
+feeds never trigger expiry. Persistent empty feeds therefore retain records; the
+5000-record capacity fails closed rather than evicting unreviewed data. Records
+held for review are not automatically replaced or purged.
+
+23 offline tests pass across the four prototypes. Remaining integration work:
+combine conditional-response and ledger acceptance without losing review state,
+serialize receipt clocks and validators atomically, define operator recovery, and
+validate fresh real snapshots. Runtime activation remains out of scope until these
+boundaries are resolved.
