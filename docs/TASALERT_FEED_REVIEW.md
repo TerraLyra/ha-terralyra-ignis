@@ -146,3 +146,18 @@ guarantee. The separate per-record ledger is not yet serialized by this module.
 
 26 offline tests pass, including restart cooldown/validator preservation, malformed
 storage rejection and simulated replacement failure. No live HA files are accessed.
+
+## Composed offline engine
+
+`tasalert_engine.advance` now combines conditional-response policy and per-record
+reconciliation. The accepted HTTP representation and retained report payloads are
+separate: a valid response may contain a disputed record while other records update.
+The disputed payload stays in the ledger with review diagnostics. A 304 preserves
+those diagnostics and never refreshes last-seen clocks or expires missing records.
+Invalid/empty responses keep both representations and their validator. Inputs are
+not mutated. Expiry results belong only to the transition that performs expiry.
+
+29 offline tests pass. The response-only storage module must not be used to persist
+this composite engine: ledger and review persistence still need a single validated
+storage envelope before restart-safe integration is possible. No runtime wiring
+or automatic network requests are present.
