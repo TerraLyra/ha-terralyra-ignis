@@ -2,7 +2,8 @@
 from datetime import datetime
 import math
 from urllib.parse import urlsplit
-from xml.etree import ElementTree as ET
+from defusedxml import ElementTree as ET
+from defusedxml.common import DefusedXmlException
 
 NS = {'k': 'http://www.opengis.net/kml/2.2'}
 MAX_BYTES = 2 * 1024 * 1024
@@ -23,7 +24,10 @@ def parse_kml(raw: bytes):
     text = raw.decode('utf-8-sig')
     if '<!DOCTYPE' in text.upper() or '<!ENTITY' in text.upper():
         raise ValueError('XML declarations with entities are unsupported')
-    root = ET.fromstring(text)
+    try:
+        root = ET.fromstring(text, forbid_dtd=True)
+    except DefusedXmlException as error:
+        raise ValueError("Unsafe XML") from error
     if root.tag != '{http://www.opengis.net/kml/2.2}kml':
         raise ValueError('Expected KML 2.2')
     records, seen = [], set()
