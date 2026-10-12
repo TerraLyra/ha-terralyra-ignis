@@ -28,5 +28,6 @@ def record_title(item,language='en'):return 'TasALERT · '+item['title']
 
 
 def record_attributes(item):
-    return {**item,'report_category':item['source_type'],
+    return {**item,'source_url':item['source_url'] or 'https://alert.tas.gov.au/data/incidents-and-messages.kml',
+            'report_category':item['source_type'],
             'source_modified_at':item['source_changed_at'],'source_freshness':'not_established','incident_text_status':'not_in_feed'}
