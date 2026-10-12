@@ -161,3 +161,17 @@ not mutated. Expiry results belong only to the transition that performs expiry.
 this composite engine: ledger and review persistence still need a single validated
 storage envelope before restart-safe integration is possible. No runtime wiring
 or automatic network requests are present.
+
+## Composite restart checkpoint
+
+`tasalert_engine_storage` now stores the accepted response and retained ledger in
+one validated, bounded, versioned envelope using atomic replacement. Record shapes,
+coordinates, clocks, IDs and review membership are validated before acceptance.
+The stored HTTP representation may intentionally differ from a retained disputed
+payload. Review diagnostics survive restart and 304; expiry actions do not replay.
+32 offline tests pass. Earlier response-only storage remains a lower-level helper,
+not the correct persistence entry point for a composite engine.
+
+Still research-only: no HTTP client, HA Store integration, concurrency control,
+operator recovery workflow or live activation. Real-world identity/status continuity
+and persistence failure behavior in the eventual HA integration remain to validate.

@@ -50,8 +50,11 @@ def encode(state):
 
 
 def save(path, state):
+    atomic_write(path, encode(state))
+
+
+def atomic_write(path, raw):
     path=Path(path)
-    raw=encode(state)
     temporary=None
     try:
         with tempfile.NamedTemporaryFile(dir=path.parent, prefix=path.name+'.', delete=False) as stream:
