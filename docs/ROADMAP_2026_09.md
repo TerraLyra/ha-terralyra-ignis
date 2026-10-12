@@ -58,7 +58,7 @@ are not automatically part of a HACS installation.
 | NSW RFS / Queensland QFD | Existing optional report calendars | Maintain compatibility and source-specific semantics |
 | Victoria | Offline inspectors complete; product-specific terms unresolved | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
-| Tasmania TasALERT | Product-specific access unresolved | Verify supported endpoints and terms |
+| Tasmania TasALERT | CC BY 4.0 for the three supported feeds | Offline KML preflight; see [feed review](TASALERT_FEED_REVIEW.md) |
 | Western Australia DFES | Product-specific access unresolved | Clarify dataset approval and distributed local authentication |
 | South Australia CFS | Product-specific reuse unresolved | Resolve product-specific reuse terms |
 | Northern Territory | Access preflight complete | Confirm supported feed and reuse scope |

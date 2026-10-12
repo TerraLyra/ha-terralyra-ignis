@@ -31,7 +31,7 @@ to an existing provider.
 | --- | --- | --- |
 | Victoria CFA-listed developer JSON | Product-specific developer conditions unresolved; offline research complete, runtime absent | Verify product-specific developer terms. |
 | WA DFES-066 Incident Points | Explicit SLIP registration and dataset approval; catalogue lists CC BY 4.0 plus EmergencyWA terms | Confirm public HACS/per-user authentication eligibility, including resource-level Government Use Only labels. |
-| Tasmania TasALERT feeds | Explicit permission required; do not inherit legacy TFS feed terms | Verify product-specific developer access before runtime implementation. |
+| Tasmania TasALERT feeds | Three supported feeds: CC BY 4.0 | Access cleared for these products; [technical preflight](TASALERT_FEED_REVIEW.md) remains before runtime implementation. |
 | SA CFS / ESO feeds | Original SA CKAN package reports CC BY-NC-ND 4.0; the national mirror omits the licence | Clarify local HACS use and current terms before implementation; commercial use needs separate permission. See [SA review](SOUTH_AUSTRALIA_ADAPTER_READINESS.md). |
 | NT Fire Incident Map | Website reuse conditions do not establish a product-specific developer grant | Clarify supported feed and local HACS reuse before adapter work; see [NT review](NORTHERN_TERRITORY_ADAPTER_READINESS.md). |
 | ACT Current Incidents | Explicit CC BY 4.0; no additional individual permission requirement found for that feed | Keep experimental pending timestamp evidence. CAP is a separate product. |
