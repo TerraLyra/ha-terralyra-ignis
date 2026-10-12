@@ -47,6 +47,8 @@ is available through HACS. Start with the
 [English / Hungarian first-setup guide](docs/FIRST_STEPS.md); release notes are
 included on each release page.
 
+The **0.40.0 release** adds optional TasALERT official reports on the map, with separate bushfire, planned burn and structure fire categories. It starts off until explicitly enabled. See [setup and release notes](docs/RELEASE_0_40_0.md).
+
 The **0.36.0 release** adds a visual report-map editor, binding-status feedback
 and summary source guidance. See [release notes](docs/RELEASE_0_36_0.md).
 
