@@ -31,7 +31,7 @@ class AiohttpTests(unittest.IsolatedAsyncioTestCase):
         self.runner=web.AppRunner(app);await self.runner.setup()
         site=web.TCPSite(self.runner,'127.0.0.1',0);await site.start()
         port=self.runner.addresses[0][1]
-        self.url_patch=patch('tasalert_async_fetch.URL',f'http://127.0.0.1:{port}/feed')
+        self.url_patch=patch('_ignis_tasalert_offline.async_fetch.URL',f'http://127.0.0.1:{port}/feed')
         self.url_patch.start()
         self.session=aiohttp.ClientSession()
 

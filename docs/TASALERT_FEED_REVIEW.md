@@ -215,3 +215,33 @@ is patched only inside the local test fixture. No external feed or HA was querie
 
 This establishes actual session compatibility, not HA runtime setup or persistence
 coordination. TLS verification remains the caller-owned session's responsibility.
+
+## Inert HA adapter checkpoint
+
+The implementation now resides in `official_sources/tasalert`; research imports
+load those same modules without initializing HA. `owner.create_owner` constructs
+a dedicated HA Store and shared verified session but is not called from setup.
+There is no platform registration, opt-in switch, scheduler or entity activation.
+
+The owner serializes load/fetch/save with one lock. Missing state needs explicit
+first-use initialization. Corrupt/load/save failures latch a block; candidate state
+is published only after save succeeds. This first adapter requires reconstruction
+for recovery; it does not provide a recovery action or save deadline yet.
+
+50 tests passed locally with aiohttp present, including the packaged implementation,
+loopback transport, mocked HA Store interface, concurrent refresh ordering and save
+failure blocking. Actual HA Store lifecycle/unload integration remains untested.
+Optional aiohttp-dependent tests skip when the dependency is absent.
+
+## HA Store and stop validation
+
+Four isolated HA tests now use the actual Store implementation to check restart
+cooldown retention, corrupt-state preservation, cancellation of an active fetch on
+close and a stalled storage load. Storage operations have a deadline and latch a
+block on interruption/timeout; late task errors are observed. Close never closes
+the shared session or publishes a late candidate. In-flight disk work may complete
+later; a blocked/closed owner must not be reused. Recovery remains unimplemented.
+
+All 50 existing TasALERT tests and these four HA tests passed locally. This is not
+yet config-entry setup/unload acceptance: setup registration, provider opt-in,
+scheduler, diagnostics and presentation remain unwired.
