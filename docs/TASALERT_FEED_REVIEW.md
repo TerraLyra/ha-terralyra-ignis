@@ -175,3 +175,18 @@ not the correct persistence entry point for a composite engine.
 Still research-only: no HTTP client, HA Store integration, concurrency control,
 operator recovery workflow or live activation. Real-world identity/status continuity
 and persistence failure behavior in the eventual HA integration remain to validate.
+
+## Opt-in research HTTP client
+
+`tasalert_fetch.fetch_once` performs at most one due request to the fixed HTTPS KML
+URL with verified TLS, conditional ETag and redirects disabled. It rejects oversized,
+truncated or encoded bodies; network/HTTP failures preserve accepted data and use
+backoff. HTTP 304 follows the engine's no-refresh semantics. The 20-second timeout
+is a socket-operation timeout, not a total wall-clock deadline; a production async
+client must add a total deadline. No scheduler or HA entity is enabled. Callers must
+serialize fetch/save and retain in-memory state if persistence fails.
+
+37 offline tests passed. One explicit live smoke request returned an accepted
+22-record snapshot (16 incidents, six burnt areas), and the composite state passed
+an exact save/load roundtrip in a temporary file. This is a point-in-time transport
+check, not sustained availability, completeness or event-lifetime validation.
