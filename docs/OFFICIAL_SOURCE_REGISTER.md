@@ -4,8 +4,9 @@ Before adding a provider, follow [access preflight](PROVIDER_ACCESS_PREFLIGHT.md
 and notify the user early of required requests.
 
 Research status, not a statement of live feed health or authorization to redistribute
-all listed products. NSW and Queensland adapters are implemented; other listed sources are research
-candidates. This review did not enable feeds or change Home Assistant. Each new
+all listed products. NSW and Queensland adapters are implemented. TasALERT now has
+an opt-in runtime and map adapter; see its current [implementation notes](TASALERT_FEED_REVIEW.md).
+Other listed sources remain research candidates. This review did not enable feeds or change Home Assistant. Each new
 adapter still needs a bounded direct sample/schema/freshness probe.
 
 | Jurisdiction | Official documentation / product | Evidence and remaining gate | Order |
@@ -15,7 +16,7 @@ adapter still needs a bounded direct sample/schema/freshness probe.
 | Victoria | [CFA feeds](https://www.cfa.vic.gov.au/rss-feeds) | Offline validation and paired-snapshot reports implemented; no runtime provider. EMV developer-product conditions remain unresolved; request submission/approval not confirmed. | 3 |
 | Western Australia | [DFES FAQ](https://www.dfes.wa.gov.au/emergencywa/faq), [Emergency WA terms](https://www.emergency.wa.gov.au/about) | DFES documents SLIP access using ArcGIS/WMS/WFS and RSS/CAP. DFES-066 points and DFES-064 incident areas list CC BY 4.0; DFES-068 warning areas lists CC BY-ND 4.0. SLIP/DFES approval required. See [WA readiness](WESTERN_AUSTRALIA_ADAPTER_READINESS.md); no live sample or guessed map-backend scraping. | 4–5 |
 | South Australia | [CFS feeds](https://www.cfs.sa.gov.au/warnings-restrictions/warnings/rss-feeds/) | Original SA catalogue API reports CC BY-NC-ND 4.0; national mirror licence is missing. Clarification raised before adapter work. See [SA review](SOUTH_AUSTRALIA_ADAPTER_READINESS.md). | 4–5 |
-| Tasmania | [TFS feeds](https://www.fire.tas.gov.au/Show?pageId=xmlFeedsHome) | Legacy TFS terms do not cover the replacement automatically. TasALERT explicitly requires feed permission: info@alert.tas.gov.au. See [preflight](PROVIDER_ACCESS_PREFLIGHT.md). | 6–8 |
+| Tasmania | [TasALERT KML](https://alert.tas.gov.au/data/incidents-and-messages.kml) | TasALERT feeds in scope permit republication under CC BY 4.0. Optional shared retrieval, storage recovery and map adapter implemented; default off. Preserve original category/status/times and attribution. See [current implementation and dated samples](TASALERT_FEED_REVIEW.md). | 6–8 |
 | ACT | [ESA warnings](https://esa.act.gov.au/be-emergency-ready/warnings-alerts) | Current Incidents has explicit CC BY 4.0. Offline reader, test markers and experimental DST-aware interpretation implemented; no production entities. Real timestamp semantics remain unverified; CAP separate. See [ACT readiness](ACT_ADAPTER_READINESS.md). | 6–8 |
 | Northern Territory | [NT fire map](https://pfes.nt.gov.au/fire-and-rescue-service/fire-incident-map) | Documented approximate 10–15-minute updates. Map says points/polygons represent general areas, not fire spread. Machine endpoint and product-specific reuse remain unverified; [access review](NORTHERN_TERRITORY_ADAPTER_READINESS.md) separates incident-map terms from open burn permits. | 6–8 |
 
