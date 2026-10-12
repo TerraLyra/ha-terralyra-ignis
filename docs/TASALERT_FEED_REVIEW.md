@@ -232,3 +232,16 @@ for recovery; it does not provide a recovery action or save deadline yet.
 loopback transport, mocked HA Store interface, concurrent refresh ordering and save
 failure blocking. Actual HA Store lifecycle/unload integration remains untested.
 Optional aiohttp-dependent tests skip when the dependency is absent.
+
+## HA Store and stop validation
+
+Four isolated HA tests now use the actual Store implementation to check restart
+cooldown retention, corrupt-state preservation, cancellation of an active fetch on
+close and a stalled storage load. Storage operations have a deadline and latch a
+block on interruption/timeout; late task errors are observed. Close never closes
+the shared session or publishes a late candidate. In-flight disk work may complete
+later; a blocked/closed owner must not be reused. Recovery remains unimplemented.
+
+All 50 existing TasALERT tests and these four HA tests passed locally. This is not
+yet config-entry setup/unload acceptance: setup registration, provider opt-in,
+scheduler, diagnostics and presentation remain unwired.
