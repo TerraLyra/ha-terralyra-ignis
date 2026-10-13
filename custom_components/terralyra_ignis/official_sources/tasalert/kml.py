@@ -46,7 +46,9 @@ def parse_kml(raw: bytes):
                 raise ValueError('Missing or duplicate field name')
             fields[name] = data.findtext('k:value', default='', namespaces=NS)
         kind = fields.get('feedType')
-        if kind not in ('incident', 'burnt-area'):
+        # Warnings share the official feed with incidents. Preserve them in the
+        # snapshot; presentation remains restricted to incident records.
+        if kind not in ('incident', 'burnt-area', 'warning'):
             raise ValueError('Unreviewed feed type')
         clocks = {key: timestamp(fields[key]) for key in ('created', 'changed') if fields.get(key)}
         url = fields.get('url')

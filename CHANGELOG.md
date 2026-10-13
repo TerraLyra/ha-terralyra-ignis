@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.40.1
+
+- Accept TasALERT warning records alongside incidents without rejecting the whole
+  feed. Preserve warnings in the snapshot without displaying them as fire points.
+
 ## 0.40.0
 
 - Add opt-in TasALERT official-report retrieval shared across monitored locations.
