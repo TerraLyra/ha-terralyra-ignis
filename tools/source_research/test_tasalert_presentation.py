@@ -18,6 +18,15 @@ class PresentationTests(unittest.TestCase):
         self.assertFalse(view['satellite_detection'])
         self.assertEqual(view['attribution'],'TasALERT')
 
+    def test_mixed_warning_snapshot_keeps_incidents_without_warning_marker(self):
+        from test_tasalert_kml import sample
+        warning = sample(kind='warning', identifier='warning-one', extra='<Data name="type"><value>Smoke Alert</value></Data>')
+        raw = record().replace(b'</Document>', warning.split(b'<Document>')[1].split(b'</Document>')[0] + b'</Document>')
+        engine = advance(Engine(), datetime(2026,10,13,tzinfo=UTC), 200, raw)
+        self.assertIn('warning-one', engine.ledger)
+        self.assertEqual(engine.ledger['warning-one']['record']['fields']['type'], 'Smoke Alert')
+        self.assertEqual([view['id'] for view in views(engine)], ['one'])
+
     def test_categories_are_distinct(self):
         for source,category in [('Bushfire','bushfire'),('Fuel Reduction Burn','planned_burn'),('Structure Fire','structure_fire'),('Unknown','other')]:
             self.engine.ledger['one']['record']['fields']['type']=source
