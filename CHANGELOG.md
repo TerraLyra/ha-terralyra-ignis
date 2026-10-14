@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.2
+
+- Add an explicit visual-editor button to refresh the sample point of an existing
+  Home forecast binding. Review the displayed coordinates before applying; no
+  automatic reassignment or provider activation occurs.
+
 ## 0.40.1
 
 - Accept TasALERT warning records alongside incidents without rejecting the whole
