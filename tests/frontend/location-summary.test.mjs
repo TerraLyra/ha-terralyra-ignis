@@ -148,3 +148,21 @@ test('location labels hide technical IDs unless names collide',()=>{
  assert.equal(locationChoiceLabel(home,[home,second]),'Home — sensor.home');
  assert.equal(locationChoiceLabel(second,[home,second]),'Home — sensor.other');
 });
+
+const {legacyForecastRefresh}=await import('../../frontend/ignis-location-summary.js');
+test('legacy refresh preserves explicit association and reads latest valid sample point',()=>{
+ const config={entity:'sensor.home',location_id:'home',forecast:{...binding,custom:'preserve'}};
+ const states={'sensor.home':{attributes:{location_id:'home'}},'sensor.risk':{...forecast,attributes:{...forecast.attributes,sample_latitude:47.1}}};
+ const refreshed=legacyForecastRefresh(states,config);
+ assert.deepEqual(refreshed,{...binding,custom:'preserve',latitude:47.1});
+ assert.equal(config.forecast.latitude,47);
+ states['sensor.risk'].attributes.sample_latitude=47.2;
+ assert.equal(legacyForecastRefresh(states,config).latitude,47.2);
+ assert.equal(legacyForecastRefresh(states,{...config,forecast:{...refreshed,latitude:47.2}}),null);
+ for(const patch of [{scope:'monitoring_area'},{sample_latitude:NaN},{sample_latitude:91},{sample_longitude:181},{sample_longitude:'19'}])
+   assert.equal(legacyForecastRefresh({...states,'sensor.risk':{...forecast,attributes:{...states['sensor.risk'].attributes,...patch}}},config),null);
+ for(const state of ['unknown','unavailable'])assert.equal(legacyForecastRefresh({...states,'sensor.risk':{...states['sensor.risk'],state}},config),null);
+ assert.equal(legacyForecastRefresh(states,{...config,location_id:'other'}),null);
+ assert.equal(legacyForecastRefresh(states,{...config,entity:'sensor.missing'}),null);
+ assert.equal(legacyForecastRefresh(states,{}),null);
+});

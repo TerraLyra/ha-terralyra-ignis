@@ -83,3 +83,12 @@ Release preparation and live acceptance remain separate: verify new optional
 entities after installing a reviewed release, initial delay, a valid current-day
 result, disable/re-enable and retained legacy Home history. No automatic HA
 restart or dashboard edit is part of this implementation.
+
+## Saved Home forecast sample point
+
+The summary editor offers an explicit sample-point refresh for an existing
+legacy `near_home` forecast binding when its coordinates differ. Review the
+displayed coordinates before applying them; this does not establish a new
+location association or enable a provider. The button preserves the saved
+entity and location identity and reads current metadata when clicked. Missing,
+unavailable, invalid or mismatched bindings do not offer a refresh.
