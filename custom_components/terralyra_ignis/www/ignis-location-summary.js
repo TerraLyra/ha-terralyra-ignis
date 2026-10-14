@@ -155,6 +155,18 @@ export function forecastChoices(states={},locationId) {
     location_id:locationId,latitude:state.attributes.latitude,longitude:state.attributes.longitude,
     radius_km:state.attributes.forecast_radius_km})).sort((a,b)=>a.name.localeCompare(b.name)||a.entity.localeCompare(b.entity));
 }
+// Refresh only a previously saved legacy association, and only by explicit click.
+export function legacyForecastRefresh(states={}, config={}) {
+  const binding=config.forecast, entity=states[binding?.entity], a=entity?.attributes;
+  if(!binding || typeof config.location_id!=='string' || !config.location_id ||
+     binding.location_id!==config.location_id ||
+     states[config.entity]?.attributes?.location_id!==config.location_id ||
+     ['unknown','unavailable'].includes(entity?.state) || a?.scope!=='near_home' ||
+     !Number.isFinite(a.sample_latitude) || Math.abs(a.sample_latitude)>90 ||
+     !Number.isFinite(a.sample_longitude) || Math.abs(a.sample_longitude)>180 ||
+     (binding.latitude===a.sample_latitude && binding.longitude===a.sample_longitude))return null;
+  return {...binding,latitude:a.sample_latitude,longitude:a.sample_longitude};
+}
 export function forecastSetupReview(states, config, now=new Date(), language='hu') {
   if(!config.forecast)return text("Előrejelzés: nincs hozzárendelve (nem kötelező).",language);
   const result=summarizeForecast(states?.[config.forecast.entity],config.forecast,config.location_id,now,language);
@@ -176,7 +188,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
   setConfig(config){this.config={...config};this.render();}
   set hass(value){
     this._hass=value;
-    const signature=JSON.stringify([summaryLanguage(value),locationChoices(value?.states),forecastChoices(value?.states,this.config?.location_id),value?.states?.[this.config?.forecast?.entity]?.attributes?.scope]);
+    const signature=JSON.stringify([summaryLanguage(value),locationChoices(value?.states),forecastChoices(value?.states,this.config?.location_id),value?.states?.[this.config?.forecast?.entity]?.attributes?.scope,legacyForecastRefresh(value?.states,this.config)]);
     if(signature!==this._choicesSignature){this._choicesSignature=signature;this.render();}
     else this.refreshReview();
   }
@@ -216,6 +228,17 @@ class IgnisLocationSummaryEditor extends HTMLElement {
         else this.refreshForecast();
       };
       host.append(this.node('p',(language==='hu'?`A kiválasztott előrejelzés beállításai változtak. Aktuális pont: ${selected.latitude}, ${selected.longitude}; előrejelzési sugár: ${selected.radius_km} km. A gombbal átveheted ezeket a kártyához.`:`The selected forecast settings have changed. Current point: ${selected.latitude}, ${selected.longitude}; forecast radius: ${selected.radius_km} km. Use the button to apply these to the card.`)),refresh);
+    }
+    const legacyRefresh=legacyForecastRefresh(this._hass?.states,this.config);
+    if(legacyRefresh){
+      const refresh=this.node('button',language==='hu'?'Home-előrejelzés mintapontjának frissítése':'Update Home forecast sample point');refresh.type='button';
+      refresh.onclick=()=>{
+        const latest=legacyForecastRefresh(this._hass?.states,this.config);
+        if(latest)this.update({forecast:latest});else this.refreshForecast();
+      };
+      host.append(this.node('p',language==='hu'
+        ?`A megőrzött Home-előrejelzés mintapontja eltér. Jelenlegi mintapont: ${legacyRefresh.latitude}, ${legacyRefresh.longitude}. Csak akkor vedd át, ha továbbra is ehhez a helyszínhez tartozik.`
+        :`The saved Home forecast sample point differs. Current sample point: ${legacyRefresh.latitude}, ${legacyRefresh.longitude}. Apply it only if it still belongs to this location.`),refresh);
     }
     host.append(this.node('p',legacyHome?(language==='hu'?'A korábbi Home-előrejelzés hozzárendelését megőriztük. Érvényességét a beállítások áttekintése jelzi; nem szükséges új előrejelzést engedélyezni csak a kártya frissítése miatt.':'The existing Home forecast binding is preserved. Setup review shows its validity; a card update alone does not require enabling a new forecast.'):choices.length?text("Csak a kiválasztott helyhez tartozó előrejelzések választhatók. A hozzárendelés nem kapcsol be adatforrást.",language):text("Ehhez a helyhez még nincs választható előrejelzés. Az IGNIS beállításaiban engedélyezheted, ahol elérhető.",language)));
   }
