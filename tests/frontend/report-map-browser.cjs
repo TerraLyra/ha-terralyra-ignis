@@ -151,7 +151,7 @@ const assert=require('node:assert/strict');
   await page.evaluate(()=>{
     card.dialog.close(); card.selected=null;
     document.querySelector('main').replaceChildren(card);
-    const satellite={entity_id:'geo_location.satellite',state:'3',attributes:{source:'terralyra_ignis',friendly_name:'Műholdas észlelés',context_entry_id:'entry',context_incident_id:'a'}};
+    const satellite={entity_id:'geo_location.satellite',state:'3',attributes:{source:'terralyra_ignis',friendly_name:'Műholdas észlelés',nearest_settlement:'Ercsi',first_seen:'2026-10-14T12:00:00Z',last_seen:'2026-10-14T13:00:00Z',providers:['firms','lsa_saf'],context_entry_id:'entry',context_incident_id:'a'}};
     card.hass={language:'hu',states:{[satellite.entity_id]:satellite},callWS:async request=>{
       window.contextRequest=request;
       return {response:{reports:[{title:'Teszt hír',description:'<img src=x onerror=alert(1)>',published_at:'2026-10-07T12:00:00Z',report_url:'https://www.katasztrofavedelem.hu/modules/vesz/esemeny/1',ambiguous:true}]}};
@@ -161,6 +161,11 @@ const assert=require('node:assert/strict');
   await page.getByRole('heading',{name:'Teszt hír'}).waitFor();
   assert.match(await page.locator('dialog').innerText(),/Valószínűleg/);
   assert.equal(await page.locator('dialog img').count(),0);
+  assert.equal(await page.getByRole('heading',{name:'Ercsi · Tűzészlelés',exact:true}).count(),1);
+  const sectionTitles=await page.locator('dialog h3').allTextContents();
+  assert.deepEqual(sectionTitles,['◷ Észlelési időszak','▤ Kapcsolódó hír','⌁ Észlelő források']);
+  assert.equal(await page.locator('dialog details').getAttribute('open'),null);
+  assert.match(await page.locator('dialog').innerText(),/nem hivatalos megerősítés/);
   assert.equal(await page.evaluate(()=>contextRequest.service),'get_satellite_report_context');
   assert.equal(await page.evaluate(()=>contextRequest.service_data.incident_id),'a');
   await page.getByRole('button',{name:'Home Assistant részletek'}).click();
