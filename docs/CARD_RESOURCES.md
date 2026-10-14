@@ -114,3 +114,22 @@ kapcsold be a megerősítést és futtasd újra. Végül töltsd újra a böngé
 
 A művelet nem hoz létre dashboardkártyát vagy értesítési automatizálást,
 és nem kapcsol be adatforrást. A helyszínt továbbra is te választod ki.
+
+## Satellite observation details — next release
+
+In `custom:ignis-report-map`, selecting an IGNIS satellite marker opens an
+observation summary with the nearest settlement first, first/latest observation
+times, related BM reports, source associations and collapsed technical details.
+The **Home Assistant details** button still opens the native entity dialog.
+Standard Home Assistant map cards keep their native behavior.
+
+The times describe recorded observations, not ignition or extinction. Related
+reports and multiple-source associations remain probable links, not official
+confirmation. Missing reports do not trigger article-page downloads. Source
+observation times can differ. FRP is radiative power; pixels do not measure the
+fire perimeter.
+
+The summary follows the Home Assistant interface language (Hungarian or English
+fallback). Existing report-map configuration needs no additional binding.
+Background refreshes preserve keyboard focus and expanded technical details;
+opening an observation starts with technical details collapsed.
