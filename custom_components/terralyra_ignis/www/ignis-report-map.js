@@ -62,6 +62,23 @@ export function satelliteContextRequest(state) {
   return {config_entry_id:a.context_entry_id,incident_id:a.context_incident_id};
 }
 
+// Display observations, never infer ignition, extinction or official confirmation.
+export function satelliteSummary(state, language='en') {
+  const a=state?.attributes||{},hu=language.startsWith('hu'),unknown=hu?'Nincs adat':'Not provided';
+  const date=value=>typeof value==='string' && /(?:Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(Date.parse(value))
+    ?new Date(value).toLocaleString(hu?'hu-HU':'en-GB'):unknown;
+  const finite=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
+  const place=typeof a.nearest_settlement==='string'&&a.nearest_settlement.trim()?a.nearest_settlement:(hu?'Ismeretlen helyszín':'Unknown location');
+  const providers=[...new Set((Array.isArray(a.source_observations)?a.source_observations.flatMap(o=>Array.isArray(o.providers)?o.providers:[]):[]).concat(Array.isArray(a.providers)?a.providers:[]).filter(p=>typeof p==='string'&&p.trim()))];
+  return {title:`${place} · ${hu?'Tűzészlelés':'Fire detection'}`,
+    distance:finite(a.distance_km)?`${a.distance_km.toLocaleString(hu?'hu-HU':'en-GB',{maximumFractionDigits:1})} km`:unknown,
+    location:typeof a.location_name==='string'?a.location_name:null,direction:typeof a.direction==='string'?a.direction:null,
+    first:date(a.first_seen),last:date(a.last_seen||a.acquired),providers,
+    multiple:providers.length>1,unavailable:['unknown','unavailable'].includes(state?.state),
+    technical:[['Latitude',a.latitude],['Longitude',a.longitude],['FRP (MW)',finite(a.frp_mw)?a.frp_mw:null],['Pixels',finite(a.pixel_count)?a.pixel_count:null],['Satellites',Array.isArray(a.satellites)?a.satellites.join(', '):null]]
+      .filter(([,value])=>value!==null&&value!==undefined).map(([key,value])=>[key,String(value)])};
+}
+
 export function safeLink(value) {
   try {
     const url = new URL(value);
@@ -284,7 +301,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       super();
       this.attachShadow({mode:'open'});
       const style = document.createElement('style');
-      style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a{font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
+      style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}.satellite-summary header{padding:18px;border-radius:14px;background:var(--secondary-background-color,#eef5f6);border-left:4px solid var(--primary-color,#007f91)}.satellite-summary header>span{font-size:.72rem;letter-spacing:.12em;color:var(--secondary-text-color)}.satellite-summary h2{margin:10px 0}.satellite-summary section{padding:12px 0;border-bottom:1px solid var(--divider-color,#ddd)}.satellite-summary h3{font-size:1rem}.satellite-summary small{color:var(--secondary-text-color);line-height:1.5;display:block}.satellite-summary details{padding-top:20px}.satellite-summary summary{cursor:pointer;font-weight:600}.sat-close{margin-bottom:14px}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a{font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
       this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true, terralyra_ignis_tasalert_reports:true};
       this.maxDays = 0;
       this.controls = document.createElement('div');
@@ -389,23 +406,42 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     }
     renderSatellite(state) {
       this.selectedState=state;
-      const hu=this._hass.language?.startsWith('hu');
-      const el=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
-      const close=el('button',hu?'Bezárás':'Close');close.onclick=()=>this.dialog.close();
-      const heading=el('h2',state.attributes.friendly_name || this.selected);heading.id='report-title';
-      const details=el('button',hu?'Home Assistant részletek':'Home Assistant details');
-      details.onclick=()=>{const entityId=this.selected;this.dialog.close();this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId},bubbles:true,composed:true}));};
-      this.dialog.replaceChildren(close,heading,details);
-      const result=this.satelliteResult;
-      if(!result || result.error){this.dialog.append(el('p',hu?(!result?'Kapcsolódó hírek ellenőrzése…':'A kapcsolódó hírek most nem ellenőrizhetők.'):(!result?'Checking related reports…':'Related reports could not be checked.')));return;}
-      if(!result.reports?.length)this.dialog.append(el('p',hu?'A helyben tárolt hírek között nem találtunk kapcsolódó BM-hírt.':'No related BM report was found in the local archive.'));
-      for(const report of result.reports || []) {
-        this.dialog.append(el('h3',hu?'Valószínűleg ehhez az észleléshez kapcsolódó BM-hír':'BM report probably related to this observation'),el('h4',report.title));
-        const body=el('p',report.description);body.style.whiteSpace='pre-wrap';this.dialog.append(body);
-        this.dialog.append(el('p',`BM OKF · ${report.published_at}`));
-        if(report.ambiguous)this.dialog.append(el('p',hu?'Több műholdas észleléshez is illeszkedhet.':'May relate to multiple satellite observations.'));
-        const url=safeLink(report.report_url);if(url){const link=el('a',hu?'Eredeti hír':'Original report');link.href=url;link.target='_blank';link.rel='noopener noreferrer';this.dialog.append(link);}
+      const hu=this._hass.language?.startsWith('hu'),v=satelliteSummary(state,this._hass.language||'en');
+      const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
+      const expanded=this.dialog.querySelector('details')?.open;
+      const close=el('button',hu?'Bezárás':'Close');close.onclick=()=>this.dialog.close();close.className='sat-close';
+      const heading=el('h2',v.title);heading.id='report-title';
+      const card=el('article');card.className='satellite-summary';
+      const header=el('header');header.append(el('span',hu?'MŰHOLDAS ÉSZLELÉS':'SATELLITE OBSERVATION'),heading);
+      header.append(el('p',[v.distance,v.direction,v.location].filter(Boolean).join(' · ')));
+      card.append(header);
+      const section=(title)=>{const n=el('section');n.append(el('h3',title));card.append(n);return n;};
+      const times=section(hu?'◷ Észlelési időszak':'◷ Observation period');
+      const clocks=el('dl');clocks.append(el('dt',hu?'Első észlelés':'First observation'),el('dd',v.first),el('dt',hu?'Legutóbbi észlelés':'Latest observation'),el('dd',v.last));times.append(clocks);
+      times.append(el('small',hu?'Észlelési időpontok, nem a tűz keletkezésének vagy eloltásának ideje.':'Observation times, not ignition or extinction times.'));
+      if(v.unavailable)times.append(el('p',hu?'Az észlelés adatai jelenleg nem érhetők el.':'Observation data is currently unavailable.'));
+      const news=section(hu?'▤ Kapcsolódó hír':'▤ Related report'),result=this.satelliteResult;
+      if(!result||result.error)news.append(el('p',hu?(!result?'Kapcsolódó hírek ellenőrzése…':'A kapcsolódó hírek most nem ellenőrizhetők.'):(!result?'Checking related reports…':'Related reports could not be checked.')));
+      else if(!result.reports?.length)news.append(el('p',hu?'A helyben tárolt hírek között nem találtunk kapcsolódó BM-hírt.':'No related BM report was found in the local archive.'));
+      for(const report of result?.reports || []) {
+        news.append(el('span',hu?'Valószínűleg kapcsolódó BM-hír':'Probably related BM report'),el('h4',report.title));
+        const body=el('p',typeof report.description==='string'?report.description.slice(0,4000):'');body.style.whiteSpace='pre-wrap';news.append(body);
+        news.append(el('small',`BM OKF · ${report.published_at}`));
+        if(report.ambiguous)news.append(el('p',hu?'Több műholdas észleléshez is illeszkedhet.':'May relate to multiple satellite observations.'));
+        const url=safeLink(report.report_url);if(url){const link=el('a',hu?'Eredeti hír':'Original report');link.href=url;link.target='_blank';link.rel='noopener noreferrer';news.append(link);}
       }
+      const sources=section(hu?'⌁ Észlelő források':'⌁ Observing sources');
+      sources.append(el('p',v.multiple?(hu?'Több forrás észlelése · valószínűleg ugyanaz az esemény':'Multiple sources · probably the same event'):(hu?'Több forrás egyezése nem igazolt.':'Agreement between multiple sources is not established.')));
+      sources.append(el('p',state.attributes.provider_attribution||v.providers.join(' · ')||(hu?'Nincs forrásadat':'No source information')));
+      sources.append(el('small',hu?'A műholdas egyezés nem hivatalos megerősítés. A források időpontjai eltérhetnek.':'Satellite agreement is not official confirmation. Source observation times may differ.'));
+      const technical=el('details');technical.open=Boolean(expanded);technical.append(el('summary',hu?'Technikai részletek':'Technical details'));
+      const list=el('dl');for(const [key,value] of v.technical)list.append(el('dt',hu?({Latitude:'Szélesség',Longitude:'Hosszúság',Pixels:'Pixelszám',Satellites:'Műholdak'}[key]||key):key),el('dd',value));technical.append(list);
+      technical.append(el('small',hu?'Az FRP sugárzási teljesítmény; a pixelszám nem a tűz területe.':'FRP is radiative power; pixel count is not fire area.'));
+      for(const o of state.attributes.source_observations||[])technical.append(el('p',`${o.provider_attribution||(o.providers||[]).join(', ')} · ${o.acquired||'—'} · ${o.evidence_role||'—'}`));
+      card.append(technical);
+      const footer=el('footer'),details=el('button',hu?'Home Assistant részletek':'Home Assistant details');
+      details.onclick=()=>{const entityId=this.selected;this.dialog.close();this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId},bubbles:true,composed:true}));};footer.append(details);card.append(footer);
+      this.dialog.replaceChildren(close,card);
     }
     renderReport() {
       if(satelliteContextRequest(this._hass?.states[this.selected])) {this.renderSatellite(this._hass.states[this.selected]);return;}
