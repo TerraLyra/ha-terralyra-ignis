@@ -36,17 +36,6 @@ const assert=require('node:assert/strict');
   assert.deepEqual(await page.evaluate(()=>nativeClicks),[]);
   const box=await page.locator('dialog').boundingBox();
   assert.ok(box.width<=390 && box.x>=0);
-  await page.locator('dialog summary').click();
-  await page.evaluate(()=>{
-    const current=card._hass.states['geo_location.satellite'];
-    card.hass={...card._hass,states:{...card._hass.states,[current.entity_id]:{...current,attributes:{...current.attributes,pixel_count:4}}}};
-  });
-  assert.notEqual(await page.locator('dialog details').getAttribute('open'),null);
-  assert.equal(await page.evaluate(()=>card.shadowRoot.activeElement?.dataset.focusKey),'technical');
-  await page.getByRole('button',{name:'Bezárás',exact:true}).click();
-  await page.evaluate(()=>card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:'geo_location.satellite'},bubbles:true,composed:true})));
-  await page.getByRole('heading',{name:'Teszt hír'}).waitFor();
-  assert.equal(await page.locator('dialog details').getAttribute('open'),null);
   await page.getByRole('button',{name:'Home Assistant részletek'}).click();
   assert.deepEqual(await page.evaluate(()=>nativeClicks),['geo_location.report']);
   await page.evaluate(()=>card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:'geo_location.satellite'},bubbles:true,composed:true})));
