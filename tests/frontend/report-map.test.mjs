@@ -206,3 +206,19 @@ test('TasALERT keeps planned burns distinct and displays licensed source clocks'
  assert.equal(visibleMapSources({}, {})[source],false);
  assert.equal(visibleMapSources({'switch.tas':{state:'on',attributes:{ignis_map_source:source}}},{[source]:'switch.tas'})[source],true);
 });
+
+
+test('setup guidance distinguishes loading, absent switches and available choices without opt-in',async()=>{
+ const {mapSetupStatus}=await import('../../frontend/ignis-report-map.js');
+ const source='terralyra_ignis_tasalert_reports';
+ const states={'switch.tas':{state:'off',attributes:{ignis_map_source:source}},'switch.house':{state:'on',attributes:{}}};
+ assert.equal(mapSetupStatus(undefined,undefined,source),'loading');
+ assert.equal(mapSetupStatus({},undefined,source),'no_switch');
+ assert.equal(mapSetupStatus({'switch.house':states['switch.house']},undefined,source),'no_switch');
+ assert.equal(mapSetupStatus(states,undefined,source),'select_switch');
+ assert.equal(mapSetupStatus(states,'switch.tas',source),'off');
+ assert.equal(mapSetupStatus(states,'switch.old',source),'missing');
+ assert.equal(mapSetupStatus(states,'switch.tas','terralyra_ignis_canada_reports'),'wrong_source');
+ assert.equal(visibleMapSources(states,{})[source],false);
+ assert.equal(states['switch.tas'].state,'off');
+});
