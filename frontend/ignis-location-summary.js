@@ -95,7 +95,13 @@ export function summarizeLocation(entity, locationId, language='hu') {
   const status=['unknown','unavailable'].includes(entity.state)?'unavailable':a.operational_status;
   const usable=['available','degraded','partial'].includes(status);
   const count=v=>usable && Number.isSafeInteger(v) && v>=0?v:null;
-  return {name:a.location_name||locationId,status:statusLabels(language)[status]||text("Ismeretlen adatellátás",language),active:count(a.active_incidents),multi:count(a.multi_source_incidents),nearest:usable&&Number.isFinite(a.nearest_incident_distance_km)&&a.nearest_incident_distance_km>=0?a.nearest_incident_distance_km:null,sources:a.source_health,received:a.last_received_at,monitoringRadius:a.monitoring_radius_km,alertRadius:a.alert_radius_km};
+  return {name:a.location_name||locationId,status:statusLabels(language)[status]||text("Ismeretlen adatellátás",language),active:count(a.active_incidents),multi:count(a.multi_source_incidents),empty:status==='available'&&count(a.active_incidents)===0&&a.nearest_incident_distance_km==null,nearest:usable&&Number.isFinite(a.nearest_incident_distance_km)&&a.nearest_incident_distance_km>=0?a.nearest_incident_distance_km:null,sources:a.source_health,received:a.last_received_at,monitoringRadius:a.monitoring_radius_km,alertRadius:a.alert_radius_km};
+}
+export function missingDistanceMessage(model, language='hu') {
+  if(model.empty)return language==='hu'
+    ? 'Nincs követett műholdas észlelés a megfigyelt körzetben és időablakban.'
+    : 'No satellite observations are tracked in the monitored area and time window.';
+  return text("Nincs ellenőrizhető távolságadat ehhez a helyszínhez.",language);
 }
 // FRMv3 validity dates are UTC product dates; generated_at is retrieval time.
 const riskLabels=language=>({low:text("Alacsony",language),moderate:text("Mérsékelt",language),high:text("Magas",language),very_high:text("Nagyon magas",language),extreme:text("Szélsőséges",language)});
@@ -322,7 +328,7 @@ class IgnisLocationSummary extends HTMLElement {
     const counts=this.node('div');counts.className='counts';
     for(const [n,label,icon] of [[model.active,text("aktívként követett műholdas esemény",language),'mdi:fire'],[model.multi,text("több forrás által észlelt esemény",language),'mdi:layers-outline']]){const p=this.node('p'),number=this.node('span',n??'—');number.className='number';p.append(number,this.labelled('span',label,icon));counts.append(p);}card.append(counts);
     if(model.active===null)card.append(this.node('p',text("A jelenlegi eseményszám nem állapítható meg.",language)));
-    card.append(this.node('p',model.nearest===null?text("Nincs ellenőrizhető távolságadat ehhez a helyszínhez.",language):(language==='hu'?`Legközelebbi követett műholdas esemény a helyszín sugarán belül: ${model.nearest.toLocaleString(this._hass?.locale?.language||language,{maximumFractionDigits:2})} km`:`Nearest tracked satellite incident within this location’s radius: ${model.nearest.toLocaleString(this._hass?.locale?.language||language,{maximumFractionDigits:2})} km`)));
+    card.append(this.node('p',model.nearest===null?missingDistanceMessage(model,language):(language==='hu'?`Legközelebbi követett műholdas esemény a helyszín sugarán belül: ${model.nearest.toLocaleString(this._hass?.locale?.language||language,{maximumFractionDigits:2})} km`:`Nearest tracked satellite incident within this location’s radius: ${model.nearest.toLocaleString(this._hass?.locale?.language||language,{maximumFractionDigits:2})} km`)));
     if(Number.isFinite(model.monitoringRadius)&&Number.isFinite(model.alertRadius)&&model.alertRadius>0&&model.alertRadius<=model.monitoringRadius)
       card.append(this.labelled('p',(language==='hu'?`Megfigyelés: ${model.monitoringRadius} km · Riasztás: ${model.alertRadius} km`:`Monitoring: ${model.monitoringRadius} km · Alert: ${model.alertRadius} km`),'mdi:radar'));
     card.append(this.labelled('h3',text("Adatforrások",language),'mdi:satellite-variant'));
