@@ -20,7 +20,8 @@ def decode(raw):
     data = json.loads(raw)
     if not isinstance(data, dict) or data.pop('version', None) != 1:
         raise ValueError('Unsupported state version')
-    if set(data) != {'snapshot','etag','failures','next_attempt','status'}:
+    data.setdefault('last_success_at', None)  # Older state has no verifiable receipt clock.
+    if set(data) != {'snapshot','etag','failures','next_attempt','status','last_success_at'}:
         raise ValueError('Unexpected state fields')
     if type(data['failures']) is not int or not 0 <= data['failures'] <= 1000000:
         raise ValueError('Invalid failure counter')
@@ -37,6 +38,11 @@ def decode(raw):
     if data['next_attempt'] is not None:
         data['next_attempt']=datetime.fromisoformat(data['next_attempt'])
         if data['next_attempt'].utcoffset() is None:raise ValueError('Naive deadline')
+    if data['last_success_at'] is not None:
+        if not isinstance(data['last_success_at'],str):raise ValueError('Invalid receipt clock')
+        data['last_success_at']=datetime.fromisoformat(data['last_success_at'])
+        if data['last_success_at'].utcoffset() is None:raise ValueError('Naive receipt clock')
+        if data['snapshot'] is None:raise ValueError('Receipt clock without snapshot')
     return State(**data)
 
 
@@ -44,6 +50,7 @@ def encode(state):
     data=asdict(state)
     data['snapshot']=base64.b64encode(state.snapshot).decode('ascii') if state.snapshot is not None else None
     data['next_attempt']=state.next_attempt.isoformat() if state.next_attempt else None
+    data['last_success_at']=state.last_success_at.isoformat() if state.last_success_at else None
     raw=json.dumps({'version':1,**data},sort_keys=True).encode()
     decode(raw)  # Validate before replacing a previously valid file.
     return raw

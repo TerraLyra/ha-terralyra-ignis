@@ -12,6 +12,23 @@ class EngineTests(unittest.TestCase):
         self.b=record(number='B').replace(b'id="one"',b'id="two"')
         self.base=advance(Engine(),self.now,200,pair(self.a,self.b),etag='"a"')
 
+    def test_receipt_clock_survives_failures_and_restart(self):
+        import json
+        from tasalert_engine_storage import encode, decode
+        self.assertEqual(self.base.response.last_success_at,self.now)
+        cached=advance(self.base,self.now+timedelta(hours=1),304)
+        self.assertEqual(cached.response.last_success_at,self.now+timedelta(hours=1))
+        self.assertEqual(cached.ledger,self.base.ledger)
+        for status,body in ((503,b''),(200,b'broken'),(200,b'<kml/>')):
+            failed=advance(cached,self.now+timedelta(hours=2),status,body)
+            restored=decode(encode(failed))
+            self.assertEqual(restored.response.last_success_at,cached.response.last_success_at)
+        old=json.loads(encode(self.base))
+        old['response'].pop('last_success_at')
+        self.assertIsNone(decode(json.dumps(old).encode()).response.last_success_at)
+        old['response']['last_success_at']='2026-10-12T12:00:00'
+        with self.assertRaises(ValueError):decode(json.dumps(old).encode())
+
     def test_partial_review_and_304_keep_distinct_representations(self):
         changed=record('Patrol','2026-10-12T13:00:00+00:00',number='B').replace(b'id="one"',b'id="two"')
         body=pair(record(number='conflict'),changed)

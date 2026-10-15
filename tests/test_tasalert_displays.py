@@ -39,6 +39,8 @@ async def test_map_disable_removes_markers_not_source(hass):
         await manager.set_enabled(True)
         assert len(added)==1
         marker=added[0]
+        assert marker.extra_state_attributes['last_success_at']=='2026-10-12T00:00:00+00:00'
+        assert marker.extra_state_attributes['source_freshness']=='not_established'
         assert marker.extra_state_attributes['report_category']=='Bushfire'
         assert marker.extra_state_attributes['source_url']=='https://alert.tas.gov.au/data/incidents-and-messages.kml'
         assert marker.extra_state_attributes['license_url'].endswith('/by/4.0/')

@@ -133,7 +133,7 @@ class TasAlertMapRecord(GeolocationEvent):
         state = self.manager.runtime.owner.state
         return {**record_attributes(self.item),
                 'response_status': self.manager.runtime.owner.diagnostics()['response_status'],
-                'last_success_at': None,
+                'last_success_at': state.response.last_success_at.isoformat() if state and state.response.last_success_at else None,
                 'retention': 'validated_current_incidents_only'}
 
     async def async_added_to_hass(self):
