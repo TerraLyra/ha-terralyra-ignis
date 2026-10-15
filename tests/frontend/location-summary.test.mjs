@@ -166,3 +166,21 @@ test('legacy refresh preserves explicit association and reads latest valid sampl
  assert.equal(legacyForecastRefresh(states,{...config,entity:'sensor.missing'}),null);
  assert.equal(legacyForecastRefresh(states,{}),null);
 });
+
+
+test('empty observation wording requires available zero-count data and no distance',async()=>{
+ const {missingDistanceMessage}=await import('../../frontend/ignis-location-summary.js');
+ const make=(status,active,distance=null)=>summarizeLocation({state:status,attributes:{...entity.attributes,operational_status:status,active_incidents:active,nearest_incident_distance_km:distance}},'ca');
+ const empty=make('available',0);
+ assert.equal(empty.empty,true);
+ assert.match(missingDistanceMessage(empty,'en'),/No satellite observations/);
+ assert.match(missingDistanceMessage(empty,'hu'),/Nincs követett műholdas észlelés/);
+ for(const model of [make('partial',0),make('degraded',0),make('unavailable',0),make('initializing',0),make('available',null),make('available',2),make('available',0,12)]){
+  assert.equal(model.empty,false);
+  assert.match(missingDistanceMessage(model,'en'),/No verifiable distance/);
+ }
+ // A normal detection -> empty -> recovery cycle never retains the old distance.
+ assert.equal(make('available',1,12).nearest,12);
+ assert.equal(empty.nearest,null);
+ assert.equal(make('available',1,7).nearest,7);
+});
