@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.3
+
+- Show settlement-first satellite observation summaries on the IGNIS report map,
+  with observation times, related news, source associations and collapsible details.
+- Preserve keyboard focus and expanded details during observation updates.
+- Persist and expose TasALERT successful receipt times without treating retrieval
+  time as proof of event freshness.
+
 ## 0.40.2
 
 - Add an explicit visual-editor button to refresh the sample point of an existing
