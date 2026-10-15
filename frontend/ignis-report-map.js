@@ -39,6 +39,13 @@ export function mapBindingStatus(states, id, source) {
   if(source && declared!==undefined && declared!==source)return 'wrong_source';
   return ['on','off'].includes(states[id].state)?states[id].state:'unavailable';
 }
+// Setup guidance does not change runtime visibility or enable a source.
+export function mapSetupStatus(states, id, source) {
+  const status=mapBindingStatus(states,id,source);
+  if(status!=='unbound')return status;
+  if(!states)return 'loading';
+  return mapSwitchChoices(states,source).length?'select_switch':'no_switch';
+}
 const WORDS = {
   en: {close:'Close', details:'Home Assistant details', source:'Source information',
     absent:'No incident text has been loaded for this report.',
@@ -222,7 +229,8 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const hu=this._hass?.language?.startsWith('hu');
       const messages=hu?{
         wrong_source:'A kapcsoló másik forráshoz tartozik; válaszd ki a megfelelő kapcsolót. A riportvezérlő rejtve marad.',
-        unbound:'Nincs hozzárendelés; a riportvezérlő rejtve marad.',
+        select_switch:'Van választható IGNIS kapcsoló. Ha szeretnéd ezt a forrást megjeleníteni, válaszd ki fent.',
+        no_switch:'Nem található ehhez a forráshoz IGNIS térképkapcsoló. Ha szükséged van rá, ellenőrizd a forrás engedélyezését és az entitásokat az integráció beállításaiban. A forrás használata nem kötelező.',
         invalid:'Kapcsolóentitást válassz; a jelenlegi hozzárendelés nem használható.',
         loading:'Várakozás a Home Assistant állapotadataira.',
         missing:'A hozzárendelt kapcsoló nem található. Ellenőrizd a kiválasztást.',
@@ -231,7 +239,8 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         on:'A térképkapcsoló be van kapcsolva. Ez nem igazolja friss riportok meglétét.'
       }:{
         wrong_source:'The switch belongs to a different source; select the matching switch. The report control stays hidden.',
-        unbound:'No binding; the report control stays hidden.',
+        select_switch:'An IGNIS switch is available. Select it above if you want to display this source.',
+        no_switch:'No IGNIS map switch was found for this source. If needed, check source enablement and entities in the integration settings. This source is optional.',
         invalid:'Select a switch entity; the current binding cannot be used.',
         loading:'Waiting for Home Assistant state data.',
         missing:'The bound switch was not found. Check the selection.',
@@ -240,7 +249,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         on:'The map switch is on. This does not establish that fresh reports exist.'
       };
       this.statusHost.replaceChildren(this.node('h3',hu?'Hozzárendelések állapota':'Binding status'));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']])this.statusHost.append(this.node('p',name+': '+messages[mapBindingStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']])this.statusHost.append(this.node('p',name+': '+messages[mapSetupStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
     }
     render(){
       if(!this.config)return;
