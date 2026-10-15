@@ -16,6 +16,7 @@ class State:
     failures: int = 0
     next_attempt: datetime | None = None
     status: str = 'not_requested'
+    last_success_at: datetime | None = None
 
 
 def request_headers(state):
@@ -49,7 +50,7 @@ def apply_response(state, now, status, body=b'', etag=None, retry_after=None):
             pass
     failed = replace(state, failures=failures, next_attempt=deadline, status='retrieval_failed')
     if status == 304:
-        return (replace(state, failures=0, next_attempt=now+INTERVAL, status='not_modified')
+        return (replace(state, failures=0, next_attempt=now+INTERVAL, status='not_modified', last_success_at=now)
                 if state.snapshot is not None else replace(failed, status='unexpected_304'))
     if status != 200:
         return failed
@@ -66,4 +67,4 @@ def apply_response(state, now, status, body=b'', etag=None, retry_after=None):
     # Validators belong only to the accepted representation. Never adopt an
     # error/review ETag, which could hide a still-unaccepted response behind 304.
     safe_etag = etag if isinstance(etag,str) and len(etag)<=512 and not any(ord(c)<32 or ord(c)==127 for c in etag) else None
-    return State(body, safe_etag, 0, now+INTERVAL, 'accepted')
+    return State(body, safe_etag, 0, now+INTERVAL, 'accepted', now)

@@ -34,6 +34,7 @@ class TasAlertDiagnosticSensor(SensorEntity):
                 'next_attempt':state.response.next_attempt.isoformat() if state and state.response.next_attempt else None,
                 'retained_record_count':len(state.ledger) if state else None,
                 'review_record_count':len(state.review) if state else None,
+                'last_success_at':state.response.last_success_at.isoformat() if state and state.response.last_success_at else None,
                 'source_freshness':'not_established','attribution':'TasALERT',
                 'license_url':'https://creativecommons.org/licenses/by/4.0/'}
 
