@@ -89,9 +89,24 @@ export function sourceGuidance(source, language='hu') {
     initializing:text("Várd meg az első lekérés eredményét. Ha ez az állapot tartós, ellenőrizd az IGNIS diagnosztikáját.",language)
   })[source.status]||'';
 }
+export function locationBindingError(entity, locationId, language='hu') {
+  const hu=language==='hu', a=entity?.attributes;
+  if(!entity)return hu
+    ? 'A kiválasztott érzékelő nem található. Ellenőrizd a helyszínt a kártya szerkesztőjében és az integráció entitásai között.'
+    : 'The selected sensor was not found. Check the location in the card editor and the integration entities.';
+  if(!a || typeof a.location_id!=='string' || !a.location_id.trim() ||
+     typeof a.operational_status!=='string' || !Array.isArray(a.source_health) || !Object.hasOwn(a,'active_incidents'))return hu
+    ? 'Válaszd a helyszín működésiállapot-érzékelőjét a kártya szerkesztőjében; ez az érzékelő nem helyszínösszefoglaló.'
+    : 'Select the location operational-status sensor in the card editor; this sensor is not a location summary.';
+  if(a.location_id!==locationId)return hu
+    ? 'Az érzékelő másik helyszínhez tartozik. Válaszd ki újra a kívánt helyszínt a kártya szerkesztőjében.'
+    : 'The sensor belongs to a different location. Select the intended location again in the card editor.';
+  return null;
+}
 export function summarizeLocation(entity, locationId, language='hu') {
   const a=entity?.attributes;
-  if(!a || a.location_id!==locationId || !Array.isArray(a.source_health))return {error:text("A kiválasztott érzékelő nem ehhez a helyszínhez tartozik, vagy nem támogatott.",language)};
+  const error=locationBindingError(entity,locationId,language);
+  if(error)return {error};
   const status=['unknown','unavailable'].includes(entity.state)?'unavailable':a.operational_status;
   const usable=['available','degraded','partial'].includes(status);
   const count=v=>usable && Number.isSafeInteger(v) && v>=0?v:null;
@@ -181,7 +196,8 @@ export function forecastSetupReview(states, config, now=new Date(), language='hu
 // Setup review is descriptive: it cannot inspect notification automation delivery.
 export function setupReview(entity, locationId, language='hu') {
   const a=entity?.attributes;
-  if(!a || a.location_id!==locationId)return [text("A helyszín hozzárendelése még nem ellenőrizhető.",language)];
+  const error=locationBindingError(entity,locationId,language);
+  if(error)return [error];
   const valid=Number.isFinite(a.monitoring_radius_km)&&Number.isFinite(a.alert_radius_km)&&a.alert_radius_km>0&&a.alert_radius_km<=a.monitoring_radius_km;
   return [
     (language==='hu'?`Helyszín: ${a.location_name||locationId}`:`Location: ${a.location_name||locationId}`),
