@@ -184,3 +184,15 @@ test('empty observation wording requires available zero-count data and no distan
  assert.equal(empty.nearest,null);
  assert.equal(make('available',1,7).nearest,7);
 });
+
+test('binding guidance separates absent, unsupported and mismatched sensors from data outages',async()=>{
+ const {locationBindingError,setupReview}=await import('../../frontend/ignis-location-summary.js');
+ assert.match(locationBindingError(null,'ca','en'),/not found/);
+ assert.match(locationBindingError({attributes:{location_id:'ca'}},'ca','en'),/operational-status sensor/);
+ assert.match(locationBindingError(entity,'home','en'),/different location/);
+ assert.equal(locationBindingError({...entity,state:'unavailable'},'ca','en'),null);
+ for(const sample of [null,{attributes:{location_id:'ca'}},entity]){
+   const id=sample===entity?'home':'ca';
+   assert.equal(setupReview(sample,id,'en')[0],summarizeLocation(sample,id,'en').error);
+ }
+});
