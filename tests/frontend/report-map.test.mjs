@@ -222,3 +222,21 @@ test('setup guidance distinguishes loading, absent switches and available choice
  assert.equal(visibleMapSources(states,{})[source],false);
  assert.equal(states['switch.tas'].state,'off');
 });
+
+
+test('monitoring review counts places once and distinguishes missing or invalid area data',async()=>{
+ const {monitoringAreaReview}=await import('../../frontend/ignis-report-map.js');
+ const source='terralyra_ignis_monitoring_areas',config={geo_location_sources:[source]};
+ const area={state:'0',attributes:{source,map_circle_meaning:'active_fire_monitoring_area',latitude:0,longitude:0,monitoring_radius_km:100,gps_accuracy:100000}};
+ const states={'geo_location.home':area,'geo_location.alert':{...area,attributes:{...area.attributes,map_circle_meaning:'satellite_fire_alert_area'}},'sensor.fake':area};
+ assert.deepEqual(monitoringAreaReview(states,config),{status:'ready',ready:1,unavailable:0});
+ assert.equal(monitoringAreaReview(states,{}).status,'hidden');
+ assert.equal(monitoringAreaReview(undefined,config).status,'loading');
+ assert.equal(monitoringAreaReview({},config).status,'missing');
+ for(const patch of [{latitude:91},{longitude:181},{latitude:'0'},{monitoring_radius_km:0},{gps_accuracy:null},{gps_accuracy:-1}]){
+  assert.deepEqual(monitoringAreaReview({'geo_location.home':{...area,attributes:{...area.attributes,...patch}}},config),{status:'partial',ready:0,unavailable:1});
+ }
+ assert.equal(monitoringAreaReview({'geo_location.home':{...area,state:'unavailable'}},config).unavailable,1);
+ assert.equal(monitoringAreaReview(states,{show_all:true}).ready,1);
+ assert.equal(area.attributes.monitoring_radius_km,100);
+});
