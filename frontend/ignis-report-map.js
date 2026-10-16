@@ -309,6 +309,28 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         if(current&&!choices.some(([id])=>id===current)){const option=this.node('option',(hu?'Megőrzött, ellenőrizendő: ':'Saved; check binding: ')+current);option.value=current;select.append(option);}
         select.value=current;select.onchange=()=>{const bindings={...this.config.report_switches};if(select.value)bindings[source]=select.value;else delete bindings[source];this.update({report_switches:bindings});};label.append(select);root.append(label);
       }
+      for(const [key,caption,options] of [
+        ['aspect_ratio',hu?'Térkép képaránya':'Map aspect ratio',[
+          ['',hu?'Alapértelmezett':'Default'],['16:9',hu?'Széles (16:9)':'Wide (16:9)'],['4:3','4:3'],['1:1',hu?'Négyzet (1:1)':'Square (1:1)']]],
+        ['scale_ruler',hu?'Méretarány-vonalzó':'Scale ruler',[
+          ['',hu?'Alapértelmezett':'Default'],['true',hu?'Bekapcsolva':'On'],['false',hu?'Kikapcsolva':'Off']]]
+      ]){
+        const label=this.node('label',caption),select=this.node('select');select.setAttribute('aria-label',caption);
+        const current=this.config[key]===undefined?'':String(this.config[key]);
+        for(const [value,title] of options){const option=this.node('option',title);option.value=value;select.append(option);}
+        if(!options.some(([value])=>value===current)){
+          const option=this.node('option',(hu?'Egyedi, megőrzött: ':'Custom, preserved: ')+current);option.value=current;select.append(option);
+        }
+        select.value=current;
+        select.onchange=()=>{
+          const next={...this.config};
+          if(select.value==='')delete next[key];
+          else next[key]=key==='scale_ruler'?select.value==='true':select.value;
+          this.config=next;this.update({});
+        };
+        label.append(select);root.append(label);
+      }
+      root.append(this.node('p',hu?'A képarány a kártya alakját szabályozza; szakaszos dashboardon az Elrendezés beállítása is befolyásolhatja a méretét. A vonalzó a térkép aktuális léptékét mutatja.':'Aspect ratio controls the card shape; on a sections dashboard, Layout settings can also affect its size. The ruler shows the current map scale.'));
       const clusterCaption=hu?'Jelölők csoportosítása':'Marker clustering';
       const clusterLabel=this.node('label',clusterCaption),clusterSelect=this.node('select');clusterSelect.setAttribute('aria-label',clusterCaption);
       for(const [value,caption] of [['default',hu?'Alapértelmezett':'Default'],['on',hu?'Bekapcsolva':'On'],['off',hu?'Kikapcsolva':'Off']]){

@@ -142,3 +142,12 @@ with clustering off, so configured areas remain visible. Users can change these
 options in the visual editor. Existing saved cards retain their configuration;
 no report switch is automatically bound or enabled. This does not replace
 first-time-user acceptance.
+
+## Map appearance controls — next release
+
+The visual map editor offers default, 16:9, 4:3 and square aspect ratios, plus a
+scale ruler setting. Existing custom aspect ratios remain selected and are preserved
+when other settings change. Default removes the override. These options only affect
+presentation; locations, source switches and notification radii are unchanged.
+In sections dashboards, the Layout tab can also influence card dimensions.
+See the [Home Assistant map settings](https://www.home-assistant.io/dashboards/map/).
