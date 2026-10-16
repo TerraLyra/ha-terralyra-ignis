@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.5
+
+- Retry a failed map load directly from the card; ignore late results from superseded loads.
+- Explain missing, unsupported and mismatched location-summary sensors separately.
+- Configure map aspect ratio and scale ruler in the visual editor while preserving custom settings.
+
 ## 0.40.4
 
 - Explain zero tracked satellite observations without suggesting a distance error;
