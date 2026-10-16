@@ -19,6 +19,23 @@ const MONITORING_AREAS='terralyra_ignis_monitoring_areas';
 export function hasMonitoringAreas(config) {
   return Boolean(config.show_all || config.geo_location_sources?.some(item=>(typeof item==='string'?item:item?.source)===MONITORING_AREAS));
 }
+// Review only IGNIS monitoring entities; inner alert circles are not extra places.
+export function monitoringAreaReview(states, config) {
+  if(!hasMonitoringAreas(config))return {status:'hidden',ready:0,unavailable:0};
+  if(!states)return {status:'loading',ready:0,unavailable:0};
+  const areas=Object.entries(states).filter(([id,state])=>id.startsWith('geo_location.') &&
+    state?.attributes?.source===MONITORING_AREAS &&
+    state.attributes.map_circle_meaning==='active_fire_monitoring_area');
+  const ready=areas.filter(([,state])=>{
+    const a=state.attributes;
+    return !['unknown','unavailable'].includes(state.state) &&
+      Number.isFinite(a.latitude)&&Math.abs(a.latitude)<=90 &&
+      Number.isFinite(a.longitude)&&Math.abs(a.longitude)<=180 &&
+      Number.isFinite(a.monitoring_radius_km)&&a.monitoring_radius_km>0 &&
+      Number.isFinite(a.gps_accuracy)&&a.gps_accuracy>0;
+  }).length;
+  return {status:areas.length?(ready===areas.length?'ready':'partial'):'missing',ready,unavailable:areas.length-ready};
+}
 // Preserve all unrelated source options and native map settings.
 export function withMonitoringAreas(config, enabled) {
   if(config.show_all)return {...config};
@@ -249,6 +266,21 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         on:'The map switch is on. This does not establish that fresh reports exist.'
       };
       this.statusHost.replaceChildren(this.node('h3',hu?'Hozzárendelések állapota':'Binding status'));
+      const areas=monitoringAreaReview(this._hass?.states,this.config);
+      const areaMessages=hu?{
+        hidden:'A megfigyelési körök megjelenítése nincs bekapcsolva ezen a kártyán.',
+        loading:'A megfigyelési körök ellenőrzése az állapotadatokra vár.',
+        missing:'Még nincs elérhető IGNIS megfigyelési terület. Ellenőrizd a helyszíneket és a területentitásokat az integráció beállításaiban.',
+        ready:`${areas.ready} megfigyelt helyszín köradata elérhető. A tényleges megjelenést a térkép szűrése és csoportosítása is befolyásolja.`,
+        partial:`${areas.ready} helyszín köradata elérhető, ${areas.unavailable} terület adata hiányos vagy nem elérhető. Ellenőrizd az integráció területentitásait.`
+      }:{
+        hidden:'Monitoring circles are not enabled on this card.',
+        loading:'Waiting for state data to check monitoring circles.',
+        missing:'No IGNIS monitoring area is available yet. Check locations and area entities in the integration settings.',
+        ready:`Circle data is available for ${areas.ready} monitored locations. Map filters and clustering also affect actual visibility.`,
+        partial:`Circle data is available for ${areas.ready} locations; ${areas.unavailable} areas have incomplete or unavailable data. Check the integration area entities.`
+      };
+      this.statusHost.append(this.node('p',areaMessages[areas.status]));
       for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']])this.statusHost.append(this.node('p',name+': '+messages[mapSetupStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
     }
     render(){
