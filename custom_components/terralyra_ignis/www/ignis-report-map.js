@@ -379,14 +379,30 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
     }
     async buildMap() {
       const config = this.config;
+      const attempt = this.mapAttempt = (this.mapAttempt || 0) + 1;
       try {
         const helpers = await window.loadCardHelpers();
-        if (config !== this.config) return;
+        if (config !== this.config || attempt !== this.mapAttempt) return;
         this.map = helpers.createCardElement(config);
         this.updateMap();
         this.mapHost.replaceChildren(this.map);
       } catch {
-        this.mapHost.textContent = 'IGNIS: the Home Assistant map could not be loaded. Reload the dashboard or use the standard map card.';
+        if (config !== this.config || attempt !== this.mapAttempt) return;
+        const hu = this._hass?.language?.startsWith('hu');
+        const message = document.createElement('p');
+        message.setAttribute('role','status');
+        message.textContent = hu
+          ? 'A térkép nem tölthető be. Próbáld újra; ha továbbra sem sikerül, töltsd újra a böngészőt.'
+          : 'The map could not be loaded. Try again; if it still fails, reload the browser.';
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.textContent = hu ? 'Újrapróbálás' : 'Try again';
+        retry.addEventListener('click', () => {
+          retry.disabled = true;
+          message.textContent = hu ? 'Térkép betöltése…' : 'Loading map…';
+          void this.buildMap();
+        });
+        this.mapHost.replaceChildren(message,retry);
       }
     }
     set hass(value) {
