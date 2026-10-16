@@ -24,4 +24,10 @@ No storage reset, history deletion or forced source request is needed.
 Validation before release preparation: 43 frontend unit tests, browser regressions,
 55 offline TasALERT tests and complete CI passed on the implementation PRs
 #189–#191. A live multi-source summary was inspected before the focus refinement.
-The receipt-clock change has not yet been validated on the user's live HA.
+A subsequent live upgrade check on 2026-10-15 confirmed the satellite summary,
+collapsed details on reopening, multi-source wording and native entity-details
+handoff. At 21:49:32 UTC, a scheduled TasALERT 304 response populated
+`last_success_at` on the map switch and all three Hobart markers, preserving
+41 retained source records. `source_freshness` remained `not_established` as
+intended. This sampled check does not establish event freshness or every failure
+and restart transition.

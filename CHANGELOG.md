@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.4
+
+- Explain zero tracked satellite observations without suggesting a distance error;
+  retain uncertainty for partial or unavailable data.
+- Guide optional report-source setup according to available map switches.
+- Show monitoring-circle data readiness in the map editor, distinguishing loading,
+  missing and incomplete area data.
+
 ## 0.40.3
 
 - Show settlement-first satellite observation summaries on the IGNIS report map,
