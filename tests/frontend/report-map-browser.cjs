@@ -205,6 +205,29 @@ const assert=require('node:assert/strict');
   assert.equal(await page.getByRole('link',{name:'CC BY 4.0'}).getAttribute('href'),'https://creativecommons.org/licenses/by/4.0/');
   await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,'switch.tas':{state:'off'}}});
   assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),0);
+  await page.keyboard.press('Escape');
+  // A failed frontend load is retryable without fetching provider data.
+  await page.evaluate(async()=>{
+    window.loadCardHelpers=async()=>{throw new Error('offline');};
+    await card.buildMap();
+  });
+  assert.equal(await page.getByRole('button',{name:'Újrapróbálás',exact:true}).count(),1);
+  await page.evaluate(()=>{
+    window.loadCardHelpers=async()=>({createCardElement:()=>document.createElement('div')});
+  });
+  await page.getByRole('button',{name:'Újrapróbálás',exact:true}).click();
+  await page.waitForFunction(()=>card.mapHost.firstElementChild===card.map);
+  // A late rejection from a superseded attempt cannot replace a working map.
+  await page.evaluate(async()=>{
+    let rejectOld;
+    window.loadCardHelpers=()=>new Promise((resolve,reject)=>{rejectOld=reject;});
+    const old=card.buildMap();
+    window.loadCardHelpers=async()=>({createCardElement:()=>document.createElement('div')});
+    await card.buildMap();
+    rejectOld(new Error('late failure'));
+    await old;
+  });
+  assert.equal(await page.evaluate(()=>card.mapHost.firstElementChild===card.map),true);
   console.log('Browser checks passed: safe text/links, scoped clicks, native fallback, mobile fit, report removal, Escape.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
