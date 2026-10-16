@@ -205,6 +205,7 @@ const assert=require('node:assert/strict');
   assert.equal(await page.getByRole('link',{name:'CC BY 4.0'}).getAttribute('href'),'https://creativecommons.org/licenses/by/4.0/');
   await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,'switch.tas':{state:'off'}}});
   assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),0);
+  await page.keyboard.press('Escape');
   // A failed frontend load is retryable without fetching provider data.
   await page.evaluate(async()=>{
     window.loadCardHelpers=async()=>{throw new Error('offline');};
