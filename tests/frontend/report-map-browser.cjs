@@ -206,6 +206,25 @@ const assert=require('node:assert/strict');
   await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,'switch.tas':{state:'off'}}});
   assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),0);
   await page.keyboard.press('Escape');
+  await page.evaluate(()=>{
+    window.appearance=document.createElement('ignis-report-map-editor');
+    appearance.setConfig({type:'custom:ignis-report-map',aspect_ratio:'73%',default_zoom:7,report_switches:{terralyra_ignis_tasalert_reports:'switch.tas'}});
+    appearance.hass={language:'en',states:{}};
+    document.querySelector('main').append(appearance);
+    window.appearanceEdits=[];
+    appearance.addEventListener('config-changed',e=>appearanceEdits.push(e.detail.config));
+  });
+  assert.equal(await page.getByRole('combobox',{name:'Map aspect ratio',exact:true}).inputValue(),'73%');
+  await page.getByRole('combobox',{name:'Scale ruler',exact:true}).selectOption('true');
+  assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).aspect_ratio),'73%');
+  assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).scale_ruler),true);
+  await page.getByRole('combobox',{name:'Map aspect ratio',exact:true}).selectOption('1:1');
+  assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).aspect_ratio),'1:1');
+  await page.getByRole('combobox',{name:'Scale ruler',exact:true}).selectOption('');
+  assert.equal(await page.evaluate(()=>Object.hasOwn(appearanceEdits.at(-1),'scale_ruler')),false);
+  assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).default_zoom),7);
+  assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).report_switches.terralyra_ignis_tasalert_reports),'switch.tas');
+  await page.evaluate(()=>appearance.remove());
   // A failed frontend load is retryable without fetching provider data.
   await page.evaluate(async()=>{
     window.loadCardHelpers=async()=>{throw new Error('offline');};
