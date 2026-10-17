@@ -34,6 +34,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
  await page.evaluate(()=>{forecast.attributes.forecast_radius_km=100;card.hass={states:{'sensor.place':entity,'sensor.forecast':forecast}}});
  assert.doesNotMatch(await page.locator('ha-card').innerText(),/Magas · Érvényesség/);
+ // Receipt times follow HA's configured timezone, not the browser timezone.
+ await page.evaluate(()=>{
+   entity={...entity,attributes:{...entity.attributes,last_received_at:'2026-10-17T12:00:00Z'}};
+   card.hass={language:'en',locale:{language:'en-US'},config:{time_zone:'America/Los_Angeles'},states:{'sensor.place':entity}};
+ });
+ assert.match(await page.locator('ha-card').innerText(),/Latest successful data receipt: 10\/17\/2026, 5:00:00 AM/);
+ await page.evaluate(()=>card.hass={...card._hass,config:{time_zone:'Europe/Budapest'}});
+ assert.match(await page.locator('ha-card').innerText(),/Latest successful data receipt: 10\/17\/2026, 2:00:00 PM/);
+ await page.evaluate(()=>card.hass={...card._hass,config:{}});
+ assert.match(await page.locator('ha-card').innerText(),/Latest successful data receipt: 10\/17\/2026, 12:00:00 PM/);
  // Editor requires an explicit selection and preserves advanced configuration.
  await page.evaluate(()=>{
    document.querySelector('main').replaceChildren();
