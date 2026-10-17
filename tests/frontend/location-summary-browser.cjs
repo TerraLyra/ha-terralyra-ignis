@@ -3,6 +3,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  const page=await browser.newPage({viewport:{width:390,height:844}});await page.setContent('<main></main>');
  await page.addScriptTag({type:'module',content:fs.readFileSync('frontend/ignis-location-summary.js','utf8')});
  await page.evaluate(async()=>{await customElements.whenDefined('ignis-location-summary');window.card=document.createElement('ignis-location-summary');card.setConfig({entity:'sensor.place',location_id:'ca'});window.entity={state:'available',attributes:{location_id:'ca',location_name:'<img src=x onerror=alert(1)>',operational_status:'available',active_incidents:3,multi_source_incidents:1,source_health:[{provider:'NASA FIRMS',status:'available'}]}};card.hass={states:{'sensor.place':entity}};document.querySelector('main').append(card);window.info=null;card.addEventListener('hass-more-info',e=>window.info=e.detail.entityId);});
+ // Background updates retain keyboard position, but never steal outside focus.
+ await page.getByRole('button',{name:'Érzékelő részletei'}).focus();
+ await page.evaluate(()=>{entity={...entity,attributes:{...entity.attributes,active_incidents:4}};card.hass={states:{'sensor.place':entity}};});
+ assert.equal(await page.evaluate(()=>card.shadowRoot.activeElement?.dataset.action),'sensor-details');
+ assert.equal(await page.locator('.number').first().textContent(),'4');
+ await page.getByRole('button',{name:'Érzékelő részletei'}).press('Enter');
+ assert.equal(await page.evaluate(()=>info),'sensor.place');
+ await page.evaluate(()=>{const outside=document.createElement('button');outside.id='outside';outside.textContent='Outside';document.querySelector('main').append(outside);outside.focus();entity={...entity,attributes:{...entity.attributes,active_incidents:3}};card.hass={states:{'sensor.place':entity}};});
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'outside');
+ await page.evaluate(()=>document.querySelector('#outside').remove());
  assert.equal(await page.locator('.number').first().textContent(),'3');assert.equal(await page.locator('img').count(),0);
  await page.getByRole('button',{name:'Érzékelő részletei'}).click();assert.equal(await page.evaluate(()=>info),'sensor.place');
  await page.evaluate(()=>{entity={...entity,state:'unavailable'};card.hass={states:{'sensor.place':entity}}});assert.equal(await page.locator('.number').first().textContent(),'—');

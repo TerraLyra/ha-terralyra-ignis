@@ -333,7 +333,11 @@ class IgnisLocationSummary extends HTMLElement {
   render(){
     const language=summaryLanguage(this._hass);
     if(!this.config||!this.shadowRoot)return;
-    const root=this.shadowRoot;root.replaceChildren();
+    const root=this.shadowRoot;
+    const binding=JSON.stringify([this.config.entity,this.config.location_id]);
+    const restoreDetailsFocus=root.activeElement?.dataset.action==='sensor-details' && this.renderedBinding===binding;
+    this.renderedBinding=binding;
+    root.replaceChildren();
     const style=this.node('style',`:host{display:block}ha-card{display:block;padding:22px;background:var(--card-background-color,white);color:var(--primary-text-color,#183238);border-radius:16px;overflow-wrap:anywhere}h2{margin:0 0 12px;font-size:24px}h3{font-size:16px;margin-top:22px}.with-icon{display:flex;align-items:baseline;gap:8px}.with-icon ha-icon{--mdc-icon-size:18px;width:18px;height:18px;flex:0 0 18px;align-self:flex-start;margin-top:2px;color:var(--secondary-text-color,#596e73)}.with-icon>span{min-width:0}.status{padding:12px;background:var(--secondary-background-color,#eef4f4);border-radius:8px}.counts{display:flex;gap:24px;flex-wrap:wrap}.counts p{flex:1;min-width:120px}.number{display:block;font-size:36px;font-weight:600}.muted{font-size:13px;color:var(--secondary-text-color,#596e73)}li{margin:8px 0}button{font:inherit;padding:9px;border:1px solid var(--divider-color,#aaa);border-radius:8px;background:transparent;color:inherit;cursor:pointer}`);root.append(style);
     const card=this.node('ha-card');root.append(card);
     if(!this.config.entity){card.append(this.node('h2',text("Helyszínösszefoglaló",language)),this.node('p',text("Válassz egy megfigyelt helyszínt a kártya szerkesztőjében.",language)));return;}
@@ -362,7 +366,8 @@ class IgnisLocationSummary extends HTMLElement {
     }
     card.append(this.labelled('h3',text("Hivatalos tűzgyújtási korlátozás",language),'mdi:information-outline'),this.node('p',text("Nincs kapcsolt adat; ebből a tilalom fennállása nem állapítható meg.",language)));
     const note=this.node('p',text("Az észlelések hiánya nem jelent tűzmentességet. A legutóbbi adatátvétel nem minden forrás frissessége és nem az esemény kezdete. A műholdas események nem hatóságilag igazolt tűzesetek.",language));note.className='muted';card.append(note);
-    const button=this.node('button',text("Érzékelő részletei",language));button.onclick=()=>this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:this.config.entity},bubbles:true,composed:true}));card.append(button);
+    const button=this.node('button',text("Érzékelő részletei",language));button.dataset.action='sensor-details';button.onclick=()=>this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:this.config.entity},bubbles:true,composed:true}));card.append(button);
+    if(restoreDetailsFocus)button.focus({preventScroll:true});
   }
 }
 customElements.define('ignis-location-summary',IgnisLocationSummary);
