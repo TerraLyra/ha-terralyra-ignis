@@ -196,3 +196,11 @@ test('binding guidance separates absent, unsupported and mismatched sensors from
    assert.equal(setupReview(sample,id,'en')[0],summarizeLocation(sample,id,'en').error);
  }
 });
+
+test('receipt formatting rejects missing timezone and survives invalid presentation settings',async()=>{
+ const {formatReceiptTime}=await import('../../frontend/ignis-location-summary.js');
+ for(const value of [null,0,'','bad','2026-10-17','2026-10-17T12:00:00','badZ'])assert.equal(formatReceiptTime(value),null);
+ assert.equal(formatReceiptTime('2026-10-17T12:00:00Z','en-US','Bad/Zone'),'2026-10-17T12:00:00.000Z (UTC)');
+ assert.equal(formatReceiptTime('2026-10-17T14:00:00+02:00','invalid_locale','UTC'),'2026-10-17T12:00:00.000Z (UTC)');
+ assert.equal(formatReceiptTime('2026-10-17T14:00:00+02:00','en-US','UTC'),formatReceiptTime('2026-10-17T12:00:00Z','en-US','UTC'));
+});
