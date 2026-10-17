@@ -103,6 +103,14 @@ export function locationBindingError(entity, locationId, language='hu') {
     : 'The sensor belongs to a different location. Select the intended location again in the card editor.';
   return null;
 }
+// Never interpret a timezone-less receipt timestamp as browser-local time.
+export function formatReceiptTime(value, locale='en', timeZone='UTC') {
+  if(typeof value!=='string' || !/T.*(?:Z|[+-]\d{2}:\d{2})$/i.test(value))return null;
+  const date=new Date(value);
+  if(!Number.isFinite(date.getTime()))return null;
+  try {return date.toLocaleString(locale,{timeZone});}
+  catch {return date.toISOString()+' (UTC)';}
+}
 export function summarizeLocation(entity, locationId, language='hu') {
   const a=entity?.attributes;
   const error=locationBindingError(entity,locationId,language);
@@ -353,15 +361,16 @@ class IgnisLocationSummary extends HTMLElement {
       card.append(this.labelled('p',(language==='hu'?`Megfigyelés: ${model.monitoringRadius} km · Riasztás: ${model.alertRadius} km`:`Monitoring: ${model.monitoringRadius} km · Alert: ${model.alertRadius} km`),'mdi:radar'));
     card.append(this.labelled('h3',text("Adatforrások",language),'mdi:satellite-variant'));
     const list=this.node('ul');for(const source of model.sources){if(!source||typeof source!=='object')continue;const row=this.node('li',`${source.name||source.provider||text("Ismeretlen forrás",language)}${source.satellite?' · '+source.satellite:''}: ${statusLabels(language)[source.status]||({delayed:text("Késleltetett",language),outage:text("Forráskiesés",language),auth_error:text("Hozzáférési hiba",language),no_product:text("Nincs termék",language)}[source.status])||text("Ismeretlen állapot",language)}`);const guidance=sourceGuidance(source,language);if(guidance){const hint=this.node('div',guidance);hint.className='muted';row.append(hint);}list.append(row);}card.append(list);
-    const date=typeof model.received==='string'?new Date(model.received):null;
-    const stamp=this.node('p',date&&!Number.isNaN(date.getTime())?(language==='hu'?`Legutóbbi sikeres adatátvétel: ${date.toLocaleString(this._hass?.locale?.language||language,{timeZone:this._hass?.config?.time_zone||'UTC'})}`:`Latest successful data receipt: ${date.toLocaleString(this._hass?.locale?.language||language,{timeZone:this._hass?.config?.time_zone||'UTC'})}`):text("Nincs adatátvételi időpont.",language));stamp.className='muted';card.append(stamp);
+    const received=formatReceiptTime(model.received,this._hass?.locale?.language||language,this._hass?.config?.time_zone||'UTC');
+    const stamp=this.node('p',received?(language==='hu'?`Legutóbbi sikeres adatátvétel: ${received}`:`Latest successful data receipt: ${received}`):text("Nincs adatátvételi időpont.",language));stamp.className='muted';card.append(stamp);
     card.append(this.labelled('h3',text("Tűzveszély-előrejelzés",language),'mdi:chart-line'));
     const forecast=summarizeForecast(this._hass?.states?.[this.config.forecast?.entity],this.config.forecast,this.config.location_id,new Date(),language);
     if(forecast.message)card.append(this.node('p',forecast.message));
     else {
       card.append(this.node('p',(language==='hu'?`${forecast.risk} · Érvényesség: ${forecast.validDate} (UTC terméknap)`:`${forecast.risk} · Valid for: ${forecast.validDate} (UTC product date)`)));
       card.append(this.node('p',forecast.freshness));
-      if(forecast.received)card.append(this.node('p',(language==='hu'?`Sikeres lekérés: ${new Date(forecast.received).toLocaleString(this._hass?.locale?.language||language,{timeZone:this._hass?.config?.time_zone||'UTC'})}`:`Successful retrieval: ${new Date(forecast.received).toLocaleString(this._hass?.locale?.language||language,{timeZone:this._hass?.config?.time_zone||'UTC'})}`)));
+      const forecastReceived=formatReceiptTime(forecast.received,this._hass?.locale?.language||language,this._hass?.config?.time_zone||'UTC');
+      if(forecastReceived)card.append(this.node('p',language==='hu'?`Sikeres lekérés: ${forecastReceived}`:`Successful retrieval: ${forecastReceived}`));
       card.append(this.node('p',forecast.attribution),this.node('p',forecast.scope==='monitored_location'?text("Modell-előrejelzés a kijelölt helyszín közelére; nem hatósági riasztás. A lekérés ideje nem a modell kiadási ideje.",language):text("Modell-előrejelzés az otthonpont közelére; nem hatósági riasztás. A lekérés ideje nem a modell kiadási ideje.",language)));
     }
     card.append(this.labelled('h3',text("Hivatalos tűzgyújtási korlátozás",language),'mdi:information-outline'),this.node('p',text("Nincs kapcsolt adat; ebből a tilalom fennállása nem állapítható meg.",language)));
