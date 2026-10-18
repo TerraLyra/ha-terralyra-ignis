@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.7
+
+- Preserve allowlisted NIFC failure reasons and HTTP status across restarts.
+- Expose these details in source diagnostics without retaining response bodies or arbitrary exception text.
+- Keep existing recovery wait bounds and clear failure details after successful retrieval.
+
 ## 0.40.6
 
 - Preserve keyboard focus on summary sensor details during background updates.
