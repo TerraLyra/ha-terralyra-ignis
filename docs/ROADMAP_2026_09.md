@@ -1,8 +1,29 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-10-01: stable integration 0.32.0, with separately
-updated optional dashboard resources. Main-branch changes after the release
-are not automatically part of a HACS installation.
+Status reconciled on 2026-10-18: stable integration **0.40.7**.
+Main-branch changes after that release are not automatically installed by HACS.
+Dated sections below retain historical decisions; this current summary takes
+precedence where their delivery status has changed.
+
+## Current next steps
+
+- **Merged, not released:** per-source readiness in the summary setup review
+  (#207) and direct localized notification-blueprint guidance (#208).
+- **Acceptance still open:** unaided setup, the user's separate reinstall trial,
+  and real phone notification delivery. Assisted and automated checks do not
+  complete these acceptance steps. See [onboarding acceptance](ONBOARDING_ACCEPTANCE.md).
+- **Provider work:** resolve each product's remaining technical/access gates
+  before adding runtime adapters. TasALERT is already delivered in 0.40.0;
+  maintain its current implementation rather than repeat its initial preflight.
+- **BM:** satellite-first report association shipped in 0.37.0. Keep independent
+  samples as bounded validation; do not create events from BM reports or restart
+  an open-ended language-model effort. See [current behavior](BM_SATELLITE_FIRST.md).
+- **Paused:** historical-counter investigation #41 and optimization remain paused.
+
+Recent delivered UI work includes observation details (0.40.3), empty-observation
+and setup guidance (0.40.4), map recovery/appearance controls (0.40.5), and summary
+focus/timezone improvements (0.40.6). NIFC failure diagnostics persist across
+restart in 0.40.7. See [release validation](NEXT_RELEASE_READINESS.md).
 
 ## Delivered
 
@@ -58,7 +79,7 @@ are not automatically part of a HACS installation.
 | NSW RFS / Queensland QFD | Existing optional report calendars | Maintain compatibility and source-specific semantics |
 | Victoria | Offline inspectors complete; product-specific terms unresolved | Await developer terms and resolve remaining time/schema evidence before runtime work |
 | ACT | Offline experimental research only | Real timestamp semantics and DST evidence; no production entities/calendar |
-| Tasmania TasALERT | CC BY 4.0 for the three supported feeds | Offline KML preflight; see [feed review](TASALERT_FEED_REVIEW.md) |
+| Tasmania TasALERT | Optional runtime reports delivered in 0.40.0 under CC BY 4.0 | Maintain retrieval, timestamp and recovery behavior; see [feed review](TASALERT_FEED_REVIEW.md) |
 | Western Australia DFES | Product-specific access unresolved | Clarify dataset approval and distributed local authentication |
 | South Australia CFS | Product-specific reuse unresolved | Resolve product-specific reuse terms |
 | Northern Territory | Access preflight complete | Confirm supported feed and reuse scope |
@@ -103,9 +124,9 @@ new attributes. See [release validation](NEXT_RELEASE_READINESS.md).
 - [x] Assess whether richer data should also serve nearest-settlement labels;
   check label changes separately before changing that runtime behavior.
 
-The Hungarian supplement serves offline research. It shipped with 0.30.0,
-but production BM map geolocation and runtime nearest-settlement changes
-remain outside the delivered scope.
+The Hungarian supplement shipped with 0.30.0. Since 0.37.0 it also supports
+local satellite-first BM association. It does not authorize BM-derived incident
+coordinates or a change to runtime nearest-settlement labels.
 
 ## BM fire scope (requested 2026-09-24)
 
