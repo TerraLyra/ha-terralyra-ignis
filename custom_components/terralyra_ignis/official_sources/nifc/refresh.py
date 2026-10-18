@@ -48,6 +48,8 @@ class RefreshState:
     status: str = 'never_fetched'
     resume_after_review_at: float | None = None
     received_at: datetime | None = None
+    failure_reason: str | None = None
+    failure_http_status: int | None = None
 
 
 def _clock(value):
