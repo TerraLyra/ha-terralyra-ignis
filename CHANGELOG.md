@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.8
+
+- Show per-source readiness and troubleshooting guidance in the location-summary editor.
+- Suppress retained source statuses when the selected sensor is unavailable.
+- Link directly to localized notification-blueprint instructions without changing card settings.
+
 ## 0.40.7
 
 - Preserve allowlisted NIFC failure reasons and HTTP status across restarts.
