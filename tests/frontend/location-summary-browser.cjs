@@ -83,16 +83,6 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
  await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health[0].last_success_at='2026-10-18T12:00:00Z';editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
  assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/14:00:00/);
- // Source refresh preserves the focused guide, but never takes outside focus.
- await page.getByRole('link',{name:'Értesítési blueprint beállítása',exact:true}).focus();
- await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health[0].last_success_at='2026-10-18T12:05:00Z';editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
- assert.equal(await page.evaluate(()=>editor.shadowRoot.activeElement?.dataset.action),'notification-guide');
- assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/14:05:00/);
- await page.evaluate(()=>{const button=document.createElement('button');button.id='outside-review';button.textContent='Outside review';document.querySelector('main').append(button);button.focus();editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
- assert.equal(await page.evaluate(()=>document.activeElement.id),'outside-review');
- await page.evaluate(()=>document.querySelector('#outside-review').remove());
-
-
  await page.evaluate(()=>{editorStates['sensor.place'].state='unavailable';editor.hass={states:editorStates}});
  assert.doesNotMatch(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
  assert.equal(await page.evaluate(()=>changes.length),await page.evaluate(()=>changeCount));
@@ -103,6 +93,17 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.getByRole('textbox').press('Tab');
  assert.equal(await page.evaluate(()=>changes.at(-1).title),'My place');
  assert.equal(await page.evaluate(()=>changes.at(-1).custom_option),true);
+ // Source refresh preserves the focused guide, but never takes outside focus.
+ await page.getByRole('link',{name:'Értesítési blueprint beállítása',exact:true}).focus();
+ await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health[0].last_success_at='2026-10-18T12:05:00Z';editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
+ assert.equal(await page.evaluate(()=>editor.shadowRoot.activeElement?.dataset.action),'notification-guide');
+ assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/14:05:00/);
+ await page.evaluate(()=>{const button=document.createElement('button');button.id='outside-review';button.textContent='Outside review';document.querySelector('main').append(button);button.focus();editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'outside-review');
+ await page.evaluate(()=>document.querySelector('#outside-review').remove());
+
+
+
  await page.getByRole('combobox',{name:'Megfigyelt helyszín',exact:true}).selectOption('sensor.other');
  assert.equal(await page.evaluate(()=>changes.at(-1).location_id),'other');
  assert.equal(await page.evaluate(()=>changes.at(-1).forecast.location_id),'ca');
