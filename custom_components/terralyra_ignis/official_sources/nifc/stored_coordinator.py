@@ -57,7 +57,9 @@ class NifcStoredCoordinator:
         return {'problem': self._problem, 'in_flight': self._lock.locked(),
                 'has_last_response': state is not None and state.last_success is not None,
                 'failures': 0 if state is None else state.failures,
-                'source_freshness': 'not_established'}
+                'source_freshness': 'not_established',
+                'last_failure_reason': None if state is None else state.failure_reason,
+                'last_failure_http_status': None if state is None else state.failure_http_status}
 
     async def refresh(self, *, enabled=False):
         if self._inner is None:

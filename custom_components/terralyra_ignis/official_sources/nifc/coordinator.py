@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
+from .failure_details import failure_reason, validate_failure
 from datetime import datetime, timezone
 import math
 import time
@@ -19,6 +21,10 @@ def checkpoint(state, *, now):
     if math.isinf(wait) and state.resume_after_review_at is not None:
         _clock(state.resume_after_review_at)
         data.update(version=2, resume_wait_seconds=math.ceil(max(0, state.resume_after_review_at - now)))
+    if state.failure_reason is not None:
+        validate_failure(state.failure_reason, state.failure_http_status)
+        return dict(version=3, cooldown=data, failure_reason=state.failure_reason,
+                    http_status=state.failure_http_status)
     return data
 
 
@@ -30,6 +36,16 @@ def restore_checkpoint(data, *, now):
     No saved response or user history is read, replaced or deleted here.
     """
     _clock(now)
+    if isinstance(data, dict) and data.get('version') == 3:
+        if type(data['version']) is not int or set(data) != {'version', 'cooldown', 'failure_reason', 'http_status'}:
+            raise ValueError('Invalid diagnostic checkpoint')
+        validate_failure(data['failure_reason'], data['http_status'])
+        inner = data['cooldown']
+        if not isinstance(inner, dict) or inner.get('version') not in (1, 2):
+            raise ValueError('Invalid nested cooldown')
+        state = restore_checkpoint(inner, now=now)
+        return replace(state, failure_reason=data['failure_reason'],
+                       failure_http_status=data['http_status'])
     keys = {'version','wait_seconds','failures'}
     if isinstance(data, dict) and data.get('version') == 2:
         keys.add('resume_wait_seconds')
@@ -82,11 +98,18 @@ class NifcCoordinator:
                     kind = 'invalid_data'
                 self.state = failed(self.state, now=self._clock(), kind=kind,
                                     server_wait=retry_after_seconds(error.retry_after, now=self._utcnow()))
+                self.state = replace(self.state, failure_reason='HTTP response rejected',
+                                     failure_http_status=error.status)
                 return 'failed'
-            except (OSError, asyncio.TimeoutError):
+            except (OSError, asyncio.TimeoutError) as error:
                 self.state = failed(self.state, now=self._clock(), kind='transient')
+                self.state = replace(self.state, failure_reason=('Request timed out'
+                    if isinstance(error, TimeoutError) else 'Connection or response interrupted'),
+                    failure_http_status=None)
                 return 'failed'
-            except ValueError:
+            except ValueError as error:
                 self.state = failed(self.state, now=self._clock(), kind='invalid_data')
+                self.state = replace(self.state, failure_reason=failure_reason(error),
+                                     failure_http_status=None)
                 return 'failed'
             return 'retrieved'
