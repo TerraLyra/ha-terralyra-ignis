@@ -201,6 +201,19 @@ export function forecastSetupReview(states, config, now=new Date(), language='hu
   const result=summarizeForecast(states?.[config.forecast.entity],config.forecast,config.location_id,now,language);
   return result.message?(language==='hu'?`Előrejelzés: ${result.message}`:`Forecast: ${result.message}`):(language==='hu'?`Előrejelzés: ${result.risk} · UTC terméknap: ${result.validDate}. ${result.freshness}`:`Forecast: ${result.risk} · UTC product date: ${result.validDate}. ${result.freshness}`);
 }
+// Hide retained source health when the selected sensor itself is unavailable.
+export function sourceSetupReview(entity, locationId, language='hu') {
+  if(locationBindingError(entity,locationId,language))return [];
+  if(['unknown','unavailable'].includes(entity.state))return [text("Az adatellátás jelenleg nem ellenőrizhető.",language)];
+  const sources=entity.attributes.source_health.filter(source=>source&&typeof source==='object');
+  if(!sources.length)return [language==='hu'?'Még nincs forrásonkénti állapotadat.':'Per-source status is not available yet.'];
+  return sources.map(source=>{
+    const name=source.name||source.provider||text("Ismeretlen forrás",language);
+    const status=({available:language==='hu'?'Elérhető':'Available',delayed:text("Késleltetett",language),outage:text("Forráskiesés",language),auth_error:text("Hozzáférési hiba",language),no_product:text("Nincs termék",language),initializing:language==='hu'?'Első adatokra vár':'Waiting for first data'})[source.status]||text("Ismeretlen állapot",language);
+    const guidance=sourceGuidance(source,language);
+    return `${name}${source.satellite?' · '+source.satellite:''}: ${status}${guidance?' — '+guidance:''}`;
+  });
+}
 // Setup review is descriptive: it cannot inspect notification automation delivery.
 export function setupReview(entity, locationId, language='hu') {
   const a=entity?.attributes;
@@ -277,6 +290,9 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     if(!this.reviewHost||!this.config)return;
     this.reviewHost.replaceChildren(this.node('h3',text("Beállítások áttekintése",language)));
     for(const text of setupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language))this.reviewHost.append(this.node('p',text));
+    const sources=this.node('ul');
+    for(const line of sourceSetupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language))sources.append(this.node('li',line));
+    if(sources.childNodes.length)this.reviewHost.append(sources);
     this.reviewHost.append(this.node('p',forecastSetupReview(this._hass?.states,this.config,new Date(),language)));
   }
   render(){

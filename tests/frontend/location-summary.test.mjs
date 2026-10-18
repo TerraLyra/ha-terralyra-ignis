@@ -204,3 +204,18 @@ test('receipt formatting rejects missing timezone and survives invalid presentat
  assert.equal(formatReceiptTime('2026-10-17T14:00:00+02:00','invalid_locale','UTC'),'2026-10-17T12:00:00.000Z (UTC)');
  assert.equal(formatReceiptTime('2026-10-17T14:00:00+02:00','en-US','UTC'),formatReceiptTime('2026-10-17T12:00:00Z','en-US','UTC'));
 });
+
+const {sourceSetupReview}=await import('../../frontend/ignis-location-summary.js');
+test('setup source review distinguishes delay, access errors and absent status',()=>{
+ const e={...entity,attributes:{...entity.attributes,source_health:[
+  {name:'FIRMS',satellite:'VIIRS',status:'available'},
+  {name:'LSA SAF',status:'delayed'}, {name:'Other',status:'auth_error'}]}};
+ const lines=sourceSetupReview(e,'ca','en');
+ assert.match(lines[0],/FIRMS · VIIRS: Available/);
+ assert.match(lines[1],/Delayed.*successful retrieval/i);
+ assert.match(lines[2],/Access error.*credentials/i);
+ assert.deepEqual(sourceSetupReview(e,'wrong','en'),[]);
+ assert.deepEqual(sourceSetupReview({...e,state:'unavailable'},'ca','en'),['Data availability cannot currently be verified.']);
+ assert.match(sourceSetupReview(entity,'ca','en')[0],/not available yet/);
+ assert.match(sourceSetupReview(e,'ca','hu')[1],/Késleltetett/);
+});
