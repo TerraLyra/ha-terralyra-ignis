@@ -68,6 +68,8 @@ check the monitored location in IGNIS settings and wait for its status sensor.
 Do not substitute a source-count sensor. A delayed source is a data limitation;
 recreating the card will not refresh satellite observations.
 
+<a id="notification-blueprint-english"></a>
+
 ### 4. Enable phone notifications
 
 Import the [notification blueprint](../blueprints/automation/terralyra_ignis/satellite_alert.yaml)
@@ -152,6 +154,8 @@ erőforrást, majd töltsd újra teljesen a felületet. Üres helyszínlistáná
 a megfigyelt pontot az IGNIS beállításaiban, és várd meg az állapotérzékelőjét.
 Ne forrásszámláló érzékelőt válassz helyette. A késő forrásadatot a kártya
 újralétrehozása nem frissíti.
+
+<a id="notification-blueprint-magyar"></a>
 
 ### 4. Értesítési blueprint
 

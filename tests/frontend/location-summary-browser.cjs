@@ -57,6 +57,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(await page.locator('ha-card').innerText(),/Válassz egy megfigyelt helyszínt/);
  assert.match(await page.getByRole('status').innerText(),/Még nincs választható/);
  assert.equal(await page.evaluate(()=>changes.length),0);
+ const blueprintGuide=page.getByRole('link',{name:'Értesítési blueprint beállítása',exact:true});
+ assert.match(await blueprintGuide.getAttribute('href'),/#notification-blueprint-magyar$/);
+ assert.equal(await blueprintGuide.getAttribute('target'),'_blank');
+ await page.evaluate(()=>{editor.hass={language:'en',states:{}}});
+ assert.match(await page.getByRole('link',{name:'Set up the notification blueprint',exact:true}).getAttribute('href'),/#notification-blueprint-english$/);
+ assert.equal(await page.evaluate(()=>changes.length),0);
+ await page.evaluate(()=>{editor.hass={states:{}}});
+
  await page.evaluate(()=>{
    window.editorStates={'sensor.place':entity,'sensor.forecast':forecast,
     'sensor.other':{...entity,attributes:{...entity.attributes,location_id:'other',location_name:'Other'}}};
