@@ -70,6 +70,13 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.evaluate(()=>editor.setConfig({...changes.at(-1),forecast:{entity:'sensor.forecast',location_id:'ca',latitude:47,longitude:19},custom_option:true}));
  await page.getByRole('textbox').fill('My place');
  // A HA state update must not discard a title currently being typed.
+ // Source review updates without changing the user's saved card configuration.
+ await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health=[{name:'FIRMS',status:'delayed'}];editor.hass={states:editorStates};window.changeCount=changes.length});
+ assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
+ await page.evaluate(()=>{editorStates['sensor.place'].state='unavailable';editor.hass={states:editorStates}});
+ assert.doesNotMatch(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
+ assert.equal(await page.evaluate(()=>changes.length),await page.evaluate(()=>changeCount));
+ await page.evaluate(()=>{editorStates['sensor.place'].state='available';editor.hass={states:editorStates}});
  await page.evaluate(()=>{editorStates['sensor.place'].attributes.monitoring_radius_km=100;editorStates['sensor.place'].attributes.alert_radius_km=50;editor.hass={states:editorStates}});
  assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/Megfigyelés: 100 km/);
  assert.equal(await page.getByRole('textbox').inputValue(),'My place');

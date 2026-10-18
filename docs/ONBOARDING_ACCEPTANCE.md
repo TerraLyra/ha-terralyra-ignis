@@ -151,3 +151,11 @@ when other settings change. Default removes the override. These options only aff
 presentation; locations, source switches and notification radii are unchanged.
 In sections dashboards, the Layout tab can also influence card dimensions.
 See the [Home Assistant map settings](https://www.home-assistant.io/dashboards/map/).
+
+## Per-source setup review — next release
+
+The summary editor lists source readiness and existing troubleshooting guidance
+for the explicitly selected location. Unknown/unavailable sensors suppress retained
+source statuses. This review is read-only and does not enable providers, change
+card bindings or establish notification delivery. Hungarian and English wording
+and background status transitions have automated coverage.
