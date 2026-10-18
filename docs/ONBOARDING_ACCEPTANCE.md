@@ -167,3 +167,10 @@ the interface language. The guide opens separately, preserving unfinished card
 edits. It explains that HACS updates do not create notification automations.
 Phone selection, blueprint import and notification acceptance remain explicit
 user steps; the editor does not claim delivery readiness.
+
+## Source receipt times — next release
+
+The editor's per-source review includes the last successful receipt timestamp in
+the HA timezone. Missing or timezone-less timestamps remain unknown; invalid
+formatting settings fall back to labelled UTC. Receipt time is explicitly distinct
+from observation time and does not override delayed or failed source status.

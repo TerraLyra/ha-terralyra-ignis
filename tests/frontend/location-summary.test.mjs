@@ -219,3 +219,14 @@ test('setup source review distinguishes delay, access errors and absent status',
  assert.match(sourceSetupReview(entity,'ca','en')[0],/not available yet/);
  assert.match(sourceSetupReview(e,'ca','hu')[1],/Késleltetett/);
 });
+
+test('source setup receipt time follows HA zone and never accepts offsetless input',()=>{
+ const e={...entity,attributes:{...entity.attributes,source_health:[{name:'FIRMS',status:'delayed',last_success_at:'2026-10-18T12:00:00Z'}]}};
+ assert.match(sourceSetupReview(e,'ca','en','en-GB','Europe/Budapest')[0],/14:00:00/);
+ assert.match(sourceSetupReview(e,'ca','en','en-GB','America/Los_Angeles')[0],/05:00:00/);
+ e.attributes.source_health[0].last_success_at='2026-10-18T12:00:00';
+ assert.match(sourceSetupReview(e,'ca','en')[0],/time is unknown/);
+ e.attributes.source_health[0].last_success_at='2026-10-18T12:00:00Z';
+ assert.match(sourceSetupReview(e,'ca','en','en','invalid-zone')[0],/2026-10-18T12:00:00.000Z \(UTC\)/);
+ assert.doesNotMatch(sourceSetupReview({...e,state:'unavailable'},'ca','en').join(' '),/2026/);
+});
