@@ -152,7 +152,7 @@ presentation; locations, source switches and notification radii are unchanged.
 In sections dashboards, the Layout tab can also influence card dimensions.
 See the [Home Assistant map settings](https://www.home-assistant.io/dashboards/map/).
 
-## Per-source setup review — next release
+## Per-source setup review — 0.40.8 candidate
 
 The summary editor lists source readiness and existing troubleshooting guidance
 for the explicitly selected location. Unknown/unavailable sensors suppress retained
@@ -160,7 +160,7 @@ source statuses. This review is read-only and does not enable providers, change
 card bindings or establish notification delivery. Hungarian and English wording
 and background status transitions have automated coverage.
 
-## Notification setup handoff — next release
+## Notification setup handoff — 0.40.8 candidate
 
 The summary editor links directly to the notification-blueprint instructions in
 the interface language. The guide opens separately, preserving unfinished card
