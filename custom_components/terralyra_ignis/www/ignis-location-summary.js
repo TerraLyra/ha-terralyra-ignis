@@ -202,7 +202,7 @@ export function forecastSetupReview(states, config, now=new Date(), language='hu
   return result.message?(language==='hu'?`Előrejelzés: ${result.message}`:`Forecast: ${result.message}`):(language==='hu'?`Előrejelzés: ${result.risk} · UTC terméknap: ${result.validDate}. ${result.freshness}`:`Forecast: ${result.risk} · UTC product date: ${result.validDate}. ${result.freshness}`);
 }
 // Hide retained source health when the selected sensor itself is unavailable.
-export function sourceSetupReview(entity, locationId, language='hu') {
+export function sourceSetupReview(entity, locationId, language='hu', locale=language, timeZone='UTC') {
   if(locationBindingError(entity,locationId,language))return [];
   if(['unknown','unavailable'].includes(entity.state))return [text("Az adatellátás jelenleg nem ellenőrizhető.",language)];
   const sources=entity.attributes.source_health.filter(source=>source&&typeof source==='object');
@@ -211,7 +211,9 @@ export function sourceSetupReview(entity, locationId, language='hu') {
     const name=source.name||source.provider||text("Ismeretlen forrás",language);
     const status=({available:language==='hu'?'Elérhető':'Available',delayed:text("Késleltetett",language),outage:text("Forráskiesés",language),auth_error:text("Hozzáférési hiba",language),no_product:text("Nincs termék",language),initializing:language==='hu'?'Első adatokra vár':'Waiting for first data'})[source.status]||text("Ismeretlen állapot",language);
     const guidance=sourceGuidance(source,language);
-    return `${name}${source.satellite?' · '+source.satellite:''}: ${status}${guidance?' — '+guidance:''}`;
+    const received=formatReceiptTime(source.last_success_at??source.received_timestamp,locale,timeZone);
+    const receipt=received?(language==='hu'?`Utolsó sikeres adatátvétel: ${received}`:`Last successful data receipt: ${received}`):(language==='hu'?'A sikeres adatátvétel ideje nem ismert.':'Successful data receipt time is unknown.');
+    return `${name}${source.satellite?' · '+source.satellite:''}: ${status}${guidance?' — '+guidance:''} · ${receipt}`;
   });
 }
 // Setup review is descriptive: it cannot inspect notification automation delivery.
@@ -291,8 +293,12 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     this.reviewHost.replaceChildren(this.node('h3',text("Beállítások áttekintése",language)));
     for(const text of setupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language))this.reviewHost.append(this.node('p',text));
     const sources=this.node('ul');
-    for(const line of sourceSetupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language))sources.append(this.node('li',line));
-    if(sources.childNodes.length)this.reviewHost.append(sources);
+    for(const line of sourceSetupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language,this._hass?.locale?.language||language,this._hass?.config?.time_zone||'UTC'))sources.append(this.node('li',line));
+    if(sources.childNodes.length){
+      this.reviewHost.append(sources,this.node('p',language==='hu'
+        ?'Az adatátvétel ideje nem a műholdas észlelés ideje, és önmagában nem igazolja az adatok frissességét.'
+        :'Receipt time is not satellite observation time and does not by itself establish data freshness.'));
+    }
     this.reviewHost.append(this.node('p',forecastSetupReview(this._hass?.states,this.config,new Date(),language)));
     const notification=this.node('p');
     const guide=this.node('a',language==='hu'?'Értesítési blueprint beállítása':'Set up the notification blueprint');

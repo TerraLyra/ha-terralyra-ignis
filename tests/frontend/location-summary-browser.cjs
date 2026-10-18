@@ -81,6 +81,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  // Source review updates without changing the user's saved card configuration.
  await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health=[{name:'FIRMS',status:'delayed'}];editor.hass={states:editorStates};window.changeCount=changes.length});
  assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
+ await page.evaluate(()=>{editorStates['sensor.place'].attributes.source_health[0].last_success_at='2026-10-18T12:00:00Z';editor.hass={locale:{language:'hu'},config:{time_zone:'Europe/Budapest'},states:editorStates}});
+ assert.match(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/14:00:00/);
+
  await page.evaluate(()=>{editorStates['sensor.place'].state='unavailable';editor.hass={states:editorStates}});
  assert.doesNotMatch(await page.getByRole('region',{name:'Beállítások áttekintése'}).innerText(),/FIRMS: Késleltetett/);
  assert.equal(await page.evaluate(()=>changes.length),await page.evaluate(()=>changeCount));
