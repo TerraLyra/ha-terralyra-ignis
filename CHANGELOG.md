@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.9
+
+- Show each source's last successful receipt time in the summary editor, using the HA timezone.
+- Keep missing or timezone-less receipt values unknown and distinguish receipt from observation freshness.
+- Preserve keyboard focus on the blueprint guide during same-location background review updates.
+
 ## 0.40.8
 
 - Show per-source readiness and troubleshooting guidance in the location-summary editor.
