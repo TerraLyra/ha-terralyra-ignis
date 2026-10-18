@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.6
+
+- Preserve keyboard focus on summary sensor details during background updates.
+- Display summary receipt times consistently in the Home Assistant timezone.
+- Reject timezone-less receipt display values and fall back to labelled UTC when formatting settings are invalid.
+
 ## 0.40.5
 
 - Retry a failed map load directly from the card; ignore late results from superseded loads.
