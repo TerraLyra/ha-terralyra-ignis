@@ -159,3 +159,11 @@ for the explicitly selected location. Unknown/unavailable sensors suppress retai
 source statuses. This review is read-only and does not enable providers, change
 card bindings or establish notification delivery. Hungarian and English wording
 and background status transitions have automated coverage.
+
+## Notification setup handoff — next release
+
+The summary editor links directly to the notification-blueprint instructions in
+the interface language. The guide opens separately, preserving unfinished card
+edits. It explains that HACS updates do not create notification automations.
+Phone selection, blueprint import and notification acceptance remain explicit
+user steps; the editor does not claim delivery readiness.

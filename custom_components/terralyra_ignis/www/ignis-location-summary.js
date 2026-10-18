@@ -294,6 +294,15 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     for(const line of sourceSetupReview(this._hass?.states?.[this.config.entity],this.config.location_id,language))sources.append(this.node('li',line));
     if(sources.childNodes.length)this.reviewHost.append(sources);
     this.reviewHost.append(this.node('p',forecastSetupReview(this._hass?.states,this.config,new Date(),language)));
+    const notification=this.node('p');
+    const guide=this.node('a',language==='hu'?'Értesítési blueprint beállítása':'Set up the notification blueprint');
+    guide.href='https://github.com/TerraLyra/ha-terralyra-ignis/blob/main/docs/FIRST_STEPS.md#notification-blueprint-'+(language==='hu'?'magyar':'english');
+    guide.target='_blank';guide.rel='noopener noreferrer';
+    notification.append(guide);
+    this.reviewHost.append(notification,this.node('p',language==='hu'
+      ?'Az útmutatóban válaszd ki a telefont és az értesítés nyelvét. A HACS-frissítés önmagában nem hoz létre értesítési automatizálást.'
+      :'Follow the guide to choose your phone and notification language. Updating through HACS does not create a notification automation.'));
+
   }
   render(){
     const language=summaryLanguage(this._hass);
