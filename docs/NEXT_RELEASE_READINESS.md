@@ -137,3 +137,23 @@ reported delayed data; one sampled location forecast was unavailable at the fina
 check. No settings were changed. This is a sampled upgrade smoke check, not
 proof of every source's freshness, history continuity or notification delivery.
 The user's separate manual reinstall trial remains pending.
+
+## Published 0.40.7
+
+Stable [v0.40.7](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.40.7)
+was published from `370b57b4d5eba27d2de92578ca18f1ddfc2ecdcf` after all 27
+checks passed and explicit publication approval. See [release notes](RELEASE_0_40_7.md).
+
+After the user updated and restarted, a read-only check confirmed version 0.40.7,
+a successful NIFC response, zero failures and both new diagnostic fields present
+and empty. Fault persistence remains automated-test evidence; no production
+failure was injected. Successful retrieval does not establish freshness of every
+incident or national completeness.
+
+## Merged after 0.40.7 — not released
+
+- #207: per-source readiness and guidance in the summary setup review.
+- #208: localized notification-blueprint guide from that review.
+
+Both passed all 27 checks. No new release or production installation is implied.
+The unaided setup/reinstall and notification-delivery acceptance items remain open.

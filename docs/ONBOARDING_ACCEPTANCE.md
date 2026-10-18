@@ -8,7 +8,7 @@ not automatically a passed first-time-user trial.
 
 | Capability | Evidence | Remaining boundary |
 | --- | --- | --- |
-| Separate monitoring and alert radii | 0.33.0; improved validation in 0.34.1 | Integrated guided setup and completion summary remain open |
+| Separate monitoring and alert radii | 0.33.0; improved validation in 0.34.1 | Card setup review delivered; integrated onboarding acceptance remains open |
 | Visual summary location selection | 0.34.0 | Visual forecast binding implemented; first-time-user acceptance remains open |
 | Six-language notification blueprint | 0.34.0 | Separate import and user-selected phone; no silent automation replacement |
 | Bundled optional cards | 0.35.0; resource migration observed | 0.39.0 adds an explicit administrator setup action; dashboard placement remains manual |
@@ -44,7 +44,7 @@ an existing summary resource without changing it.
    summary now supports Hungarian/English while preserving distinctions between
    absent observations, missing data and unavailable official restrictions.
 
-## First-time-user trial — not yet performed
+## Unaided first-time-user trial — not yet performed
 
 Use an isolated installation when available. Do not remove the existing production
 integration, erase storage or reset history to simulate a clean installation.
@@ -143,7 +143,7 @@ options in the visual editor. Existing saved cards retain their configuration;
 no report switch is automatically bound or enabled. This does not replace
 first-time-user acceptance.
 
-## Map appearance controls — next release
+## Map appearance controls — delivered in 0.40.5
 
 The visual map editor offers default, 16:9, 4:3 and square aspect ratios, plus a
 scale ruler setting. Existing custom aspect ratios remain selected and are preserved
