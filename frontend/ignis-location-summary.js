@@ -82,7 +82,18 @@ const statusLabels = language => ({available:text("Adatforrások elérhetők",la
 export function sourceGuidance(source, language='hu') {
   if(!source || typeof source!=='object')return '';
   if(source.status==='auth_error')return text("Ellenőrizd a forrás hozzáférési adatait az IGNIS beállításaiban.",language);
-  if(source.retrieval_status==='failed'||source.status==='outage')return text("A lekérés sikertelen. Ha tartósan fennáll, ellenőrizd az IGNIS diagnosztikáját és a hálózati kapcsolatot.",language);
+  if(source.retrieval_status==='failed'||source.status==='outage') {
+    const sentinel=['eumetsat_sentinel3a','eumetsat_sentinel3b'].includes(source.provider);
+    const messages={
+      sentinel3_network_error:['Hálózati hiba történt a Sentinel-3 lekérésekor. Ha tartós, ellenőrizd a HA hálózati kapcsolatát.','A network error occurred while retrieving Sentinel-3 data. If it persists, check the HA network connection.'],
+      sentinel3_server_error:['A Sentinel-3 szolgáltatás szerverhibát jelzett. Várd meg a következő automatikus próbálkozást.','The Sentinel-3 service returned a server error. Wait for the next automatic attempt.'],
+      sentinel3_timeout:['A Sentinel-3 lekérése túllépte a várakozási időt. Várd meg a következő automatikus próbálkozást.','The Sentinel-3 request timed out. Wait for the next automatic attempt.'],
+      sentinel3_rate_limited:['A Sentinel-3 szolgáltatás korlátozta a lekéréseket. Ne sürgesd az újrapróbálkozást.','The Sentinel-3 service limited requests. Do not force an early retry.'],
+      sentinel3_invalid_response:['A Sentinel-3 válasza nem volt feldolgozható. Ha tartós, ellenőrizd az IGNIS diagnosztikáját.','The Sentinel-3 response could not be processed. If it persists, check IGNIS diagnostics.']
+    };
+    if(sentinel && Object.hasOwn(messages,source.diagnostic_code))return messages[source.diagnostic_code][language==='hu'?0:1];
+    return text("A lekérés sikertelen. Ha tartósan fennáll, ellenőrizd az IGNIS diagnosztikáját és a hálózati kapcsolatot.",language);
+  }
   return ({
     delayed:text("Az adatok késnek. A sikeres lekérés önmagában nem jelent friss műholdas megfigyelést.",language),
     no_product:text("Jelenleg nincs elérhető adatcsomag; ebből nem következik, hogy nincs tűz.",language),
