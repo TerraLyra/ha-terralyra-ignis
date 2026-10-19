@@ -379,14 +379,27 @@ class IgnisLocationSummaryEditor extends HTMLElement {
       :'The map shows all enabled IGNIS locations; the summary belongs only to the selected location. Nothing is saved automatically. Paste the configuration into a new Manual card and review its preview. JSON works in the YAML editor too. The native map needs no additional JavaScript module.'));
     const generate=this.node('button',language==='hu'?'Konfiguráció készítése':'Generate configuration');generate.type='button';
     const output=this.node('textarea');output.readOnly=true;output.rows=12;output.style.cssText='width:100%;box-sizing:border-box';output.hidden=true;output.setAttribute('aria-label',language==='hu'?'Közös kártyakonfiguráció':'Combined card configuration');
+    const copy=this.node('button',language==='hu'?'Másolás':'Copy configuration');copy.type='button';copy.hidden=true;
     const result=this.node('p');result.setAttribute('role','status');
+    copy.onclick=async()=>{
+      if(!output.value)return;
+      const snapshot=output.value;
+      try {
+        await navigator.clipboard.writeText(snapshot);
+        if(output.isConnected&&output.value===snapshot)result.textContent=language==='hu'?'Konfiguráció a vágólapra másolva.':'Configuration copied to clipboard.';
+      } catch {
+        if(!output.isConnected||output.value!==snapshot)return;
+        output.focus();output.select();
+        result.textContent=language==='hu'?'Automatikus másolás nem érhető el. A szöveget kijelöltük; másold Ctrl+C vagy ⌘C használatával, mobilon a Másolás paranccsal.':'Automatic copying is unavailable. Text selected; use Ctrl+C or ⌘C, or Copy on mobile.';
+      }
+    };
     generate.onclick=()=>{
       const value=mapSummaryStarter(this._hass?.states?.[this.config.entity],this.config);
-      output.hidden=!value;output.value=value?JSON.stringify(value,null,2):'';
+      output.hidden=!value;copy.hidden=!value;output.value=value?JSON.stringify(value,null,2):'';
       result.textContent=value?(language==='hu'?'A jelenlegi beállítások másolata. Módosítás után készítsd el újra.':'Snapshot of current settings. Generate again after changes.'):(language==='hu'?'Előbb válassz érvényes helyszínérzékelőt.':'Choose a valid location sensor first.');
       if(value){output.focus();output.select();}
     };
-    starter.append(generate,output,result);root.append(starter);
+    starter.append(generate,copy,output,result);root.append(starter);
 
     this.forecastHost=this.node('section');root.append(this.forecastHost);this.refreshForecast();
   }

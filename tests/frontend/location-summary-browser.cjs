@@ -194,6 +194,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  const starter=await page.getByRole('textbox',{name:'Combined card configuration'}).inputValue();
  assert.equal(JSON.parse(starter).cards[1].entity,'sensor.place');
  assert.equal(JSON.parse(starter).cards[0].type,'map');
+ // Local HTTP / denied clipboard access must not claim successful copying.
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied')}}}));
+ await page.getByRole('button',{name:'Copy configuration',exact:true}).click();
+ assert.match(await page.getByRole('status').innerText(),/Automatic copying is unavailable/);
+ assert.equal(await page.getByRole('textbox',{name:'Combined card configuration'}).evaluate(el=>el.selectionEnd-el.selectionStart),starter.length);
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.copiedConfig=text}}}));
+ await page.getByRole('button',{name:'Copy configuration',exact:true}).click();
+ assert.equal(await page.evaluate(()=>window.copiedConfig),starter);
+ assert.equal(await page.getByRole('status').innerText(),'Configuration copied to clipboard.');
+
  assert.equal(await page.locator('img').count(),0);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  if(process.env.IGNIS_SCREENSHOT){
