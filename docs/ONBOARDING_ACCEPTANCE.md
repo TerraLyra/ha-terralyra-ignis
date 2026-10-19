@@ -38,8 +38,9 @@ an existing summary resource without changing it.
 ## Next implementation work
 
 1. Reduce manual map/summary setup while retaining explicit location bindings.
-2. Provide a clear setup-completion summary: monitored place, both radii, source
-   readiness and notification configuration still required.
+2. Validate the delivered setup review as part of the first-time-user trial:
+   monitored place, both radii, source readiness and the explicit notification
+   setup handoff are implemented; successful phone delivery remains unverified.
 3. Review remaining report-card wording and first-time-user acceptance; the
    summary now supports Hungarian/English while preserving distinctions between
    absent observations, missing data and unavailable official restrictions.
@@ -135,7 +136,7 @@ The trial found stale README release wording and Hungarian summary picker metada
 on an English interface, fixed in #171. Unused report-age controls on satellite-only
 maps were addressed in #172. The unaided checklist above remains open.
 
-## New map starter configuration — next release
+## New map starter configuration — delivered (#175)
 
 New report-map cards added through the picker include monitoring and alert circles
 with clustering off, so configured areas remain visible. Users can change these
@@ -152,7 +153,7 @@ presentation; locations, source switches and notification radii are unchanged.
 In sections dashboards, the Layout tab can also influence card dimensions.
 See the [Home Assistant map settings](https://www.home-assistant.io/dashboards/map/).
 
-## Per-source setup review — 0.40.8 candidate
+## Per-source setup review — delivered in 0.40.8
 
 The summary editor lists source readiness and existing troubleshooting guidance
 for the explicitly selected location. Unknown/unavailable sensors suppress retained
@@ -160,7 +161,7 @@ source statuses. This review is read-only and does not enable providers, change
 card bindings or establish notification delivery. Hungarian and English wording
 and background status transitions have automated coverage.
 
-## Notification setup handoff — 0.40.8 candidate
+## Notification setup handoff — delivered in 0.40.8
 
 The summary editor links directly to the notification-blueprint instructions in
 the interface language. The guide opens separately, preserving unfinished card
@@ -168,9 +169,18 @@ edits. It explains that HACS updates do not create notification automations.
 Phone selection, blueprint import and notification acceptance remain explicit
 user steps; the editor does not claim delivery readiness.
 
-## Source receipt times — 0.40.9 candidate
+## Source receipt times — delivered in 0.40.9
 
 The editor's per-source review includes the last successful receipt timestamp in
 the HA timezone. Missing or timezone-less timestamps remain unknown; invalid
 formatting settings fall back to labelled UTC. Receipt time is explicitly distinct
 from observation time and does not override delayed or failed source status.
+
+## Sentinel-3 failure guidance — delivered in 0.40.11
+
+Recognized Sentinel-3 failures have specific Hungarian/English guidance in the
+summary and setup review. Successful sources ignore retained failure codes;
+unknown diagnostics retain generic advice. All 51 frontend tests and 27 CI checks
+passed. The post-update live check confirmed 0.40.11 and delayed-source wording,
+not the failed-source messages: both Sentinel requests were successful at that
+check. No production failure was injected to exercise those messages.

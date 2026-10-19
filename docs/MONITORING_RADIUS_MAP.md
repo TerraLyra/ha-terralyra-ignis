@@ -55,7 +55,7 @@ monitored locations or change their radii. With native `show_all: true`, separat
 circle filtering is disabled; the editor explains that this advanced setting must
 first be changed in the code editor. Equal radii still use one circle.
 
-## Visual clustering control — next release
+## Visual clustering control — delivered in 0.39.1
 
 The IGNIS map editor offers Default, On and Off for marker clustering, in English
 and Hungarian. Default removes only the explicit `cluster` override; On and Off
