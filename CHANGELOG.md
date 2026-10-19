@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add a combined-configuration copy button with an explicit manual-copy fallback when browser clipboard access is unavailable.
+
 ## 0.40.12
 
 - Generate a combined native map and explicitly bound location-summary configuration from the summary editor, without saving dashboard changes automatically.

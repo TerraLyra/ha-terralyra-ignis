@@ -158,3 +158,8 @@ its explicit location, title, forecast and other saved options. No extra map mod
 is needed; the existing summary resource is still required. Generating the text
 does not save a dashboard, enable reports or configure notifications. Avoid keeping
 a duplicate summary if you replace your original card with this combined card.
+
+The next update adds **Copy configuration** after generation. When clipboard access
+is unavailable or denied (including local HTTP browsers), the text is selected
+for manual copying instead; a success message appears only after a successful
+clipboard write. Copying never saves a dashboard.
