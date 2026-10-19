@@ -36,6 +36,10 @@ class Sentinel3Error(Exception):
     """A Sentinel-3 request or response was invalid."""
 
 
+class Sentinel3NetworkError(Sentinel3Error):
+    """The HTTP transport failed before a usable response was received."""
+
+
 class Sentinel3RateLimitError(Sentinel3Error):
     """EUMETView asked the client to reduce its request rate."""
 
@@ -187,7 +191,7 @@ class Sentinel3Client:
         except TimeoutError as err:
             raise Sentinel3TimeoutError("EUMETView request timed out") from err
         except ClientError as err:
-            raise Sentinel3Error("EUMETView is unavailable") from err
+            raise Sentinel3NetworkError("EUMETView is unavailable") from err
 
 
 def parse_sentinel3_geojson(

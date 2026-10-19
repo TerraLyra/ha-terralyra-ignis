@@ -10,6 +10,7 @@ from ..products.sentinel3 import (
     Sentinel3Client,
     Sentinel3Error,
     Sentinel3InvalidResponseError,
+    Sentinel3NetworkError,
     Sentinel3RateLimitError,
     Sentinel3TemporaryServiceError,
     Sentinel3TimeoutError,
@@ -65,17 +66,31 @@ class Sentinel3ActiveFireProvider:
                 now=now,
             )
         except Sentinel3RateLimitError as err:
-            raise ProviderRateLimitError(str(err), retry_after=err.retry_after) from err
+            raise ProviderRateLimitError(
+                str(err), retry_after=err.retry_after,
+                diagnostic_code="sentinel3_rate_limited",
+            ) from err
         except Sentinel3TimeoutError as err:
-            raise ProviderTimeoutError(str(err)) from err
+            raise ProviderTimeoutError(
+                str(err), diagnostic_code="sentinel3_timeout"
+            ) from err
         except Sentinel3TemporaryServiceError as err:
             raise ProviderUnavailableError(
-                str(err), retry_after=err.retry_after
+                str(err), retry_after=err.retry_after,
+                diagnostic_code="sentinel3_server_error",
             ) from err
         except Sentinel3InvalidResponseError as err:
-            raise ProviderInvalidResponseError(str(err)) from err
+            raise ProviderInvalidResponseError(
+                str(err), diagnostic_code="sentinel3_invalid_response"
+            ) from err
+        except Sentinel3NetworkError as err:
+            raise ProviderUnavailableError(
+                str(err), diagnostic_code="sentinel3_network_error"
+            ) from err
         except Sentinel3Error as err:
-            raise ProviderUnavailableError(str(err)) from err
+            raise ProviderUnavailableError(
+                str(err), diagnostic_code="sentinel3_request_failed"
+            ) from err
 
         detections = tuple(
             FireDetection(

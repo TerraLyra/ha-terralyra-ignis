@@ -7,6 +7,9 @@ from typing import Protocol
 from ..models import ProviderSnapshot
 
 DIAGNOSTIC_CODES = frozenset({
+    "sentinel3_network_error", "sentinel3_server_error",
+    "sentinel3_rate_limited", "sentinel3_timeout",
+    "sentinel3_invalid_response", "sentinel3_request_failed",
     "goes_catalogue_failed", "goes_download_failed", "goes_decode_failed",
     "goes_dependency_unavailable", "goes_temporary_file_failed",
     "goes_identity_mismatch", "goes_decoder_result_invalid",
