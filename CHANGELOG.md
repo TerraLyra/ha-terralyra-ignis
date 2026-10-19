@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Distinguish Sentinel-3 network, server, timeout, rate-limit and invalid-response failures with safe diagnostic codes; preserve retry timing.
+
 ## 0.40.9
 
 - Show each source's last successful receipt time in the summary editor, using the HA timezone.
