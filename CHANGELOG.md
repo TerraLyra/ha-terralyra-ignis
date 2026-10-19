@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.10
 
 - Distinguish Sentinel-3 network, server, timeout, rate-limit and invalid-response failures with safe diagnostic codes; preserve retry timing.
 
