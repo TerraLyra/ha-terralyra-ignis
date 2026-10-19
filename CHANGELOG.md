@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Generate a combined native map and explicitly bound location-summary configuration from the summary editor, without saving dashboard changes automatically.
+
 ## 0.40.11
 
 - Explain recognized Sentinel-3 failures in Hungarian and English in location summaries and setup reviews, retaining generic guidance for unknown diagnostics.
