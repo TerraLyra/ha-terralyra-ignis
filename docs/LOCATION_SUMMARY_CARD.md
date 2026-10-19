@@ -144,7 +144,7 @@ radius and copies them only when clicked. A missing or different-location sensor
 is never substituted automatically. Nothing here enables additional providers
 or automatically edits a dashboard.
 
-## Combined map and summary starter — unreleased
+## Combined map and summary starter — 0.40.12
 
 In the summary editor, select the location and optionally bind its forecast.
 Expand **Map and summary together** and select **Generate configuration**. Copy
