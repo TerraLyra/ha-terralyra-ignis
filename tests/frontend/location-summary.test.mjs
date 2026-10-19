@@ -230,3 +230,21 @@ test('source setup receipt time follows HA zone and never accepts offsetless inp
  assert.match(sourceSetupReview(e,'ca','en','en','invalid-zone')[0],/2026-10-18T12:00:00.000Z \(UTC\)/);
  assert.doesNotMatch(sourceSetupReview({...e,state:'unavailable'},'ca','en').join(' '),/2026/);
 });
+
+
+test('Sentinel diagnostics give localized advice only for matching failed sources',()=>{
+ for(const provider of ['eumetsat_sentinel3a','eumetsat_sentinel3b']){
+  for(const code of ['network_error','server_error','timeout','rate_limited','invalid_response']){
+   const source={provider,status:'outage',diagnostic_code:`sentinel3_${code}`};
+   assert.match(sourceGuidance(source,'hu'),/Sentinel-3/);
+   assert.match(sourceGuidance(source,'en'),/Sentinel-3/);
+   assert.notEqual(sourceGuidance(source,'hu'),sourceGuidance(source,'en'));
+   assert.equal(sourceGuidance({...source,status:'available'}),'');
+  }
+ }
+ for(const diagnostic_code of ['sentinel3_network_error','https://private.invalid','toString']){
+  assert.match(sourceGuidance({provider:'nasa_firms',status:'outage',diagnostic_code},'en'),/^Retrieval failed/);
+ }
+ assert.match(sourceGuidance({provider:'eumetsat_sentinel3a',status:'outage',diagnostic_code:'private'},'en'),/^Retrieval failed/);
+ assert.match(sourceGuidance({provider:'eumetsat_sentinel3a',status:'auth_error',diagnostic_code:'sentinel3_network_error'},'en'),/credentials/);
+});
