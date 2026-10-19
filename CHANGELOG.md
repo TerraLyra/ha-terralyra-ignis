@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.12
 
 - Generate a combined native map and explicitly bound location-summary configuration from the summary editor, without saving dashboard changes automatically.
 
