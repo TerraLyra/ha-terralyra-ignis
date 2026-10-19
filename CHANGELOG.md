@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.11
 
 - Explain recognized Sentinel-3 failures in Hungarian and English in location summaries and setup reviews, retaining generic guidance for unknown diagnostics.
 
