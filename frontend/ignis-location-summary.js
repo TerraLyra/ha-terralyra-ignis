@@ -240,6 +240,17 @@ export function setupReview(entity, locationId, language='hu') {
     text("Telefonos értesítés: külön blueprint és értesítési cél szükséges. A kártya nem ellenőrzi a meglévő automatizálást vagy a kézbesítést.",language)
   ];
 }
+// JSON is valid YAML; serialize values rather than interpolating user text.
+export function mapSummaryStarter(entity, config) {
+  if(!config || locationBindingError(entity,config.location_id))return null;
+  if(!config.entity || entity.entity_id!==config.entity)return null;
+  return {type:'vertical-stack',cards:[
+    {type:'map',geo_location_sources:[{source:'terralyra_ignis',label_mode:'icon'},
+      {source:'terralyra_ignis_monitoring_areas',label_mode:'icon',focus:false}],
+      cluster:false,hours_to_show:24},
+    {...JSON.parse(JSON.stringify(config)),type:'custom:ignis-location-summary'}
+  ]};
+}
 class IgnisLocationSummaryEditor extends HTMLElement {
   setConfig(config){this.config={...config};this.render();}
   set hass(value){
@@ -361,6 +372,22 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     title.onchange=()=>this.update({title:title.value});titleLabel.append(title);root.append(titleLabel);
     const review=this.node('section');review.setAttribute('aria-label',text("Beállítások áttekintése",language));this.reviewHost=review;this.refreshReview();
     root.append(review);
+    const starter=this.node('details');
+    starter.append(this.node('summary',language==='hu'?'Térkép és összefoglaló együtt':'Map and summary together'));
+    starter.append(this.node('p',language==='hu'
+      ?'A térkép minden engedélyezett IGNIS-helyszínt mutat; az összefoglaló csak a kiválasztott helyhez tartozik. Az alábbi konfiguráció nem ment semmit automatikusan. Másold egy új Kézi kártyába, és ellenőrizd az előnézetet. A JSON a YAML-szerkesztőben is használható. A natív térkép nem igényel külön JavaScript-modult.'
+      :'The map shows all enabled IGNIS locations; the summary belongs only to the selected location. Nothing is saved automatically. Paste the configuration into a new Manual card and review its preview. JSON works in the YAML editor too. The native map needs no additional JavaScript module.'));
+    const generate=this.node('button',language==='hu'?'Konfiguráció készítése':'Generate configuration');generate.type='button';
+    const output=this.node('textarea');output.readOnly=true;output.rows=12;output.style.cssText='width:100%;box-sizing:border-box';output.hidden=true;output.setAttribute('aria-label',language==='hu'?'Közös kártyakonfiguráció':'Combined card configuration');
+    const result=this.node('p');result.setAttribute('role','status');
+    generate.onclick=()=>{
+      const value=mapSummaryStarter(this._hass?.states?.[this.config.entity],this.config);
+      output.hidden=!value;output.value=value?JSON.stringify(value,null,2):'';
+      result.textContent=value?(language==='hu'?'A jelenlegi beállítások másolata. Módosítás után készítsd el újra.':'Snapshot of current settings. Generate again after changes.'):(language==='hu'?'Előbb válassz érvényes helyszínérzékelőt.':'Choose a valid location sensor first.');
+      if(value){output.focus();output.select();}
+    };
+    starter.append(generate,output,result);root.append(starter);
+
     this.forecastHost=this.node('section');root.append(this.forecastHost);this.refreshForecast();
   }
 }

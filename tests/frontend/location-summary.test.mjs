@@ -248,3 +248,18 @@ test('Sentinel diagnostics give localized advice only for matching failed source
  assert.match(sourceGuidance({provider:'eumetsat_sentinel3a',status:'outage',diagnostic_code:'private'},'en'),/^Retrieval failed/);
  assert.match(sourceGuidance({provider:'eumetsat_sentinel3a',status:'auth_error',diagnostic_code:'sentinel3_network_error'},'en'),/credentials/);
 });
+
+const {mapSummaryStarter}=await import('../../frontend/ignis-location-summary.js');
+test('combined starter preserves explicit bindings and nested settings without mutation',()=>{
+ const selected={...entity,entity_id:'sensor.place'};
+ const config={type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca',title:'A: "quoted"\nname',forecast:{entity:'sensor.forecast',location_id:'ca'}};
+ const result=mapSummaryStarter(selected,config);
+ assert.equal(result.type,'vertical-stack');
+ assert.deepEqual(result.cards[1],config);
+ assert.equal(result.cards[0].cluster,false);
+ assert.deepEqual(result.cards[0].geo_location_sources.map(s=>s.source),['terralyra_ignis','terralyra_ignis_monitoring_areas']);
+ assert.deepEqual(JSON.parse(JSON.stringify(result)).cards[1],config);
+ result.cards[1].forecast.entity='changed';assert.equal(config.forecast.entity,'sensor.forecast');
+ for(const invalid of [null,{...selected,entity_id:'sensor.other'},{...selected,attributes:{...selected.attributes,location_id:'elsewhere'}}])assert.equal(mapSummaryStarter(invalid,config),null);
+ assert.equal(mapSummaryStarter(selected,null),null);
+});

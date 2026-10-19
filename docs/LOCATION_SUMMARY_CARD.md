@@ -143,3 +143,18 @@ a mismatch deliberately hides the risk. In the updated visual editor,
 radius and copies them only when clicked. A missing or different-location sensor
 is never substituted automatically. Nothing here enables additional providers
 or automatically edits a dashboard.
+
+## Combined map and summary starter — unreleased
+
+In the summary editor, select the location and optionally bind its forecast.
+Expand **Map and summary together** and select **Generate configuration**. Copy
+the selected text into a new Manual card on your dashboard. JSON is accepted by
+the YAML editor. Review the preview before saving. Generate again after changing
+settings; the output is a snapshot, not a live link.
+
+The native map displays satellite detections and monitoring circles for all enabled
+IGNIS locations. It is not filtered to the summary location. The summary retains
+its explicit location, title, forecast and other saved options. No extra map module
+is needed; the existing summary resource is still required. Generating the text
+does not save a dashboard, enable reports or configure notifications. Avoid keeping
+a duplicate summary if you replace your original card with this combined card.

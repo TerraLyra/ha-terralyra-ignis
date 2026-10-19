@@ -188,6 +188,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.evaluate(()=>editor.hass={language:'hu',states:{}});
  assert.equal(await page.getByRole('link',{name:'Helyszínek és sugarak beállítása'}).count(),1);
  assert.match(await page.getByRole('link',{name:'Első lépések útmutató'}).getAttribute('href'),/#magyar$/);
+ await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);entity.entity_id='sensor.place';editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});editor.hass={language:'en',states:{'sensor.place':entity}}});
+ await page.getByText('Map and summary together',{exact:true}).click();
+ await page.getByRole('button',{name:'Generate configuration',exact:true}).click();
+ const starter=await page.getByRole('textbox',{name:'Combined card configuration'}).inputValue();
+ assert.equal(JSON.parse(starter).cards[1].entity,'sensor.place');
+ assert.equal(JSON.parse(starter).cards[0].type,'map');
+ assert.equal(await page.locator('img').count(),0);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  if(process.env.IGNIS_SCREENSHOT){
    await page.evaluate(()=>{document.querySelector('main').replaceChildren(editor);editor.setConfig({type:'custom:ignis-location-summary',entity:'sensor.place',location_id:'ca'});entity.attributes.location_name='Home';editor.hass={states:{'sensor.place':entity}}});
    await page.screenshot({path:process.env.IGNIS_SCREENSHOT,fullPage:true});
