@@ -1,14 +1,18 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-10-18: stable integration **0.40.7**.
+Status reconciled on 2026-10-19: stable integration **0.40.11**.
 Main-branch changes after that release are not automatically installed by HACS.
 Dated sections below retain historical decisions; this current summary takes
 precedence where their delivery status has changed.
 
 ## Current next steps
 
-- **Merged, not released:** per-source readiness in the summary setup review
-  (#207) and direct localized notification-blueprint guidance (#208).
+- **Delivered:** per-source readiness and blueprint guidance (0.40.8), source
+  receipt times and guide focus preservation (0.40.9), Sentinel-3 diagnostic
+  codes (0.40.10) and localized failure guidance (0.40.11).
+- **Next implementation focus:** reduce remaining manual map/summary setup
+  with explicit bindings; use the existing visual editors and resource setup
+  action as the baseline, rather than duplicating delivered features.
 - **Acceptance still open:** unaided setup, the user's separate reinstall trial,
   and real phone notification delivery. Assisted and automated checks do not
   complete these acceptance steps. See [onboarding acceptance](ONBOARDING_ACCEPTANCE.md).

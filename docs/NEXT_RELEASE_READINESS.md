@@ -150,10 +150,19 @@ and empty. Fault persistence remains automated-test evidence; no production
 failure was injected. Successful retrieval does not establish freshness of every
 incident or national completeness.
 
-## Merged after 0.40.7 — not released
+## Published 0.40.8–0.40.11
 
-- #207: per-source readiness and guidance in the summary setup review.
-- #208: localized notification-blueprint guide from that review.
+- 0.40.8: per-source setup review and notification-blueprint guide (#207–#208).
+- 0.40.9: per-source receipt timestamps and guide focus preservation (#211–#212).
+- 0.40.10: bounded Sentinel-3 failure diagnostics (#214).
+- 0.40.11: Hungarian/English Sentinel-3 failure guidance (#216).
 
-Both passed all 27 checks. No new release or production installation is implied.
-The unaided setup/reinstall and notification-delivery acceptance items remain open.
+Each implementation and release preparation passed all 27 automated checks.
+After user updates and restarts, sampled read-only UI checks confirmed the
+installed versions. The 0.40.11 check showed both Sentinel sources delayed but
+successfully retrieved, with delay guidance rather than failure messages. Failure
+branches remain automated-test evidence; no production failure was injected.
+
+These are upgrade smoke checks, not unaided setup, reinstall or real-phone
+notification acceptance. Those items remain open. No history was deleted.
+See [0.40.11 release notes](RELEASE_0_40_11.md).

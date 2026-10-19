@@ -30,9 +30,9 @@ examples below remain supported. Existing forecast and advanced configuration
 fields are preserved when editing the title or location. After changing location, review the forecast binding too: a mismatched
 binding stays hidden with an explanation, never showing another place's risk.
 
-## Next release: simpler setup navigation
+## Simpler setup navigation — delivered in 0.39.0
 
-Merged after 0.38.1, not yet included in a stable release:
+Available in stable releases since 0.39.0:
 
 - Unique location names appear without technical IDs; duplicate names retain IDs
   to make the selection unambiguous. The selected entity remains explicit.
