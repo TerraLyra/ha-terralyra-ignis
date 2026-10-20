@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Clear generated combined configurations after editor changes, preventing accidental copying of an older location, title or forecast binding.
+
 ## 0.40.13
 
 - Add a combined-configuration copy button with an explicit manual-copy fallback when browser clipboard access is unavailable.
