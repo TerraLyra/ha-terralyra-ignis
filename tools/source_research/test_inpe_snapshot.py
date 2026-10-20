@@ -66,3 +66,18 @@ class StateSnapshotTests(TestCase):
     def test_bad_retrieval_clock(self):
         clock=Mock(side_effect=[NOW,NOW-timedelta(seconds=1)])
         with self.assertRaises(ValueError): collect_states(['AC'],fetch=Mock(return_value=(record(),)),now=clock)
+
+    def test_empty_state_is_successful_without_closure_claim(self):
+        snapshot = collect_states(['AC'], fetch=lambda **_: (), now=lambda:NOW)
+        result = report(snapshot)
+        self.assertEqual(snapshot.retrieved_at, NOW)
+        self.assertEqual(result['returned_record_count'], 0)
+        self.assertEqual(result['response_status'], 'success')
+        self.assertTrue(result['empty_result'])
+        self.assertFalse(result['complete'])
+        self.assertFalse(result['absence_means_extinguished'])
+
+    def test_empty_state_does_not_discard_another_states_records(self):
+        fetch = Mock(side_effect=[(), (record(('AM',)),)])
+        snapshot = collect_states(['AC','AM'], fetch=fetch, sleep=lambda _:None, now=lambda:NOW)
+        self.assertEqual(len(snapshot.records), 1)
