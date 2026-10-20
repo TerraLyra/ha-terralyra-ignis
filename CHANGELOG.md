@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.41.0
+
+- Add optional INPE Queimadas collection for one to three explicitly selected Brazilian states, disabled by default.
+- Share bounded hourly retrievals across the returned-event sensor and map layer; distinguish successful empty responses from retrieval failures.
+- Add radius-filtered centroid markers and a separate derived-event detail card with attribution and CC BY-SA 4.0 licensing.
+- Keep INPE events separate from satellite incident counts, alerts and independent corroboration; label provisional geometry and unknown observation freshness.
+
 ## 0.40.14
 
 - Clear generated combined configurations after editor changes, preventing accidental copying of an older location, title or forecast binding.
