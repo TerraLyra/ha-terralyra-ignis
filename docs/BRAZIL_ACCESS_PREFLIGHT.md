@@ -2,6 +2,40 @@
 
 Offline event inspection implemented. No HA provider, account or scheduled polling.
 
+## Current technical contract — 2026-10-20
+
+External applications, including Home Assistant, may use the centroid API.
+State requests require `?id_tipo_reg=1&uf=ac` (lowercase state abbreviation).
+Earlier `?uf=AC` observations below are historical and are not the supported
+request form. One bounded Acre request with the corrected parameters returned
+53 records in 25,658 bytes, all accepted by the state-membership validator.
+This sample establishes neither completeness nor stable long-term counts.
+
+Datetime attributes `data_ultimo_foco`, `data_min`, and `data_max` use UTC.
+Preserve calendar-date precision when a value contains only a date; do not
+invent midnight observations. The sampled centroid list contains none of those
+fields, so its observation time remains unknown. Geometry is updated using the
+previous day's data; the last-hotspot attribute is updated hourly.
+
+Use hourly polling and shared local caching with a small random offset. A
+30-minute interval is also supported when needed, but is not the default here.
+No fixed quota is currently specified; limits and interfaces may change.
+No public successor-ID field or endpoint exists for absorbed events. Absence
+must not imply extinguishment, deletion, or a guessed merge relationship.
+The product remains provisional and its interface has no stability guarantee.
+
+`inpe_cache.py` supplies a caller-driven, in-memory research cache, shared across
+consumers of one explicit state selection. It uses a monotonic one-hour interval
+plus 0–60 seconds of jitter, serializes concurrent consumers, and preserves the
+last successful snapshot after failure without returning it as fresh success.
+Failed attempts also respect the interval. There is no scheduler or HA provider
+activation. The existing three-state resource bound remains in place.
+
+Remaining production gates: collection completeness/empty-response meaning,
+public timestamp payload validation, lifecycle handling without successor IDs,
+and an explicit separately labelled derived-product UI. Do not count this as an
+independent satellite confirmation when it overlaps FIRMS observations.
+
 ## Product distinction
 
 https://data.inpe.br/queimadas/dados-abertos/ lists active-fire CSV/KML products
@@ -34,8 +68,8 @@ or guarantee availability of an endpoint.
 
 ## Remaining runtime requirements
 
-Verify the exact export scope, stable event identity across snapshots, source
-timezone, collection transitions and supported polling/caching behaviour.
+Verify the exact export scope, stable event identity across snapshots and
+collection transitions. Timezone and polling are specified above.
 Do not infer extinguishment from disappearance or from the observation collection.
 
 ## Scope decision — 2026-09-25
@@ -72,7 +106,7 @@ inspection limit. It was not downloaded. An efficient distribution strategy and
 measured resource limits are needed before enabling periodic HA retrieval.
 No source snapshots are bundled in the repository; tests use synthetic records.
 
-## Viewer JSON route and unresolved completeness
+## Historical viewer inspection and unresolved completeness
 
 The official event page imports `pages/evento-fogo/js/config.js` under
 `/queimadas/evento-fogo/`. It identifies
@@ -141,9 +175,9 @@ and statuses; Observação is not relabelled controlled/extinguished. Coordinate
 remain representative points, and areas remain provider estimates.
 
 The [methodological paper](https://doi.org/10.3390/rs18040606) establishes UTC
-processing days, event date spans and a distinct fusion lifecycle. The exact
+processing days, event date spans and a distinct fusion lifecycle. At that research stage, the exact
 unqualified API timestamp representation, public successor linkage and external
-client frequency remain unverified. No merge lineage is invented and no history
+client frequency remained unverified; see the current contract above. No merge lineage is invented and no history
 is deleted. Future display may omit unresolved clock times and preserve dates.
 
 ## Offline location view

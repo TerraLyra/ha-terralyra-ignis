@@ -178,9 +178,10 @@ promote the offline location candidates to production. Unresolved provider acces
    verified forecast validity. Establish dated evidence and operational validation
    before a runtime adapter.
 6. Brazil INPE Eventos de Fogo has offline KML/centroid inspection, bounded
-   state-scoped snapshots and an explicit-location preview (#96–#99). Resolve
-   stable identity, collection transitions, unqualified timestamps and supported
-   polling/caching before runtime activation. Preserve representative-point and
+   state-scoped snapshots and an explicit-location preview (#96–#99). The confirmed
+   state request contract, hourly shared cache with jitter and UTC/date-precision
+   parser are implemented in the research layer. Resolve collection completeness,
+   detail payload validation and lifecycle handling before runtime activation. Preserve representative-point and
    estimated-area semantics; do not import derived events into satellite counters.
    See [Brazil requirements](BRAZIL_ACCESS_PREFLIGHT.md).
 7. Castilla y León has a bounded explicit-date research client (#101), tested

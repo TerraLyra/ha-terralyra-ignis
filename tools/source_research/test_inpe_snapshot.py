@@ -22,7 +22,7 @@ class StateSnapshotTests(TestCase):
         with patch('inpe_fetch.build_opener') as opener:
             opener.return_value.open.return_value=Response(payload([f]),content_type='application/json')
             self.assertEqual(fetch_centroids(state='AC')[0].states,('AC',))
-            self.assertTrue(opener.return_value.open.call_args.args[0].full_url.endswith('?uf=AC'))
+            self.assertTrue(opener.return_value.open.call_args.args[0].full_url.endswith('?id_tipo_reg=1&uf=ac'))
 
     def test_bad_state_before_network(self):
         for state in ('xx','ac','AC&other=1',{},True):

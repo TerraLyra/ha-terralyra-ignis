@@ -64,6 +64,16 @@ class CentroidTests(TestCase):
             self.assertEqual(len(fetch_centroids()),1)
             self.assertEqual(opener.return_value.open.call_count,1)
 
+    def test_state_transport_uses_confirmed_region_type(self):
+        f = feature()
+        f['properties']['estados'] = ['AC']
+        response = Response(payload([f]), content_type='application/json')
+        with patch('inpe_fetch.build_opener') as opener:
+            opener.return_value.open.return_value = response
+            self.assertEqual(len(fetch_centroids(state='AC')), 1)
+            request = opener.return_value.open.call_args.args[0]
+            self.assertTrue(request.full_url.endswith('?id_tipo_reg=1&uf=ac'))
+
     def test_transport_rejects_wrong_type_compression_truncation(self):
         cases=[Response(payload()),Response(payload(),content_type='application/json',encoding='gzip')]
         truncated=Response(payload(),content_type='application/json')

@@ -18,7 +18,7 @@ def fetch_centroids(*, state=None):
     """
     if state is not None and (not isinstance(state, str) or state not in STATES):
         raise ValueError('Invalid state')
-    url = ENDPOINT if state is None else ENDPOINT + '?uf=' + state
+    url = ENDPOINT if state is None else ENDPOINT + '?id_tipo_reg=1&uf=' + state.lower()
     request = Request(url, headers={'Accept': 'application/json',
                                         'Accept-Encoding': 'identity'})
     with build_opener(_NoRedirect()).open(request, timeout=30) as response:
