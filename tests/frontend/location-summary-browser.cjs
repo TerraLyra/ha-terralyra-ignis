@@ -203,6 +203,21 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  await page.getByRole('button',{name:'Copy configuration',exact:true}).click();
  assert.equal(await page.evaluate(()=>window.copiedConfig),starter);
  assert.equal(await page.getByRole('status').innerText(),'Configuration copied to clipboard.');
+ // Editing after generation invalidates the old snapshot, including pending copy feedback.
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>new Promise(resolve=>{window.finishCopy=resolve})}}));
+ await page.getByRole('button',{name:'Copy configuration',exact:true}).click();
+ await page.getByRole('textbox',{name:'Custom title (optional)'}).fill('Updated title');
+ await page.getByRole('textbox',{name:'Custom title (optional)'}).press('Tab');
+ await page.evaluate(()=>window.finishCopy());
+ assert.match(await page.getByRole('status').innerText(),/Settings changed/);
+ assert.equal(await page.getByRole('button',{name:'Copy configuration',exact:true}).count(),0);
+ assert.equal(await page.getByRole('textbox',{name:'Combined card configuration'}).count(),0);
+ await page.getByRole('button',{name:'Generate configuration',exact:true}).click();
+ assert.equal(JSON.parse(await page.getByRole('textbox',{name:'Combined card configuration'}).inputValue()).cards[1].title,'Updated title');
+ // Routine source updates do not invalidate unchanged configuration.
+ await page.evaluate(()=>{entity={...entity,attributes:{...entity.attributes,active_incidents:7}};editor.hass={...editor._hass,states:{'sensor.place':entity}};});
+ assert.equal(await page.getByRole('button',{name:'Copy configuration',exact:true}).count(),1);
+
 
  assert.equal(await page.locator('img').count(),0);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

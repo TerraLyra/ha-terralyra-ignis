@@ -262,6 +262,7 @@ class IgnisLocationSummaryEditor extends HTMLElement {
   node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);return n;}
   update(patch){
     this.config={...this.config,...patch};
+    this.invalidateStarter?.();
     this.refreshReview();
     this.refreshForecast();
     this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
@@ -381,6 +382,11 @@ class IgnisLocationSummaryEditor extends HTMLElement {
     const output=this.node('textarea');output.readOnly=true;output.rows=12;output.style.cssText='width:100%;box-sizing:border-box';output.hidden=true;output.setAttribute('aria-label',language==='hu'?'Közös kártyakonfiguráció':'Combined card configuration');
     const copy=this.node('button',language==='hu'?'Másolás':'Copy configuration');copy.type='button';copy.hidden=true;
     const result=this.node('p');result.setAttribute('role','status');
+    this.invalidateStarter=()=>{
+      if(!output.value)return;
+      output.value='';output.hidden=true;copy.hidden=true;
+      result.textContent=language==='hu'?'A beállítások megváltoztak. Készítsd el újra a közös konfigurációt.':'Settings changed. Generate the combined configuration again.';
+    };
     copy.onclick=async()=>{
       if(!output.value)return;
       const snapshot=output.value;

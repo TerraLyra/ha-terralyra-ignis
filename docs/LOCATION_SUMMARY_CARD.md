@@ -163,3 +163,8 @@ Version 0.40.13 adds **Copy configuration** after generation. When clipboard acc
 is unavailable or denied (including local HTTP browsers), the text is selected
 for manual copying instead; a success message appears only after a successful
 clipboard write. Copying never saves a dashboard.
+
+After changing editor settings, the next update clears the generated snapshot and
+asks you to generate it again. Routine source-status refreshes preserve the output.
+Text already copied to a clipboard cannot be revoked; generate and copy again
+after edits before pasting into a new card.
