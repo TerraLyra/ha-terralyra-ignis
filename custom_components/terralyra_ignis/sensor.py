@@ -44,6 +44,7 @@ from .products.fire_risk import WMS_URL
 from .products.lst import WMS_URL as LST_WMS_URL
 from .nifc_sensor import NifcDiagnosticSensor
 from .canada_sensor import CanadaDiagnosticSensor
+from .inpe_sensor import create_inpe_sensor
 from .tasalert_sensor import TasAlertDiagnosticSensor
 from .tasalert_runtime import get_tasalert_runtime
 from .official_sources.canada.owner import get_canada_owner
@@ -59,6 +60,7 @@ async def async_setup_entry(
         entry, entry.runtime_data.coordinator.monitored_locations
     )
     _remove_orphaned_location_entities(hass, entry, location_plans)
+    inpe_sensor = create_inpe_sensor(hass, entry)
     entities = [
         NifcDiagnosticSensor(entry, get_nifc_owner(hass)),
         CanadaDiagnosticSensor(entry, get_canada_owner(hass)),
@@ -107,6 +109,8 @@ async def async_setup_entry(
             duplicates = sum(item.name == location.name for item in locations_by_id.values())
             label = location.name if duplicates == 1 else f"{location.name} ({location.id[-6:]})"
             entities.append(LocationFireRiskSensor(entry, coordinator, label))
+    if inpe_sensor is not None:
+        entities.append(inpe_sensor)
     async_add_entities(entities)
 
 

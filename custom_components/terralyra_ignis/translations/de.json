@@ -103,7 +103,8 @@
           "resolve_place_names": "Nahe Ortsnamen auf der Karte anzeigen",
           "enable_land_surface_temperature": "Landoberflächentemperatur aktivieren",
           "enable_firms": "NASA FIRMS verwenden, wo verfügbar",
-          "firms_map_key": "NASA FIRMS MAP_KEY"
+          "firms_map_key": "NASA FIRMS MAP_KEY",
+          "configure_inpe": "INPE Queimadas konfigurieren"
         },
         "data_description": {
           "radius_km": "Nur Erkennungen innerhalb dieser Entfernung vom Aktivbrand-Überwachungszentrum werden berücksichtigt.",
@@ -186,6 +187,14 @@
           "enabled": "Prognose aktivieren",
           "radius_km": "Prognoseradius (km)"
         }
+      },
+      "inpe": {
+        "title": "INPE Queimadas einrichten",
+        "description": "Stündliche satellitengestützte Ereignisliste für ausgewählte Bundesstaaten. Vollständigkeit nicht garantiert. Keine Treffer bedeutet nicht kein Feuer. Geometrie basiert auf Daten des Vortags. INPE / Programa Queimadas, CC BY-SA 4.0.",
+        "data": {
+          "inpe_enabled": "INPE-Abruf aktivieren",
+          "inpe_states": "Brasilianische Bundesstaaten (maximal 3)"
+        }
       }
     },
     "error": {
@@ -198,7 +207,8 @@
       "too_many_locations": "Es werden höchstens 10 überwachte Orte unterstützt",
       "forecast_not_eligible": "Der Standort ist deaktiviert oder liegt außerhalb der FRMv3-Abdeckung.",
       "invalid_forecast_settings": "Ungültige Prognoseeinstellungen.",
-      "alert_radius_exceeds_monitoring": "Verkleinere den Alarmradius oder vergrößere den Überwachungsradius. Der Alarmradius darf nicht größer sein."
+      "alert_radius_exceeds_monitoring": "Verkleinere den Alarmradius oder vergrößere den Überwachungsradius. Der Alarmradius darf nicht größer sein.",
+      "invalid_inpe_settings": "Bei Aktivierung ein bis drei Bundesstaaten auswählen."
     }
   },
   "issues": {
@@ -445,6 +455,9 @@
       },
       "tasalert_source_status": {
         "name": "TasALERT-Quellenstatus"
+      },
+      "inpe_returned_events": {
+        "name": "Von INPE gelieferte Ereignisse"
       }
     },
     "event": {

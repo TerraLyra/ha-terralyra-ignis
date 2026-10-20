@@ -238,3 +238,16 @@ No config-flow option, sensor platform or scheduler activates this source yet.
 These remain the next wiring steps; completeness uncertainty must remain visible
 in any resulting user interface. The source is satellite-derived, not an official
 emergency-service report and not independent confirmation of FIRMS.
+
+## Explicit HA opt-in and initial display
+
+The options form now offers a separate experimental INPE setup step. It requires
+one to three explicit state codes when enabled and preserves unrelated options.
+The source defaults off. A returned-event-count sensor is created only when
+configured on; its polling delegates to the shared hourly coordinator. It shows
+zero for valid empty success and unavailable on failures, with last successful
+receipt, selected states, unknown completeness/freshness and attribution in its
+attributes. It is not included in active-fire counters or confirmation logic.
+This first HA display is a native sensor; event maps and a dedicated detail card
+remain separate work. Config-entry reload reuses the same selected-state owner
+and cooldown. A full HA restart begins a new in-memory cycle.
