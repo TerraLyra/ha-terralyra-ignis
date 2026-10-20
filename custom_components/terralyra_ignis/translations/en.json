@@ -271,6 +271,9 @@
       },
       "tasalert_map": {
         "name": "TasALERT reports on map"
+      },
+      "inpe_map": {
+        "name": "INPE event map"
       }
     },
     "geo_location": {

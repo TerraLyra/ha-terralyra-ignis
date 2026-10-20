@@ -324,4 +324,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: IgnisConfigEntry) -> bo
         tasalert = hass.data.get(DOMAIN, {}).get("tasalert_maps", {}).get(entry.entry_id)
         if tasalert is not None:
             await tasalert.close()
+        inpe = hass.data.get(DOMAIN, {}).get("inpe_maps", {}).pop(entry.entry_id, None)
+        if inpe is not None:
+            await inpe.close()
     return unloaded

@@ -1,5 +1,5 @@
 // Optional local dashboard resource. No external libraries or report-page requests.
-const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc_reports', 'terralyra_ignis_tasalert_reports']);
+const SOURCES = new Set(['terralyra_ignis_canada_reports', 'terralyra_ignis_nifc_reports', 'terralyra_ignis_tasalert_reports', 'terralyra_ignis_inpe_reports']);
 // Explicit map-switch entity associations; never infer opt-in from report count.
 export function visibleMapSources(states = {}, switches = {}) {
   return {terralyra_ignis:true, ...Object.fromEntries([...SOURCES].map(source => {
@@ -139,10 +139,13 @@ export function retrievalView(attributes = {}, language = 'en') {
   const hu = language.startsWith('hu');
   const status = attributes.response_status;
   const source = attributes.source;
+  const inpe = source === 'terralyra_ignis_inpe_reports';
   const tasalert = source === 'terralyra_ignis_tasalert_reports';
   const canada = source === 'terralyra_ignis_canada_reports';
   const nifc = source === 'terralyra_ignis_nifc_reports';
   const labels = {
+    success:['Sikeres adatátvétel','Successful retrieval'],
+    error:['Sikertelen lekérés','Retrieval failed'],
     accepted:['Sikeres adatátvétel','Successful retrieval'],
     not_modified:['A forrás nem változott','Source unchanged'],
     retrieval_failed:['Sikertelen lekérés','Retrieval failed'],
@@ -167,10 +170,10 @@ export function retrievalView(attributes = {}, language = 'en') {
     refresh_failed_invalid_data:['Érvénytelen forrásválasz','Invalid source response'],
     refresh_failed_access_denied:['Hozzáférési hiba','Access denied']
   };
-  const valid = tasalert ? ['not_requested','accepted','not_modified','retrieval_failed','empty_snapshot_review','unexpected_304','invalid_snapshot','replacement_review','review_required'] : canada ? ['not_requested','initializing','available','rate_limited','unavailable','invalid_response','review_required','storage_error'] :
+  const valid = inpe ? ['not_requested','success','error'] : tasalert ? ['not_requested','accepted','not_modified','retrieval_failed','empty_snapshot_review','unexpected_304','invalid_snapshot','replacement_review','review_required'] : canada ? ['not_requested','initializing','available','rate_limited','unavailable','invalid_response','review_required','storage_error'] :
     nifc ? ['not_requested','never_fetched','retrieved','restored_cooldown','persistence_review_required','refresh_failed_transient','refresh_failed_rate_limited','refresh_failed_invalid_data','refresh_failed_access_denied'] : [];
   const known = valid.includes(status);
-  const success = (tasalert && ['accepted','not_modified'].includes(status)) || (canada && status === 'available') || (nifc && status === 'retrieved');
+  const success = (inpe && status === 'success') || (tasalert && ['accepted','not_modified'].includes(status)) || (canada && status === 'available') || (nifc && status === 'retrieved');
   const retained = known && !success && !['not_requested','initializing','never_fetched'].includes(status);
   return {
     label:known ? `${labels[status][hu ? 0 : 1]} (${status})` :
@@ -183,7 +186,9 @@ export function reportView(state, language = 'en') {
   const a = state?.attributes;
   if (!state?.entity_id?.startsWith('geo_location.') || !SOURCES.has(a?.source)) return null;
   const lang = language.split('-')[0] === 'hu' ? 'hu' : 'en';
-  const w = WORDS[lang];
+  const w = a.source === 'terralyra_ignis_inpe_reports' ? {...WORDS[lang], warning:lang === 'hu'
+    ? 'INPE műholdas eredetű, előzetes eseménytermék. A jelölő közelítő középpont, nem tűzhatár. A geometria az előző nap adataira épül; a jelenlegi aktivitás és a teljes lefedettség nem igazolt. Nem független megerősítés más műholdas forrás mellett.'
+    : 'Provisional INPE satellite-derived event product. Marker is a representative centroid, not a fire perimeter. Geometry is based on the previous day; current activity and complete coverage are not established. Not independent confirmation of other satellite sources.'} : WORDS[lang];
   const text = value => typeof value === 'string' && value ? value.slice(0, 4000) : w.unknown;
   const time = value => {
     // Never reinterpret a timezone-less source timestamp using browser timezone.
@@ -281,7 +286,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         partial:`Circle data is available for ${areas.ready} locations; ${areas.unavailable} areas have incomplete or unavailable data. Check the integration area entities.`
       };
       this.statusHost.append(this.node('p',areaMessages[areas.status]));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']])this.statusHost.append(this.node('p',name+': '+messages[mapSetupStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT'],['terralyra_ignis_inpe_reports','INPE']])this.statusHost.append(this.node('p',name+': '+messages[mapSetupStatus(this._hass?.states,this.config.report_switches?.[source],source)]));
     }
     render(){
       if(!this.config)return;
@@ -301,7 +306,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const titleText=hu?'Térkép címe (nem kötelező)':'Map title (optional)';
       const label=this.node('label',titleText),input=this.node('input');input.type='text';input.value=this.config.title||'';input.setAttribute('aria-label',titleText);input.onchange=()=>this.update({title:input.value});label.append(input);root.append(label);
       root.append(this.node('p',hu?'Válaszd ki az adott forrás IGNIS térképes megjelenítési kapcsolóját. Ez csak hozzárendelés: nem engedélyez adatforrást, és nem kapcsol át entitást.':'Select each source’s IGNIS map visibility switch. This only creates a binding: it does not enable a provider or toggle an entity.'));
-      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT']]){
+      for(const [source,name] of [['terralyra_ignis_canada_reports','Canada'],['terralyra_ignis_nifc_reports','NIFC'],['terralyra_ignis_tasalert_reports','TasALERT'],['terralyra_ignis_inpe_reports','INPE']]){
         const caption=name+(hu?' térképkapcsoló':' map switch'),label=this.node('label',caption),select=this.node('select');select.setAttribute('aria-label',caption);
         const empty=this.node('option',hu?'Nincs hozzárendelés':'No binding');empty.value='';select.append(empty);
         const choices=this.choices(source),current=this.config.report_switches?.[source]||'';
@@ -365,7 +370,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.attachShadow({mode:'open'});
       const style = document.createElement('style');
       style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}.satellite-summary header{padding:18px;border-radius:14px;background:var(--secondary-background-color,#eef5f6);border-left:4px solid var(--primary-color,#007f91)}.satellite-summary header>span{font-size:.72rem;letter-spacing:.12em;color:var(--secondary-text-color)}.satellite-summary h2{margin:10px 0}.satellite-summary section{padding:12px 0;border-bottom:1px solid var(--divider-color,#ddd)}.satellite-summary h3{font-size:1rem}.satellite-summary small{color:var(--secondary-text-color);line-height:1.5;display:block}.satellite-summary details{padding-top:20px}.satellite-summary summary{cursor:pointer;font-weight:600}.sat-close{margin-bottom:14px}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a{font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
-      this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true, terralyra_ignis_tasalert_reports:true};
+      this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true, terralyra_ignis_tasalert_reports:true, terralyra_ignis_inpe_reports:true};
       this.maxDays = 0;
       this.controls = document.createElement('div');
       this.controls.style.cssText='display:flex;flex-wrap:wrap;gap:12px;padding:12px;background:var(--card-background-color,#fff)';
@@ -443,7 +448,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       if (this.controlsKey === key) return;
       this.controlsKey = key;
       this.controls.replaceChildren();
-      const labels = hu ? ['Műholdas észlelések','Kanadai jelentések','NIFC jelentések','TasALERT jelentések'] : ['Satellite detections','Canada reports','NIFC reports','TasALERT reports'];
+      const labels = hu ? ['Műholdas észlelések','Kanadai jelentések','NIFC jelentések','TasALERT jelentések','INPE események'] : ['Satellite detections','Canada reports','NIFC reports','TasALERT reports','INPE events'];
       Object.keys(this.enabled).forEach((source,index)=>{
         if (!visibility[source]) return;
         const label=document.createElement('label');

@@ -240,3 +240,14 @@ test('monitoring review counts places once and distinguishes missing or invalid 
  assert.equal(monitoringAreaReview(states,{show_all:true}).ready,1);
  assert.equal(area.attributes.monitoring_radius_km,100);
 });
+
+test('INPE needs explicit map opt-in and explains derived centroid semantics',()=>{
+  const source='terralyra_ignis_inpe_reports';
+  assert.equal(visibleMapSources({}, {})[source],false);
+  assert.equal(visibleMapSources({'switch.inpe':{state:'on',attributes:{ignis_map_source:source}}},{[source]:'switch.inpe'})[source],true);
+  const view=reportView({...state,attributes:{...state.attributes,source,response_status:'success',source_times:undefined}},'hu');
+  assert.match(view.w.warning,/közelítő középpont/);
+  assert.match(view.w.warning,/Nem független megerősítés/);
+  assert.equal(view.rows[4][1],'Nincs megadva');
+  assert.match(view.rows.at(-1)[1],/Sikeres/);
+});

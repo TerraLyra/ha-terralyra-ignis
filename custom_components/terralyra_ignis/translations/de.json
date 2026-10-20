@@ -271,6 +271,9 @@
       },
       "tasalert_map": {
         "name": "TasALERT-Berichte auf der Karte"
+      },
+      "inpe_map": {
+        "name": "INPE-Ereigniskarte"
       }
     },
     "geo_location": {

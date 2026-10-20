@@ -271,6 +271,9 @@
       },
       "tasalert_map": {
         "name": "Rapporti TasALERT sulla mappa"
+      },
+      "inpe_map": {
+        "name": "Mappa eventi INPE"
       }
     },
     "geo_location": {
