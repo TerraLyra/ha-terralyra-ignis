@@ -166,3 +166,11 @@ branches remain automated-test evidence; no production failure was injected.
 These are upgrade smoke checks, not unaided setup, reinstall or real-phone
 notification acceptance. Those items remain open. No history was deleted.
 See [0.40.11 release notes](RELEASE_0_40_11.md).
+
+## Prepared 0.41.0 — INPE
+
+The combined INPE implementation (#225–#229) is merged. Release preparation bumps
+the manifest to 0.41.0 and documents opt-in state selection, returned-event counts,
+map binding, data limitations and upgrade steps. See [release notes](RELEASE_0_41_0.md).
+Publication remains pending explicit approval after candidate CI. Live INPE
+acceptance remains an upgrade-time check; existing source behavior is not replaced.
