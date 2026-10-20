@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.13
 
 - Add a combined-configuration copy button with an explicit manual-copy fallback when browser clipboard access is unavailable.
 
