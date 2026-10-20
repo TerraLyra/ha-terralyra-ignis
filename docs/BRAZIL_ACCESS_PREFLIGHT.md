@@ -194,3 +194,22 @@ from unknown observation time, attribution, CC BY-SA 4.0 and transformation
 notices. Empty results explicitly do not establish absence of fire. This remains
 an offline research view, with no HA card registration, scheduled requests or
 production activation.
+
+## Detail-time inspection — 2026-10-20
+
+The current official viewer imports `/queimadas/evento-fogo/pages/js/ciman/config.js`
+and loads detail records from `/queimadas/portal/api/sala-ciman/eventos/{id}`.
+The former `/queimadas/portal/api/eventos/{id}` route returned 404 for the sampled
+ID; this is a routing result, not evidence of event disappearance or closure.
+The externally specified centroid route remains the request contract above.
+No automatic fallback, mass detail retrieval or endpoint migration is enabled.
+
+A single current-list event (870445) had `data_min=2026-09-05`,
+`data_max=2026-10-19` and `data_ultimo_foco=2026-10-19 20:36:00`.
+`inpe_detail.py` accepts a supplied bounded JSON detail only when its event ID
+matches the requested ID. It preserves the date range and parses the latest
+hotspot separately as UTC. Missing fields remain unknown; malformed values,
+duplicate JSON keys, mismatched IDs and reversed date ranges fail explicitly.
+A hotspot newer than the geometry date range is allowed because those products
+have different update cycles. Geometry and unrelated HTML are not rendered.
+This parser is offline and does not add per-event requests to scheduled cycles.
