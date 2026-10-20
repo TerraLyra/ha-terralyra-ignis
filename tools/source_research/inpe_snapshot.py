@@ -38,8 +38,6 @@ def collect_states(states, *, fetch=fetch_centroids, sleep=time.sleep,
         if index:
             sleep(1)
         batch = fetch(state=state)
-        if not batch:
-            raise ValueError('Empty inventory semantics unverified')
         seen = set()
         for record in batch:
             if not isinstance(record, Centroid) or state not in record.states or record.source_id in seen:
@@ -68,6 +66,10 @@ def report(snapshot):
         'retrieved_at': snapshot.retrieved_at.isoformat(),
         'observation_time_known': False,
         'complete': False,
+        'response_status': 'success',
+        'returned_record_count': len(snapshot.records),
+        'empty_result': not snapshot.records,
+        'absence_means_extinguished': False,
         'production_ready': False,
         'events': [dict(source_id=r.source_id, category=r.category, status=r.status,
                         estimated_area_ha=r.area_ha, duration_days=r.duration_days,

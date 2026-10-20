@@ -213,3 +213,28 @@ duplicate JSON keys, mismatched IDs and reversed date ranges fail explicitly.
 A hotspot newer than the geometry date range is allowed because those products
 have different update cycles. Geometry and unrelated HTML are not rendered.
 This parser is offline and does not add per-event requests to scheduled cycles.
+
+## Empty inventories and packaged async foundation — 2026-10-20
+
+The bounded Acre and Federal District samples have only `type` and `features`
+at the collection root (53 and 1 records respectively). The current viewer
+consumes a single features array without pagination. Neither fact establishes
+upstream completeness; `complete` remains false for every snapshot.
+
+A valid FeatureCollection with `features: []` is a successful returned inventory,
+not an extinguishment or fire-absence claim. Missing/null/non-array features,
+empty bodies, malformed JSON, error envelopes and unhandled pagination/count/
+truncation metadata fail explicitly. A multi-state cycle publishes atomically;
+one failed state does not become a partial successful inventory. Empty responses
+are covered synthetically; neither live sample was empty.
+
+The pure parsers now live in `derived_sources/inpe` inside the integration;
+research imports alias those exact modules. The async client uses the caller's
+HTTP session, a total deadline, bounded streaming, strict representation checks
+and no redirects/retries. Its coordinator shares an hourly cycle with jitter,
+preserves last success on errors, and clears the current returned inventory on
+valid empty success. It does not delete historical events or infer closure.
+No config-flow option, sensor platform or scheduler activates this source yet.
+These remain the next wiring steps; completeness uncertainty must remain visible
+in any resulting user interface. The source is satellite-derived, not an official
+emergency-service report and not independent confirmation of FIRMS.

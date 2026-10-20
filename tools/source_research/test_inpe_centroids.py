@@ -30,8 +30,8 @@ class CentroidTests(TestCase):
         self.assertIsNone(record.observed_at)
         self.assertTrue(record.provisional)
 
-    def test_rejects_empty_duplicates_and_error_envelopes(self):
-        for raw in (payload([]),payload([feature(),feature()]),payload(error='broken'),
+    def test_rejects_duplicates_and_error_envelopes(self):
+        for raw in (payload([feature(),feature()]),payload(error='broken'),
                     payload(next='page2'),payload(crs={}),b'{"type":1,"type":2}',b'{'):
             with self.subTest(raw=raw[:30]),self.assertRaises(InvalidCentroids): parse_centroids(raw)
 
@@ -89,3 +89,15 @@ class CentroidTests(TestCase):
             with self.assertRaises(HTTPError): fetch_centroids()
             self.assertEqual(opener.return_value.open.call_count,1)
         self.assertIsNone(_NoRedirect().redirect_request(None,None,302,'',{},'https://elsewhere.invalid'))
+
+    def test_valid_empty_collection_is_not_a_completeness_claim(self):
+        self.assertEqual(parse_centroids(payload([]), requested_state='AC'), ())
+        for raw in (b'', b'{}', b'{"type":"FeatureCollection"}',
+                    b'{"type":"FeatureCollection","features":null}'):
+            with self.assertRaises(InvalidCentroids): parse_centroids(raw)
+
+    def test_unknown_pagination_or_truncation_contract_fails_closed(self):
+        for key in ('total', 'totalFeatures', 'numberMatched', 'numberReturned',
+                    'has_more', 'truncated', 'exceededTransferLimit', 'limit', 'offset'):
+            with self.subTest(key=key), self.assertRaises(InvalidCentroids):
+                parse_centroids(payload([], **{key: 1}))
