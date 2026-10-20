@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.14
 
 - Clear generated combined configurations after editor changes, preventing accidental copying of an older location, title or forecast binding.
 
