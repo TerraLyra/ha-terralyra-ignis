@@ -56,7 +56,7 @@ class InpeMapManager:
             rows = ()
             if self.enabled and self._add_entities is not None:
                 rows = project_inpe(result, resolve_monitored_locations(self.hass, self.entry))
-                self.status = ('not_requested' if result is None else
+                self.status = ('not_requested' if result is None or state.response_status == 'not_requested' else
                                'available' if state.response_status == 'success' else 'unavailable')
             else:
                 self.status = 'disabled'
@@ -116,8 +116,7 @@ class InpeMapRecord(GeolocationEvent):
 
     @property
     def icon(self):
-        return {'bushfire':'mdi:forest', 'planned_burn':'mdi:fire-circle',
-                'structure_fire':'mdi:home-alert'}.get(self.item['category'],'mdi:map-marker-alert')
+        return 'mdi:map-marker-radius'
 
     @property
     def distance(self):

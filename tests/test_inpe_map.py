@@ -30,6 +30,8 @@ def test_projection_radius_disabled_locations_and_duplicate_locations():
 async def test_success_empty_error_recovery_and_disable(hass):
     entry=MockConfigEntry(domain=DOMAIN,options={'inpe_enabled':True,'inpe_states':['AC']});entry.add_to_hass(hass)
     manager=get_inpe_map(hass,entry)
+    from custom_components.terralyra_ignis.inpe_sensor import create_inpe_sensor
+    assert create_inpe_sensor(hass,entry).owner is manager.owner
     component=EntityComponent(logging.getLogger(__name__),'geo_location',hass)
     with patch('custom_components.terralyra_ignis.inpe_map.resolve_monitored_locations',return_value=(LOC,)):
         manager.bind(lambda entities:hass.async_create_task(component.async_add_entities(entities)))
