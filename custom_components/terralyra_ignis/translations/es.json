@@ -103,7 +103,8 @@
           "resolve_place_names": "Mostrar lugares cercanos en el mapa",
           "enable_land_surface_temperature": "Activar la temperatura de la superficie terrestre",
           "enable_firms": "Usar NASA FIRMS donde esté disponible",
-          "firms_map_key": "NASA FIRMS MAP_KEY"
+          "firms_map_key": "NASA FIRMS MAP_KEY",
+          "configure_inpe": "Configurar INPE Queimadas"
         },
         "data_description": {
           "radius_km": "Solo se consideran las detecciones dentro de esta distancia del centro de vigilancia de incendios activos.",
@@ -186,6 +187,14 @@
           "enabled": "Activar previsión",
           "radius_km": "Radio de previsión (km)"
         }
+      },
+      "inpe": {
+        "title": "INPE Queimadas (experimental)",
+        "description": "Lista horaria de eventos derivados de satélites para los estados seleccionados. Cobertura no garantizada. Cero resultados no significa ausencia de incendios. Geometría basada en datos del día anterior. INPE / Programa Queimadas, CC BY-SA 4.0.",
+        "data": {
+          "inpe_enabled": "Activar consultas INPE",
+          "inpe_states": "Estados brasileños (hasta 3)"
+        }
       }
     },
     "error": {
@@ -198,7 +207,8 @@
       "too_many_locations": "Se admite un máximo de 10 ubicaciones vigiladas",
       "forecast_not_eligible": "La ubicación está desactivada o fuera de la cobertura FRMv3.",
       "invalid_forecast_settings": "Configuración de previsión no válida.",
-      "alert_radius_exceeds_monitoring": "Reduce el radio de alerta o aumenta el de vigilancia. El radio de alerta no puede ser mayor."
+      "alert_radius_exceeds_monitoring": "Reduce el radio de alerta o aumenta el de vigilancia. El radio de alerta no puede ser mayor.",
+      "invalid_inpe_settings": "Selecciona de uno a tres estados al activar."
     }
   },
   "issues": {
@@ -445,6 +455,9 @@
       },
       "tasalert_source_status": {
         "name": "Estado de la fuente TasALERT"
+      },
+      "inpe_returned_events": {
+        "name": "Eventos devueltos por INPE"
       }
     },
     "event": {

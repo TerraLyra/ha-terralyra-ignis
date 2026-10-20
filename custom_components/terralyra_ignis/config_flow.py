@@ -24,6 +24,8 @@ from .fire_risk_planning import (
     CONF_LOCATION_FORECASTS, LocationForecastSettings, decode_forecast_settings,
     plan_location_forecasts,
 )
+from .derived_sources.inpe.settings import settings as inpe_settings, ENABLED as INPE_ENABLED, SELECTED_STATES as INPE_STATES
+from .derived_sources.inpe.centroids import STATES as BRAZIL_STATES
 from .products.fire_risk import FireRiskError
 
 from .api import LsaSafAuthError, LsaSafError
@@ -310,7 +312,10 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
+            if user_input.get("configure_inpe", False):
+                return await self.async_step_inpe()
             options = dict(self.config_entry.options) | dict(user_input)
+            options.pop("configure_inpe", None)
             if options.pop(CONF_MANAGE_MONITORED_LOCATIONS, False):
                 return await self.async_step_monitored_locations()
             try:
@@ -404,6 +409,7 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
                     )
                 ),
                 vol.Optional(CONF_MANAGE_MONITORED_LOCATIONS, default=False): bool,
+                vol.Optional("configure_inpe", default=False): bool,
                 vol.Required(CONF_USE_CUSTOM_MONITORING_CENTER): bool,
                 vol.Required(CONF_MONITORING_CENTER_NAME): TextSelector(
                     TextSelectorConfig()
@@ -496,6 +502,26 @@ class IgnisOptionsFlow(OptionsFlowWithReload):
             data_schema=self.add_suggested_values_to_schema(schema, current),
             errors=errors,
         )
+
+    async def async_step_inpe(self, user_input=None) -> ConfigFlowResult:
+        """No network access while configuring the experimental source."""
+        errors = {}
+        current = dict(self.config_entry.options)
+        if user_input is not None:
+            try:
+                enabled, states = inpe_settings(user_input)
+            except ValueError:
+                errors["base"] = "invalid_inpe_settings"
+            else:
+                current[INPE_ENABLED] = enabled
+                current[INPE_STATES] = list(states)
+                return self.async_create_entry(data=current)
+        return self.async_show_form(step_id="inpe", errors=errors,
+            data_schema=vol.Schema({
+                vol.Required(INPE_ENABLED, default=current.get(INPE_ENABLED, False)): bool,
+                vol.Required(INPE_STATES, default=current.get(INPE_STATES, [])):
+                    SelectSelector(SelectSelectorConfig(options=sorted(BRAZIL_STATES), multiple=True)),
+            }))
 
     async def async_step_monitored_locations(
         self, user_input: dict[str, Any] | None = None

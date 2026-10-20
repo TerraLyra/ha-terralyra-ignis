@@ -103,7 +103,8 @@
           "resolve_place_names": "Show nearby place names on the map",
           "enable_land_surface_temperature": "Enable land-surface temperature",
           "enable_firms": "Use NASA FIRMS where available",
-          "firms_map_key": "NASA FIRMS MAP_KEY"
+          "firms_map_key": "NASA FIRMS MAP_KEY",
+          "configure_inpe": "Configure INPE Queimadas"
         },
         "data_description": {
           "radius_km": "Only detections within this distance of the active-fire monitoring center are considered.",
@@ -186,6 +187,14 @@
           "enabled": "Enable forecast",
           "radius_km": "Forecast radius (km)"
         }
+      },
+      "inpe": {
+        "title": "INPE Queimadas (experimental)",
+        "description": "Hourly satellite-derived event inventory for the selected states. Coverage is not guaranteed. Zero returned events does not mean no fire. Geometry uses previous-day data. INPE / Programa Queimadas, CC BY-SA 4.0.",
+        "data": {
+          "inpe_enabled": "Enable INPE retrieval",
+          "inpe_states": "Brazilian states (up to 3)"
+        }
       }
     },
     "error": {
@@ -198,7 +207,8 @@
       "too_many_locations": "A maximum of 10 monitored locations is supported",
       "forecast_not_eligible": "The location is disabled or outside FRMv3 coverage.",
       "invalid_forecast_settings": "Invalid forecast settings.",
-      "alert_radius_exceeds_monitoring": "Reduce the alert radius or increase the monitoring radius. The alert radius cannot be larger."
+      "alert_radius_exceeds_monitoring": "Reduce the alert radius or increase the monitoring radius. The alert radius cannot be larger.",
+      "invalid_inpe_settings": "Select one to three states when enabled."
     }
   },
   "issues": {
@@ -445,6 +455,9 @@
       },
       "tasalert_source_status": {
         "name": "TasALERT source status"
+      },
+      "inpe_returned_events": {
+        "name": "INPE returned events"
       }
     },
     "event": {

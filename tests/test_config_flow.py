@@ -1337,3 +1337,30 @@ def test_edit_rejects_retained_alert_radius_above_reduced_monitoring():
               LOCATION_RADIUS_KM:5, LOCATION_ENABLED:True}
     with pytest.raises(AlertRadiusTooLarge):
         _location_from_edit_input(values, existing)
+
+
+async def test_inpe_options_explicit_scope_and_disable(hass):
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
+        options={'unrelated_setting': 'preserved'})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        _default_options_input() | {'configure_inpe': True})
+    assert result['step_id'] == 'inpe'
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        {'inpe_enabled': True, 'inpe_states': []})
+    assert result['errors']['base'] == 'invalid_inpe_settings'
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        {'inpe_enabled': True, 'inpe_states': ['AC','AM','BA','SP']})
+    assert result['errors']['base'] == 'invalid_inpe_settings'
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        {'inpe_enabled': True, 'inpe_states': ['AM','AC']})
+    assert result['type'] is FlowResultType.CREATE_ENTRY
+    assert result['data']['inpe_states'] == ['AC','AM']
+    assert result['data']['unrelated_setting'] == 'preserved'
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        _default_options_input() | {'configure_inpe': True})
+    result = await hass.config_entries.options.async_configure(result['flow_id'],
+        {'inpe_enabled': False, 'inpe_states': ['AC']})
+    assert result['data']['inpe_enabled'] is False

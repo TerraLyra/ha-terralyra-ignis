@@ -103,7 +103,8 @@
           "resolve_place_names": "Közeli helynevek megjelenítése a térképen",
           "enable_land_surface_temperature": "Felszínhőmérséklet engedélyezése",
           "enable_firms": "NASA FIRMS használata, ahol elérhető",
-          "firms_map_key": "NASA FIRMS MAP_KEY"
+          "firms_map_key": "NASA FIRMS MAP_KEY",
+          "configure_inpe": "INPE Queimadas beállítása"
         },
         "data_description": {
           "radius_km": "Csak az aktívtűz-figyelőközponttól ezen a távolságon belüli észlelések számítanak.",
@@ -186,6 +187,14 @@
           "enabled": "Előrejelzés engedélyezése",
           "radius_km": "Előrejelzési sugár (km)"
         }
+      },
+      "inpe": {
+        "title": "INPE Queimadas (kísérleti)",
+        "description": "Óránkénti, műholdas adatokból származtatott eseménylista a kijelölt államokra. A lefedettség nem garantált. A nulla találat nem jelent tűzmentességet. A geometria előző napi adatokon alapul. INPE / Programa Queimadas, CC BY-SA 4.0.",
+        "data": {
+          "inpe_enabled": "INPE-lekérés engedélyezése",
+          "inpe_states": "Brazil államok (legfeljebb 3)"
+        }
       }
     },
     "error": {
@@ -198,7 +207,8 @@
       "too_many_locations": "Legfeljebb 10 figyelt hely használható",
       "forecast_not_eligible": "A helyszín nincs engedélyezve vagy nincs FRMv3-lefedettsége.",
       "invalid_forecast_settings": "Érvénytelen előrejelzési beállítások.",
-      "alert_radius_exceeds_monitoring": "Csökkentsd a riasztási sugarat, vagy növeld a megfigyelési sugarat. A riasztási sugár nem lehet nagyobb."
+      "alert_radius_exceeds_monitoring": "Csökkentsd a riasztási sugarat, vagy növeld a megfigyelési sugarat. A riasztási sugár nem lehet nagyobb.",
+      "invalid_inpe_settings": "Bekapcsoláskor válassz egy–három államot."
     }
   },
   "issues": {
@@ -445,6 +455,9 @@
       },
       "tasalert_source_status": {
         "name": "TasALERT forrásállapot"
+      },
+      "inpe_returned_events": {
+        "name": "INPE visszaadott események"
       }
     },
     "event": {

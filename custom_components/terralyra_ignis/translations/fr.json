@@ -103,7 +103,8 @@
           "resolve_place_names": "Afficher les lieux proches sur la carte",
           "enable_land_surface_temperature": "Activer la température de surface",
           "enable_firms": "Utiliser NASA FIRMS lorsque disponible",
-          "firms_map_key": "NASA FIRMS MAP_KEY"
+          "firms_map_key": "NASA FIRMS MAP_KEY",
+          "configure_inpe": "Configurer INPE Queimadas"
         },
         "data_description": {
           "radius_km": "Seules les détections situées dans cette distance du centre de surveillance des feux actifs sont prises en compte.",
@@ -186,6 +187,14 @@
           "enabled": "Activer la prévision",
           "radius_km": "Rayon de prévision (km)"
         }
+      },
+      "inpe": {
+        "title": "INPE Queimadas (expérimental)",
+        "description": "Liste horaire des événements dérivés des satellites pour les États sélectionnés. Couverture non garantie. Aucun résultat ne signifie pas absence de feu. Géométrie issue des données de la veille. INPE / Programa Queimadas, CC BY-SA 4.0.",
+        "data": {
+          "inpe_enabled": "Activer les requêtes INPE",
+          "inpe_states": "États brésiliens (3 maximum)"
+        }
       }
     },
     "error": {
@@ -198,7 +207,8 @@
       "too_many_locations": "Un maximum de 10 lieux surveillés est pris en charge",
       "forecast_not_eligible": "Le lieu est désactivé ou hors de la couverture FRMv3.",
       "invalid_forecast_settings": "Paramètres de prévision non valides.",
-      "alert_radius_exceeds_monitoring": "Réduisez le rayon d’alerte ou augmentez le rayon de surveillance. Le rayon d’alerte ne peut pas être plus grand."
+      "alert_radius_exceeds_monitoring": "Réduisez le rayon d’alerte ou augmentez le rayon de surveillance. Le rayon d’alerte ne peut pas être plus grand.",
+      "invalid_inpe_settings": "Sélectionnez un à trois États lors de l’activation."
     }
   },
   "issues": {
@@ -445,6 +455,9 @@
       },
       "tasalert_source_status": {
         "name": "État de la source TasALERT"
+      },
+      "inpe_returned_events": {
+        "name": "Événements renvoyés par INPE"
       }
     },
     "event": {
