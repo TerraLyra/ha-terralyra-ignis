@@ -189,7 +189,7 @@
         }
       },
       "inpe": {
-        "title": "INPE Queimadas (expérimental)",
+        "title": "Paramètres INPE Queimadas",
         "description": "Liste horaire des événements dérivés des satellites pour les États sélectionnés. Couverture non garantie. Aucun résultat ne signifie pas absence de feu. Géométrie issue des données de la veille. INPE / Programa Queimadas, CC BY-SA 4.0.",
         "data": {
           "inpe_enabled": "Activer les requêtes INPE",

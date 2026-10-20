@@ -189,7 +189,7 @@
         }
       },
       "inpe": {
-        "title": "INPE Queimadas (experimentell)",
+        "title": "INPE Queimadas einrichten",
         "description": "Stündliche satellitengestützte Ereignisliste für ausgewählte Bundesstaaten. Vollständigkeit nicht garantiert. Keine Treffer bedeutet nicht kein Feuer. Geometrie basiert auf Daten des Vortags. INPE / Programa Queimadas, CC BY-SA 4.0.",
         "data": {
           "inpe_enabled": "INPE-Abruf aktivieren",

@@ -189,7 +189,7 @@
         }
       },
       "inpe": {
-        "title": "INPE Queimadas (experimental)",
+        "title": "Configuración de INPE Queimadas",
         "description": "Lista horaria de eventos derivados de satélites para los estados seleccionados. Cobertura no garantizada. Cero resultados no significa ausencia de incendios. Geometría basada en datos del día anterior. INPE / Programa Queimadas, CC BY-SA 4.0.",
         "data": {
           "inpe_enabled": "Activar consultas INPE",

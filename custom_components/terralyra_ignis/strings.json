@@ -189,7 +189,7 @@
         }
       },
       "inpe": {
-        "title": "INPE Queimadas (experimental)",
+        "title": "INPE Queimadas settings",
         "description": "Hourly satellite-derived event inventory for the selected states. Coverage is not guaranteed. Zero returned events does not mean no fire. Geometry uses previous-day data. INPE / Programa Queimadas, CC BY-SA 4.0.",
         "data": {
           "inpe_enabled": "Enable INPE retrieval",

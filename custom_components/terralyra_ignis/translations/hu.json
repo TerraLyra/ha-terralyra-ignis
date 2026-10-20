@@ -189,7 +189,7 @@
         }
       },
       "inpe": {
-        "title": "INPE Queimadas (kísérleti)",
+        "title": "INPE Queimadas beállításai",
         "description": "Óránkénti, műholdas adatokból származtatott eseménylista a kijelölt államokra. A lefedettség nem garantált. A nulla találat nem jelent tűzmentességet. A geometria előző napi adatokon alapul. INPE / Programa Queimadas, CC BY-SA 4.0.",
         "data": {
           "inpe_enabled": "INPE-lekérés engedélyezése",
