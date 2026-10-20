@@ -2,12 +2,13 @@
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from .const import DOMAIN
 from .derived_sources.inpe.coordinator import Coordinator
 from .derived_sources.inpe.settings import settings
 
 
-def create_inpe_sensor(hass, entry):
+def get_inpe_owner(hass, entry):
     enabled, states = settings(entry.options)
     if not enabled:
         return None
@@ -20,7 +21,12 @@ def create_inpe_sensor(hass, entry):
         if len(owners) >= 27:
             return None
         owner = owners[key] = Coordinator(async_get_clientsession(hass), states)
-    return InpeInventorySensor(entry, owner)
+    return owner
+
+
+def create_inpe_sensor(hass, entry):
+    owner = get_inpe_owner(hass, entry)
+    return InpeInventorySensor(entry, owner) if owner is not None else None
 
 
 class InpeInventorySensor(SensorEntity):
@@ -32,6 +38,7 @@ class InpeInventorySensor(SensorEntity):
 
     def __init__(self, entry, owner):
         self.owner = owner
+        self.entry_id = entry.entry_id
         self._attr_unique_id = f'{entry.entry_id}_inpe_returned_events'
         self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})
 
@@ -63,3 +70,5 @@ class InpeInventorySensor(SensorEntity):
 
     async def async_update(self):
         await self.owner.async_refresh()
+        if self.hass is not None:
+            async_dispatcher_send(self.hass, f"{DOMAIN}_inpe_{self.entry_id}")

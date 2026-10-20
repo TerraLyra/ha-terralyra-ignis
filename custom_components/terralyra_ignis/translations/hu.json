@@ -271,6 +271,9 @@
       },
       "tasalert_map": {
         "name": "TasALERT jelentések a térképen"
+      },
+      "inpe_map": {
+        "name": "INPE eseménytérkép"
       }
     },
     "geo_location": {

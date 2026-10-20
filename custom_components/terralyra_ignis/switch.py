@@ -7,10 +7,15 @@ from .const import DOMAIN
 from .nifc_map import get_nifc_map
 from .canada_map import get_canada_map
 from .tasalert_map import get_tasalert_map
+from .inpe_map import get_inpe_map
+from .derived_sources.inpe.settings import settings as inpe_settings
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    async_add_entities([NifcMapSwitch(hass, entry), CanadaMapSwitch(hass, entry), TasAlertMapSwitch(hass, entry)])
+    entities = [NifcMapSwitch(hass, entry), CanadaMapSwitch(hass, entry), TasAlertMapSwitch(hass, entry)]
+    if inpe_settings(entry.options)[0]:
+        entities.append(InpeMapSwitch(hass, entry))
+    async_add_entities(entities)
 
 
 class NifcMapSwitch(SwitchEntity, RestoreEntity):
@@ -143,3 +148,24 @@ class TasAlertMapSwitch(SwitchEntity, RestoreEntity):
                 'visible_markers': sum(not entity.retired for entity in self._manager.entities.values()),
                 'source_freshness': 'not_established',
                 'ignis_map_source': 'terralyra_ignis_tasalert_reports'}
+
+
+class InpeMapSwitch(NifcMapSwitch):
+    """Map-only visibility; source opt-in remains in integration options."""
+    _attr_translation_key = 'inpe_map'
+
+    def __init__(self, hass, entry):
+        self._manager = get_inpe_map(hass, entry)
+        self._attr_unique_id = f'{entry.entry_id}_inpe_map'
+        self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})
+
+    @property
+    def extra_state_attributes(self):
+        state = self._manager.owner.state if self._manager.owner else None
+        return {'ignis_map_source': 'terralyra_ignis_inpe_reports',
+                'response_status': state.response_status if state else 'not_requested',
+                'last_success_at': state.last_success.isoformat() if state and state.last_success else None,
+                'map_status': self._manager.status,
+                'visible_markers': sum(not e.retired for e in self._manager.entities.values()),
+                'matched_source_records': self._manager.relevant_count,
+                'source_freshness': 'not_established', 'coverage_complete': False}

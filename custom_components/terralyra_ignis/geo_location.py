@@ -25,6 +25,8 @@ from .entity import IgnisEntity
 from .nifc_map import get_nifc_map
 from .canada_map import get_canada_map
 from .tasalert_map import get_tasalert_map
+from .inpe_map import get_inpe_map
+from .derived_sources.inpe.settings import settings as inpe_settings
 from .models import FireLifecycle
 from .monitoring import MonitoredLocation
 
@@ -56,6 +58,8 @@ async def async_setup_entry(
     nifc_map.bind(async_add_entities)
     get_canada_map(hass, entry).bind(async_add_entities)
     get_tasalert_map(hass, entry).bind(async_add_entities)
+    if inpe_settings(entry.options)[0]:
+        get_inpe_map(hass, entry).bind(async_add_entities)
     coordinator = entry.runtime_data.coordinator
     entities: dict[str, IgnisFireLocation] = {}
     monitored_locations = {

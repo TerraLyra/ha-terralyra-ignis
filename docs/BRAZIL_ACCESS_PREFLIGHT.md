@@ -251,3 +251,20 @@ attributes. It is not included in active-fire counters or confirmation logic.
 This first HA display is a native sensor; event maps and a dedicated detail card
 remain separate work. Config-entry reload reuses the same selected-state owner
 and cooldown. A full HA restart begins a new in-memory cycle.
+
+### Opt-in HA centroid map
+
+After selecting and enabling the INPE state scope, an INPE map switch is available.
+Bind that switch in the IGNIS report map editor and turn it on to display the
+layer. Disabled sources have no map control. The map shares the inventory sensor's
+collection owner and hourly cooldown; toggling map visibility does not fetch data.
+Only representative centroids inside enabled monitoring radii are shown, once
+per source event, using the nearest matching monitored location as reference.
+The layer is separate from satellite incident counts, alerts and corroboration.
+
+A successful empty inventory removes display markers; an error also hides them
+without deleting the cached inventory or any incident archive. More than 500
+matching records produces `display_limit_exceeded`, never a silent subset.
+The detail card identifies provisional derived data, previous-day geometry,
+unknown observation time and incomplete coverage, with INPE attribution and
+CC BY-SA 4.0 licensing. Removing a marker does not imply that the fire is out.
