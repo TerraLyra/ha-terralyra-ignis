@@ -116,7 +116,7 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
         async_add_listener=Mock(),
     )
     entry = SimpleNamespace(
-        entry_id="test", runtime_data=SimpleNamespace(coordinator=coordinator),
+        entry_id="test", options={}, runtime_data=SimpleNamespace(coordinator=coordinator),
         async_on_unload=Mock(),
     )
     registry = Mock()
@@ -151,7 +151,7 @@ def test_monitoring_area_uses_location_radius_as_map_decoration() -> None:
     """The native map interprets GPS accuracy as a circle radius in metres."""
     coordinator = Mock()
     entry = SimpleNamespace(
-        entry_id="test",
+        entry_id="test", options={},
         data={},
         runtime_data=SimpleNamespace(coordinator=coordinator),
     )
@@ -195,7 +195,7 @@ async def test_map_adds_one_area_per_enabled_monitored_location(alert_radius, co
         async_add_listener=Mock(),
     )
     entry = SimpleNamespace(
-        entry_id="test",
+        entry_id="test", options={},
         runtime_data=SimpleNamespace(coordinator=coordinator),
         async_on_unload=Mock(),
     )
@@ -228,7 +228,7 @@ async def test_map_removes_area_for_deleted_or_disabled_location() -> None:
         async_add_listener=Mock(),
     )
     entry = SimpleNamespace(
-        entry_id="test",
+        entry_id="test", options={},
         runtime_data=SimpleNamespace(coordinator=coordinator),
         async_on_unload=Mock(),
     )
