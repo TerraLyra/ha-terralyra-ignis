@@ -201,7 +201,7 @@ export function reportView(state, language = 'en') {
     && typeof a.incident_name === 'string' ? a.incident_name.trim() : '';
   return {w, title:incidentName ? `NIFC · ${text(incidentName)}` : text(a.friendly_name), attribution:text(a.attribution),
     unavailable: ['unavailable','unknown'].includes(state.state),
-    source:safeLink(a.source_url), license:safeLink(a.license_url), transformation:text(a.transformation),
+    source:safeLink(a.source_url), license:safeLink(a.license_url), licenseLabel:a.source === 'terralyra_ignis_inpe_reports' ? 'CC BY-SA 4.0' : 'CC BY 4.0', transformation:text(a.transformation),
     retrievalNotice:retrievalView(a,language).notice,
     rows:[
       [w.location,text(a.distance_reference_name)],
@@ -568,7 +568,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         link.href=view.source;link.target='_blank';link.rel='noopener noreferrer';link.dataset.action='source';
         footer.append(link);
       }
-      if(view.license){const link=element('a','CC BY 4.0');link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);this.dialog.append(element('p',view.transformation));}
+      if(view.license){const link=element('a',view.licenseLabel);link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);this.dialog.append(element('p',view.transformation));}
       const details=element('button',w.details);
       details.dataset.action='details';
       details.onclick=()=>{

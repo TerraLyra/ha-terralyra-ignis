@@ -246,6 +246,8 @@ test('INPE needs explicit map opt-in and explains derived centroid semantics',()
   assert.equal(visibleMapSources({}, {})[source],false);
   assert.equal(visibleMapSources({'switch.inpe':{state:'on',attributes:{ignis_map_source:source}}},{[source]:'switch.inpe'})[source],true);
   const view=reportView({...state,attributes:{...state.attributes,source,response_status:'success',source_times:undefined}},'hu');
+  assert.equal(view.licenseLabel,'CC BY-SA 4.0');
+  assert.equal(reportView(state).licenseLabel,'CC BY 4.0');
   assert.match(view.w.warning,/közelítő középpont/);
   assert.match(view.w.warning,/Nem független megerősítés/);
   assert.equal(view.rows[4][1],'Nincs megadva');

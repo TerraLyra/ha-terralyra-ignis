@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.1
+
+- Correct the INPE detail-card license link label to CC BY-SA 4.0; retain the existing license URL and other source labels.
+
 ## 0.41.0
 
 - Add optional INPE Queimadas collection for one to three explicitly selected Brazilian states, disabled by default.
