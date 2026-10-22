@@ -590,7 +590,7 @@
     },
     "register_dashboard_card": {
       "name": "Configurer une carte du tableau de bord",
-      "description": "Vérifie les ressources existantes. Un administrateur peut ajouter une carte manquante après avoir confirmé qu’aucune copie renommée n’est chargée. Les entrées existantes restent inchangées. Rechargez ensuite le navigateur.",
+      "description": "Vérifie les ressources existantes. Un administrateur peut ajouter une carte manquante après avoir vérifié l’absence de copie renommée, ou actualiser une carte fournie existante. Rechargez ensuite le navigateur.",
       "fields": {
         "card": {
           "name": "Carte"
@@ -598,6 +598,10 @@
         "confirm_no_renamed_copy": {
           "name": "Aucune copie renommée chargée",
           "description": "J’ai vérifié qu’aucune copie renommée de cette carte n’est chargée. Désactivé, vérifie uniquement sans ajouter de ressource."
+        },
+        "refresh_existing": {
+          "name": "Actualiser une carte fournie existante",
+          "description": "Actualise uniquement la version d’un module fourni identifié sans ambiguïté. N’ajoute aucune carte manquante. Rechargez ensuite le navigateur."
         }
       }
     },

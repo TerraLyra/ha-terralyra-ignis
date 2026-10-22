@@ -248,7 +248,7 @@ get_satellite_report_context:
 
 register_dashboard_card:
   name: Set up an optional dashboard card
-  description: Administrator-only. Without confirmation, review the resource inventory. Confirm only after checking that no renamed copy of this card is loaded. Adds one missing module; never updates or deletes existing entries. YAML resources require manual setup. Reload the browser after registration.
+  description: Administrator-only. Without confirmation, review the resource inventory. Confirm only after checking that no renamed copy of this card is loaded. Adds one missing module, or refreshes the version of one existing bundled card when requested. Never deletes entries. YAML resources require manual setup. Reload the browser after registration.
   fields:
     card:
       required: true
@@ -264,6 +264,12 @@ register_dashboard_card:
     confirm_no_renamed_copy:
       default: false
       name: I checked that no renamed copy of this card is loaded
+      selector:
+        boolean:
+    refresh_existing:
+      default: false
+      name: Refresh an existing bundled card
+      description: Update only the version of one recognized bundled module. Does not add a missing card. Reload the browser afterwards.
       selector:
         boolean:
 

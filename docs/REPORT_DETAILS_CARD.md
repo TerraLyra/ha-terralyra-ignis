@@ -160,3 +160,18 @@ from source timestamps, matching the dialog's receipt-time field. A failed refre
 retains the previous successful receipt time; an absent receipt remains unknown.
 No current clock or source status date is substituted. This attribute requires
 an integration update when released, unlike the separately installed card.
+
+## Refresh a bundled card after an upgrade
+
+If the report detail still shows an old label after updating the integration,
+open Developer Tools → Actions and run `terralyra_ignis.register_dashboard_card`
+with `card: map` and `refresh_existing: true`. Then reload the browser.
+The action updates the query version of the existing bundled module using a
+hash of its installed contents. It preserves the resource ID and module type,
+and repeating it with unchanged contents does not write again.
+
+The same option supports `summary` and `bm`. It does not add missing cards,
+delete resources, update YAML resources, or change duplicate/legacy modules.
+Those cases still require reviewing the resource inventory. Refresh takes
+precedence over the add confirmation if both options are supplied. No automatic
+resource changes occur at integration startup.

@@ -120,3 +120,55 @@ async def test_setup_errors_are_translatable_and_never_write(hass, inventory, ex
     assert error.value.translation_domain == 'terralyra_ignis'
     assert error.value.translation_key == expected
     collection.async_create_item.assert_not_awaited()
+
+async def test_refresh_existing_keeps_id_and_is_idempotent(hass, hass_storage):
+    """A stale query becomes a content version without duplicating the module."""
+    collection = ResourceStorageCollection(hass, Mock())
+    collection.loaded = True
+    old = await collection.async_create_item({
+        'url': '/terralyra_ignis/cards/ignis-report-map.js?v=old',
+        'res_type': 'module',
+    })
+    hass.data[LOVELACE_DATA] = SimpleNamespace(resources=collection, resource_mode='storage')
+    register_card_resource_service(hass)
+    async def call():
+        return await hass.services.async_call(
+            'terralyra_ignis', 'register_dashboard_card',
+            {'card': 'map', 'refresh_existing': True}, blocking=True,
+            return_response=True, context=Context(user_id='admin'))
+    with patch.object(hass.auth, 'async_get_user', AsyncMock(return_value=SimpleNamespace(is_admin=True))):
+        result = await call()
+        assert result['status'] == 'refreshed'
+        assert result['changed'] is True
+        items = collection.async_items()
+        assert len(items) == 1
+        assert items[0]['id'] == old['id']
+        assert items[0]['type'] == 'module'
+        assert items[0]['url'] == result['url']
+        assert result['url'] != old['url']
+        assert (await call())['changed'] is False
+
+@pytest.mark.parametrize('inventory,mode', [
+    ([], 'storage'),
+    ([{'id':'a','url':'/local/ignis-report-map.js','type':'module'}], 'storage'),
+    ([{'id':'a','url':'/terralyra_ignis/cards/ignis-report-map.js','type':'js'}], 'storage'),
+    ([{'id':'a','url':'/terralyra_ignis/cards/ignis-report-map.js','type':'module'},
+      {'id':'b','url':'/terralyra_ignis/cards/ignis-report-map.js?v=old','type':'module'}], 'storage'),
+    ([{'id':'a','url':'/terralyra_ignis/cards/ignis-report-map.js','type':'module'}], 'yaml'),
+])
+async def test_refresh_never_adds_or_changes_ambiguous_resources(hass, inventory, mode):
+    collection = Mock(spec=ResourceStorageCollection)
+    collection.async_get_info = AsyncMock()
+    collection.async_items.return_value = inventory
+    collection.async_create_item = AsyncMock()
+    collection.async_update_item = AsyncMock()
+    hass.data[LOVELACE_DATA] = SimpleNamespace(resources=collection, resource_mode=mode)
+    register_card_resource_service(hass)
+    with patch.object(hass.auth, 'async_get_user', AsyncMock(return_value=SimpleNamespace(is_admin=True))):
+        result = await hass.services.async_call(
+            'terralyra_ignis', 'register_dashboard_card',
+            {'card':'map', 'refresh_existing':True, 'confirm_no_renamed_copy':True},
+            blocking=True, return_response=True, context=Context(user_id='admin'))
+    assert result['changed'] is False
+    collection.async_create_item.assert_not_awaited()
+    collection.async_update_item.assert_not_awaited()
