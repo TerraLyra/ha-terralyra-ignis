@@ -590,7 +590,7 @@
     },
     "register_dashboard_card": {
       "name": "Configura una scheda della dashboard",
-      "description": "Controlla le risorse esistenti. Un amministratore può aggiungere una scheda mancante dopo aver confermato che non è caricata una copia rinominata. Le voci esistenti restano invariate. Poi ricarica il browser.",
+      "description": "Controlla le risorse esistenti. Un amministratore può aggiungere una scheda mancante dopo aver escluso copie rinominate, oppure aggiornare una scheda inclusa esistente. Poi ricarica il browser.",
       "fields": {
         "card": {
           "name": "Scheda"
@@ -598,6 +598,10 @@
         "confirm_no_renamed_copy": {
           "name": "Nessuna copia rinominata caricata",
           "description": "Ho verificato che non sia caricata una copia rinominata di questa scheda. Se disattivato, controlla soltanto senza aggiungere risorse."
+        },
+        "refresh_existing": {
+          "name": "Aggiorna una scheda inclusa esistente",
+          "description": "Aggiorna solo la versione di un modulo incluso identificato senza ambiguità. Non aggiunge schede mancanti. Poi ricarica il browser."
         }
       }
     },
