@@ -1,6 +1,6 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-10-19: stable integration **0.40.11**.
+Status reconciled on 2026-10-22: stable integration **0.41.1**.
 Main-branch changes after that release are not automatically installed by HACS.
 Dated sections below retain historical decisions; this current summary takes
 precedence where their delivery status has changed.
@@ -10,9 +10,12 @@ precedence where their delivery status has changed.
 - **Delivered:** per-source readiness and blueprint guidance (0.40.8), source
   receipt times and guide focus preservation (0.40.9), Sentinel-3 diagnostic
   codes (0.40.10) and localized failure guidance (0.40.11).
-- **Next implementation focus:** reduce remaining manual map/summary setup
-  with explicit bindings; use the existing visual editors and resource setup
-  action as the baseline, rather than duplicating delivered features.
+- **Delivered setup work:** combined map/summary generation and regeneration
+  shipped in 0.40.12–0.40.14. Optional INPE collection and mapping shipped in
+  0.41.0; its corrected license label shipped in 0.41.1.
+- **Prepared:** explicit bundled-card refresh after upgrades, addressing stale
+  browser resources without creating duplicate modules. Pending stable release
+  and post-upgrade acceptance; see [0.41.2 notes](RELEASE_0_41_2.md).
 - **Acceptance still open:** unaided setup, the user's separate reinstall trial,
   and real phone notification delivery. Assisted and automated checks do not
   complete these acceptance steps. See [onboarding acceptance](ONBOARDING_ACCEPTANCE.md).

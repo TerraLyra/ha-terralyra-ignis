@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.2
+
+- Add an explicit administrator action to refresh the version of an existing bundled dashboard card after upgrades, preserving its resource identity and preventing duplicate registration.
+- Keep ambiguous, legacy and YAML resource inventories unchanged; provide refresh guidance in all six service languages.
+
 ## 0.41.1
 
 - Correct the INPE detail-card license link label to CC BY-SA 4.0; retain the existing license URL and other source labels.
