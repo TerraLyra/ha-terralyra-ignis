@@ -20,6 +20,10 @@ assert.equal(await page.getByRole('button',{name:'Fetch reports',exact:true}).co
 assert.equal(await page.getByRole('region',{name:'Report details'}).count(),1);
 assert.equal(await page.getByRole('button',{name:/Ismeretlen/}).count(),1);
 await page.evaluate(()=>card.hass={...card._hass,language:'hu'});
+// Large text must not force the native filter beyond a narrow card.
+await page.setViewportSize({width:390,height:844});
+await page.evaluate(()=>{card.shadowRoot.querySelector('select').style.fontSize='32px';});
+assert.equal(await page.evaluate(()=>{const c=card.shadowRoot.querySelector('ha-card'),s=c.querySelector('select');return s.getBoundingClientRect().right<=c.getBoundingClientRect().right&&c.scrollWidth<=c.clientWidth;}),true);
 await page.evaluate(()=>window.fail=true);await page.getByRole('button',{name:'Jelentések lekérése'}).click();await page.getByRole('alert').waitFor();assert.equal(await page.locator('.entry').count(),0);
 console.log('BM card: explicit fetch, filters, safe text/links, mobile and failure checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

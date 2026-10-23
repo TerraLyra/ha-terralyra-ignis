@@ -2,6 +2,8 @@
 
 ## 0.41.5
 
+- Use theme text colors for report actions and keep the BM filter within narrow cards at enlarged text sizes.
+
 - Align report detail headers and collapsible technical information with satellite cards while retaining visible retrieval errors.
 - Use localized report dates and distances, consistent decorative HA icons, visible keyboard focus and larger touch targets.
 - Follow the HA interface language for Hungarian and English BM card controls without translating original source text.
