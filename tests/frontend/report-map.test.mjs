@@ -253,3 +253,21 @@ test('INPE needs explicit map opt-in and explains derived centroid semantics',()
   assert.equal(view.rows[4][1],'Nincs megadva');
   assert.match(view.rows.at(-1)[1],/Sikeres/);
 });
+
+test('report age wording separates absent, malformed and future source times',async()=>{
+  const {reportAgeLabel}=await import('../../frontend/ignis-report-map.js');
+  const now=Date.parse('2026-10-23T10:00:00Z');
+  const record=stamp=>({...state,attributes:{source:'terralyra_ignis_inpe_reports',source_modified_at:stamp,last_success_at:'2026-10-23T09:00:00Z'}});
+  for(const stamp of [undefined,null,'']) {
+    assert.match(reportAgeLabel(record(stamp),'en',now),/does not provide/);
+    assert.match(reportAgeLabel(record(stamp),'hu',now),/nem ad meg/);
+  }
+  for(const stamp of ['bad','2026-10-23T09:00:00',42]) {
+    assert.match(reportAgeLabel(record(stamp),'en',now),/cannot be interpreted/);
+    assert.match(reportAgeLabel(record(stamp),'hu',now),/nem értelmezhető/);
+  }
+  assert.match(reportAgeLabel(record('2026-10-24T10:00:00Z'),'en',now),/in the future/);
+  assert.match(reportAgeLabel(record('2026-10-24T10:00:00Z'),'hu',now),/jövőben/);
+  assert.match(reportAgeLabel(record('2026-10-22T10:00:00Z'),'en',now),/1 days/);
+  assert.match(reportAgeLabel(record('2026-10-22T10:00:00Z'),'hu',now),/1 nap/);
+});

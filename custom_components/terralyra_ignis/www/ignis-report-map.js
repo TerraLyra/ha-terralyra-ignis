@@ -223,6 +223,27 @@ export function reportAge(state, now = Date.now()) {
   return Number.isFinite(age) && age >= 0 ? age : null;
 }
 
+export function reportAgeLabel(state, language = 'en', now = Date.now()) {
+  const hu = language.startsWith('hu');
+  const a = state?.attributes || {};
+  const stamp = a.source_times?.status_date || a.source_modified_at;
+  if (stamp === undefined || stamp === null || stamp === '') {
+    return hu ? 'A forrás nem ad meg frissítési időpontot; a jelentés kora nem állapítható meg.'
+      : 'The source does not provide an update time; the report age cannot be determined.';
+  }
+  if (typeof stamp !== 'string' || !/(Z|[+-]\d\d:\d\d)$/.test(stamp) || !Number.isFinite(Date.parse(stamp))) {
+    return hu ? 'A forrás frissítési időpontja nem értelmezhető; a jelentés kora nem állapítható meg.'
+      : 'The source update time cannot be interpreted; the report age cannot be determined.';
+  }
+  const age = reportAge(state, now);
+  if (age === null) {
+    return hu ? 'A forrás frissítési időpontja a jövőben van; a jelentés kora nem állapítható meg.'
+      : 'The source update time is in the future; the report age cannot be determined.';
+  }
+  return hu ? `Jelentés kora: ${Math.floor(age)} nap (forrás szerinti frissítés)`
+    : `Report age: ${Math.floor(age)} days (source update)`;
+}
+
 export function filterMapStates(states, enabled, maxDays, now = Date.now()) {
   return Object.fromEntries(Object.entries(states).filter(([, state]) => {
     const source = state.attributes?.source;
@@ -555,10 +576,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       this.dialog.append(element('p',view.attribution),element('h3',description.heading),paragraph);
       if(description.notice) this.dialog.append(element('p',description.notice));
       if(view.retrievalNotice) this.dialog.append(element('p',view.retrievalNotice));
-      const age=reportAge(state);
-      this.dialog.append(element('p',this._hass.language?.startsWith('hu')
-        ? (age === null ? 'Jelentés kora: ismeretlen vagy jövőbeli időpont' : `Jelentés kora: ${Math.floor(age)} nap (forrás szerinti frissítés)`)
-        : (age === null ? 'Report age: unknown or future timestamp' : `Report age: ${Math.floor(age)} days (source update)`)));
+      this.dialog.append(element('p',reportAgeLabel(state,this._hass.language || 'en')));
       const list=document.createElement('dl');
       for(const [label,value] of view.rows) list.append(element('dt',label),element('dd',value));
       this.dialog.append(list,element('p',w.warning));

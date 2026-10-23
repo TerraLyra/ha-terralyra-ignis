@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.3
+
+- Explain missing, invalid and future source update times separately in Hungarian and English report details.
+- Keep report age based on source update time, without substituting successful retrieval time.
+
 ## 0.41.2
 
 - Add an explicit administrator action to refresh the version of an existing bundled dashboard card after upgrades, preserving its resource identity and preventing duplicate registration.
