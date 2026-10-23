@@ -195,7 +195,7 @@ export function reportView(state, language = 'en') {
     // Never reinterpret a timezone-less source timestamp using browser timezone.
     if (typeof value !== 'string' || !/(Z|[+-]\d\d:\d\d)$/.test(value)) return w.unknown;
     const date = new Date(value);
-    return Number.isNaN(date.valueOf()) ? w.unknown : date.toLocaleString(lang) + ' (' + value + ')';
+    return Number.isNaN(date.valueOf()) ? w.unknown : new Intl.DateTimeFormat(lang==='hu'?'hu-HU':'en-GB',{dateStyle:'short',timeStyle:'long'}).format(date);
   };
   const distance = Number(state.state);
   const incidentName = a.source === 'terralyra_ignis_nifc_reports'
@@ -206,7 +206,7 @@ export function reportView(state, language = 'en') {
     retrievalNotice:retrievalView(a,language).notice,
     rows:[
       [w.location,text(a.distance_reference_name)],
-      [w.distance,Number.isFinite(distance) && state.state.trim() !== '' ? `${distance} ${text(a.unit_of_measurement)}` : w.unknown],
+      [w.distance,Number.isFinite(distance) && state.state.trim() !== '' ? `${distance.toLocaleString(lang==='hu'?'hu-HU':'en-GB',{maximumFractionDigits:1})} ${text(a.unit_of_measurement)}` : w.unknown],
       [w.status,text(a.source_status || a.stage_of_control)],
       [w.category,text(a.report_category || a.prescribed_status)],
       [w.updated,time(a.source_times?.status_date || a.source_modified_at)],
@@ -391,7 +391,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       super();
       this.attachShadow({mode:'open'});
       const style = document.createElement('style');
-      style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}.satellite-summary header{padding:18px;border-radius:14px;background:var(--secondary-background-color,#eef5f6);border-left:4px solid var(--primary-color,#007f91)}.satellite-summary header>span{font-size:.72rem;letter-spacing:.12em;color:var(--secondary-text-color)}.satellite-summary h2{margin:10px 0}.satellite-summary section{padding:12px 0;border-bottom:1px solid var(--divider-color,#ddd)}.satellite-summary h3{font-size:1rem}.satellite-summary small{color:var(--secondary-text-color);line-height:1.5;display:block}.satellite-summary details{padding-top:20px}.satellite-summary summary{cursor:pointer;font-weight:600}.sat-close{margin-bottom:14px}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a{font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
+      style.textContent = `:host{display:block}dialog{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:var(--card-background-color,#fff);color:var(--primary-text-color,#172b39);font:inherit}dialog::backdrop{background:#0008}.satellite-summary header{padding:18px;border-radius:14px;background:var(--secondary-background-color,#eef5f6);border-left:4px solid var(--primary-color,#007f91)}.satellite-summary header>span{font-size:.72rem;letter-spacing:.12em;color:var(--secondary-text-color)}.satellite-summary h2{margin:10px 0}.satellite-summary section{padding:12px 0;border-bottom:1px solid var(--divider-color,#ddd)}.satellite-summary h3{font-size:1rem;display:flex;align-items:center;gap:8px}.satellite-summary h3 ha-icon{--mdc-icon-size:18px}.satellite-summary small{color:var(--secondary-text-color);line-height:1.5;display:block}.satellite-summary details{padding-top:20px}.satellite-summary summary{cursor:pointer;font-weight:600}.sat-close{margin-bottom:14px;position:sticky;top:0;z-index:1;background:var(--card-background-color,#fff)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--primary-color,#007f91);outline-offset:3px}h2{font-size:1.3rem;overflow-wrap:anywhere}p{line-height:1.5}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px}dt{color:var(--secondary-text-color,#596975)}dd{margin:0;overflow-wrap:anywhere}button,a,summary{min-height:44px;box-sizing:border-box;font:inherit;padding:10px;color:var(--primary-color,#007f91)}button{cursor:pointer;background:transparent;border:1px solid currentColor;border-radius:8px}footer{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}@media(max-width:440px){dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:12px}}`;
       this.enabled = {terralyra_ignis:true, terralyra_ignis_canada_reports:true, terralyra_ignis_nifc_reports:true, terralyra_ignis_tasalert_reports:true, terralyra_ignis_inpe_reports:true};
       this.maxDays = 0;
       this.controls = document.createElement('div');
@@ -525,14 +525,14 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const header=el('header');header.append(el('span',hu?'MŰHOLDAS ÉSZLELÉS':'SATELLITE OBSERVATION'),heading);
       header.append(el('p',[v.distance,v.direction,v.location].filter(Boolean).join(' · ')));
       card.append(header);
-      const section=(title)=>{const n=el('section');n.append(el('h3',title));card.append(n);return n;};
-      const times=section(hu?'◷ Észlelési időszak':'◷ Observation period');
+      const section=(title,icon)=>{const n=el('section'),h=el('h3'),i=el('ha-icon');i.setAttribute('icon',icon);i.setAttribute('aria-hidden','true');h.append(i,el('span',title));n.append(h);card.append(n);return n;};
+      const times=section(hu?'Észlelési időszak':'Observation period','mdi:clock-outline');
       const clocks=el('dl');
       if(v.singleObservation)clocks.append(el('dt',hu?'Észlelés időpontja':'Observation time'),el('dd',v.first));
       else clocks.append(el('dt',hu?'Első észlelés':'First observation'),el('dd',v.first),el('dt',hu?'Legutóbbi észlelés':'Latest observation'),el('dd',v.last));times.append(clocks);
       times.append(el('small',hu?'Észlelési időpontok, nem a tűz keletkezésének vagy eloltásának ideje.':'Observation times, not ignition or extinction times.'));
       if(v.unavailable)times.append(el('p',hu?'Az észlelés adatai jelenleg nem érhetők el.':'Observation data is currently unavailable.'));
-      const news=section(hu?'▤ Kapcsolódó hír':'▤ Related report'),result=this.satelliteResult;
+      const news=section(hu?'Kapcsolódó hír':'Related report','mdi:newspaper-variant-outline'),result=this.satelliteResult;
       if(!result||result.error)news.append(el('p',hu?(!result?'Kapcsolódó hírek ellenőrzése…':'A kapcsolódó hírek most nem ellenőrizhetők.'):(!result?'Checking related reports…':'Related reports could not be checked.')));
       else if(!result.reports?.length)news.append(el('p',hu?'A helyben tárolt hírek között nem találtunk kapcsolódó BM-hírt.':'No related BM report was found in the local archive.'));
       for(const report of result?.reports || []) {
@@ -544,7 +544,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         if(report.ambiguous)news.append(el('p',hu?'Több műholdas észleléshez is illeszkedhet.':'May relate to multiple satellite observations.'));
         const url=safeLink(report.report_url);if(url){const link=el('a',hu?'Eredeti hír':'Original report');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.dataset.focusKey=`report:${url}`;news.append(link);}
       }
-      const sources=section(hu?'⌁ Észlelő források':'⌁ Observing sources');
+      const sources=section(hu?'Észlelő források':'Observing sources','mdi:layers-outline');
       sources.append(el('p',v.multiple?(hu?'Több forrás észlelése · valószínűleg ugyanaz az esemény':'Multiple sources · probably the same event'):(hu?'Több forrás egyezése nem igazolt.':'Agreement between multiple sources is not established.')));
       sources.append(el('p',state.attributes.provider_attribution||v.providers.join(' · ')||(hu?'Nincs forrásadat':'No source information')));
       sources.append(el('small',hu?'A műholdas egyezés nem hivatalos megerősítés. A források időpontjai eltérhetnek.':'Satellite agreement is not official confirmation. Source observation times may differ.'));
@@ -568,34 +568,40 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const view = reportView(state,this._hass.language);
       const w = view?.w || WORDS[this._hass.language?.startsWith('hu') ? 'hu' : 'en'];
       const focused = this.shadowRoot.activeElement?.dataset?.action;
+      const sameReport=this.dialog.dataset.reportId===this.selected;
+      const expanded=sameReport && this.dialog.querySelector('details[data-report-technical]')?.open;
+      const scrollTop=sameReport?this.dialog.scrollTop:0;
       const element = (tag,text) => {const el=document.createElement(tag);el.textContent=text;return el;};
       const close = element('button',w.close);
       close.dataset.action='close';
       close.onclick=()=>this.dialog.close();
       const heading=element('h2',view?.title || w.unavailable);
       heading.id='report-title';
-      this.dialog.replaceChildren(close,heading);
-      if (!view || view.unavailable) {this.dialog.append(element('p',w.unavailable));return;}
+      close.className='sat-close';
+      const article=element('article','');article.className='satellite-summary';const header=element('header','');header.append(heading);article.append(header);this.dialog.replaceChildren(close,article);
+      if (!view || view.unavailable) {article.append(element('p',w.unavailable));return;}
       const description = reportDescription(state.attributes,this._hass.language || 'en');
       const paragraph=element('p',description.content);paragraph.style.whiteSpace='pre-wrap';
       const inpe=state.attributes.source==='terralyra_ignis_inpe_reports';
-      if(inpe){const keyFacts=element('dl','');for(const [label,value] of view.rows.slice(0,4))keyFacts.append(element('dt',label),element('dd',value));this.dialog.append(keyFacts);}
-      this.dialog.append(element('p',view.attribution));
-      if(!inpe || (typeof state.attributes.incident_text==='string' && state.attributes.incident_text.trim()))this.dialog.append(element('h3',description.heading));
-      this.dialog.append(paragraph);
-      if(description.notice) this.dialog.append(element('p',description.notice));
-      if(view.retrievalNotice) this.dialog.append(element('p',view.retrievalNotice));
-      this.dialog.append(element('p',reportAgeLabel(state,this._hass.language || 'en')));
+      {const keyFacts=element('dl','');for(const [label,value] of view.rows.slice(0,4))keyFacts.append(element('dt',label),element('dd',value));header.append(keyFacts);}
+      article.append(element('p',view.attribution));
+      if(!inpe || (typeof state.attributes.incident_text==='string' && state.attributes.incident_text.trim()))article.append(element('h3',description.heading));
+      article.append(paragraph);
+      if(description.notice) article.append(element('p',description.notice));
+      if(view.retrievalNotice) article.append(element('p',view.retrievalNotice),element('p',retrievalView(state.attributes,this._hass.language||'en').label));
+      article.append(element('p',reportAgeLabel(state,this._hass.language || 'en')));
+      const times=element('dl','');for(const [label,value] of view.rows.slice(4,6))times.append(element('dt',label),element('dd',value));article.append(times);
+      const technical=element('details','');technical.dataset.reportTechnical='true';technical.open=Boolean(expanded);const toggle=element('summary',this._hass.language?.startsWith('hu')?'Technikai részletek':'Technical details');toggle.dataset.action='technical';technical.append(toggle);
       const list=document.createElement('dl');
-      for(const [label,value] of (inpe?view.rows.slice(4):view.rows)) list.append(element('dt',label),element('dd',value));
-      this.dialog.append(list,element('p',w.warning));
+      for(const [label,value] of view.rows.slice(6)) list.append(element('dt',label),element('dd',value));
+      technical.append(list);article.append(element('p',w.warning),technical);
       const footer=document.createElement('footer');
       if(view.source) {
         const link=element('a',w.source);
         link.href=view.source;link.target='_blank';link.rel='noopener noreferrer';link.dataset.action='source';
         footer.append(link);
       }
-      if(view.license){const link=element('a',view.licenseLabel);link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);this.dialog.append(element('p',view.transformation));}
+      if(view.license){const link=element('a',view.licenseLabel);link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);technical.append(element('p',view.transformation));}
       const details=element('button',w.details);
       details.dataset.action='details';
       details.onclick=()=>{
@@ -603,8 +609,10 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         this.dialog.close();
         this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId},bubbles:true,composed:true}));
       };
-      footer.append(details);this.dialog.append(footer);
-      if(focused) this.dialog.querySelector(`[data-action="${focused}"]`)?.focus();
+      footer.append(details);article.append(footer);
+      if(focused) this.dialog.querySelector(`[data-action="${focused}"]`)?.focus({preventScroll:true});
+      this.dialog.scrollTop=scrollTop;
+      this.dialog.dataset.reportId=this.selected;
     }
   }
   customElements.define('ignis-report-map',IgnisReportMap);

@@ -15,8 +15,8 @@ test('only supported official map sources are intercepted',()=>{
 test('keeps source time and selected location; does not invent a receipt time',()=>{
   const view=reportView(state,'hu');
   assert.equal(view.rows[0][1],'Canada');
-  assert.equal(view.rows[1][1],'12.3 km');
-  assert.match(view.rows[4][1],/2026-06-12T07:30:00\+00:00/);
+  assert.equal(view.rows[1][1],'12,3 km');
+  assert.equal(view.rows[4][1],new Intl.DateTimeFormat('hu-HU',{dateStyle:'short',timeStyle:'long'}).format(new Date(state.attributes.source_times.status_date)));
   assert.equal(view.rows[6][1],'Nincs megadva');
   assert.equal(view.title,'Report <script>');
 });
@@ -35,8 +35,8 @@ test('unavailable reports are explicit, not a zero-distance report',()=>{
 });
 test('NIFC uses its actual modification and discovery clocks',()=>{
   const view=reportView({...state,attributes:{source:'terralyra_ignis_nifc_reports',source_modified_at:'2026-09-22T12:00:00Z',source_discovered_at:'2026-09-01T11:00:00Z'}});
-  assert.match(view.rows[4][1],/2026-09-22T12:00:00Z/);
-  assert.match(view.rows[5][1],/2026-09-01T11:00:00Z/);
+  assert.equal(view.rows[4][1],new Intl.DateTimeFormat('en-GB',{dateStyle:'short',timeStyle:'long'}).format(new Date('2026-09-22T12:00:00Z')));
+  assert.equal(view.rows[5][1],new Intl.DateTimeFormat('en-GB',{dateStyle:'short',timeStyle:'long'}).format(new Date('2026-09-01T11:00:00Z')));
 });
 
 test('age filter hides only old official reports; unknown and satellite records survive',async()=>{

@@ -9,6 +9,17 @@ assert.equal((await page.evaluate(()=>calls[0])).return_response,true);
 await page.getByRole('combobox').selectOption('all');assert.equal(await page.locator('.entry').count(),4);await page.getByRole('button',{name:/Lakástűz/}).click();assert.equal(await page.locator('a').count(),0);
 await page.getByRole('combobox').selectOption('veg');assert.equal(await page.locator('.entry').count(),1);assert.equal(await page.locator('a').count(),1);
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+// Selection stays adjacent and keyboard focus survives each redraw.
+await page.getByRole('combobox').focus();await page.getByRole('combobox').selectOption('all');
+assert.equal(await page.evaluate(()=>card.shadowRoot.activeElement?.dataset.focusKey),'filter');
+await page.getByRole('button',{name:/Ismeretlen/}).click();
+assert.equal(await page.evaluate(()=>card.shadowRoot.activeElement?.dataset.focusKey),'notice:https://www.katasztrofavedelem.hu/modules/vesz/esemeny/3');
+assert.equal(await page.evaluate(()=>card.shadowRoot.querySelector('.detail').previousElementSibling.getAttribute('aria-expanded')),'true');
+await page.evaluate(()=>card.hass={...card._hass,language:'en'});
+assert.equal(await page.getByRole('button',{name:'Fetch reports',exact:true}).count(),1);
+assert.equal(await page.getByRole('region',{name:'Report details'}).count(),1);
+assert.equal(await page.getByRole('button',{name:/Ismeretlen/}).count(),1);
+await page.evaluate(()=>card.hass={...card._hass,language:'hu'});
 await page.evaluate(()=>window.fail=true);await page.getByRole('button',{name:'Jelentések lekérése'}).click();await page.getByRole('alert').waitFor();assert.equal(await page.locator('.entry').count(),0);
 console.log('BM card: explicit fetch, filters, safe text/links, mobile and failure checks passed');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

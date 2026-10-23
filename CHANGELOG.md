@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.41.5
+
+- Align report detail headers and collapsible technical information with satellite cards while retaining visible retrieval errors.
+- Use localized report dates and distances, consistent decorative HA icons, visible keyboard focus and larger touch targets.
+- Follow the HA interface language for Hungarian and English BM card controls without translating original source text.
+- Show BM details directly beneath the selected report and preserve control focus across redraws.
+
 ## 0.41.4
 
 - Lead INPE report details with location, distance and reported status.
