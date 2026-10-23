@@ -23,3 +23,5 @@ jobs:
         run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/bm-reports-browser.cjs
       - name: Location summary browser checks
         run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/location-summary-browser.cjs
+      - name: Check custom-theme contrast and enlarged text
+        run: NODE_PATH="$RUNNER_TEMP/ignis-ui/node_modules" node tests/frontend/theme-accessibility-browser.cjs

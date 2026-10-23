@@ -163,7 +163,7 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('dialog img').count(),0);
   assert.equal(await page.getByRole('heading',{name:'Ercsi · Tűzészlelés',exact:true}).count(),1);
   const sectionTitles=await page.locator('dialog h3').allTextContents();
-  assert.deepEqual(sectionTitles,['◷ Észlelési időszak','▤ Kapcsolódó hír','⌁ Észlelő források']);
+  assert.deepEqual(sectionTitles,['Észlelési időszak','Kapcsolódó hír','Észlelő források']);
   assert.equal(await page.locator('dialog details').getAttribute('open'),null);
   assert.match(await page.locator('dialog').innerText(),/nem hivatalos megerősítés/);
   assert.equal(await page.evaluate(()=>contextRequest.service),'get_satellite_report_context');
