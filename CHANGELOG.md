@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.41.4
+
+- Lead INPE report details with location, distance and reported status.
+- Show a single observation time when first and latest valid timestamps represent the same instant.
+- Collapse long related news behind a short preview, preserving expanded sections during background updates.
+- Show repeated delayed-source guidance once per summary while retaining source-specific retrieval errors.
+
 ## 0.41.3
 
 - Explain missing, invalid and future source update times separately in Hungarian and English report details.

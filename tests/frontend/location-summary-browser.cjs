@@ -3,6 +3,12 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  const page=await browser.newPage({viewport:{width:390,height:844}});await page.setContent('<main></main>');
  await page.addScriptTag({type:'module',content:fs.readFileSync('frontend/ignis-location-summary.js','utf8')});
  await page.evaluate(async()=>{await customElements.whenDefined('ignis-location-summary');window.card=document.createElement('ignis-location-summary');card.setConfig({entity:'sensor.place',location_id:'ca'});window.entity={state:'available',attributes:{location_id:'ca',location_name:'<img src=x onerror=alert(1)>',operational_status:'available',active_incidents:3,multi_source_incidents:1,source_health:[{provider:'NASA FIRMS',status:'available'}]}};card.hass={states:{'sensor.place':entity}};document.querySelector('main').append(card);window.info=null;card.addEventListener('hass-more-info',e=>window.info=e.detail.entityId);});
+ await page.evaluate(()=>{entity.attributes.source_health=[{provider:'one',status:'delayed'},{provider:'two',status:'delayed'},{provider:'broken',status:'delayed',retrieval_status:'failed'}];card.hass={states:{'sensor.place':entity}};});
+ const compactText=await page.locator('ha-card').innerText();
+ assert.equal(compactText.split('Az adatok késnek.').length-1,1);
+ assert.match(compactText,/A lekérés sikertelen/);
+ assert.match(await page.locator('li').filter({hasText:'broken'}).innerText(),/A lekérés sikertelen/);
+ await page.evaluate(()=>{entity.attributes.source_health=[{provider:'NASA FIRMS',status:'available'}];card.hass={states:{'sensor.place':entity}};});
  // Background updates retain keyboard position, but never steal outside focus.
  await page.getByRole('button',{name:'Érzékelő részletei'}).focus();
  await page.evaluate(()=>{entity={...entity,attributes:{...entity.attributes,active_incidents:4}};card.hass={states:{'sensor.place':entity}};});

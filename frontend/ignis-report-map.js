@@ -98,6 +98,7 @@ export function satelliteSummary(state, language='en') {
     distance:finite(a.distance_km)?`${a.distance_km.toLocaleString(hu?'hu-HU':'en-GB',{maximumFractionDigits:1})} km`:unknown,
     location:typeof a.location_name==='string'?a.location_name:null,direction:typeof a.direction==='string'?a.direction:null,
     first:date(a.first_seen),last:date(a.last_seen||a.acquired),providers,
+    singleObservation:date(a.first_seen)!==unknown && date(a.last_seen||a.acquired)!==unknown && Date.parse(a.first_seen)===Date.parse(a.last_seen||a.acquired),
     multiple:providers.length>1,unavailable:['unknown','unavailable'].includes(state?.state),
     technical:[['Latitude',a.latitude],['Longitude',a.longitude],['FRP (MW)',finite(a.frp_mw)?a.frp_mw:null],['Pixels',finite(a.pixel_count)?a.pixel_count:null],['Satellites',Array.isArray(a.satellites)?a.satellites.join(', '):null]]
       .filter(([,value])=>value!==null&&value!==undefined).map(([key,value])=>[key,String(value)])};
@@ -515,7 +516,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       const hu=this._hass.language?.startsWith('hu'),v=satelliteSummary(state,this._hass.language||'en');
       const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
       const sameIncident=this.dialog.dataset.satelliteId===this.selected;
-      const expanded=sameIncident && this.dialog.querySelector('details')?.open;
+      const expandedKeys=new Set(sameIncident?Array.from(this.dialog.querySelectorAll('details[open]')).map(n=>n.dataset.expandKey):[]);
       const focused=sameIncident?this.shadowRoot.activeElement?.dataset.focusKey:null;
       const scrollTop=sameIncident?this.dialog.scrollTop:0;
       const close=el('button',hu?'Bezárás':'Close');close.onclick=()=>this.dialog.close();close.className='sat-close';close.dataset.focusKey='close';
@@ -526,7 +527,9 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       card.append(header);
       const section=(title)=>{const n=el('section');n.append(el('h3',title));card.append(n);return n;};
       const times=section(hu?'◷ Észlelési időszak':'◷ Observation period');
-      const clocks=el('dl');clocks.append(el('dt',hu?'Első észlelés':'First observation'),el('dd',v.first),el('dt',hu?'Legutóbbi észlelés':'Latest observation'),el('dd',v.last));times.append(clocks);
+      const clocks=el('dl');
+      if(v.singleObservation)clocks.append(el('dt',hu?'Észlelés időpontja':'Observation time'),el('dd',v.first));
+      else clocks.append(el('dt',hu?'Első észlelés':'First observation'),el('dd',v.first),el('dt',hu?'Legutóbbi észlelés':'Latest observation'),el('dd',v.last));times.append(clocks);
       times.append(el('small',hu?'Észlelési időpontok, nem a tűz keletkezésének vagy eloltásának ideje.':'Observation times, not ignition or extinction times.'));
       if(v.unavailable)times.append(el('p',hu?'Az észlelés adatai jelenleg nem érhetők el.':'Observation data is currently unavailable.'));
       const news=section(hu?'▤ Kapcsolódó hír':'▤ Related report'),result=this.satelliteResult;
@@ -534,7 +537,9 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       else if(!result.reports?.length)news.append(el('p',hu?'A helyben tárolt hírek között nem találtunk kapcsolódó BM-hírt.':'No related BM report was found in the local archive.'));
       for(const report of result?.reports || []) {
         news.append(el('span',hu?'Valószínűleg kapcsolódó BM-hír':'Probably related BM report'),el('h4',report.title));
-        const body=el('p',typeof report.description==='string'?report.description.slice(0,4000):'');body.style.whiteSpace='pre-wrap';news.append(body);
+        const content=typeof report.description==='string'?report.description.slice(0,4000):'';
+        const body=el('p',content.length>280?content.slice(0,280)+'…':content);body.style.whiteSpace='pre-wrap';news.append(body);
+        if(content.length>280){const full=el('details');full.dataset.expandKey=`news:${report.report_url||report.title}`;full.open=expandedKeys.has(full.dataset.expandKey);const summary=el('summary',hu?'Teljes hírszöveg':'Full report text');summary.dataset.focusKey=full.dataset.expandKey;const text=el('p',content);text.style.whiteSpace='pre-wrap';full.append(summary,text);news.append(full);}
         news.append(el('small',`BM OKF · ${report.published_at}`));
         if(report.ambiguous)news.append(el('p',hu?'Több műholdas észleléshez is illeszkedhet.':'May relate to multiple satellite observations.'));
         const url=safeLink(report.report_url);if(url){const link=el('a',hu?'Eredeti hír':'Original report');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.dataset.focusKey=`report:${url}`;news.append(link);}
@@ -543,7 +548,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       sources.append(el('p',v.multiple?(hu?'Több forrás észlelése · valószínűleg ugyanaz az esemény':'Multiple sources · probably the same event'):(hu?'Több forrás egyezése nem igazolt.':'Agreement between multiple sources is not established.')));
       sources.append(el('p',state.attributes.provider_attribution||v.providers.join(' · ')||(hu?'Nincs forrásadat':'No source information')));
       sources.append(el('small',hu?'A műholdas egyezés nem hivatalos megerősítés. A források időpontjai eltérhetnek.':'Satellite agreement is not official confirmation. Source observation times may differ.'));
-      const technical=el('details');technical.open=Boolean(expanded);const toggle=el('summary',hu?'Technikai részletek':'Technical details');toggle.dataset.focusKey='technical';technical.append(toggle);
+      const technical=el('details');technical.dataset.expandKey='technical';technical.open=expandedKeys.has('technical');const toggle=el('summary',hu?'Technikai részletek':'Technical details');toggle.dataset.focusKey='technical';technical.append(toggle);
       const list=el('dl');for(const [key,value] of v.technical)list.append(el('dt',hu?({Latitude:'Szélesség',Longitude:'Hosszúság',Pixels:'Pixelszám',Satellites:'Műholdak'}[key]||key):key),el('dd',value));technical.append(list);
       technical.append(el('small',hu?'Az FRP sugárzási teljesítmény; a pixelszám nem a tűz területe.':'FRP is radiative power; pixel count is not fire area.'));
       for(const o of state.attributes.source_observations||[])technical.append(el('p',`${o.provider_attribution||(o.providers||[]).join(', ')} · ${o.acquired||'—'} · ${o.evidence_role||'—'}`));
@@ -573,12 +578,16 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       if (!view || view.unavailable) {this.dialog.append(element('p',w.unavailable));return;}
       const description = reportDescription(state.attributes,this._hass.language || 'en');
       const paragraph=element('p',description.content);paragraph.style.whiteSpace='pre-wrap';
-      this.dialog.append(element('p',view.attribution),element('h3',description.heading),paragraph);
+      const inpe=state.attributes.source==='terralyra_ignis_inpe_reports';
+      if(inpe){const keyFacts=element('dl','');for(const [label,value] of view.rows.slice(0,4))keyFacts.append(element('dt',label),element('dd',value));this.dialog.append(keyFacts);}
+      this.dialog.append(element('p',view.attribution));
+      if(!inpe || (typeof state.attributes.incident_text==='string' && state.attributes.incident_text.trim()))this.dialog.append(element('h3',description.heading));
+      this.dialog.append(paragraph);
       if(description.notice) this.dialog.append(element('p',description.notice));
       if(view.retrievalNotice) this.dialog.append(element('p',view.retrievalNotice));
       this.dialog.append(element('p',reportAgeLabel(state,this._hass.language || 'en')));
       const list=document.createElement('dl');
-      for(const [label,value] of view.rows) list.append(element('dt',label),element('dd',value));
+      for(const [label,value] of (inpe?view.rows.slice(4):view.rows)) list.append(element('dt',label),element('dd',value));
       this.dialog.append(list,element('p',w.warning));
       const footer=document.createElement('footer');
       if(view.source) {
