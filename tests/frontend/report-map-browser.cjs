@@ -225,6 +225,33 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).default_zoom),7);
   assert.equal(await page.evaluate(()=>appearanceEdits.at(-1).report_switches.terralyra_ignis_tasalert_reports),'switch.tas');
   await page.evaluate(()=>appearance.remove());
+  // Compact clocks and long news preserve independent disclosure state on updates.
+  await page.evaluate(()=>{
+    document.querySelector('main').replaceChildren(card);
+    const sat={entity_id:'geo_location.compact',state:'3',attributes:{source:'terralyra_ignis',nearest_settlement:'Ercsi',first_seen:'2026-10-14T12:00:00Z',last_seen:'2026-10-14T14:00:00+02:00',context_entry_id:'entry',context_incident_id:'compact'}};
+    card.hass={language:'en',states:{[sat.entity_id]:sat},callWS:async()=>({response:{reports:[{title:'Long news',description:'Preview '.repeat(50)+'END OF REPORT',report_url:'https://example.com/report'}]}})};
+    card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:sat.entity_id},bubbles:true,composed:true}));
+  });
+  await page.getByRole('heading',{name:'Long news',exact:true}).waitFor();
+  assert.match(await page.locator('dialog').innerText(),/Observation time/);
+  assert.doesNotMatch(await page.locator('dialog').innerText(),/First observation|Latest observation|END OF REPORT/);
+  await page.getByText('Full report text',{exact:true}).click();
+  assert.match(await page.locator('dialog').innerText(),/END OF REPORT/);
+  await page.evaluate(()=>{const current=card._hass.states['geo_location.compact'];card.hass={...card._hass,states:{[current.entity_id]:{...current,attributes:{...current.attributes,pixel_count:5}}}};});
+  assert.notEqual(await page.locator('details[data-expand-key^="news:"]').getAttribute('open'),null);
+  assert.equal(await page.locator('details[data-expand-key="technical"]').getAttribute('open'),null);
+  await page.keyboard.press('Escape');
+  await page.evaluate(()=>{
+    const report={entity_id:'geo_location.inpe',state:'92.3',attributes:{source:'terralyra_ignis_inpe_reports',friendly_name:'Rio Branco',distance_reference_name:'Rio Branco',unit_of_measurement:'km',source_status:'Ativo',incident_text_status:'not_in_feed'}};
+    card.hass={language:'en',states:{[report.entity_id]:report}};
+    card.mapHost.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true}));
+  });
+  const inpeText=await page.locator('dialog').innerText();
+  assert.ok(inpeText.indexOf('92.3 km')<inpeText.indexOf('This feed'));
+  assert.ok(inpeText.indexOf('Ativo')<inpeText.indexOf('This feed'));
+  assert.doesNotMatch(inpeText,/Source description/);
+  await page.keyboard.press('Escape');
+  await page.evaluate(()=>{card.hass={...card._hass,language:'hu'};});
   // A failed frontend load is retryable without fetching provider data.
   await page.evaluate(async()=>{
     window.loadCardHelpers=async()=>{throw new Error('offline');};
