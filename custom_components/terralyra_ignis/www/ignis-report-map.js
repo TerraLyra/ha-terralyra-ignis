@@ -579,7 +579,12 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
       heading.id='report-title';
       close.className='sat-close';
       const article=element('article','');article.className='satellite-summary';const header=element('header','');header.append(heading);article.append(header);this.dialog.replaceChildren(close,article);
-      if (!view || view.unavailable) {article.append(element('p',w.unavailable));return;}
+      if (!view || view.unavailable) {
+        article.append(element('p',w.unavailable));
+        if(focused) close.focus({preventScroll:true});
+        this.dialog.dataset.reportId=this.selected;
+        return;
+      }
       const description = reportDescription(state.attributes,this._hass.language || 'en');
       const paragraph=element('p',description.content);paragraph.style.whiteSpace='pre-wrap';
       const inpe=state.attributes.source==='terralyra_ignis_inpe_reports';
@@ -610,7 +615,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         this.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId},bubbles:true,composed:true}));
       };
       footer.append(details);article.append(footer);
-      if(focused) this.dialog.querySelector(`[data-action="${focused}"]`)?.focus({preventScroll:true});
+      if(focused) (this.dialog.querySelector(`[data-action="${focused}"]`) || close).focus({preventScroll:true});
       this.dialog.scrollTop=scrollTop;
       this.dialog.dataset.reportId=this.selected;
     }
