@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.41.6
+
+- Preserve keyboard focus on the report license link during background updates.
+- Extend keyboard navigation and return-focus browser regression checks.
+- Reconcile delivered UI work and remaining acceptance checks.
+
 ## 0.41.5
 
 - Use theme text colors for report actions and keep the BM filter within narrow cards at enlarged text sizes.
