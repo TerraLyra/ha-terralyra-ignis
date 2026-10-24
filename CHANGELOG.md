@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.7
+
+- Move keyboard focus to Close when the selected report or focused action disappears during an update.
+- Cover report removal and recovery with a browser regression test.
+
 ## 0.41.6
 
 - Preserve keyboard focus on the report license link during background updates.
