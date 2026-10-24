@@ -35,9 +35,13 @@ The separate registration action can add a missing module after confirmation.
 Neither feature establishes first-time-user acceptance. A live preview recognized
 an existing summary resource without changing it.
 
-## Next implementation work
+## Remaining acceptance work
 
-1. Reduce manual map/summary setup while retaining explicit location bindings.
+Combined map/summary generation and regeneration shipped in 0.40.12–0.40.14.
+Report-card UX improvements shipped in 0.41.3–0.41.5. Do not repeat these as
+unimplemented work.
+
+1. Exercise the delivered combined setup in the unaided trial below.
 2. Validate the delivered setup review as part of the first-time-user trial:
    monitored place, both radii, source readiness and the explicit notification
    setup handoff are implemented; successful phone delivery remains unverified.
@@ -184,3 +188,27 @@ unknown diagnostics retain generic advice. All 51 frontend tests and 27 CI check
 passed. The post-update live check confirmed 0.40.11 and delayed-source wording,
 not the failed-source messages: both Sentinel requests were successful at that
 check. No production failure was injected to exercise those messages.
+
+
+## Report-card upgrade acceptance — sampled on 2026-10-24
+
+The installed version was 0.41.5. The explicit resource-refresh action updated
+one existing map module and one existing BM module. After navigation loaded the
+new resources, the INPE report displayed its key facts first, source-time absence
+wording, collapsible technical details and readable action text on the grey theme.
+The BM request returned reports; switching to all reports and selecting another
+entry put its details immediately below that entry. Controls followed the English
+HA interface while original Hungarian report text remained unchanged.
+
+Before release, three theme palettes and simulated 200% text at 390px width passed
+isolated browser checks. This is not a physical-phone text-scaling or full
+screen-reader result. Production checks used the existing desktop layout.
+
+Remaining accessibility acceptance:
+
+- [ ] Physical-phone system text scaling: filter choices, detail scrolling and close action.
+- [ ] Screen-reader reading order and announcements after filtering and selecting a report.
+- [ ] Keyboard-only navigation through map markers, report details and return focus.
+
+No phone notification was sent, production history removed or source setting
+changed for this acceptance check. The separate unaided and reinstall trials remain open.
