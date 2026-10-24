@@ -21,6 +21,20 @@ const assert=require('node:assert/strict');
    window.report={entity_id:'geo_location.report',state:'186.1',attributes:{source:'terralyra_ignis_canada_reports',friendly_name:'Canada · <img src=x onerror=alert(1)>',distance_reference_name:'Canada',unit_of_measurement:'km',source_url:'javascript:alert(1)',source_times:{status_date:'2026-06-12T07:30:00Z'}}};
    card.hass={language:'hu',states:{'switch.canada':{state:'on'},'switch.nifc':{state:'on'},[report.entity_id]:report}};
   });
+  // Keyboard activation from a native-map-like marker, including nested shadow DOM.
+  await page.evaluate(()=>{const host=document.createElement('div');const root=host.attachShadow({mode:'open'});const marker=document.createElement('button');marker.textContent='Test marker';marker.onclick=()=>marker.dispatchEvent(new CustomEvent('hass-more-info',{detail:{entityId:report.entity_id},bubbles:true,composed:true}));root.append(marker);card.mapHost.append(host);});
+  await page.getByRole('button',{name:'Test marker'}).focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.getByRole('button',{name:'Bezárás',exact:true}).evaluate(el=>el===el.getRootNode().activeElement),true);
+  await page.keyboard.press('Tab');
+  assert.equal(await page.locator('dialog summary').evaluate(el=>el===el.getRootNode().activeElement),true);
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('dialog details').evaluate(el=>el.open),true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.getByRole('button',{name:'Test marker'}).evaluate(el=>el===el.getRootNode().activeElement),true);
+  await page.keyboard.press('Space');
+  await page.getByRole('button',{name:'Bezárás',exact:true}).press('Enter');
+  assert.equal(await page.getByRole('button',{name:'Test marker'}).evaluate(el=>el===el.getRootNode().activeElement),true);
   // New cards show configured areas without changing legacy saved configurations.
   const starter=await page.evaluate(()=>customElements.get('ignis-report-map').getStubConfig());
   assert.equal(starter.cluster,false);

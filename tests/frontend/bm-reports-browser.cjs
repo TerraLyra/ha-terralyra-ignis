@@ -20,6 +20,16 @@ assert.equal(await page.getByRole('button',{name:'Fetch reports',exact:true}).co
 assert.equal(await page.getByRole('region',{name:'Report details'}).count(),1);
 assert.equal(await page.getByRole('button',{name:/Ismeretlen/}).count(),1);
 await page.evaluate(()=>card.hass={...card._hass,language:'hu'});
+// Enter/Space selection and tab navigation must survive background redraws.
+await page.getByRole('button',{name:/Ismeretlen/}).focus();
+await page.keyboard.press('Enter');
+await page.keyboard.press('Tab');
+assert.equal(await page.getByRole('link').evaluate(el=>el===el.getRootNode().activeElement),true);
+await page.evaluate(()=>card.hass={...card._hass});
+assert.equal(await page.getByRole('link').evaluate(el=>el===el.getRootNode().activeElement),true);
+await page.keyboard.press('Shift+Tab');
+await page.keyboard.press('Space');
+assert.equal(await page.evaluate(()=>card.shadowRoot.activeElement?.dataset.focusKey),'notice:https://www.katasztrofavedelem.hu/modules/vesz/esemeny/3');
 // Large text must not force the native filter beyond a narrow card.
 await page.setViewportSize({width:390,height:844});
 await page.evaluate(()=>{card.shadowRoot.querySelector('select').style.fontSize='32px';});
