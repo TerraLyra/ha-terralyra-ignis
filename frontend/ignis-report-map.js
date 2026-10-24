@@ -601,7 +601,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('ignis-report-m
         link.href=view.source;link.target='_blank';link.rel='noopener noreferrer';link.dataset.action='source';
         footer.append(link);
       }
-      if(view.license){const link=element('a',view.licenseLabel);link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);technical.append(element('p',view.transformation));}
+      if(view.license){const link=element('a',view.licenseLabel);link.dataset.action='license';link.href=view.license;link.target='_blank';link.rel='noopener noreferrer';footer.append(link);technical.append(element('p',view.transformation));}
       const details=element('button',w.details);
       details.dataset.action='details';
       details.onclick=()=>{
