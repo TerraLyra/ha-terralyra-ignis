@@ -221,6 +221,12 @@ const assert=require('node:assert/strict');
   await page.evaluate(()=>{tas={...tas,attributes:{...tas.attributes}};card.hass={...card._hass,states:{...card._hass.states,[tas.entity_id]:tas}};});
   assert.equal(await page.getByRole('link',{name:'CC BY 4.0',exact:true}).evaluate(el=>el===el.getRootNode().activeElement),true);
 
+  // Removing a focused report must leave a reachable close action.
+  await page.evaluate(()=>{const states={...card._hass.states};delete states[tas.entity_id];card.hass={...card._hass,states};});
+  assert.equal(await page.getByRole('button',{name:'Bezárás',exact:true}).evaluate(el=>el===el.getRootNode().activeElement),true);
+  await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,[tas.entity_id]:tas}});
+  assert.equal(await page.getByRole('button',{name:'Bezárás',exact:true}).evaluate(el=>el===el.getRootNode().activeElement),true);
+
   await page.evaluate(()=>card.hass={...card._hass,states:{...card._hass.states,'switch.tas':{state:'off'}}});
   assert.equal(await page.getByRole('checkbox',{name:'TasALERT jelentések',exact:true}).count(),0);
   await page.keyboard.press('Escape');
