@@ -767,7 +767,7 @@ empty temporarily or enter `terralyra_ignis` in the card's YAML as shown above.
 - continue localization and usability review on real Home Assistant dashboards;
   every enabled location now has a translated operational-status entity with
   equal-source health, timestamps and local incident-confirmation counts
-- submit TerraLyra IGNIS artwork to the upstream Home Assistant brands repository
+- keep bundled TerraLyra IGNIS artwork covered by the HACS brands validator
 
 ### MSG-IODC compatibility check
 
@@ -975,8 +975,8 @@ The repository includes automated GitHub Actions for:
 - repository secret-pattern scanning and weekly Dependabot updates
 
 The repository bundles local normal- and high-DPI brand icons for Home Assistant
-2026.3 and newer. The HACS `brands` check remains ignored until the same artwork
-is accepted into the separate upstream `home-assistant/brands` repository. Each
+2026.3 and newer. The HACS `brands` check validates the bundled `brand/icon.png`; a separate
+upstream brands submission is not required by the current validator. Each
 stable integration version is published as a GitHub release for predictable
 HACS installation and rollback.
 
