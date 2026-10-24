@@ -167,10 +167,29 @@ These are upgrade smoke checks, not unaided setup, reinstall or real-phone
 notification acceptance. Those items remain open. No history was deleted.
 See [0.40.11 release notes](RELEASE_0_40_11.md).
 
-## Prepared 0.41.0 — INPE
+## Delivered 0.41.0 — INPE
 
 The combined INPE implementation (#225–#229) is merged. Release preparation bumps
 the manifest to 0.41.0 and documents opt-in state selection, returned-event counts,
 map binding, data limitations and upgrade steps. See [release notes](RELEASE_0_41_0.md).
-Publication remains pending explicit approval after candidate CI. Live INPE
-acceptance remains an upgrade-time check; existing source behavior is not replaced.
+The release was subsequently published and sampled with explicit INPE opt-in.
+Existing source behavior is not replaced.
+
+
+## Published 0.41.2–0.41.5
+
+- 0.41.2: explicit refresh of existing bundled card resources.
+- 0.41.3: report timestamp explanations.
+- 0.41.4: key facts first, single equal observation time, collapsible news and
+  deduplicated delay guidance.
+- 0.41.5: consistent report layout, localized controls and dates, adjacent BM
+  details, keyboard/touch styling, theme action contrast and enlarged BM filter.
+
+Stable [v0.41.5](https://github.com/TerraLyra/ha-terralyra-ignis/releases/tag/v0.41.5)
+was published from `2651b592d11bd63d0884330760a0bb8f2aa1d285` after explicit approval.
+All 27 candidate checks passed; the merged tree matched the tested tree.
+On 2026-10-24 the installed version and both card-resource refreshes were verified,
+followed by sampled report rendering and BM selection checks. See the bounded
+[acceptance record](ONBOARDING_ACCEPTANCE.md#report-card-upgrade-acceptance--sampled-on-2026-10-24).
+
+No additional runtime release is implied by this documentation reconciliation.
