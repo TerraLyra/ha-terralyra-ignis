@@ -58,6 +58,3 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-          # Local brand assets work in Home Assistant 2026.3+, but the HACS
-          # brands check requires a separate upstream home-assistant/brands PR.
-          ignore: brands
