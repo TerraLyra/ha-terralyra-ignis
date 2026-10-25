@@ -62,6 +62,15 @@ requires the separate blueprint setup below.
 If replacing a `/local/` resource, edit the existing entry rather than adding a duplicate.
 Fully reload the browser after changing resources.
 
+For a combined starter, open **Map and summary together** in the summary editor,
+then **Generate configuration** and **Copy configuration**. Paste into a new
+**Manual** dashboard card and review the preview before saving. If clipboard
+access is blocked, copy the selected text manually. The map shows all enabled
+IGNIS locations; the summary remains bound to the selected place. Generating does
+not save the dashboard or enable notifications. Regenerate after changing settings,
+and avoid leaving a duplicate summary when replacing the original card.
+[Combined setup details](LOCATION_SUMMARY_CARD.md#combined-map-and-summary-starter--04012).
+
 If the summary card is missing from the picker, check that the resource is a
 JavaScript module, then fully reload the frontend. If the location list is empty,
 check the monitored location in IGNIS settings and wait for its status sensor.
@@ -148,6 +157,16 @@ sugarat és az adatellátást a beállítások áttekintésében. Az értesíté
 is az alábbi, külön blueprint-beállítás szükséges.
 Régi `/local/` cím esetén a meglévő erőforrást módosítsd, ne adj hozzá második példányt.
 Végül töltsd újra teljesen a böngészőt.
+
+Közös kezdőkártyához az összefoglaló szerkesztőjében nyisd ki a **Térkép és
+összefoglaló együtt** részt, majd válaszd a **Konfiguráció készítése** és a másolás
+gombot. Illeszd be egy új **Kézi / Manual** dashboardkártyába, és mentés előtt
+ellenőrizd az előnézetet. Ha a böngésző tiltja a vágólapot, a kijelölt szöveget
+kézzel másold. A térkép minden engedélyezett IGNIS-helyszínt mutat; az összefoglaló
+a kiválasztott ponthoz tartozik. A készítés nem ment dashboardot és nem kapcsol be
+értesítést. Beállításmódosítás után készíts új konfigurációt, és az eredeti kártya
+lecserélésekor ne hagyj két azonos összefoglalót.
+[Részletes közös beállítás](LOCATION_SUMMARY_CARD.md#combined-map-and-summary-starter--04012).
 
 Ha az összefoglaló nem szerepel a kártyaválasztóban, ellenőrizd a JavaScript-modul
 erőforrást, majd töltsd újra teljesen a felületet. Üres helyszínlistánál ellenőrizd

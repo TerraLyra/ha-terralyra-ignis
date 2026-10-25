@@ -208,7 +208,25 @@ Remaining accessibility acceptance:
 
 - [ ] Physical-phone system text scaling: filter choices, detail scrolling and close action.
 - [ ] Screen-reader reading order and announcements after filtering and selecting a report.
-- [ ] Keyboard-only navigation through map markers, report details and return focus.
+- [x] Sampled desktop keyboard activation, detail controls and Escape/Close return focus.
+  Full page traversal and screen-reader acceptance remain open.
 
 No phone notification was sent, production history removed or source setting
 changed for this acceptance check. The separate unaided and reinstall trials remain open.
+
+## Follow-up acceptance — 0.41.6–0.41.7
+
+Sampled live checks confirmed both installed versions and explicit map-resource
+refreshes. The license link was reachable by keyboard, and Escape returned focus
+to the opening report marker. Report disappearance/recovery remains isolated
+browser-test evidence; no production record was removed to induce the condition.
+
+Canada recovery was verified on 2026-10-25: a successful scheduled retrieval
+replaced the review-required state, returning 151 records without a storage block.
+This establishes retrieval recovery, not freshness of every report or national
+completeness. No history was deleted.
+
+The current HACS validator accepts bundled brand/icon.png. PR #242 passed all 27
+checks with the brands exemption removed, including HACS. This is repository
+validation, not acceptance into the default HACS catalogue. The unaided setup,
+separate reinstall trial and physical-phone notification checks remain open.
