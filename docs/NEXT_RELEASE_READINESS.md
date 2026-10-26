@@ -193,3 +193,27 @@ followed by sampled report rendering and BM selection checks. See the bounded
 [acceptance record](ONBOARDING_ACCEPTANCE.md#report-card-upgrade-acceptance--sampled-on-2026-10-24).
 
 No additional runtime release is implied by this documentation reconciliation.
+
+
+## Assisted reinstall follow-up — 2026-10-25
+
+The isolated HA Core/HACS trial passed package removal and reinstallation of
+0.41.7, entity-ID comparison, YAML-card/blueprint retention across redownload, and
+explicit location rebinding after IGNIS config-entry recreation. See the
+[bounded acceptance evidence](ONBOARDING_ACCEPTANCE.md#isolated-hacs-reinstall-and-card-rebinding--2026-10-25).
+No runtime changes or new stable release are implied by this documentation update.
+
+Subsequent checks on the same day completed the full HACS removal/reinstall
+cycle with storage-managed dashboards and module resources. Files remained
+unchanged until deliberate location rebinding through the visual editor; all
+three cards then rendered. The blueprint file also survived unchanged.
+
+The shutdown failure was isolated by comparing HA with orjson 3.11.9 and 3.13.0:
+the original failed, while the override exited normally in both baseline and
+full HACS/IGNIS instances. This is a local test-launcher workaround, not a change
+to IGNIS requirements or certification of HA's stock dependency set.
+
+Remaining checks are unaided onboarding, a saved phone notification automation
+and real delivery, retained-history upgrade comparison, physical-phone text
+scaling and screen-reader acceptance. These are not replaced by reinstall tests.
+See the acceptance checklist for the full evidence and environment limitations.

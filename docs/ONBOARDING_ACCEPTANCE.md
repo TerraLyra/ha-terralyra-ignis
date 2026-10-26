@@ -35,6 +35,20 @@ The separate registration action can add a missing module after confirmation.
 Neither feature establishes first-time-user acceptance. A live preview recognized
 an existing summary resource without changing it.
 
+## Current acceptance snapshot — 2026-10-26
+
+- Passed, assisted: full HACS removal/reinstall, entity-ID restoration for the
+  same named location, YAML and storage dashboard retention, storage module
+  resource retention, visual summary rebinding and blueprint-file preservation.
+- Local environment workaround verified: orjson 3.13.0 permits a normal shutdown;
+  HA 2026.9.2's original 3.11.9 pin is unchanged. This is not stock-HA acceptance.
+- Still open: unaided first setup, existing phone-automation preservation and
+  actual delivery, retained-history upgrade comparison, physical-phone text
+  scaling, full keyboard traversal and screen-reader acceptance.
+- These technical tests do not establish acceptance into the default HACS
+  catalogue. Detailed dated records below retain the limits of each test cycle;
+  later follow-ups supersede earlier pending statuses only for the named scope.
+
 ## Remaining acceptance work
 
 Combined map/summary generation and regeneration shipped in 0.40.12–0.40.14.
@@ -228,5 +242,108 @@ completeness. No history was deleted.
 
 The current HACS validator accepts bundled brand/icon.png. PR #242 passed all 27
 checks with the brands exemption removed, including HACS. This is repository
-validation, not acceptance into the default HACS catalogue. The unaided setup,
-separate reinstall trial and physical-phone notification checks remain open.
+validation, not acceptance into the default HACS catalogue. The unaided setup and physical-phone notification checks remain open.
+The later isolated reinstall evidence and its limits are recorded below.
+
+
+## Isolated HACS reinstall and card rebinding — 2026-10-25
+
+Assisted checks used HA Core 2026.9.2, HACS 2.0.5 and IGNIS 0.41.7 on an
+isolated macOS instance. Production configuration and history were not changed.
+
+- HACS correctly refused package removal while an IGNIS config entry existed.
+  After removing that entry, HACS removed the package. Following an isolated
+  restart, re-adding the custom repository and downloading restored the package.
+  All 194 package files matched the stable release, excluding generated caches.
+- Recreating the same test location restored 46 entities with the same entity IDs
+  and no duplicate registry entries. This is not a retained-history comparison.
+- A separate HACS redownload and restart preserved the YAML dashboard, its three
+  card resources, the original notification blueprint and the empty automation
+  file byte for byte. The summary, map and BM controls rendered, and the blueprint
+  remained listed with an accessible editor. No BM feed request was needed.
+- Removing and recreating the IGNIS config entry preserved those dashboard and
+  blueprint files. The summary first reported a missing sensor, then correctly
+  reported a different location binding. Updating only its `location_id` restored
+  the summary. This tests deletion of the integration configuration, not deletion
+  of the entire Home Assistant configuration directory.
+
+These checks close the assisted HACS package-removal/reinstall and YAML-card
+rebinding scenarios. They do not establish storage-managed dashboard retention,
+existing phone-automation preservation, phone delivery, or unaided onboarding.
+The automation file was empty; its unchanged hash is not evidence of an existing
+notification automation surviving reinstall.
+
+The isolated macOS process crashed during Python finalization on shutdown. The
+same crash reproduced without custom integrations, so IGNIS is not necessary to
+trigger it; the underlying cause remains unresolved. Functional restart checks
+above must not be reported as clean-shutdown acceptance or HA OS validation.
+
+A follow-up blueprint-selector check found exactly one eligible IGNIS installation,
+the recreated test installation. Selecting it succeeded. The phone selector
+reported “No devices available”, consistent with the absence of a Companion App
+device. The draft was discarded without saving or sending a notification.
+
+
+## Storage dashboard persistence — 2026-10-25
+
+A separate dashboard was created and saved through the HA interface with the
+summary, report-map and BM cards. Its storage file and dashboard registry remained
+byte-identical after an isolated restart and after replacing the integration
+package from the stable 0.41.7 commit and restarting again. All three cards rendered
+after browser reload; the summary retained its location binding and 25 km radii,
+and the map retained the monitoring location. No BM request was made.
+
+This cycle used direct stable-package replacement, not another HACS removal.
+Card module resources still came from YAML; storage-managed resource persistence
+is not covered. The known macOS shutdown crash recurred. Production was untouched.
+
+
+## Storage-managed module resources — 2026-10-25
+
+In the isolated instance, Lovelace resource management was switched to storage
+mode and the three IGNIS module URLs were registered through the HA resource UI.
+After stable 0.41.7 package replacement and restart, the resources file and all
+dashboard storage files were byte-identical. The UI listed exactly three module
+resources without duplicates. A fresh dashboard load rendered the summary, map
+and BM card using those stored references, without YAML resource declarations.
+
+This closes storage-resource persistence for direct package replacement/restart,
+not a full HACS removal cycle with storage resources. The known macOS shutdown
+crash persisted. No production configuration or history was changed.
+
+
+## Full HACS cycle with storage resources — 2026-10-25
+
+The isolated 0.41.7 test was repeated with the dashboard and all three module
+references stored by HA. The IGNIS config entry was removed, HACS removed the
+package (directory absence verified), and HA restarted without it. Re-adding
+the custom repository and downloading through HACS restored all 194 stable
+package files. After another restart, the same named test location was recreated.
+
+Dashboard storage, module resources and the notification blueprint remained
+byte-identical throughout removal/reinstallation, before deliberate rebinding.
+The summary correctly warned about the changed location ID. Reselecting the
+location in the visual card editor and saving restored the summary without code
+edits; the map and BM controls also rendered. Resource registration did not need
+to be repeated. This closes the assisted full-HACS storage-retention scenario.
+
+No production data was touched or phone notification sent. The recurring macOS
+shutdown crash remains unresolved; this is not clean-shutdown or HA OS evidence.
+
+
+## Local shutdown diagnosis and workaround — 2026-10-25
+
+A controlled HA comparison isolated the shutdown failure to the pinned orjson
+version in this macOS test environment. With HA Core 2026.9.2 and Python 3.14.9,
+the baseline using orjson 3.11.9 exited with SIGSEGV; the same baseline with a
+separately installed orjson 3.13.0 exited normally. The full HACS/IGNIS instance
+also changed from exit 139 to exit 0 with the same override, after its dashboard
+loaded successfully. The standalone Fragment-cycle example did not reproduce
+locally; the HA comparison provides the relevant evidence.
+
+This matches [upstream issue #185580](https://github.com/home-assistant/core/issues/185580).
+The workaround is confined to the local test launcher and does not change IGNIS
+requirements, the original virtual-environment pin or production HA. Because it
+overrides HA's pinned dependency, it is not an official HA fix, a full compatibility
+certification, or evidence that the stock dependency set now shuts down cleanly.
+Earlier reinstall observations remain valid with their recorded environment limits.
