@@ -40,11 +40,13 @@ an existing summary resource without changing it.
 - Passed, assisted: full HACS removal/reinstall, entity-ID restoration for the
   same named location, YAML and storage dashboard retention, storage module
   resource retention, visual summary rebinding and blueprint-file preservation.
+- Passed, bounded upgrade: 0.41.6 to 0.41.7 preserved recorder rows, entity IDs,
+  activity entries and a synthetic incident-history record; no schema migration.
 - Local environment workaround verified: orjson 3.13.0 permits a normal shutdown;
   HA 2026.9.2's original 3.11.9 pin is unchanged. This is not stock-HA acceptance.
 - Still open: unaided first setup, existing phone-automation preservation and
-  actual delivery, retained-history upgrade comparison, physical-phone text
-  scaling, full keyboard traversal and screen-reader acceptance.
+  actual delivery, broader historical-version migration coverage, physical-phone
+  text scaling, full keyboard traversal and screen-reader acceptance.
 - These technical tests do not establish acceptance into the default HACS
   catalogue. Detailed dated records below retain the limits of each test cycle;
   later follow-ups supersede earlier pending statuses only for the named scope.
@@ -81,7 +83,9 @@ integration, erase storage or reset history to simulate a clean installation.
 ## Upgrade acceptance — partly sampled, not complete
 
 - [ ] Compare existing entity IDs, radii and selected sources before and after update.
-- [ ] Confirm old history remains available; do not delete it to make checks pass.
+- [x] Compare retained recorder/activity history and a synthetic incident on
+  0.41.6 → 0.41.7 in isolated copies. Other migration paths and production-history
+  equivalence remain unverified; do not delete history to make checks pass.
 - [ ] Confirm bundled card updates load after browser/app reload without duplicate resources.
 - [ ] Confirm existing notification automations are unchanged and not duplicated.
 
@@ -347,3 +351,23 @@ requirements, the original virtual-environment pin or production HA. Because it
 overrides HA's pinned dependency, it is not an official HA fix, a full compatibility
 certification, or evidence that the stock dependency set now shuts down cleanly.
 Earlier reinstall observations remain valid with their recorded environment limits.
+
+
+## Bounded upgrade-history checks — 2026-10-26
+
+Separate copies of the isolated test configuration exercised 0.41.6 followed by
+0.41.7. The original test instance and production were not modified. Of 1,703
+IGNIS recorder state rows present before upgrade, including 39 created under
+0.41.6, all retained their IDs and compared values after upgrade. The 46 entity
+IDs/unique IDs and 48 sampled activity-history entries were preserved.
+
+A second copy contained one explicitly labelled synthetic historical incident,
+not a live detection. After loading/saving with 0.41.6 and then 0.41.7, its entire
+normalized history record compared equal, including observation timestamps,
+source information and location associations. No notification was sent. Both
+versions exited normally using the documented local orjson override.
+
+These results cover this exact update path, which has no storage-schema migration.
+They do not establish every older-version migration, real incident ingestion,
+phone delivery, or production-history equivalence. Synthetic fixtures remain
+only in the separate disposable test copy.
