@@ -214,6 +214,16 @@ full HACS/IGNIS instances. This is a local test-launcher workaround, not a chang
 to IGNIS requirements or certification of HA's stock dependency set.
 
 Remaining checks are unaided onboarding, a saved phone notification automation
-and real delivery, retained-history upgrade comparison, physical-phone text
+and real delivery, broader historical-version migration coverage, physical-phone text
 scaling and screen-reader acceptance. These are not replaced by reinstall tests.
 See the acceptance checklist for the full evidence and environment limitations.
+
+
+## Bounded history upgrade follow-up — 2026-10-26
+
+Isolated 0.41.6 → 0.41.7 comparisons retained all 1,703 pre-upgrade IGNIS recorder
+rows, 46 entity identities and 48 sampled activity-history entries. A separate
+synthetic incident retained its full normalized archive record. Both versions
+stopped normally with the local orjson workaround. This path has no schema
+migration; it does not establish all historical upgrade paths or real-phone
+notification acceptance. See the acceptance record for scope and limitations.
