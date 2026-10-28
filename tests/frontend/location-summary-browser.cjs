@@ -9,6 +9,15 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.match(compactText,/A lekérés sikertelen/);
  assert.match(await page.locator('li').filter({hasText:'broken'}).innerText(),/A lekérés sikertelen/);
  await page.evaluate(()=>{entity.attributes.source_health=[{provider:'NASA FIRMS',status:'available'}];card.hass={states:{'sensor.place':entity}};});
+ // Counter columns must reflow with text size, including Safari-style text enlargement.
+ for(const language of ['hu','en'])for(const size of [16,32]){
+  await page.evaluate(({language,size})=>{card.hass={language,states:{'sensor.place':entity}};card.style.fontSize=size+'px';},{language,size});
+  const layout=await page.evaluate(()=>{const blocks=[...card.shadowRoot.querySelectorAll('.counts p')];const rects=blocks.map(e=>e.getBoundingClientRect());return {stacked:rects[1].top>=rects[0].bottom,overflow:blocks.some(e=>e.scrollWidth>e.clientWidth),text:card.shadowRoot.textContent};});
+  assert.equal(layout.stacked,true,`${language} ${size}: counters must stack on mobile`);
+  assert.equal(layout.overflow,false,`${language} ${size}: counter overflow`);
+  assert.ok(layout.text.includes(language==='hu'?'aktívként követett műholdas esemény':'satellite incidents tracked as active'));
+ }
+ await page.evaluate(()=>{card.style.fontSize='16px';card.hass={language:'hu',states:{'sensor.place':entity}};});
  // Background updates retain keyboard position, but never steal outside focus.
  await page.getByRole('button',{name:'Érzékelő részletei'}).focus();
  await page.evaluate(()=>{entity={...entity,attributes:{...entity.attributes,active_incidents:4}};card.hass={states:{'sensor.place':entity}};});
