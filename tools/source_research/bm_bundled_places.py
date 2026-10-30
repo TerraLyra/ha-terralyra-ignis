@@ -10,6 +10,10 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # Reviewed locative/adjective forms from RSS 93257 and 93273.
+    "Paks": ("Pakson", "paksi"),
+    "Erdőkertes": ("Erdőkertesen", "erdőkertesi"),
+    "Gödöllő": ("gödöllői",),
     # BM RSS 92598/92596: exact observed event and responder forms.
     'Szolnok': ('Szolnokon',),
     'Lébény': ('Lébénynél', 'lébényi'),
