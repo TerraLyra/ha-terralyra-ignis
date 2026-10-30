@@ -12,8 +12,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  // Counter columns must reflow with text size, including Safari-style text enlargement.
  for(const language of ['hu','en'])for(const size of [16,32]){
   await page.evaluate(({language,size})=>{card.hass={language,states:{'sensor.place':entity}};card.style.fontSize=size+'px';},{language,size});
-  const layout=await page.evaluate(()=>{const blocks=[...card.shadowRoot.querySelectorAll('.counts p')];const rects=blocks.map(e=>e.getBoundingClientRect());return {stacked:rects[1].top>=rects[0].bottom,overflow:blocks.some(e=>e.scrollWidth>e.clientWidth),text:card.shadowRoot.textContent};});
+  const layout=await page.evaluate(()=>{const blocks=[...card.shadowRoot.querySelectorAll('.counts p')];const rects=blocks.map(e=>e.getBoundingClientRect());return {gap:rects[1].top-rects[0].bottom,stacked:rects[1].top>=rects[0].bottom,overflow:blocks.some(e=>e.scrollWidth>e.clientWidth),text:card.shadowRoot.textContent};});
   assert.equal(layout.stacked,true,`${language} ${size}: counters must stack on mobile`);
+  assert.ok(layout.gap<=20,`${language} ${size}: excessive counter spacing`);
   assert.equal(layout.overflow,false,`${language} ${size}: counter overflow`);
   assert.ok(layout.text.includes(language==='hu'?'aktívként követett műholdas esemény':'satellite incidents tracked as active'));
  }
