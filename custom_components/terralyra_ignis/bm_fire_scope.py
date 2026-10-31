@@ -4,7 +4,7 @@ import re
 # Deliberately bounded vocabulary. A match is evidence for human review only.
 _PATTERNS = {
     'vegetation': r'(?<!\w)(?:erdő(?:tűz|ben)?|bozót(?:os)?(?:ra)?|nádas|aljnövényzet|avar|száraz fű|tarló)(?!\w)',
-    'local_asset': r'(?<!\w)(?:garázs(?:ra|ban)?|konyha|konyhában|melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi)(?!\w)',
+    'local_asset': r'(?<!\w)(?:garázs(?:ra|ban)?|konyha|konyhában|melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi|mosógép(?:et|ben|tűz)?)(?!\w)',
     'fire': r'(?<!\w)(?:ég|égett|égnek|égették|lángol|lángolt|tűz|tüzet|tűz keletkezett|kigyulladt|gyulladt[ \t]+ki)(?!\w)',
     'accident': r'(?<!\w)(?:összeütközött|ütközött|karambolozott|karambol|baleset|elgázolt|felborult)(?!\w)',
     # Broad veto only: smoke, extinguishing and compounds must prevent a
@@ -43,7 +43,7 @@ def review_fire_scope(title: str, description: str, *, input_truncated: bool = F
                         start, end = sentence.start()+match.start(), sentence.start()+match.end()
                         evidence.append(dict(kind=kind, field=field, start=start, end=end,
                                              evidence=text[start:end]))
-                fire = found['fire'] or bool(re.search(r'(?<!\w)(?:erdőtűz|lakástűz)(?!\w)', sentence.group(), re.I))
+                fire = found['fire'] or bool(re.search(r'(?<!\w)(?:erdőtűz|lakástűz|mosógéptűz)(?!\w)', sentence.group(), re.I))
                 accident |= found['accident']
                 fire_mentioned |= fire or found['possible_fire']
                 vegetation |= fire and found['vegetation']
