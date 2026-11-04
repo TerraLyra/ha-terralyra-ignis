@@ -10,6 +10,11 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # RSS 93397: responding fire brigade adjective.
+    "Kőszeg": ("kőszegi",),
+    # RSS 93315/93314: observed location and responding-unit forms.
+    "Tárnok": ("Tárnokon",),
+    "Balmazújváros": ("balmazújvárosi",),
     # RSS 93285: adjective may describe an incident or a responding brigade.
     "Békéscsaba": ("békéscsabai",),
     # Reviewed locative/adjective forms from RSS 93257 and 93273.
