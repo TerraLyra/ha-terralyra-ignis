@@ -6,7 +6,7 @@ _PATTERNS = {
     'vegetation': r'(?<!\w)(?:erdő(?:tűz|ben)?|bozót(?:os)?(?:ra)?|nádas|aljnövényzet|avar|száraz fű|tarló)(?!\w)',
     'local_asset': r'(?<!\w)(?:garázs(?:ra|ban)?|konyha|konyhában|melléképület(?:ben)?|lakás(?:ban|tűz)?|ház(?:ban)?|családi ház|személyautó|gépkocsi|autó|jármű|lakókocsi|mosógép(?:et|ben|tűz)?)(?!\w)',
     'fire': r'(?<!\w)(?:ég|égett|égnek|égették|lángol|lángolt|tűz|tüzet|tűz keletkezett|kigyulladt|gyulladt[ \t]+ki)(?!\w)',
-    'accident': r'(?<!\w)(?:összeütközött|ütközött|karambolozott|karambol|baleset|elgázolt|felborult)(?!\w)',
+    'accident': r'(?<!\w)(?:összeütközött|ütközött|karambolozott|karambol|baleset(?:hez)?|árokba[ \t]+hajtott|elgázolt|felborult)(?!\w)',
     # Broad veto only: smoke, extinguishing and compounds must prevent a
     # non-fire label even when the narrow type classifier misses them.
     # Responding firefighters (tűzoltók) alone do not establish a fire.
@@ -36,6 +36,13 @@ def review_fire_scope(title: str, description: str, *, input_truncated: bool = F
                 found = {}
                 for kind, pattern in PATTERNS.items():
                     matches = list(pattern.finditer(sentence.group()))
+                    if kind == 'uncertain':
+                        # Traffic permission is not uncertainty about the incident.
+                        # Filter this occurrence only; other uncertainty survives.
+                        matches = [m for m in matches if not (
+                            m.group().casefold() == 'lehet'
+                            and re.match(r'[ \t]+közlekedni(?!\w)', sentence.group()[m.end():], re.I)
+                        )]
                     if kind == 'possible_fire':
                         matches = [m for m in matches if not re.fullmatch(r'tűzoltó(?:k|kat|knak|khoz|kkal|i|it|inak|ság|ságok|sági)?', m.group(), re.I)]
                     found[kind] = bool(matches)
