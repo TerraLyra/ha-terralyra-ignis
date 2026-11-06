@@ -41,7 +41,9 @@ def review_fire_scope(title: str, description: str, *, input_truncated: bool = F
                         # Filter this occurrence only; other uncertainty survives.
                         matches = [m for m in matches if not (
                             m.group().casefold() == 'lehet'
-                            and re.match(r'[ \t]+közlekedni(?!\w)', sentence.group()[m.end():], re.I)
+                            and (re.match(r'[ \t]+közlekedni(?!\w)', sentence.group()[m.end():], re.I)
+                                 or (re.search(r'(?<!\w)forgalmi[ \t]+akadályra[ \t]+$', sentence.group()[:m.start()], re.I)
+                                     and re.match(r'[ \t]+számítani(?!\w)', sentence.group()[m.end():], re.I)))
                         )]
                     if kind == 'uncertain' and re.fullmatch(
                         r'[ \t]*A[ \t]+tűz[ \t]+nem[ \t]+terjedt[ \t]+tovább[ \t]*',
