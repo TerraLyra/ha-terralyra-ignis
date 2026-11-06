@@ -10,6 +10,12 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # RSS 93465/93466: incident locatives and brigade adjectives.
+    "Tuzsér": ("Tuzséron",),
+    "Siófok": ("Siófokon", "siófoki"),
+    "Záhony": ("záhonyi",),
+    # RSS 93454: location near Gyál, not the road direction.
+    "Gyál": ("Gyálnál",),
     # RSS 93427/93426: incident locatives and responding brigade.
     "Miskolc": ("Miskolcon",),
     "Iván": ("Ivánon",),
