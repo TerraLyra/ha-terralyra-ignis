@@ -10,6 +10,9 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # RSS 93488: incident vicinity and responding brigade.
+    "Üllő": ("Üllőnél",),
+    "Monor": ("monori",),
     # RSS 93465/93466: incident locatives and brigade adjectives.
     "Tuzsér": ("Tuzséron",),
     "Siófok": ("Siófokon", "siófoki"),
