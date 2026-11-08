@@ -10,6 +10,11 @@ from bm_location_candidates import Settlement
 DATABASE = Path(__file__).resolve().parents[2] / 'custom_components/terralyra_ignis/data/geonames_cities500.sqlite3'
 # Small manually reviewed vocabulary, not a general Hungarian suffix generator.
 REVIEWED_ALIASES = {
+    # RSS 93533/93534: incident locatives and responding brigades.
+    "Tura": ("Turán",),
+    "Abaújszántó": ("abaújszántói", "Abaújszántón"),
+    "Hatvan": ("hatvani",),
+    "Encs": ("encsi",),
     # RSS 93522: incident place and responding brigade adjectives.
     "Bácsborsód": ("bácsborsódi", "Bácsborsódon"),
     "Bácsbokod": ("bácsbokodi",),
