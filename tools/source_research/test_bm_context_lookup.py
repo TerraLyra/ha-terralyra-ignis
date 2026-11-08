@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from copy import deepcopy
 from test_bm_satellite_context import BMTownReport
@@ -10,7 +11,7 @@ class LookupTests(unittest.TestCase):
     def test_whole_local_pipeline_preserves_history_and_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'places.db'
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db, db:
                 db.executescript("CREATE TABLE metadata(key,value); INSERT INTO metadata VALUES ('source','GeoNames HU'),('schema_version','1'); CREATE TABLE hu_names(geoname_id,name,latitude,longitude); INSERT INTO hu_names VALUES (1,'Hejőbába',47.9,20.9);")
             class Resolver:
                 def _resolve_sync(self,lat,lon):return ('Hejőbába','HU',2.,47.9,20.9)
@@ -23,5 +24,5 @@ class LookupTests(unittest.TestCase):
             self.assertEqual((history,notices),original)
             self.assertFalse(result['creates_incident'])
             with self.assertRaises(ValueError):lookup_context('missing',history,notices,Resolver(),path)
-            with sqlite3.connect(path) as db:db.execute("INSERT INTO hu_names VALUES (2,'Hejőbába',48.,21.)")
+            with closing(sqlite3.connect(path)) as db, db:db.execute("INSERT INTO hu_names VALUES (2,'Hejőbába',48.,21.)")
             self.assertEqual(lookup_context('a',history,notices,Resolver(),path)['reports'],[])
