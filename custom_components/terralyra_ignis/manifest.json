@@ -2,6 +2,8 @@
   "domain": "terralyra_ignis",
   "name": "TerraLyra IGNIS",
   "after_dependencies": [
+    "automation",
+    "blueprint",
     "lovelace"
   ],
   "codeowners": [

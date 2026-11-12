@@ -38,6 +38,8 @@ class NotificationTextTests(unittest.TestCase):
     def setUp(self):
         self.config = yaml.load(BLUEPRINT.read_text(), Loader=BlueprintLoader)
         self.env = Environment(undefined=StrictUndefined)
+        self.env.globals.update(config_entry_attr=lambda entry, attr: "terralyra_ignis", integration_entities=lambda domain: [])
+        self.env.filters["config_entry_id"] = lambda entity: entity
 
     def render(self, language="hu", places=None):
         if places is None:
@@ -113,11 +115,22 @@ class NotificationTextTests(unittest.TestCase):
 
     def test_manual_run_and_empty_event_do_not_notify(self):
         guard = self.env.from_string(self.config["actions"][0]["value_template"])
-        for context in ({}, {"trigger": {"platform": "event", "event": {"data": {}}}},
-                        {"trigger": {"platform": "state"}}):
-            self.assertEqual(guard.render(context), "False")
-        self.assertEqual(guard.render(trigger={"platform": "event", "event": {
-            "data": {"alert_locations": [{"location_name": "Home"}]}}}), "True")
+        for context in ({}, {"trigger": {"platform": "state"}},
+                        {"trigger": {"platform": "event", "event": {"data": {}}},
+                         "selected_ignis_entry": "old"}):
+            self.assertEqual(guard.render(context).strip(), "False")
+
+    def test_reinstall_only_falls_back_when_unambiguous(self):
+        guard = self.env.from_string(self.config["actions"][0]["value_template"])
+        self.env.filters["config_entry_id"] = lambda entity: entity
+        event = {"platform": "event", "event": {"data": {
+            "config_entry_id": "new", "alert_locations": [{"location_name": "Home"}]}}}
+        self.env.globals["config_entry_attr"] = lambda entry, attr: None
+        for entries, expected in ((["new"], "True"), (["new", "other"], "False"), ([], "False")):
+            self.env.globals["integration_entities"] = lambda domain: entries
+            self.assertEqual(guard.render(trigger=event, selected_ignis_entry="old").strip(), expected)
+        self.env.globals["config_entry_attr"] = lambda entry, attr: "terralyra_ignis"
+        self.assertEqual(guard.render(trigger=event, selected_ignis_entry="old").strip(), "False")
 
 
 async def test_home_assistant_blueprint_schema_and_rendering(hass):
@@ -140,7 +153,7 @@ async def test_home_assistant_blueprint_schema_and_rendering(hass):
         }}})
         inputs.validate()
         config = PLATFORM_SCHEMA(inputs.async_substitute())
-        assert config["triggers"][0]["event_data"] == {"config_entry_id": "test_entry"}
+        assert "event_data" not in config["triggers"][0]
         notification = config["actions"][1]
         context = {"notification_language": language, "trigger": {
             "platform": "event", "event": {"data": {"alert_locations": [
@@ -153,7 +166,7 @@ async def test_home_assistant_blueprint_schema_and_rendering(hass):
         guard = config["actions"][0]["value_template"]
         guard.hass = hass
         assert guard.async_render({}) is False
-        assert guard.async_render(context) is True
+        # Entry matching is exercised separately with real entries in lifecycle tests.
 
 
 if __name__ == "__main__":

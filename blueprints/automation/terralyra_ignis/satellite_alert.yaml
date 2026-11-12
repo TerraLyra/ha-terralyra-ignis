@@ -45,19 +45,27 @@ blueprint:
 
 variables:
   notification_language: !input language
+  selected_ignis_entry: !input ignis_entry
 
 triggers:
   - trigger: event
     event_type: terralyra_ignis_fire_alert
-    event_data:
-      config_entry_id: !input ignis_entry
 
 # Keep this guard inside actions too: manually running actions has no event.
 actions:
   - condition: template
     value_template: >-
-      {{ trigger is defined and trigger.platform == 'event'
-         and (trigger.event.data.get('alert_locations', []) | count > 0) }}
+      {% if trigger is defined and trigger.platform == 'event' %}
+        {% set event_entry = trigger.event.data.get('config_entry_id') %}
+        {% set known_entries = integration_entities('terralyra_ignis')
+          | map('config_entry_id') | reject('none') | unique | list %}
+        {% set selected_exists = config_entry_attr(selected_ignis_entry, 'domain') == 'terralyra_ignis' %}
+        {{ (trigger.event.data.get('alert_locations', []) | count > 0)
+           and event_entry is string
+           and ((selected_exists and event_entry == selected_ignis_entry)
+             or (not selected_exists and known_entries | count == 1
+                 and event_entry == known_entries[0])) }}
+      {% else %}{{ false }}{% endif %}
   - device_id: !input phone
     domain: mobile_app
     type: notify
