@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.17
+
+- Preserve saved satellite notification automations across a full IGNIS reinstall.
+- Safely update untouched official imported blueprints while preserving customized copies.
+
 ## 0.41.7
 
 - Move keyboard focus to Close when the selected report or focused action disappears during an update.
