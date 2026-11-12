@@ -1,0 +1,96 @@
+blueprint:
+  name: TerraLyra IGNIS — short satellite fire notification
+  description: >-
+    Send a short notification to a Home Assistant Companion App phone when IGNIS
+    observes a satellite incident entering a location's alert radius. Requires
+    IGNIS 0.33.0 or newer. Configure monitoring and alert radii in IGNIS first.
+    Choose a notification language below. The first snapshot after
+    startup establishes a quiet baseline. Official reports do not trigger this
+    automation. Disable any replaced notification automation to avoid duplicates.
+  domain: automation
+  author: TerraLyra
+  homeassistant:
+    min_version: "2026.9.0"
+  input:
+    ignis_entry:
+      name: IGNIS installation / IGNIS-példány
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    phone:
+      name: Phone / Telefon
+      description: A Companion App device with push notifications enabled.
+      selector:
+        device:
+          filter:
+            integration: mobile_app
+    language:
+      name: Notification language / Értesítés nyelve
+      default: en
+      selector:
+        select:
+          options:
+            - label: Magyar
+              value: hu
+            - label: English
+              value: en
+            - label: Deutsch
+              value: de
+            - label: Español
+              value: es
+            - label: Français
+              value: fr
+            - label: Italiano
+              value: it
+
+variables:
+  notification_language: !input language
+
+triggers:
+  - trigger: event
+    event_type: terralyra_ignis_fire_alert
+    event_data:
+      config_entry_id: !input ignis_entry
+
+# Keep this guard inside actions too: manually running actions has no event.
+actions:
+  - condition: template
+    value_template: >-
+      {{ trigger is defined and trigger.platform == 'event'
+         and (trigger.event.data.get('alert_locations', []) | count > 0) }}
+  - device_id: !input phone
+    domain: mobile_app
+    type: notify
+    title: >-
+      {%- set names = trigger.event.data.alert_locations | map(attribute='location_name') | join(', ') -%}
+      {%- set titles = {'hu':'Tűz észlelés %s közelében', 'en':'Fire detected near %s',
+        'de':'Feuer nahe %s erkannt', 'es':'Incendio detectado cerca de %s',
+        'fr':'Incendie détecté près de %s', 'it':'Incendio rilevato vicino a %s'} -%}
+      {{ titles.get(notification_language, titles.en) | format(names) }}
+    message: >-
+      {%- set hu = {'N':'északra','NNE':'észak-északkeletre','NE':'északkeletre','ENE':'kelet-északkeletre','E':'keletre','ESE':'kelet-délkeletre','SE':'délkeletre','SSE':'dél-délkeletre','S':'délre','SSW':'dél-délnyugatra','SW':'délnyugatra','WSW':'nyugat-délnyugatra','W':'nyugatra','WNW':'nyugat-északnyugatra','NW':'északnyugatra','NNW':'észak-északnyugatra'} -%}
+      {%- set en = {'N':'north','NNE':'north-northeast','NE':'northeast','ENE':'east-northeast','E':'east','ESE':'east-southeast','SE':'southeast','SSE':'south-southeast','S':'south','SSW':'south-southwest','SW':'southwest','WSW':'west-southwest','W':'west','WNW':'west-northwest','NW':'northwest','NNW':'north-northwest'} -%}
+      {%- set de = {'N': 'nördlich', 'NNE': 'nordnordöstlich', 'NE': 'nordöstlich', 'ENE': 'ostnordöstlich', 'E': 'östlich', 'ESE': 'ostsüdöstlich', 'SE': 'südöstlich', 'SSE': 'südsüdöstlich', 'S': 'südlich', 'SSW': 'südsüdwestlich', 'SW': 'südwestlich', 'WSW': 'westsüdwestlich', 'W': 'westlich', 'WNW': 'westnordwestlich', 'NW': 'nordwestlich', 'NNW': 'nordnordwestlich'} -%}
+      {%- set es = {'N': 'norte', 'NNE': 'nornoreste', 'NE': 'noreste', 'ENE': 'estenoreste', 'E': 'este', 'ESE': 'estesureste', 'SE': 'sureste', 'SSE': 'sursureste', 'S': 'sur', 'SSW': 'sursuroeste', 'SW': 'suroeste', 'WSW': 'oestesuroeste', 'W': 'oeste', 'WNW': 'oestenoroeste', 'NW': 'noroeste', 'NNW': 'nornoroeste'} -%}
+      {%- set fr = {'N': 'nord', 'NNE': 'nord-nord-est', 'NE': 'nord-est', 'ENE': 'est-nord-est', 'E': 'est', 'ESE': 'est-sud-est', 'SE': 'sud-est', 'SSE': 'sud-sud-est', 'S': 'sud', 'SSW': 'sud-sud-ouest', 'SW': 'sud-ouest', 'WSW': 'ouest-sud-ouest', 'W': 'ouest', 'WNW': 'ouest-nord-ouest', 'NW': 'nord-ouest', 'NNW': 'nord-nord-ouest'} -%}
+      {%- set it = {'N': 'nord', 'NNE': 'nord-nord-est', 'NE': 'nord-est', 'ENE': 'est-nord-est', 'E': 'est', 'ESE': 'est-sud-est', 'SE': 'sud-est', 'SSE': 'sud-sud-est', 'S': 'sud', 'SSW': 'sud-sud-ovest', 'SW': 'sud-ovest', 'WSW': 'ovest-sud-ovest', 'W': 'ovest', 'WNW': 'ovest-nord-ovest', 'NW': 'nord-ovest', 'NNW': 'nord-nord-ovest'} -%}
+      {%- for place in trigger.event.data.alert_locations -%}
+        {%- set distance = '%.1f' | format(place.distance_km | float) -%}
+        {%- if notification_language == 'hu' -%}
+          {{ 'Tűz észlelve ' ~ distance | replace('.', ',') ~ 'km-re a ' ~ place.location_name ~ ' ponttól' }}{{ ' ' ~ hu[place.direction] if place.get('direction') in hu else '' }}
+        {%- elif notification_language == 'de' -%}
+          {{ 'Feuer erkannt: ' ~ (distance | replace('.', ',')) ~ ' km ' }}{{ de[place.direction] ~ ' von ' if place.get('direction') in de else 'von ' }}{{ place.location_name }}
+        {%- elif notification_language == 'es' -%}
+          {{ 'Incendio detectado a ' ~ (distance | replace('.', ',')) ~ ' km ' }}{{ 'al ' ~ es[place.direction] ~ ' de ' if place.get('direction') in es else 'de ' }}{{ place.location_name }}
+        {%- elif notification_language == 'fr' -%}
+          {{ 'Incendie détecté à ' ~ (distance | replace('.', ',')) ~ ' km ' }}{{ ("à l'" if place.direction in ['E', 'ENE', 'ESE', 'W', 'WNW', 'WSW'] else 'au ') ~ fr[place.direction] ~ ' de ' if place.get('direction') in fr else 'de ' }}{{ place.location_name }}
+        {%- elif notification_language == 'it' -%}
+          {{ 'Incendio rilevato a ' ~ (distance | replace('.', ',')) ~ ' km ' }}{{ 'a ' ~ it[place.direction] ~ ' di ' if place.get('direction') in it else 'da ' }}{{ place.location_name }}
+        {%- else -%}
+          {{ 'Fire detected ' ~ distance ~ ' km ' }}{{ en[place.direction] ~ ' of ' if place.get('direction') in en else 'from ' }}{{ place.location_name }}
+        {%- endif -%}
+        {{- '. ' if not loop.last else '' -}}
+      {%- endfor -%}
+
+mode: queued
+max: 10

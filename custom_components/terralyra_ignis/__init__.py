@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import (
     HomeAssistant,
     ServiceCall,
@@ -18,6 +19,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
+from .blueprint_upgrade import async_upgrade_imported_blueprints
 from .frontend_resources import async_register_card_paths
 from .card_resource_service import register_card_resource_service
 from .nifc_service import register_nifc_initialization
@@ -100,6 +102,13 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register explicit, response-only diagnostic actions."""
 
+    async def _upgrade_blueprints(_event=None):
+        await async_upgrade_imported_blueprints(hass)
+
+    if hass.is_running:
+        hass.async_create_task(_upgrade_blueprints())
+    else:
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _upgrade_blueprints)
     await async_register_card_paths(hass)
     register_card_resource_service(hass)
 

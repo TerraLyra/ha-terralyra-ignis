@@ -100,7 +100,11 @@ notification automation uses the intended phone and language. An optional summar
 shows the same place. HACS updates the integration and bundled card files. Restart HA after an update
 and fully reload the browser or Companion App frontend. Resource paths stay the
 same; if old code persists, use the [version-query recovery](CARD_RESOURCES.md#later-updates-and-rollback).
-Imported blueprints still need their own update steps. Satellite notices supplement
+Untouched copies of the earlier official notification blueprint update automatically.
+Customized copies are left unchanged; review and update those manually. After deleting
+and recreating IGNIS, a saved automation follows the new installation only when it is
+the sole available IGNIS installation. If several exist, select the intended one again.
+Satellite notices supplement
 awareness and do not replace official emergency warnings.
 
 ## Magyar
@@ -195,5 +199,9 @@ A HACS az integrációt és a csomagolt kártyafájlokat is frissíti. Frissít�
 indítsd újra a HA-t, majd töltsd újra teljesen a böngészőt vagy a Companion App
 felületét. Az erőforrások útvonala marad; régi megjelenés esetén kövesd a
 [verziójelöléses frissítés lépéseit](CARD_RESOURCES.md#magyar-egyszeri-átállás).
-Az importált blueprint továbbra is külön frissül.
+A korábbi hivatalos értesítési blueprint változatlan példánya automatikusan frissül.
+Az egyedileg módosított példányt a rendszer nem írja felül: azt külön kell átnézni és
+frissíteni. Az IGNIS törlése és újratelepítése után a mentett automatizálás csak akkor
+követi automatikusan az új példányt, ha az az egyetlen rendelkezésre álló IGNIS-példány.
+Több példány esetén válaszd ki újra a megfelelőt.
 Az IGNIS értesítése nem helyettesíti a hivatalos hatósági figyelmeztetést.
