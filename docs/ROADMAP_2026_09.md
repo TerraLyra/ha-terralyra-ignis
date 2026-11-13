@@ -1,6 +1,6 @@
 # IGNIS public development roadmap
 
-Status reconciled on 2026-10-24: stable integration **0.41.5**.
+Status reconciled on 2026-11-13: stable integration **0.41.17**.
 Main-branch changes after that release are not automatically installed by HACS.
 Dated sections below retain historical decisions; this current summary takes
 precedence where their delivery status has changed.
@@ -18,12 +18,29 @@ precedence where their delivery status has changed.
   layouts, BM navigation, theme contrast and enlarged-filter fixes (0.41.5).
   Sampled production refresh and rendering checks passed; see
   [release validation](NEXT_RELEASE_READINESS.md).
-- **Acceptance still open:** unaided setup, the user's separate reinstall trial,
-  and real phone notification delivery. Assisted and automated checks do not
-  complete these acceptance steps. See [onboarding acceptance](ONBOARDING_ACCEPTANCE.md).
-- **Provider work:** resolve each product's remaining technical/access gates
-  before adding runtime adapters. TasALERT is already delivered in 0.40.0;
-  maintain its current implementation rather than repeat its initial preflight.
+- **Delivered since 0.41.5:** later releases include map keyboard and focus
+  improvements, mobile counter layout fixes and bounded BM language-review
+  improvements. Version 0.41.17 updates unmodified official notification
+  blueprints and permits unambiguous rebinding after an IGNIS reinstall;
+  customized blueprint copies remain unchanged.
+- **Sampled acceptance:** an iPhone received a real test notification and a
+  later live notification. Isolated HACS removal and reinstallation exercised
+  saved automation and blueprint retention with a synthetic phone; a real push
+  after that isolated reinstall was not tested. These checks do not establish
+  delivery on all devices.
+- **Acceptance still open:** independent, unaided first-time setup, a separate
+  user-led reinstall trial, broader historical migration coverage and further
+  accessibility checks. Earlier dated acceptance documents remain historical
+  evidence rather than a current status summary.
+- **HACS catalogue:** the custom-repository installation and release checks
+  have been exercised. The default-catalogue entry is not yet included; submission and inclusion
+  remain subject to the HACS process and maintainer review.
+- **Provider work:** resolve product-specific technical, access and usage gates
+  before adding runtime adapters. JAXA WLF has documented usage conditions;
+  authenticated transport and real-file validation remain open. The distinct
+  CAMS Himawari product retains its own endpoint and terms gates. GWIS remains
+  research pending product-date and response validation. TasALERT was delivered
+  in 0.40.0; maintain its implementation rather than repeat initial preflight.
 - **BM:** satellite-first report association shipped in 0.37.0. Keep independent
   samples as bounded validation; do not create events from BM reports or restart
   an open-ended language-model effort. See [current behavior](BM_SATELLITE_FIRST.md).

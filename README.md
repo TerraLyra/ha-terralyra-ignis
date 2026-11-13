@@ -748,26 +748,29 @@ empty temporarily or enter `terralyra_ignis` in the card's YAML as shown above.
 
 ## Roadmap
 
-### Next
+### Current priorities
 
-- extend the opt-in per-location FRMv3 forecasts shipped in 0.32.0 only after
-  validating additional providers; JRC GWIS is the worldwide candidate, with
-  point-query and product-date gates documented in
-  [`docs/GWIS_TECHNICAL_SPIKE.md`](docs/GWIS_TECHNICAL_SPIKE.md)
-- obtain a documented near-real-time Himawari-9 FRP-PIXEL List Product endpoint
-  and access terms; a conservative foundation now exposes geographically
-  relevant Himawari coverage as an inactive opportunity without counting it as
-  an active source, and the remaining go/no-go gates are recorded in
-  [`docs/HIMAWARI_TECHNICAL_SPIKE.md`](docs/HIMAWARI_TECHNICAL_SPIKE.md)
-- collect operational GOES-18/19 experience from covered installations while
-  retaining the conservative pre-download coverage gate and product navigation
-  checks; technical and resource details are in
-  [`docs/GOES_TECHNICAL_SPIKE.md`](docs/GOES_TECHNICAL_SPIKE.md) and
-  [`docs/GOES_DECODER_BENCHMARK.md`](docs/GOES_DECODER_BENCHMARK.md)
-- continue localization and usability review on real Home Assistant dashboards;
-  every enabled location now has a translated operational-status entity with
-  equal-source health, timestamps and local incident-confirmation counts
-- keep bundled TerraLyra IGNIS artwork covered by the HACS brands validator
+- Complete the HACS default-catalogue submission process; IGNIS is currently
+  available as a custom repository. Acceptance is decided by HACS maintainers.
+- Continue unaided onboarding, independent reinstall and accessibility checks.
+  A real iPhone received a notification in a sampled live test; this does not
+  establish delivery on all phones or in every situation.
+- Maintain satellite-first BM report association and bounded location reviews;
+  BM reports do not create independent satellite incidents.
+- Extend opt-in per-location forecasts only after validating additional
+  providers. GWIS remains a research candidate with product-date and point-query
+  gates in [`docs/GWIS_TECHNICAL_SPIKE.md`](docs/GWIS_TECHNICAL_SPIKE.md).
+- Validate Himawari access separately by product. JAXA WLF usage requirements
+  and the relevant date boundary are documented; authenticated delivery and
+  real-file validation remain open. The distinct CAMS FRP-PIXEL route still
+  needs endpoint and product-specific access/terms verification. Neither is an
+  active IGNIS source. See [`docs/HIMAWARI_PRODUCT_TERMS.md`](docs/HIMAWARI_PRODUCT_TERMS.md)
+  and [`docs/HIMAWARI_TECHNICAL_SPIKE.md`](docs/HIMAWARI_TECHNICAL_SPIKE.md).
+- Continue GOES-18/19 operational validation, localization, accessibility and
+  source-specific diagnostics; retain the existing coverage and safety gates.
+
+The [detailed roadmap](docs/ROADMAP_2026_09.md) distinguishes delivered work
+from remaining validation and access gates.
 
 ### MSG-IODC compatibility check
 
