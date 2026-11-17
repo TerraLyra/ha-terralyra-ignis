@@ -2,12 +2,12 @@
 
 from datetime import date, datetime, time, timedelta
 import logging
-from zoneinfo import ZoneInfo
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .clustering import haversine_km
 from .const import DOMAIN
@@ -60,7 +60,7 @@ class NswRfsCalendar(CoordinatorEntity, CalendarEntity):
         if not self.coordinator.last_update_success or not data or data["status"] == "unavailable":
             raise HomeAssistantError("NSW RFS reports are temporarily unavailable")
         locations = [loc for loc in resolve_monitored_locations(hass, self._entry) if loc.enabled]
-        zone = ZoneInfo(hass.config.time_zone)
+        zone = await dt_util.async_get_time_zone(hass.config.time_zone)
         result = []
         for record in data["events"]:
             matches = []

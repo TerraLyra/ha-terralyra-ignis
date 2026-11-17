@@ -2,12 +2,12 @@
 
 from datetime import datetime, timedelta, time
 import logging
-from zoneinfo import ZoneInfo
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .gdacs_geometry import location_relation
@@ -58,6 +58,7 @@ class GdacsCalendar(CoordinatorEntity, CalendarEntity):
         if not self.coordinator.last_update_success or not data or data["status"] == "unavailable":
             raise HomeAssistantError("GDACS context is temporarily unavailable")
         locations = [loc for loc in resolve_monitored_locations(hass, self._entry) if loc.enabled]
+        zone = await dt_util.async_get_time_zone(hass.config.time_zone)
         result = []
         self._spatial_unknown = 0
         for record in data["events"]:
@@ -69,7 +70,6 @@ class GdacsCalendar(CoordinatorEntity, CalendarEntity):
             # Use upstream calendar dates as all-day context, never guess a timezone.
             start = datetime.fromisoformat(record["fromdate_raw"]).date()
             end = datetime.fromisoformat(record["todate_raw"]).date() + timedelta(days=1)
-            zone = ZoneInfo(hass.config.time_zone)
             if datetime.combine(start, time.min, zone) >= end_date or datetime.combine(end, time.min, zone) <= start_date:
                 continue
             hu = hass.config.language == "hu"

@@ -8,6 +8,7 @@ from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .monitoring import resolve_monitored_locations
@@ -126,8 +127,9 @@ class QfdCalendar(CoordinatorEntity, CalendarEntity):
         if not self.coordinator.last_update_success or data is None or data.status == "unavailable":
             raise HomeAssistantError("Queensland QFD reports are temporarily unavailable")
         locations = tuple(resolve_monitored_locations(hass,self._entry))
+        zone = await dt_util.async_get_time_zone(hass.config.time_zone)
         # Geometry and rendering operate on immutable snapshots outside the HA loop.
         events, self._projection = await hass.async_add_executor_job(partial(
             _render,data,locations,datetime.now(UTC),start_date,end_date,
-            ZoneInfo(hass.config.time_zone),hass.config.language == "hu"))
+            zone,hass.config.language == "hu"))
         return events
