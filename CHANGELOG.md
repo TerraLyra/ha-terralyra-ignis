@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.18
+
+- Resolve GDACS, NSW RFS and Queensland QFD calendar time zones asynchronously to avoid blocking the Home Assistant event loop.
+
 ## 0.41.17
 
 - Preserve saved satellite notification automations across a full IGNIS reinstall.
