@@ -132,7 +132,8 @@ class TasAlertOwner:
         self._recovery_deadline=candidate.response.next_attempt
         # A cancelled/failed save has unknown durability: block subsequent I/O.
         try:
-            await self._storage(self.store.async_save,json.loads(encode(candidate)))
+            encoded = await asyncio.to_thread(encode, candidate)
+            await self._storage(self.store.async_save, json.loads(encoded))
         except BaseException:
             self.blocked=True
             raise

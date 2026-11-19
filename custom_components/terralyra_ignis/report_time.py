@@ -4,6 +4,8 @@ import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+SOURCE_ZONE = ZoneInfo("Europe/Budapest")
+
 _YESTERDAY_IGNITION = re.compile(
     r"\btegnap(?:\s+(?:kora|késő|reggel|délelőtt|délután|este|éjjel|hajnalban)){0,3}"
     r"\s+gyulladt\s+(?:meg|ki)\b",
@@ -25,7 +27,7 @@ def hungarian_start_hint(description: str, published: datetime) -> dict[str, str
     if len(matches) != 1 or re.search(r"\b(?:nem|sem)\b", description, re.IGNORECASE):
         return unknown
     try:
-        day = published.astimezone(ZoneInfo("Europe/Budapest")).date() - timedelta(days=1)
+        day = published.astimezone(SOURCE_ZONE).date() - timedelta(days=1)
     except (ValueError, OverflowError):
         return unknown
     return {

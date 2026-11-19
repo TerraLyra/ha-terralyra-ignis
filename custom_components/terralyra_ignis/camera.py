@@ -76,7 +76,8 @@ class FireRiskMapCamera(IgnisFireRiskEntity, Camera):
                     places = await resolver.async_map_places(bbox)
                 except PlaceLookupError as err:
                     _LOGGER.debug("Could not add FRMv3 settlement labels: %s", err)
-            image = annotate_fire_risk_map(
+            image = await self.hass.async_add_executor_job(
+                annotate_fire_risk_map,
                 image,
                 bbox,
                 float(self.hass.config.latitude),

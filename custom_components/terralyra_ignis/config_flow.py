@@ -267,8 +267,8 @@ class IgnisConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception:  # noqa: BLE001
                 errors["base"] = "cannot_connect"
             else:
-                await self.async_set_unique_id(username.lower())
-                self._abort_if_unique_id_mismatch(reason="wrong_account")
+                if username.lower() != entry.data.get(CONF_USERNAME, "").strip().lower():
+                    return self.async_abort(reason="wrong_account")
                 return self.async_update_reload_and_abort(
                     entry,
                     data_updates={

@@ -411,7 +411,7 @@ async def test_reauth_success(hass, mock_test_auth: AsyncMock) -> None:
     """Test successful reauthentication updates credentials and reloads."""
     entry = MockConfigEntry(
         domain=DOMAIN,
-        unique_id=USERNAME,
+        unique_id=DOMAIN,
         data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
     )
     entry.add_to_hass(hass)
@@ -1059,7 +1059,11 @@ async def test_options_cannot_disable_or_delete_last_location(hass) -> None:
     assert result["errors"] == {"base": "one_location_required"}
 
 
-async def test_options_toggle_and_delete_with_two_locations(hass) -> None:
+async def test_options_toggle_and_delete_with_two_locations(hass, monkeypatch) -> None:
+    # This test exercises the options flow, not an integration reload. Avoid
+    # leaving a scheduled reload racing with Home Assistant fixture teardown.
+    reload_entry = AsyncMock()
+    monkeypatch.setattr(hass.config_entries, "async_reload", reload_entry)
     entry = MockConfigEntry(
         domain=DOMAIN,
         data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},

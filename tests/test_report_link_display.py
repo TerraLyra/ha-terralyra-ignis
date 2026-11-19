@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 """Readable annotations retain uncertainty without exposing audit identifiers."""
 
 from copy import deepcopy
@@ -27,7 +28,7 @@ def test_readable_link_preserves_review(language):
         },
     }
     original = deepcopy(link)
-    lines = link_lines(link, language, "Europe/Budapest")
+    lines = link_lines(link, language, ZoneInfo("Europe/Budapest"))
     text = "\n".join(lines)
     assert "Egyek test report" in lines[0]
     assert link["review"]["report_url"] in lines[1]
@@ -38,12 +39,12 @@ def test_readable_link_preserves_review(language):
     assert "0.66 km" in text
     assert "private-" not in text and "076291" not in text
     assert link == original
-    assert link_lines(link, "unknown", "UTC") == link_lines(link, "en", "UTC")
+    assert link_lines(link, "unknown", ZoneInfo("UTC")) == link_lines(link, "en", ZoneInfo("UTC"))
 
 
 def test_repeated_dst_hour_is_unambiguous():
-    assert local_time("2026-10-25T00:30:00+00:00", "Europe/Budapest") == "2026-10-25 02:30 CEST (UTC+0200)"
-    assert local_time("2026-10-25T01:30:00+00:00", "Europe/Budapest") == "2026-10-25 02:30 CET (UTC+0100)"
+    assert local_time("2026-10-25T00:30:00+00:00", ZoneInfo("Europe/Budapest")) == "2026-10-25 02:30 CEST (UTC+0200)"
+    assert local_time("2026-10-25T01:30:00+00:00", ZoneInfo("Europe/Budapest")) == "2026-10-25 02:30 CET (UTC+0100)"
 
 
 async def test_existing_link_gets_local_title_without_storage_or_network_changes():

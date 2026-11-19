@@ -27,16 +27,16 @@ async def fetch_once(engine, session, *, clock=lambda: datetime.now(UTC), total_
             async with session.get(URL,headers=headers,allow_redirects=False,
                                    auto_decompress=False,raise_for_status=False) as response:
                 retry=response.headers.get('Retry-After')
-                if response.status!=200:return advance(engine,now,response.status,retry_after=retry)
+                if response.status!=200:return await asyncio.to_thread(advance,engine,now,response.status,retry_after=retry)
                 length=response.headers.get('Content-Length')
                 if (response.headers.get('Content-Encoding','identity').lower() not in ('identity','')
                     or (length is not None and (not length.isdigit() or int(length)>MAX_BYTES))):
-                    return advance(engine,now,503,retry_after=retry)
+                    return await asyncio.to_thread(advance,engine,now,503,retry_after=retry)
                 body=bytearray()
                 async for chunk in response.content.iter_chunked(65536):
-                    if len(body)+len(chunk)>MAX_BYTES:return advance(engine,now,503,retry_after=retry)
+                    if len(body)+len(chunk)>MAX_BYTES:return await asyncio.to_thread(advance,engine,now,503,retry_after=retry)
                     body.extend(chunk)
-                if length is not None and len(body)!=int(length):return advance(engine,now,503,retry_after=retry)
-                return advance(engine,now,200,bytes(body),etag=response.headers.get('ETag'),retry_after=retry)
+                if length is not None and len(body)!=int(length):return await asyncio.to_thread(advance,engine,now,503,retry_after=retry)
+                return await asyncio.to_thread(advance,engine,now,200,bytes(body),etag=response.headers.get('ETag'),retry_after=retry)
     except (TimeoutError, *transport_errors):
-        return advance(engine,now,503)
+        return await asyncio.to_thread(advance,engine,now,503)

@@ -1,7 +1,6 @@
 """Context-only calendar annotations for explicitly reviewed report links."""
 
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import UTC, datetime
 
 from .const import DOMAIN
 from .report_links import resolve_links
@@ -28,7 +27,7 @@ DETAILS = {
 
 def local_time(value, time_zone):
     """Use HA's time zone, including the UTC offset across DST transitions."""
-    return datetime.fromisoformat(value).astimezone(ZoneInfo(time_zone)).strftime(
+    return datetime.fromisoformat(value).astimezone(time_zone).strftime(
         "%Y-%m-%d %H:%M %Z (UTC%z)"
     )
 
@@ -52,7 +51,7 @@ async def active_links(hass, entry_id, history, notices=None):
     ]
 
 
-def link_lines(link, language, time_zone="UTC"):
+def link_lines(link, language, time_zone=UTC):
     label = LABELS.get(language, LABELS["en"])[0]
     report, explanation, distance, observations, reviewed = DETAILS.get(language, DETAILS["en"])
     candidate = link["review"]["candidate"]
