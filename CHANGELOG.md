@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.41.19
+
+- Fix LSA SAF reauthentication for existing integration entries.
+- Move fire-risk image rendering, fire-product parsing and TasALERT processing off the Home Assistant event loop.
+- Resolve report calendar time zones asynchronously and reuse the Budapest time zone for report start hints.
+
 ## 0.41.18
 
 - Resolve GDACS, NSW RFS and Queensland QFD calendar time zones asynchronously to avoid blocking the Home Assistant event loop.
