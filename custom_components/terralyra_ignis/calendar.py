@@ -7,6 +7,7 @@ from typing import Any
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import IgnisConfigEntry
@@ -236,14 +237,15 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
         if data is None:
             return []
         links = await active_links(hass, self._entry_id, data.incident_history)
+        zone = await dt_util.async_get_time_zone(hass.config.time_zone) or UTC
         events = []
         for incident in data.incident_history:
-            event = self._calendar_event(incident, links)
+            event = self._calendar_event(incident, links, zone)
             if event.end > start_date and event.start < end_date:
                 events.append(event)
         return sorted(events, key=lambda event: event.start)
 
-    def _calendar_event(self, incident: dict[str, Any], links=()) -> CalendarEvent:
+    def _calendar_event(self, incident: dict[str, Any], links=(), zone=UTC) -> CalendarEvent:
         labels = HISTORY_LABELS.get(self.hass.config.language, HISTORY_LABELS["en"])
         first_seen = _parse_history_time(incident["first_seen"])
         last_seen = _parse_history_time(incident["last_seen"])
@@ -285,7 +287,7 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
         annotations = []
         for link in links:
             if link["review"]["candidate"]["incident_id"] == incident.get("track_id"):
-                annotations.extend([*link_lines(link, self.hass.config.language, self.hass.config.time_zone), ""])
+                annotations.extend([*link_lines(link, self.hass.config.language, zone), ""])
         lines = annotations + lines
         return CalendarEvent(
             summary=labels["title"].format(place=place),

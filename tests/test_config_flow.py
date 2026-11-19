@@ -411,7 +411,7 @@ async def test_reauth_success(hass, mock_test_auth: AsyncMock) -> None:
     """Test successful reauthentication updates credentials and reloads."""
     entry = MockConfigEntry(
         domain=DOMAIN,
-        unique_id=USERNAME,
+        unique_id=DOMAIN,
         data={CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD},
     )
     entry.add_to_hass(hass)

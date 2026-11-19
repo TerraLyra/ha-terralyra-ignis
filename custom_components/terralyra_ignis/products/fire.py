@@ -1,6 +1,7 @@
 """MTG MTFRPPixel (LSA-509) client and CSV parser."""
 from __future__ import annotations
 
+import asyncio
 import csv
 import gzip
 import io
@@ -128,7 +129,7 @@ class ActiveFireClient(LsaSafApi):
                     except ClientResponseError as err:
                         raise LsaSafError(f"LSA SAF HTTP error: {err.status}") from err
                     payload = await _read_limited(response)
-                    return parse_product(filename, url, payload)
+                    return await asyncio.to_thread(parse_product, filename, url, payload)
             except LsaSafError:
                 raise
             except TimeoutError as err:

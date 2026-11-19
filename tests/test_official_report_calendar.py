@@ -159,7 +159,8 @@ async def test_reviewed_link_is_context_only_and_disappears_after_undo(hass, fre
     before = history_calendar._calendar_event(incident)
     from custom_components.terralyra_ignis.report_link_display import active_links
     display_links = await active_links(hass, entity._entry.entry_id, [incident], [report])
-    linked = history_calendar._calendar_event(incident, display_links)
+    from zoneinfo import ZoneInfo
+    linked = history_calendar._calendar_event(incident, display_links, ZoneInfo("Europe/Budapest"))
     assert linked.description.startswith(f"Kapcsolódó hír: {report['title']}")
     assert "2026-09-09 11:00 CEST (UTC+0200)" in linked.description
     assert saved["link_id"] not in linked.description

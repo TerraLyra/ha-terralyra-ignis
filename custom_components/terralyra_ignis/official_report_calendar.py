@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
@@ -82,6 +83,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
         links = await active_links(hass, self._entry.entry_id,
                                    data.incident_history if data is not None else [],
                                    self.coordinator.data["notices"])
+        zone = await dt_util.async_get_time_zone(hass.config.time_zone) or UTC
         events = []
         for notice in self.coordinator.data["notices"]:
             relevance = classify_report(notice)
@@ -95,7 +97,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
             event_notes = notes
             if matching:
                 event_notes = notes.replace(LABELS.get(hass.config.language, LABELS["en"])[1], "").strip()
-                event_notes = "\n\n".join("\n".join(link_lines(link, hass.config.language, hass.config.time_zone)) for link in matching) + "\n\n" + event_notes
+                event_notes = "\n\n".join("\n".join(link_lines(link, hass.config.language, zone)) for link in matching) + "\n\n" + event_notes
             events.append(CalendarEvent(
                 summary=f"BM OKF · {notice['title']}",
                 start=published,
