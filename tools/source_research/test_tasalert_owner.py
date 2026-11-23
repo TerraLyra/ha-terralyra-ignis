@@ -49,3 +49,30 @@ class OwnerTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(OSError):await broken.async_refresh()
         self.assertIs(broken.state,old)
         self.assertTrue(broken.blocked)
+
+    async def test_store_serialization_runs_off_event_loop(self):
+        from threading import get_ident
+        from unittest.mock import patch
+        module=load('owner')
+        original_encode,original_decode=module.encode,module.decode
+        loop_thread=get_ident();seen=[]
+        def encode(state):
+            seen.append(('encode',get_ident()))
+            return original_encode(state)
+        def decode(data):
+            seen.append(('decode',get_ident()))
+            return original_decode(data)
+        store=Store();owner=Owner(store,None)
+        with patch.object(module,'encode',encode),patch.object(module,'decode',decode):
+            await owner.async_load(confirmed_new=True)
+            await Owner(store,None).async_load()
+            await owner.async_recover()
+        self.assertEqual([x[0] for x in seen],['encode','decode','decode','encode'])
+        self.assertTrue(all(ident != loop_thread for _,ident in seen))
+
+    async def test_invalid_store_still_blocks_without_reset(self):
+        store=Store();store.data={'invalid':'data'};owner=Owner(store,None)
+        with self.assertRaises(ValueError):await owner.async_load()
+        self.assertTrue(owner.blocked)
+        self.assertEqual(store.data,{'invalid':'data'})
+        self.assertEqual(store.saves,0)

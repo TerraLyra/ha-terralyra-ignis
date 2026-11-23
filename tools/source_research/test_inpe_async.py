@@ -38,3 +38,17 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         task.cancel()
         with self.assertRaises(asyncio.CancelledError): await task
         self.assertTrue(response.closed)
+
+    async def test_parser_runs_off_event_loop(self):
+        from threading import get_ident
+        from unittest.mock import patch
+        module=load('client');original=module.parse_centroids
+        seen=[];loop_thread=get_ident()
+        def parse(*args,**kwargs):
+            seen.append(get_ident())
+            return original(*args,**kwargs)
+        response=Response([payload([])],headers={'Content-Type':'application/json'})
+        with patch.object(module,'parse_centroids',parse):
+            self.assertEqual(await fetch_state(Session(response),'AC'),())
+        self.assertEqual(len(seen),1)
+        self.assertNotEqual(seen[0],loop_thread)

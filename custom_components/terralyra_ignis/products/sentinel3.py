@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import math
 from dataclasses import dataclass
@@ -128,7 +129,8 @@ class Sentinel3Client:
             "count": str(MAX_FEATURES + 1),
         }
         payload = await self._async_get(params)
-        return parse_sentinel3_geojson(
+        return await asyncio.to_thread(
+            parse_sentinel3_geojson,
             payload,
             satellite=satellite,
             window_start=start,

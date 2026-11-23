@@ -62,5 +62,33 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertIsNone(safe_diagnostic_code('sentinel3_private token'))
 
 
+class ParserThreadTests(unittest.IsolatedAsyncioTestCase):
+    async def test_parser_runs_off_event_loop(self):
+        import json
+        from datetime import UTC, datetime
+        from threading import get_ident
+        from unittest.mock import AsyncMock, patch
+        from sentinel_diag.products import sentinel3
+
+        now = datetime(2026, 9, 7, 12, tzinfo=UTC)
+        body = json.dumps({"type":"FeatureCollection", "features":[],
+            "numberMatched":0, "numberReturned":0,
+            "timeStamp":"2026-09-07T12:00:02Z"}).encode()
+        client = Sentinel3Client(None)
+        original = sentinel3.parse_sentinel3_geojson
+        loop_thread = get_ident()
+        threads = []
+        def parse(*args, **kwargs):
+            threads.append(get_ident())
+            return original(*args, **kwargs)
+        with patch.object(client, '_async_get', AsyncMock(return_value=body)):
+            with patch.object(sentinel3, 'parse_sentinel3_geojson', parse):
+                result = await client.async_area(satellite='S3A',
+                    bounds=((18., 46., 20., 48.),), now=now)
+        self.assertEqual(result.detections, ())
+        self.assertEqual(len(threads), 1)
+        self.assertNotEqual(threads[0], loop_thread)
+
+
 if __name__ == '__main__':
     unittest.main()
