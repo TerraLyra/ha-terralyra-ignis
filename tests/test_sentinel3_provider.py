@@ -275,3 +275,23 @@ def test_factory_queries_only_locations_inside_conservative_coverage() -> None:
     assert all(item.location_ids == ("tokyo-latitude",) for item in sentinel_bindings)
     assert plans[0].covered is True
     assert plans[1].covered is False
+
+@pytest.mark.asyncio
+async def test_client_parses_off_event_loop(monkeypatch) -> None:
+    from threading import get_ident
+    from custom_components.terralyra_ignis.products import sentinel3
+
+    loop_thread = get_ident()
+    thread_ids = []
+    original = sentinel3.parse_sentinel3_geojson
+
+    def parse(*args, **kwargs):
+        thread_ids.append(get_ident())
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(sentinel3, "parse_sentinel3_geojson", parse)
+    response = await Sentinel3Client(_Session(_payload())).async_area(
+        satellite="S3A", bounds=((138.0, 34.0, 142.0, 37.0),), now=NOW
+    )
+    assert response.detections == ()
+    assert len(thread_ids) == 1 and thread_ids[0] != loop_thread

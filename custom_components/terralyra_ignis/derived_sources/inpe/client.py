@@ -40,4 +40,4 @@ async def fetch_state(session, state, *, total_timeout=30):
                 body.extend(chunk)
             if length is not None and len(body)!=int(length):
                 raise FetchError('truncated_response')
-            return parse_centroids(bytes(body), requested_state=state)
+            return await asyncio.to_thread(parse_centroids, bytes(body), requested_state=state)

@@ -34,4 +34,4 @@ async def fetch_async(session):
         count=MAX_RECORDS,srsName='EPSG:4326',sortBy='national_fire_id A',
         CQL_FILTER='record_start<=now() AND record_end>now()')
     raw=await read_json(session,ENDPOINT+'?'+urlencode(params))
-    return decode_response(raw)
+    return await asyncio.to_thread(decode_response, raw)

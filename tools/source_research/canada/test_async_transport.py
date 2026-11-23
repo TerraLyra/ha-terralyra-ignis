@@ -63,3 +63,18 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
         session,url=await self.setup_server(handler)
         with self.assertRaises(aiohttp.ClientPayloadError):
             await read_json(session,url)
+
+    async def test_fetch_decodes_off_event_loop(self):
+        from threading import get_ident
+        from unittest.mock import AsyncMock, patch
+        import async_transport
+        seen=[];loop_thread=get_ident()
+        def decode(raw):
+            seen.append(get_ident())
+            self.assertEqual(raw,b'payload')
+            return 'parsed'
+        with patch.object(async_transport,'read_json',AsyncMock(return_value=b'payload')):
+            with patch.object(async_transport,'decode_response',decode):
+                self.assertEqual(await async_transport.fetch_async(None),'parsed')
+        self.assertEqual(len(seen),1)
+        self.assertNotEqual(seen[0],loop_thread)

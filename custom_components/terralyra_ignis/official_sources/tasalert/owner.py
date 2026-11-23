@@ -9,6 +9,14 @@ class InitializationRequired(ValueError):
     """Missing store requires explicit first-use intent, not a reset."""
 
 
+def _decode_store(data):
+    return decode(json.dumps(data, allow_nan=False).encode())
+
+
+def _encode_store(state):
+    return json.loads(encode(state))
+
+
 STORE_KEY = 'terralyra_ignis_tasalert_v1'
 
 
@@ -75,9 +83,11 @@ class TasAlertOwner:
                         self.initialization_required=True
                         raise InitializationRequired('TasALERT storage not initialized')
                     state=Engine()
-                    await self._storage(self.store.async_save,json.loads(encode(state)))
+                    encoded = await asyncio.to_thread(_encode_store, state)
+                    if self.closed:raise OSError("TasALERT owner closed")
+                    await self._storage(self.store.async_save, encoded)
                 else:
-                    state=decode(json.dumps(data,allow_nan=False).encode())
+                    state=await asyncio.to_thread(_decode_store, data)
                 if self.closed:raise OSError("TasALERT owner closed")
                 self.state=state
                 self.initialization_required=False
@@ -99,7 +109,7 @@ class TasAlertOwner:
             data = await self._storage(self.store.async_load)
             if data is None:
                 raise ValueError('Recovery requires an existing valid TasALERT store')
-            state = decode(json.dumps(data, allow_nan=False).encode())
+            state = await asyncio.to_thread(_decode_store, data)
             # Unknown durability must not shorten a persisted wait or cause an
             # immediate repeat request after a failed save.
             deadline = max(filter(None, (state.response.next_attempt,
@@ -107,7 +117,9 @@ class TasAlertOwner:
                            self._recovery_deadline,
                            datetime.now(UTC) + INTERVAL)))
             state = replace(state, response=replace(state.response, next_attempt=deadline))
-            await self._storage(self.store.async_save, json.loads(encode(state)))
+            encoded = await asyncio.to_thread(_encode_store, state)
+            if self.closed:raise OSError("TasALERT owner closed")
+            await self._storage(self.store.async_save, encoded)
             if self.closed:
                 raise OSError('TasALERT owner closed')
             self.state = state
@@ -132,8 +144,9 @@ class TasAlertOwner:
         self._recovery_deadline=candidate.response.next_attempt
         # A cancelled/failed save has unknown durability: block subsequent I/O.
         try:
-            encoded = await asyncio.to_thread(encode, candidate)
-            await self._storage(self.store.async_save, json.loads(encoded))
+            encoded = await asyncio.to_thread(_encode_store, candidate)
+            if self.closed:raise OSError("TasALERT owner closed")
+            await self._storage(self.store.async_save, encoded)
         except BaseException:
             self.blocked=True
             raise
