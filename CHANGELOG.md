@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.20
+
+- Run TasALERT storage encoding and decoding off the Home Assistant event loop while preserving recovery safeguards.
+- Run Sentinel-3, Canada CWFIF and INPE response parsing off the event loop to keep Home Assistant responsive during large updates.
+
 ## 0.41.19
 
 - Fix LSA SAF reauthentication for existing integration entries.
