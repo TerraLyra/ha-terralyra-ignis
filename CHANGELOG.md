@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.21
+
+- Use the TerraLyra Horizon symbol for the integration icon, with dedicated light and dark theme variants.
+- Remove the unsupported SVG from the integration brand directory.
+
 ## 0.41.20
 
 - Run TasALERT storage encoding and decoding off the Home Assistant event loop while preserving recovery safeguards.
